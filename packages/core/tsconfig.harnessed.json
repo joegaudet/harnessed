@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "_comment": "Extend this from your own tsconfig.json to inherit the settings TC39 standard decorators and `accessor` fields require. Turning any of them off breaks decorated harness fields at runtime, not at typecheck.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "ESNext.Decorators", "DOM", "DOM.Iterable"]
+  }
+}

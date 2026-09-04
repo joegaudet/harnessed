@@ -1,0 +1,109 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: lint, format, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm build
+      - run: pnpm lint
+
+  typecheck:
+    name: typecheck (ts ${{ matrix.typescript }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 5.2 is the floor the peer range promises — the first version with
+        # standard decorators and `accessor`. Testing it is the only way that
+        # promise means anything.
+        typescript: ['5.2', '6', 'latest']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add -Dw typescript@${{ matrix.typescript }}
+      - run: pnpm typecheck
+
+  rules:
+    name: eslint rule tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:rules
+
+  conformance-dom:
+    name: conformance/dom (node ${{ matrix.node }}, tl-dom ${{ matrix.testing-library }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+        testing-library: ['10', 'latest']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter conformance add -D @testing-library/dom@${{ matrix.testing-library }}
+      - run: pnpm build
+      - run: pnpm test:dom
+
+  conformance-playwright:
+    name: conformance/playwright (node ${{ matrix.node }}, pw ${{ matrix.playwright }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+        playwright: ['1.62', 'latest']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter conformance add -D @playwright/test@${{ matrix.playwright }}
+      - run: pnpm build
+      - run: npx playwright install --with-deps chromium
+      - run: pnpm test:playwright
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.node }}-${{ matrix.playwright }}
+          path: |
+            packages/conformance/test-results/
+            packages/conformance/playwright-report/
+          retention-days: 7

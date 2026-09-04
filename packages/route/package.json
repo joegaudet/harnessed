@@ -1,0 +1,68 @@
+{
+  "name": "@harnessed/route",
+  "version": "0.1.0",
+  "description": "RouteHarness \u2014 one test object per URL, with typed path params and a required readiness check.",
+  "keywords": [
+    "testing",
+    "harness",
+    "playwright",
+    "page-object",
+    "routing"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/route"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed/core": "workspace:^",
+    "@harnessed/playwright": "workspace:^"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40"
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -b --force . && tsup",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

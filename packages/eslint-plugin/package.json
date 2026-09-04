@@ -1,0 +1,66 @@
+{
+  "name": "@harnessed/eslint-plugin",
+  "version": "0.1.0",
+  "description": "ESLint rules that enforce the harness authoring conventions mechanically.",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "testing",
+    "harness"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/eslint-plugin"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=9"
+  },
+  "scripts": {
+    "build": "pnpm clean && tsc -b --force . && tsup",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "devDependencies": {
+    "eslint": "^10.10.0",
+    "typescript-eslint": "^8.69.0",
+    "vitest": "^5.0.0"
+  }
+}
