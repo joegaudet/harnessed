@@ -6,15 +6,16 @@ export interface RenderContext extends DetectedLayout {
 
 /** The placement table, rendered from the repo's actual layout. */
 export function placementTable(context: RenderContext): string {
-  const { components, screens, harnesses, widgetTestId, screenTestId, testIdAttribute } = context
+  const { components, screens, harnesses, widgetHarnesses, screenHarnesses } = context
+  const { widgetTestId, screenTestId, testIdAttribute } = context
   const widgetExample = widgetTestId.replace('<kebab>', 'sel-card')
   const screenExample = screenTestId.replace('<kebab>', 'checkout')
 
   return [
     `| Kind | Source | Harness | \`${testIdAttribute}\` |`,
     '|---|---|---|---|',
-    `| Widget | \`${components}/<Name>.tsx\` | \`${harnesses}/components/<Name>.harness.ts\` | \`${widgetTestId}\` |`,
-    `| Screen | \`${screens}/<Name>.tsx\` | \`${harnesses}/components/screens/<Name>.harness.ts\` | \`${screenTestId}\` |`,
+    `| Widget | \`${components}/<Name>.tsx\` | \`${widgetHarnesses}/<Name>.harness.ts\` | \`${widgetTestId}\` |`,
+    `| Screen | \`${screens}/<Name>.tsx\` | \`${screenHarnesses}/<Name>.harness.ts\` | \`${screenTestId}\` |`,
     `| Route | a URL | \`${harnesses}/routes/<name>.route.ts\` | the stage element it renders into |`,
     '',
     `Examples: a \`SelCard\` widget gets \`${widgetExample}\`; a \`Checkout\` screen gets`,
@@ -73,6 +74,8 @@ export default defineConfig({
     components: '${context.components}',
     screens: '${context.screens}',
     harnesses: '${context.harnesses}',
+    widgetHarnesses: '${context.widgetHarnesses}',
+    screenHarnesses: '${context.screenHarnesses}',
   },
   testIdPattern: {
     widget: '${context.widgetTestId}',

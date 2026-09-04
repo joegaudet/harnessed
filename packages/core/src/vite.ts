@@ -24,10 +24,16 @@ export interface DecoratorPluginOptions {
   target?: string
 }
 
+/**
+ * Structurally compatible with Vite's `Plugin` without importing Vite, so core
+ * stays dependency-free. `map` is a string because that is what esbuild returns,
+ * and Vite's `SourceMapInput` accepts one — typing it looser makes the plugin
+ * unassignable to `Plugin`.
+ */
 interface MinimalPlugin {
   name: string
   enforce: 'pre'
-  transform(code: string, id: string): Promise<{ code: string; map: unknown } | null> | null
+  transform(code: string, id: string): Promise<{ code: string; map: string } | null> | null
 }
 
 interface EsbuildModule {

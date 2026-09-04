@@ -7,7 +7,6 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
-      '**/dist-types/**',
       '**/*.d.ts',
       '**/.features-gen/**',
       // Shipped templates, not source: they reference modules a consumer supplies.
@@ -48,6 +47,15 @@ export default tseslint.config(
         project: './tsconfig.tools.json',
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    files: ['packages/playwright/src/bdd.ts'],
+    rules: {
+      // Playwright reads a fixture's destructured parameter names to work out its
+      // dependencies and rejects a plain parameter, so an empty pattern is the
+      // only way to declare a fixture that depends on nothing.
+      'no-empty-pattern': 'off',
     },
   },
   // Dogfooding: the plugin's own rules run over the conformance harnesses, which

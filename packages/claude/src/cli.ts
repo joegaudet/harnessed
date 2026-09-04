@@ -14,6 +14,8 @@ Options
   --components <dir>    Where reusable widgets live
   --screens <dir>       Where screens or pages live
   --harnesses <dir>     Where harnesses should be written
+  --widget-harnesses <dir>  Where widget harnesses go (default: detected)
+  --screen-harnesses <dir>  Where screen harnesses go (default: detected)
   --test-id-attr <str>  The test-id attribute in use (default: detected)
   --widget-testid <p>   Widget test-id pattern (default: ui-<kebab>)
   --screen-testid <p>   Screen test-id pattern (default: screen-<kebab>)
@@ -56,6 +58,12 @@ function parse(argv: string[]): {
         break
       case '--harnesses':
         layout.harnesses = next()
+        break
+      case '--widget-harnesses':
+        layout.widgetHarnesses = next()
+        break
+      case '--screen-harnesses':
+        layout.screenHarnesses = next()
         break
       case '--test-id-attr':
         layout.testIdAttribute = next()
@@ -109,6 +117,8 @@ function main(): void {
       `  components      ${context.components}`,
       `  screens         ${context.screens}`,
       `  harnesses       ${context.harnesses}`,
+      `  widget harness  ${context.widgetHarnesses}`,
+      `  screen harness  ${context.screenHarnesses}`,
       `  test-id attr    ${context.testIdAttribute}`,
       `  widget test id  ${context.widgetTestId}`,
       `  screen test id  ${context.screenTestId}`,

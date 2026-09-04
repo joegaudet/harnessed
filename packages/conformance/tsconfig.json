@@ -4,15 +4,23 @@
     "composite": true,
     "noEmit": false,
     "emitDeclarationOnly": true,
-    "outDir": "dist-types",
+    "outDir": "dist",
     "jsx": "react-jsx",
     "types": ["node"]
   },
   "include": ["fixture", "specs", "runners"],
   "references": [
-    { "path": "../core" },
-    { "path": "../dom" },
-    { "path": "../playwright" },
-    { "path": "../route" }
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../dom"
+    },
+    {
+      "path": "../playwright"
+    },
+    {
+      "path": "../route"
+    }
   ]
 }

@@ -24,6 +24,14 @@ export interface LayoutConfig {
   screens?: string
   /** Directory harnesses are written to. */
   harnesses?: string
+  /**
+   * Where widget harnesses go, if not directly under `harnesses`. Repos that
+   * mirror their source tree usually want a subdirectory — an agent told the
+   * wrong path puts the file somewhere the suite will not find it.
+   */
+  widgetHarnesses?: string
+  /** Where screen harnesses go, if not directly under `harnesses`. */
+  screenHarnesses?: string
 }
 
 export interface TestIdPatternConfig {

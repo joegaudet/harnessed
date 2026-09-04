@@ -5,6 +5,10 @@ export interface DetectedLayout {
   components: string
   screens: string
   harnesses: string
+  /** Where widget harnesses go. May be a subdirectory of `harnesses`. */
+  widgetHarnesses: string
+  /** Where screen harnesses go. May be a subdirectory of `harnesses`. */
+  screenHarnesses: string
   widgetTestId: string
   screenTestId: string
 }
@@ -71,10 +75,26 @@ function containsText(dir: string, needle: string, depth: number): boolean {
  * actually live. Guesses, not rules — the CLI shows them and takes an override.
  */
 export function detectLayout(root: string): DetectedLayout {
+  const harnesses = firstExisting(root, HARNESS_CANDIDATES) ?? 'harness'
+  // An existing tree is the best evidence of where new harnesses belong.
+  const widgetHarnesses =
+    firstExisting(root, [
+      join(harnesses, 'components/ui'),
+      join(harnesses, 'components/widgets'),
+      join(harnesses, 'components'),
+    ]) ?? harnesses
+  const screenHarnesses =
+    firstExisting(root, [
+      join(harnesses, 'components/screens'),
+      join(harnesses, 'screens'),
+      join(harnesses, 'components'),
+    ]) ?? harnesses
   return {
     components: firstExisting(root, COMPONENT_CANDIDATES) ?? 'src/components',
     screens: firstExisting(root, SCREEN_CANDIDATES) ?? 'src/screens',
-    harnesses: firstExisting(root, HARNESS_CANDIDATES) ?? 'harness',
+    harnesses,
+    widgetHarnesses,
+    screenHarnesses,
     widgetTestId: 'ui-<kebab>',
     screenTestId: 'screen-<kebab>',
   }
