@@ -19,18 +19,6 @@ export type Selector =
 
 export type SelectorType = Selector['type']
 
-/**
- * Locator priority, highest first. A harness should reach for `role` unless the
- * accessible name is unstable or absent, then `testId`.
- */
-export const SELECTOR_PRIORITY: readonly SelectorType[] = [
-  'role',
-  'testId',
-  'label',
-  'text',
-  'placeholder',
-]
-
 export function role(name: string, options?: RoleOptions): Selector {
   return options === undefined
     ? { type: 'role', role: name }

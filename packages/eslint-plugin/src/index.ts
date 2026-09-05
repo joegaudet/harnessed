@@ -26,6 +26,16 @@ const meta = { name: '@harnessed/eslint-plugin', version: '0.1.0' }
  * export default [harnessed.configs.recommended]
  * ```
  */
+const recommendedRules = {
+  'harnessed/no-page-or-screen-in-harness': 'error',
+  'harnessed/no-reach-through-cast': 'error',
+  'harnessed/require-host': 'error',
+  'harnessed/require-wait-for-ready': 'error',
+  // A suggestion by default: a repo mid-adoption still has tests that predate
+  // their harnesses, and failing the build on those helps nobody.
+  'harnessed/no-raw-locator-in-test': 'warn',
+} as const
+
 const plugin = {
   meta,
   rules,
@@ -35,24 +45,13 @@ const plugin = {
 plugin.configs.recommended = {
   name: 'harnessed/recommended',
   plugins: { harnessed: plugin },
-  rules: {
-    'harnessed/no-page-or-screen-in-harness': 'error',
-    'harnessed/no-reach-through-cast': 'error',
-    'harnessed/require-host': 'error',
-    'harnessed/require-wait-for-ready': 'error',
-    // A suggestion by default: a repo mid-adoption still has tests that predate
-    // their harnesses, and failing the build on those helps nobody.
-    'harnessed/no-raw-locator-in-test': 'warn',
-  },
+  rules: recommendedRules,
 }
 
 plugin.configs.strict = {
   name: 'harnessed/strict',
   plugins: { harnessed: plugin },
-  rules: {
-    ...(plugin.configs.recommended as { rules: Record<string, string> }).rules,
-    'harnessed/no-raw-locator-in-test': 'error',
-  },
+  rules: { ...recommendedRules, 'harnessed/no-raw-locator-in-test': 'error' },
 }
 
 export default plugin

@@ -27,7 +27,7 @@ export function findHostMeta(target: object): HarnessOptions | undefined {
   const store = globals().hostMeta
   let current: object | null = target
   while (current !== null && current !== Function.prototype) {
-    const found = store.get(current) as HarnessOptions | undefined
+    const found = store.get(current)
     if (found !== undefined) return found
     current = Object.getPrototypeOf(current) as object | null
   }

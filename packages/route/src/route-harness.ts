@@ -1,4 +1,4 @@
-import { createQuery, requireHostMeta } from '@harnessed/core'
+import { createQuery, requireHostMeta, timeoutFor } from '@harnessed/core'
 import type {
   ComponentHarness,
   ComponentHarnessConstructor,
@@ -93,7 +93,8 @@ export abstract class RouteHarness<
         const { pathname } = url
         return typeof expected === 'string' ? pathname === expected : expected.test(pathname)
       },
-      { timeout: options?.timeout },
+      // Without this the configured default silently did not apply here.
+      { timeout: timeoutFor(options?.timeout) },
     )
   }
 

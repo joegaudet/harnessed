@@ -232,9 +232,14 @@ export default defineConfig({
 })
 ```
 
-One file, three readers: the runtime via `configure()`, `@harnessed/eslint-plugin`,
-and the `@harnessed/claude` skill generator. `testIdAttribute` is pushed into
-Testing Library and Playwright for you.
+One place to declare these, so the runtime, the linter, and the generated docs
+describe the same layout. `testIdAttribute` is pushed into Testing Library and
+Playwright for you.
+
+**It is not loaded automatically yet.** Today you pass the runtime half to
+`configure()`, give `layout.harnesses` to `@harnessed/eslint-plugin` as rule
+options, and re-run `npx @harnessed/claude install` when the layout changes. A
+loader that wires all three from the file is the obvious next step.
 
 ## Keeping the conventions
 

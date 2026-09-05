@@ -22,7 +22,12 @@ export function App() {
 
   return (
     <div data-testid="stage">
-      {view === 'login' ? <LoginForm error={url.searchParams.get('error') ?? undefined} /> : null}
+      {view === 'login' ? (
+        <LoginForm
+          error={url.searchParams.get('error') ?? undefined}
+          lateDuplicates={url.searchParams.get('late') === '1'}
+        />
+      ) : null}
       {view === 'cards' ? (
         <>
           <CardGrid cards={CARDS} />

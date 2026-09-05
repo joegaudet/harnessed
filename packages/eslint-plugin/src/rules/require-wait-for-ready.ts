@@ -1,5 +1,5 @@
 import type { Rule } from 'eslint'
-import { dirOptionSchema, harnessDirsOf, inAnyDir } from '../shared'
+import { dirOptionSchema, harnessDirsOf, inAnyDir, isAbstract, isRouteHarness } from '../shared'
 
 interface ClassBodyNode {
   body: Array<{
@@ -8,18 +8,6 @@ interface ClassBodyNode {
     value?: { body?: { body?: unknown[] } }
     abstract?: boolean
   }>
-}
-
-function isRouteHarness(node: Rule.Node): boolean {
-  if (node.type !== 'ClassDeclaration') return false
-  const superClass = node.superClass
-  if (superClass === null || superClass === undefined) return false
-  if (superClass.type === 'Identifier') return superClass.name === 'RouteHarness'
-  return (
-    superClass.type === 'CallExpression' &&
-    superClass.callee.type === 'Identifier' &&
-    superClass.callee.name === 'RouteHarness'
-  )
 }
 
 /**
@@ -47,7 +35,7 @@ const rule: Rule.RuleModule = {
       ClassDeclaration(node) {
         const asNode = node as unknown as Rule.Node
         if (!isRouteHarness(asNode)) return
-        if ((asNode as Rule.Node & { abstract?: boolean }).abstract === true) return
+        if (isAbstract(asNode)) return
 
         const body = (node.body as unknown as ClassBodyNode).body
         const method = body.find(

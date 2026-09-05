@@ -48,6 +48,15 @@ export class CardGridHarness extends ComponentHarness {
     return this.card.map(c => c.label())
   }
 
+  /**
+   * Each card's own hint. 'Large' has none, and a decoy with the same test id sits
+   * outside the grid — so this is only correct if each child harness reads its own
+   * subtree rather than the page.
+   */
+  async hints(): Promise<(string | null)[]> {
+    return this.card.map(c => c.hint())
+  }
+
   async chooseByLabel(label: string): Promise<void> {
     const matches = await this.card.filter(async c => (await c.label()) === label)
     if (matches.length !== 1) {

@@ -82,6 +82,12 @@ describe('require-host', () => {
         code: `class FormHarness extends ComponentHarness {}`,
         errors: [{ messageId: 'missing' }],
       },
+      {
+        name: 'a mixin-style base is still a harness',
+        filename: '/repo/harness/components/Form.harness.ts',
+        code: `class FormHarness extends ComponentHarness(Base) {}`,
+        errors: [{ messageId: 'missing' }],
+      },
     ],
   })
 })
@@ -112,6 +118,15 @@ describe('require-wait-for-ready', () => {
         filename: '/repo/harness/routes/checkout.route.ts',
         code: `class R extends RouteHarness { async waitForReady() {} }`,
         errors: [{ messageId: 'empty' }],
+      },
+      {
+        // The two rules used to recognise different subsets of superclass
+        // syntax, so a namespaced base was policed by one and skipped by the
+        // other. One predicate now backs both.
+        name: 'a namespaced base is still a route',
+        filename: '/repo/harness/routes/checkout.route.ts',
+        code: `class R extends ns.RouteHarness { get path() { return '/' } }`,
+        errors: [{ messageId: 'missing' }],
       },
     ],
   })

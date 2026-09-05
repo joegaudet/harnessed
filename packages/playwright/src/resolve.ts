@@ -1,20 +1,11 @@
-import { getConfig } from '@harnessed/core'
+import { testIdSync } from '@harnessed/core'
 import type { Selector } from '@harnessed/core'
 import { selectors } from '@playwright/test'
 import type { Locator, Page } from '@playwright/test'
 
 type RoleName = Parameters<Page['getByRole']>[0]
 
-let appliedTestIdAttribute: string | undefined
-
-/** Playwright keeps the test-id attribute in its own global, so ours is pushed across. */
-function syncTestIdAttribute(): void {
-  const wanted = getConfig().testIdAttribute
-  if (wanted !== appliedTestIdAttribute) {
-    selectors.setTestIdAttribute(wanted)
-    appliedTestIdAttribute = wanted
-  }
-}
+const syncTestIdAttribute = testIdSync(attribute => selectors.setTestIdAttribute(attribute))
 
 type Scoped = Pick<
   Locator,
@@ -50,8 +41,4 @@ export function locatorFor(page: Page, scope: readonly Selector[], selector: Sel
     current = step(current, link)
   }
   return step(current, selector)
-}
-
-export function timeoutFor(explicit?: number): number {
-  return explicit ?? getConfig().defaultTimeout
 }

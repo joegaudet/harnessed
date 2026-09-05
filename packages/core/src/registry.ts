@@ -20,7 +20,7 @@ export function registeredDrivers(): string[] {
 
 /** The one place a driver is chosen. Everything after this is driver-agnostic. */
 export function createQuery(env: EnvConfig, scope: readonly Selector[], selector: Selector): Query {
-  const factory = globals().drivers.get(env.driver) as QueryFactory | undefined
+  const factory = globals().drivers.get(env.driver)
   if (factory === undefined) {
     const known = registeredDrivers()
     const suffix =

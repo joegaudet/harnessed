@@ -49,6 +49,9 @@ export function createApiStubs<Stubs extends object>(
   } = options
 
   const stubs = structuredClone(defaults)
+  // Built once: the table is captured and never mutated, and this ran on every
+  // intercepted request.
+  const pathnames = Object.keys(routes)
 
   return {
     stubs,
@@ -56,7 +59,7 @@ export function createApiStubs<Stubs extends object>(
       if (live()) return
       await page.route(pattern, async route => {
         const pathname = new URL(route.request().url()).pathname
-        const match = Object.keys(routes).find(key => pathname.endsWith(key))
+        const match = pathnames.find(key => pathname.endsWith(key))
         const body = match === undefined ? fallback(pathname, stubs) : routes[match]!(stubs)
         await route.fulfill({
           status: 200,

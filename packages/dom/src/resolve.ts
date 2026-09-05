@@ -1,6 +1,5 @@
-import { getConfig } from '@harnessed/core'
+import { indexOutOfRange, strictViolation, testIdSync, timeoutFor } from '@harnessed/core'
 import type { Selector } from '@harnessed/core'
-import { describeScope, describeSelector } from '@harnessed/core'
 import { configure as configureTestingLibrary, within } from '@testing-library/dom'
 import type { ByRoleMatcher } from '@testing-library/dom'
 
@@ -8,24 +7,9 @@ import type { ByRoleMatcher } from '@testing-library/dom'
  *  casts it to its own role union at the boundary. */
 type RoleName = ByRoleMatcher
 
-let appliedTestIdAttribute: string | undefined
-
-/**
- * Testing Library holds the test-id attribute in its own module-level config, so
- * ours has to be pushed across. Done at query time and only on change, because a
- * consumer may call `configure()` after the driver was imported.
- */
-function syncTestIdAttribute(): void {
-  const wanted = getConfig().testIdAttribute
-  if (wanted !== appliedTestIdAttribute) {
-    configureTestingLibrary({ testIdAttribute: wanted })
-    appliedTestIdAttribute = wanted
-  }
-}
-
-function timeoutFor(explicit?: number): number {
-  return explicit ?? getConfig().defaultTimeout
-}
+const syncTestIdAttribute = testIdSync(testIdAttribute =>
+  configureTestingLibrary({ testIdAttribute }),
+)
 
 /** Every match for one selector, without waiting. Zero is an answer. */
 export function queryAll(root: HTMLElement, selector: Selector): HTMLElement[] {
@@ -48,55 +32,37 @@ export function queryAll(root: HTMLElement, selector: Selector): HTMLElement[] {
 /**
  * One match, waiting for it to appear. Strict: several matches is an error.
  *
- * The ambiguity check runs first, without waiting. Testing Library's `findBy*` is
- * `waitFor(getBy*)`, so a "found multiple elements" error gets retried for the full
- * timeout before surfacing — but more than one match is never going to become one
- * by waiting, and Playwright's strict mode rejects at once. Checking up front keeps
- * the two drivers in step and turns a timeout into an immediate, readable failure.
+ * The non-waiting query runs first. Testing Library's `findBy*` is
+ * `waitFor(getBy*)`, so a "found multiple elements" error is retried for the full
+ * timeout before surfacing — but more than one match never becomes one by
+ * waiting, and Playwright rejects at once. Checking up front keeps the two
+ * drivers in step and turns a timeout into an immediate, readable failure.
+ *
+ * The check is applied to the waited result too. Otherwise the guarantee would
+ * hold only for nodes that happened to be on screen already, and a target that
+ * renders late as two nodes would still sit out the whole timeout.
  */
 async function findOne(
   root: HTMLElement,
+  scope: readonly Selector[],
   selector: Selector,
   timeout?: number,
 ): Promise<HTMLElement> {
   syncTestIdAttribute()
 
+  const immediate = queryAll(root, selector)
+  const resolved = immediate.length > 0 ? immediate : await findAll(root, selector, timeout)
+
   if (selector.nth !== undefined) {
-    const all = await findAll(root, selector, timeout)
-    const found = all[selector.nth]
+    const found = resolved[selector.nth]
     if (found === undefined) {
-      throw new Error(
-        `harnessed: index ${selector.nth} is out of range \u2014 ${all.length} node(s) matched.`,
-      )
+      throw indexOutOfRange(selector.nth, resolved.length, scope, selector)
     }
     return found
   }
 
-  const immediate = queryAll(root, selector)
-  if (immediate.length > 1) {
-    throw new Error(
-      `harnessed: strict mode violation \u2014 ${immediate.length} nodes match ` +
-        `${describeSelector(selector)}. Scope the query, or use nth()/first() only when ` +
-        `the matches genuinely are the same control rendered more than once.`,
-    )
-  }
-  if (immediate.length === 1) return immediate[0]!
-
-  // Not on screen yet — this is the case waiting is for.
-  const scoped = within(root)
-  const options = { timeout: timeoutFor(timeout) }
-  switch (selector.type) {
-    case 'role':
-      return scoped.findByRole(selector.role as RoleName, selector.options, options)
-    case 'label':
-      return scoped.findByLabelText(selector.text, undefined, options)
-    case 'testId':
-      return scoped.findByTestId(selector.testId, undefined, options)
-    case 'text':
-      return scoped.findByText(selector.text, undefined, options)
-    case 'placeholder':
-      return scoped.findByPlaceholderText(selector.text, undefined, options)
-  }
+  if (resolved.length > 1) throw strictViolation(resolved.length, scope, selector)
+  return resolved[0]!
 }
 
 async function findAll(
@@ -132,8 +98,10 @@ export async function resolveScope(
   timeout?: number,
 ): Promise<HTMLElement> {
   let current = container
-  for (const step of scope) {
-    current = await findOne(current, step, timeout)
+  for (const [index, step] of scope.entries()) {
+    // Each link is reported with the path that reached it, so an ambiguous
+    // container names the container rather than the leaf you asked for.
+    current = await findOne(current, scope.slice(0, index), step, timeout)
   }
   return current
 }
@@ -146,13 +114,8 @@ export async function resolveOne(
   timeout?: number,
 ): Promise<HTMLElement> {
   const root = await resolveScope(container, scope, timeout)
-  try {
-    return await findOne(root, selector, timeout)
-  } catch (cause) {
-    throw new Error(`harnessed: ${describeScope(scope, selector)} — ${(cause as Error).message}`, {
-      cause,
-    })
-  }
+  // The errors already carry the scope path, so there is nothing to wrap.
+  return findOne(root, scope, selector, timeout)
 }
 
 /**

@@ -1,3 +1,5 @@
+import { emptySet } from './errors'
+import { eachOf, filterOf, lastIndex, mapOf } from './list'
 import type { Selector } from './selector'
 
 export interface WaitOptions {
@@ -73,34 +75,21 @@ export abstract class Query {
   }
 
   async last(): Promise<Query> {
-    const total = await this.count()
-    return this.nth(total - 1)
+    const index = lastIndex(await this.count())
+    if (index === undefined) throw emptySet(this.scope, this.selector)
+    return this.nth(index)
   }
 
   async each(fn: (query: Query, index: number) => Promise<void>): Promise<void> {
-    const total = await this.count()
-    for (let index = 0; index < total; index += 1) {
-      await fn(this.nth(index), index)
-    }
+    return eachOf(this, fn)
   }
 
   async map<T>(fn: (query: Query, index: number) => Promise<T>): Promise<T[]> {
-    const total = await this.count()
-    const results: T[] = []
-    for (let index = 0; index < total; index += 1) {
-      results.push(await fn(this.nth(index), index))
-    }
-    return results
+    return mapOf(this, fn)
   }
 
   async filter(fn: (query: Query, index: number) => Promise<boolean>): Promise<Query[]> {
-    const total = await this.count()
-    const kept: Query[] = []
-    for (let index = 0; index < total; index += 1) {
-      const candidate = this.nth(index)
-      if (await fn(candidate, index)) kept.push(candidate)
-    }
-    return kept
+    return filterOf(this, fn)
   }
 
   async texts(): Promise<string[]> {

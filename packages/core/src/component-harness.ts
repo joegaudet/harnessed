@@ -1,8 +1,11 @@
 import type { EnvConfig } from './env'
+import { emptySet } from './errors'
 import type { HarnessHost } from './harness-host'
 import { requireHostMeta } from './host-meta'
+import { eachOf, filterOf, lastIndex, mapOf } from './list'
 import type { Query } from './query'
 import { createQuery } from './registry'
+import { nth as withNth } from './selector'
 import type { Selector } from './selector'
 
 export interface ComponentHarnessConstructor<T extends ComponentHarness = ComponentHarness> {
@@ -21,10 +24,13 @@ export interface ComponentHarnessConstructor<T extends ComponentHarness = Compon
 export abstract class ComponentHarness implements HarnessHost {
   /** @internal */ _env: EnvConfig
   /** @internal */ _scope: Selector[]
+  /** @internal Fixed at construction; kept so `self` and `nth` need not re-slice. */
+  private _parentScope: readonly Selector[]
 
   constructor(env: EnvConfig, parentScope: readonly Selector[] = []) {
     const { host } = requireHostMeta(this.constructor as { name?: string })
     this._env = env
+    this._parentScope = parentScope
     this._scope = [...parentScope, host]
   }
 
@@ -33,7 +39,7 @@ export abstract class ComponentHarness implements HarnessHost {
    * card that is itself a button has nothing inside it to click.
    */
   get self(): Query {
-    return createQuery(this._env, this._scope.slice(0, -1), this._hostSelector)
+    return createQuery(this._env, this._parentScope, this._hostSelector)
   }
 
   private get _hostSelector(): Selector {
@@ -52,11 +58,11 @@ export abstract class ComponentHarness implements HarnessHost {
 
   nth(index: number): this {
     const Ctor = this.constructor as new (env: EnvConfig, parentScope?: readonly Selector[]) => this
-    const instance = new Ctor(this._env, this._scope.slice(0, -1))
-    instance._scope = [
-      ...this._scope.slice(0, -1),
-      { ...this._hostSelector, nth: index } as Selector,
-    ]
+    // The constructor has to run: it is what re-initialises the decorated
+    // accessor fields. Its `_scope` is then replaced, because this instance
+    // addresses one specific occurrence of the host rather than all of them.
+    const instance = new Ctor(this._env, this._parentScope)
+    instance._scope = [...this._parentScope, withNth(this._hostSelector, index)]
     return instance
   }
 
@@ -65,33 +71,21 @@ export abstract class ComponentHarness implements HarnessHost {
   }
 
   async last(): Promise<this> {
-    return this.nth((await this.count()) - 1)
+    const index = lastIndex(await this.count())
+    if (index === undefined) throw emptySet(this._parentScope, this._hostSelector)
+    return this.nth(index)
   }
 
   async each(fn: (harness: this, index: number) => Promise<void>): Promise<void> {
-    const total = await this.count()
-    for (let index = 0; index < total; index += 1) {
-      await fn(this.nth(index), index)
-    }
+    return eachOf(this, fn)
   }
 
   async map<T>(fn: (harness: this, index: number) => Promise<T>): Promise<T[]> {
-    const total = await this.count()
-    const results: T[] = []
-    for (let index = 0; index < total; index += 1) {
-      results.push(await fn(this.nth(index), index))
-    }
-    return results
+    return mapOf(this, fn)
   }
 
   async filter(fn: (harness: this, index: number) => Promise<boolean>): Promise<this[]> {
-    const total = await this.count()
-    const kept: this[] = []
-    for (let index = 0; index < total; index += 1) {
-      const candidate = this.nth(index)
-      if (await fn(candidate, index)) kept.push(candidate)
-    }
-    return kept
+    return filterOf(this, fn)
   }
 
   /**

@@ -19,14 +19,21 @@ export function inAnyDir(filename: string, dirs: string[]): boolean {
   return dirs.some(dir => path.includes(`/${dir}/`) || path.startsWith(`${dir}/`))
 }
 
-export function harnessDirsOf(context: Rule.RuleContext): string[] {
+function dirsOf(
+  context: Rule.RuleContext,
+  key: keyof HarnessRuleOptions,
+  fallback: string[],
+): string[] {
   const options = (context.options[0] ?? {}) as HarnessRuleOptions
-  return options.harnessDirs ?? DEFAULT_HARNESS_DIRS
+  return options[key] ?? fallback
+}
+
+export function harnessDirsOf(context: Rule.RuleContext): string[] {
+  return dirsOf(context, 'harnessDirs', DEFAULT_HARNESS_DIRS)
 }
 
 export function testDirsOf(context: Rule.RuleContext): string[] {
-  const options = (context.options[0] ?? {}) as HarnessRuleOptions
-  return options.testDirs ?? DEFAULT_TEST_DIRS
+  return dirsOf(context, 'testDirs', DEFAULT_TEST_DIRS)
 }
 
 export const dirOptionSchema = {
@@ -36,22 +43,6 @@ export const dirOptionSchema = {
     testDirs: { type: 'array' as const, items: { type: 'string' as const } },
   },
   additionalProperties: false,
-}
-
-/**
- * Walks to the nearest enclosing class, if any.
- *
- * `parent` is `null` at the Program root, not `undefined` — a loop that only
- * checks for `undefined` walks off the top of the tree and crashes the whole lint
- * run on the file.
- */
-export function enclosingClass(node: Rule.Node): Rule.Node | undefined {
-  let current: Rule.Node | null | undefined = node
-  while (current) {
-    if (current.type === 'ClassDeclaration' || current.type === 'ClassExpression') return current
-    current = current.parent as Rule.Node | null | undefined
-  }
-  return undefined
 }
 
 /** True when the node sits inside a method with the given name. */
@@ -70,15 +61,37 @@ export function insideMethodNamed(node: Rule.Node, name: string): boolean {
   return false
 }
 
-export function extendsHarnessBase(node: Rule.Node): boolean {
-  if (node.type !== 'ClassDeclaration' && node.type !== 'ClassExpression') return false
+/**
+ * The name of whatever a class extends, however it is written.
+ *
+ * Covers `extends X`, `extends ns.X`, and `extends X(Base)`. Written once because
+ * two rules previously recognised different subsets, so `class R extends
+ * ns.RouteHarness` was policed by one rule and silently skipped by the other.
+ */
+export function superClassName(node: Rule.Node): string | undefined {
+  if (node.type !== 'ClassDeclaration' && node.type !== 'ClassExpression') return undefined
   const superClass = node.superClass
-  if (superClass === null || superClass === undefined) return false
-  const name =
-    superClass.type === 'Identifier'
-      ? superClass.name
-      : superClass.type === 'MemberExpression' && superClass.property.type === 'Identifier'
-        ? superClass.property.name
-        : ''
+  if (superClass === null || superClass === undefined) return undefined
+  if (superClass.type === 'Identifier') return superClass.name
+  if (superClass.type === 'MemberExpression' && superClass.property.type === 'Identifier') {
+    return superClass.property.name
+  }
+  if (superClass.type === 'CallExpression' && superClass.callee.type === 'Identifier') {
+    return superClass.callee.name
+  }
+  return undefined
+}
+
+export function extendsHarnessBase(node: Rule.Node): boolean {
+  const name = superClassName(node) ?? ''
   return name.endsWith('Harness') || name.endsWith('Route')
+}
+
+export function isRouteHarness(node: Rule.Node): boolean {
+  return superClassName(node) === 'RouteHarness'
+}
+
+/** An abstract class may leave its host to subclasses. */
+export function isAbstract(node: Rule.Node): boolean {
+  return (node as Rule.Node & { abstract?: boolean }).abstract === true
 }

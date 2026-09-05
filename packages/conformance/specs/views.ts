@@ -10,6 +10,8 @@ export function viewSearch(view: View): string {
       return '?view=login'
     case 'login-error':
       return `?view=login&error=${encodeURIComponent('Bad credentials')}`
+    case 'login-late-duplicates':
+      return '?view=login&late=1'
     case 'cards':
       return '?view=cards'
     case 'dialog':

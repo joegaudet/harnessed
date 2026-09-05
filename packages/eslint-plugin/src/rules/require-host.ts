@@ -1,5 +1,5 @@
 import type { Rule } from 'eslint'
-import { dirOptionSchema, extendsHarnessBase, harnessDirsOf, inAnyDir } from '../shared'
+import { dirOptionSchema, extendsHarnessBase, harnessDirsOf, inAnyDir, isAbstract } from '../shared'
 
 function hasHarnessDecorator(node: Rule.Node): boolean {
   const decorators = (node as Rule.Node & { decorators?: unknown[] }).decorators ?? []
@@ -7,10 +7,6 @@ function hasHarnessDecorator(node: Rule.Node): boolean {
     const expression = (decorator as { expression?: { callee?: { name?: string } } }).expression
     return expression?.callee?.name === 'Harness'
   })
-}
-
-function isAbstract(node: Rule.Node): boolean {
-  return (node as Rule.Node & { abstract?: boolean }).abstract === true
 }
 
 /**

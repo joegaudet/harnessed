@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { detectLayout, detectTestIdAttribute } from './detect'
@@ -78,14 +78,14 @@ export function install(options: InstallOptions = {}): InstallResult {
   write(join(root, '.claude/rules/harness.md'), renderRules(rulesTemplate, context), result, dryRun)
 
   for (const template of ['component-harness-template.ts', 'route-harness-template.ts']) {
-    const to = join(root, '.claude/skills/harness/examples', template)
-    if (dryRun) {
-      result.written.push(to)
-      continue
-    }
-    mkdirSync(dirname(to), { recursive: true })
-    copyFileSync(join(assets, 'skills/harness/examples', template), to)
-    result.written.push(to)
+    // Through `write` rather than copyFileSync, so dry-run semantics cannot
+    // diverge between the rendered files and the copied ones.
+    write(
+      join(root, '.claude/skills/harness/examples', template),
+      readFileSync(join(assets, 'skills/harness/examples', template), 'utf8'),
+      result,
+      dryRun,
+    )
   }
 
   const configPath = join(root, 'harnessed.config.ts')

@@ -9,7 +9,6 @@ import { viewSearch } from './views'
 
 function context(): ConformanceCtx {
   return {
-    driver: 'dom',
     async show(view: View) {
       // Same App the playwright run drives, so both drivers read the same markup.
       window.history.pushState({}, '', `/${viewSearch(view)}`)
@@ -21,11 +20,6 @@ function context(): ConformanceCtx {
 
 describe('conformance: dom driver', () => {
   for (const spec of specs) {
-    const runs = spec.drivers === undefined || spec.drivers.includes('dom')
-    if (!runs) {
-      it.skip(`${spec.name} [not applicable to the dom driver]`, () => {})
-      continue
-    }
     it(spec.name, async () => {
       await spec.run(context())
     })

@@ -1,10 +1,10 @@
 import { Query, registerDriver } from '@harnessed/core'
 import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed/core'
-import { describeSelector } from '@harnessed/core'
+import { checkedFrom, strictViolation, timeoutFor } from '@harnessed/core'
 import type { Locator, Page } from '@playwright/test'
 import { PLAYWRIGHT_DRIVER } from './driver-id'
 import type { PlaywrightEnv } from './env'
-import { locatorFor, timeoutFor } from './resolve'
+import { locatorFor } from './resolve'
 
 /** Playwright driver. Every value operation goes through the Page the caller gave us. */
 export class PlaywrightQuery extends Query {
@@ -25,119 +25,115 @@ export class PlaywrightQuery extends Query {
   }
 
   /**
-   * Strict resolution, up front and without waiting.
+   * Runs an operation, restating a strict-mode violation in the shared wording.
    *
-   * Playwright raises its own strict-mode error, but only after the action has
-   * waited for the element to become actionable. More than one match will not
-   * become one by waiting, and the dom driver answers immediately — so the check
-   * happens here to keep the two in step and to name the selector in the message.
+   * Playwright raises its own strict violation at selector-resolution time rather
+   * than after the actionability wait — measured at 19ms for duplicates already
+   * on the page, and as soon as they exist for ones that render late. So counting
+   * up front to detect ambiguity added nothing and cost a second round-trip on
+   * every single-target operation. The wording is worth keeping so a failure
+   * reads the same under both drivers; that now costs a `count()` on the failure
+   * path only.
    */
-  private async strict(options?: WaitOptions): Promise<Locator> {
+  private async act<T>(run: (locator: Locator) => Promise<T>): Promise<T> {
     const locator = this.locator
-    if (this.selector.nth === undefined) {
-      const matches = await locator.count()
-      if (matches > 1) {
-        throw new Error(
-          `harnessed: strict mode violation — ${matches} nodes match ` +
-            `${describeSelector(this.selector)}. Scope the query, or use nth()/first() only ` +
-            `when the matches genuinely are the same control rendered more than once.`,
-        )
-      }
+    try {
+      return await run(locator)
+    } catch (cause) {
+      if (!/strict mode violation/i.test(String((cause as Error).message))) throw cause
+      throw strictViolation(await locator.count(), this.scope, this.selector)
     }
-    void options
-    return locator
   }
 
   // --- interactions -------------------------------------------------------
 
   override async click(options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).click({ timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.click({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).fill(value, { timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.fill(value, { timeout: timeoutFor(options?.timeout) }))
   }
 
   override async clear(options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).clear({ timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.clear({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async check(options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).check({ timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.check({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async uncheck(options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).uncheck({ timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.uncheck({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
-    await (
-      await this.strict(options)
-    ).selectOption(value, {
-      timeout: timeoutFor(options?.timeout),
-    })
+    await this.act(l => l.selectOption(value, { timeout: timeoutFor(options?.timeout) }))
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).hover({ timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.hover({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).focus({ timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.focus({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async blur(options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).blur({ timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.blur({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async press(key: string, options?: WaitOptions): Promise<void> {
-    await (await this.strict(options)).press(key, { timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.press(key, { timeout: timeoutFor(options?.timeout) }))
   }
 
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
-    const value = await (
-      await this.strict(options)
-    ).textContent({ timeout: timeoutFor(options?.timeout) })
+    const value = await this.act(l => l.textContent({ timeout: timeoutFor(options?.timeout) }))
     return (value ?? '').trim()
   }
 
   override async inputValue(options?: WaitOptions): Promise<string> {
-    return (await this.strict(options)).inputValue({ timeout: timeoutFor(options?.timeout) })
+    return this.act(l => l.inputValue({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async attribute(name: string, options?: WaitOptions): Promise<string | null> {
-    return (await this.strict(options)).getAttribute(name, {
-      timeout: timeoutFor(options?.timeout),
-    })
+    return this.act(l => l.getAttribute(name, { timeout: timeoutFor(options?.timeout) }))
   }
 
   override async isVisible(options?: WaitOptions): Promise<boolean> {
-    const locator = await this.strict(options)
-    if ((await locator.count()) === 0) return false
-    return locator.isVisible()
+    return this.act(async l =>
+      (await l.count()) === 0 ? false : l.isVisible({ timeout: timeoutFor(options?.timeout) }),
+    )
   }
 
   override async isEnabled(options?: WaitOptions): Promise<boolean> {
-    return (await this.strict(options)).isEnabled({ timeout: timeoutFor(options?.timeout) })
+    return this.act(l => l.isEnabled({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async isChecked(options?: WaitOptions): Promise<boolean> {
-    const locator = await this.strict(options)
-    // Mirrors the dom driver: an explicit aria-checked wins, so a non-native
-    // control reports the same thing under both drivers.
-    const aria = await locator.getAttribute('aria-checked', {
-      timeout: timeoutFor(options?.timeout),
+    // One round-trip for both signals, rather than an attribute read followed by
+    // a separate checkedness read.
+    return this.act(async l => {
+      const [aria, native] = await l.evaluate(
+        (element: HTMLInputElement) =>
+          [element.getAttribute('aria-checked'), Boolean(element.checked)] as const,
+        undefined,
+        { timeout: timeoutFor(options?.timeout) },
+      )
+      return checkedFrom(aria, native)
     })
-    if (aria !== null) return aria === 'true'
-    return locator.isChecked({ timeout: timeoutFor(options?.timeout) })
   }
 
   override async selectedOptions(options?: WaitOptions): Promise<string[]> {
-    const locator = await this.strict(options)
-    return locator.evaluate((element: HTMLSelectElement) =>
-      [...(element.selectedOptions ?? [])].map(option => option.value),
+    return this.act(l =>
+      l.evaluate(
+        (element: HTMLSelectElement) =>
+          [...(element.selectedOptions ?? [])].map(option => option.value),
+        undefined,
+        { timeout: timeoutFor(options?.timeout) },
+      ),
     )
   }
 
@@ -149,6 +145,14 @@ export class PlaywrightQuery extends Query {
 
   override async count(): Promise<number> {
     return this.locator.count()
+  }
+
+  /**
+   * Playwright reads every match in one round-trip, where the shared loop resolves
+   * N times. Trimmed to match `text()`, which the shared implementation uses.
+   */
+  override async texts(): Promise<string[]> {
+    return (await this.locator.allTextContents()).map(value => value.trim())
   }
 }
 

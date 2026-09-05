@@ -5,19 +5,21 @@ import { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'
 import { PortalDialogHarness } from '../fixture/harnesses/PortalDialog.harness'
 import { StepOneHarness, StepTwoHarness } from '../fixture/harnesses/Wizard.harness'
 
-export type View = 'login' | 'login-error' | 'cards' | 'dialog' | 'wizard'
-export type DriverId = 'dom' | 'playwright'
-
+export type View = 'login' | 'login-error' | 'login-late-duplicates' | 'cards' | 'dialog' | 'wizard'
 export interface ConformanceCtx {
-  readonly driver: DriverId
   /** Puts the named view on screen and returns the env a harness is constructed with. */
   show(view: View): Promise<EnvConfig>
 }
 
+/**
+ * Every spec runs under every driver. There is deliberately no per-driver opt-out:
+ * the moment one exists, "both drivers agree" stops meaning what it says. The two
+ * things that genuinely cannot be shared — route behaviour, which needs a real
+ * page, and matcher registration, which is runner-specific — live in their own
+ * files rather than as exceptions here.
+ */
 export interface Spec {
   name: string
-  /** Which drivers this spec runs under. Defaults to every driver. */
-  drivers?: DriverId[]
   run(ctx: ConformanceCtx): Promise<void>
 }
 
@@ -275,9 +277,10 @@ export const specs: Spec[] = [
     name: 'a child harness inherits the scope chain and reads its own subtree',
     async run(ctx) {
       const grid = new CardGridHarness(await ctx.show('cards'))
-      // 'Large' carries no hint; the child harness must report that, not the decoy.
-      const hints = await Promise.all([0, 1, 2].map(i => grid.labelAt(i)))
-      assert.deepEqual(hints, ['Small', 'Medium', 'Large'])
+      // 'Large' carries no hint, and a decoy with the same test id sits outside
+      // the grid — so a child harness reading the page instead of its own subtree
+      // would report the decoy's text here.
+      assert.deepEqual(await grid.hints(), ['Under 1000 sq ft', '1000 to 2500 sq ft', null])
     },
   },
   {
@@ -311,6 +314,82 @@ export const specs: Spec[] = [
       await stepOne.continue()
       assert.equal(await stepTwo.heading(), 'Step two')
       assert.equal(await stepOne.isAbsent(), true)
+    },
+  },
+  // ------------------------------------------- divergences the drivers once had
+  {
+    name: 'isEnabled reports a control disabled by an ancestor fieldset',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      // The control has no `disabled` attribute of its own — it inherits one.
+      // Reading the attribute alone made this true under dom and false under
+      // Playwright.
+      assert.equal(await form.isReferralEnabled(), false)
+    },
+  },
+  {
+    name: 'last() on an empty set fails the same way under every driver',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      const started = Date.now()
+      await assert.rejects(() => form.lastMissing(), /no nodes match/)
+      const elapsed = Date.now() - started
+      // Playwright reads nth(-1) as "the last one" and would wait out the whole
+      // timeout; dom reported a confusing negative index.
+      assert.ok(elapsed < IMMEDIATE_MS, `last() on an empty set took ${elapsed}ms`)
+    },
+  },
+  {
+    name: 'a strict violation is raised for duplicates that only appear later',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
+      // Nothing matches yet, so a check that only looks once sees no ambiguity.
+      assert.equal(await form.lateCount(), 0)
+      await assert.rejects(() => form.lateText(), /strict mode violation/)
+    },
+  },
+  {
+    name: 'a strict violation names the scope chain, not just the leaf',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      await assert.rejects(() => grid.ambiguousCardText(), /card-grid.*card/s)
+    },
+  },
+
+  // ------------------------------------------------- members without coverage
+  {
+    name: 'selectedOptions reads every selected value of a multi-select',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      assert.deepEqual(await form.addonValues(), ['sms'])
+      await form.chooseAddons(['voice', 'fax'])
+      assert.deepEqual(await form.addonValues(), ['voice', 'fax'])
+    },
+  },
+  {
+    name: 'texts reads every match, trimmed and in order',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
+      await form.waitForLate()
+      assert.deepEqual(await form.lateTexts(), ['first', 'second'])
+    },
+  },
+  {
+    name: 'waitFor resolves once a late node is visible',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
+      assert.equal(await form.lateCount(), 0)
+      await form.waitForLate()
+      assert.equal(await form.lateCount(), 2)
+    },
+  },
+  {
+    name: 'blur is available and leaves the field readable',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      await form.fillIn({ email: 'ada@example.com' })
+      await form.blurEmail()
+      assert.equal((await form.values()).email, 'ada@example.com')
     },
   },
 ]

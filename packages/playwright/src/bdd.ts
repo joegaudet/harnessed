@@ -12,7 +12,15 @@ export interface WorldFixture<W> {
   world: Partial<W>
 }
 
-/** Playwright's own constraint on fixture records, without reaching for `any`. */
+/**
+ * A structural stand-in for "some Playwright test object", used to call `extend`.
+ *
+ * Deliberately not used as a bound on `withWorld`'s `T`. Playwright's real
+ * `TestType` is not assignable to this one — its concrete fixture args do not
+ * satisfy an index-signature record — so constraining `T` rejects the very thing
+ * callers pass. The conditional return type is what gives misuse a readable
+ * error instead.
+ */
 type AnyTestType = TestType<Record<string, unknown>, Record<string, unknown>>
 
 /**

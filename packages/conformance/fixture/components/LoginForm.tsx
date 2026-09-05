@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export type LoginStatus = 'idle' | 'submitting' | 'done'
 
@@ -6,6 +6,8 @@ export interface LoginFormProps {
   onSubmit?: (email: string, password: string) => void
   /** Renders the error line when set. Absent otherwise — exercises count()/isAbsent(). */
   error?: string
+  /** Renders two same-id nodes after a delay, for the late-duplicate case. */
+  lateDuplicates?: boolean
 }
 
 /**
@@ -13,10 +15,17 @@ export interface LoginFormProps {
  * and a control whose accessible name changes with its state (which is why the
  * status carries a data attribute instead).
  */
-export function LoginForm({ onSubmit, error }: LoginFormProps) {
+export function LoginForm({ onSubmit, error, lateDuplicates }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState<LoginStatus>('idle')
+  const [late, setLate] = useState(false)
+
+  useEffect(() => {
+    if (!lateDuplicates) return
+    const timer = setTimeout(() => setLate(true), 150)
+    return () => clearTimeout(timer)
+  }, [lateDuplicates])
 
   return (
     <form
@@ -55,6 +64,30 @@ export function LoginForm({ onSubmit, error }: LoginFormProps) {
         <option value="free">Free</option>
         <option value="pro">Pro</option>
       </select>
+
+      <label htmlFor="login-addons">Add-ons</label>
+      <select id="login-addons" multiple defaultValue={['sms']}>
+        <option value="sms">SMS</option>
+        <option value="voice">Voice</option>
+        <option value="fax">Fax</option>
+      </select>
+
+      {/* `disabled` is inherited, so this control has no disabled attribute of its
+          own — the case where reading the attribute and reading the property
+          disagree. */}
+      <fieldset disabled>
+        <label htmlFor="login-referral">Referral code</label>
+        <input id="login-referral" data-testid="login-referral" />
+      </fieldset>
+
+      {/* Appears after a beat, as two nodes: a strict violation that cannot be
+          seen by a query that only looks once. */}
+      {late ? (
+        <p>
+          <span data-testid="login-late">first</span>
+          <span data-testid="login-late">second</span>
+        </p>
+      ) : null}
 
       {error ? <p data-testid="login-error">{error}</p> : null}
 

@@ -29,6 +29,9 @@ export class LoginFormHarness extends ComponentHarness {
   @ByPlaceholder('you@example.com') private accessor emailByPlaceholder!: Query
   @ByTestId('login-submit') private accessor submit!: Query
   @ByTestId('login-error') private accessor errorLine!: Query
+  @ByLabel('Add-ons') private accessor addons!: Query
+  @ByTestId('login-referral') private accessor referral!: Query
+  @ByTestId('login-late') private accessor lateLine!: Query
   @ByRole('dialog', { name: 'Confirm', global: true }) private accessor globalDialog!: Query
 
   async heading(): Promise<string> {
@@ -101,6 +104,47 @@ export class LoginFormHarness extends ComponentHarness {
   /** Reaches a node the host scope cannot see; used to prove `global` escapes scope. */
   async seesGlobalDialog(): Promise<boolean> {
     return (await this.globalDialog.count()) > 0
+  }
+
+  /** Inside a disabled fieldset, so it carries no `disabled` attribute of its own. */
+  async isReferralEnabled(): Promise<boolean> {
+    return this.referral.isEnabled()
+  }
+
+  async addonValues(): Promise<string[]> {
+    return this.addons.selectedOptions()
+  }
+
+  async chooseAddons(values: string[]): Promise<void> {
+    await this.addons.selectOption(values)
+  }
+
+  /** Two nodes, and only after a delay — the waited strict-mode path. */
+  async lateText(): Promise<string> {
+    return this.lateLine.text()
+  }
+
+  async waitForLate(): Promise<void> {
+    await this.lateLine.first().waitFor('visible')
+  }
+
+  async lateCount(): Promise<number> {
+    return this.lateLine.count()
+  }
+
+  /** No such node ever exists, so last() is asked about an empty set. */
+  async lastMissing(): Promise<Query> {
+    return this.elementBy(testId('never-rendered')).last()
+  }
+
+  /** Reads every match in one call — Playwright overrides this, dom does not. */
+  async lateTexts(): Promise<string[]> {
+    return this.lateLine.texts()
+  }
+
+  async blurEmail(): Promise<void> {
+    await this.email.focus()
+    await this.email.blur()
   }
 
   async clearEmail(): Promise<void> {

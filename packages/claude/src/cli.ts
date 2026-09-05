@@ -110,6 +110,9 @@ function main(): void {
         ? [
             'Left alone (already present — pass --overwrite-config to replace):',
             ...result.skipped.map(path => `  ${relative(process.cwd(), path)}`),
+            '',
+            'Note: the existing config was NOT read. The layout below came from',
+            'detecting this repo, so check it matches what the config says.',
           ]
         : []),
       '',

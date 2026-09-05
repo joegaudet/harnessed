@@ -29,45 +29,50 @@ function firstExisting(root: string, candidates: string[]): string | undefined {
   })
 }
 
-/** The test-id attribute already in use, if the repo has settled on one. */
+/**
+ * The test-id attribute already in use, if the repo has settled on one.
+ *
+ * One walk testing every candidate, rather than a walk per candidate: the old
+ * shape read every source file up to three times whenever the repo used the
+ * last candidate or none of them.
+ */
 export function detectTestIdAttribute(root: string): string {
-  const conventional = ['data-testid', 'data-test-id', 'data-test']
+  const candidates = ['data-testid', 'data-test-id', 'data-test']
   const searchRoots = ['src', 'app', 'lib'].map(dir => join(root, dir)).filter(existsSync)
-  for (const attribute of conventional) {
-    if (searchRoots.some(dir => containsText(dir, attribute, 0))) return attribute
+  for (const dir of searchRoots) {
+    const found = firstNeedle(dir, candidates, 0)
+    if (found !== undefined) return found
   }
-  return 'data-testid'
+  return candidates[0]!
 }
 
-function containsText(dir: string, needle: string, depth: number): boolean {
-  if (depth > 3) return false
-  let entries: string[]
+function firstNeedle(dir: string, needles: string[], depth: number): string | undefined {
+  if (depth > 3) return undefined
+  let entries
   try {
-    entries = readdirSync(dir)
+    entries = readdirSync(dir, { withFileTypes: true })
   } catch {
-    return false
+    return undefined
   }
   for (const entry of entries) {
-    if (entry === 'node_modules' || entry.startsWith('.')) continue
-    const full = join(dir, entry)
-    let info
-    try {
-      info = statSync(full)
-    } catch {
+    if (entry.name === 'node_modules' || entry.name.startsWith('.')) continue
+    const full = join(dir, entry.name)
+    if (entry.isDirectory()) {
+      const found = firstNeedle(full, needles, depth + 1)
+      if (found !== undefined) return found
       continue
     }
-    if (info.isDirectory()) {
-      if (containsText(full, needle, depth + 1)) return true
-      continue
-    }
-    if (!/\.(tsx?|jsx?|vue|svelte)$/.test(entry)) continue
+    if (!/\.(tsx?|jsx?|vue|svelte)$/.test(entry.name)) continue
     try {
-      if (readFileSync(full, 'utf8').includes(needle)) return true
+      const contents = readFileSync(full, 'utf8')
+      // Candidates are in priority order, so the first hit in this file wins.
+      const hit = needles.find(needle => contents.includes(needle))
+      if (hit !== undefined) return hit
     } catch {
       continue
     }
   }
-  return false
+  return undefined
 }
 
 /**

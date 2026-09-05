@@ -1,26 +1,11 @@
-import { pw } from '@harnessed/playwright'
 import { test } from '@playwright/test'
-import type { ConformanceCtx, View } from './catalog'
 import { specs } from './catalog'
+import { playwrightContext } from './context'
 import { routeSpecs } from './routes.catalog'
-import { viewSearch } from './views'
 
 for (const spec of specs) {
-  const runs = spec.drivers === undefined || spec.drivers.includes('playwright')
-  if (!runs) {
-    test.skip(`${spec.name} [not applicable to the playwright driver]`, () => {})
-    continue
-  }
   test(spec.name, async ({ page }) => {
-    const ctx: ConformanceCtx = {
-      driver: 'playwright',
-      async show(view: View) {
-        await page.goto(`/${viewSearch(view)}`)
-        await page.waitForSelector('[data-testid="stage"]')
-        return pw(page)
-      },
-    }
-    await spec.run(ctx)
+    await spec.run(playwrightContext(page))
   })
 }
 

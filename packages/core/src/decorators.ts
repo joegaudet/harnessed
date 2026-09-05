@@ -4,6 +4,7 @@ import type { HarnessOptions } from './host-meta'
 import { setHostMeta } from './host-meta'
 import type { Query } from './query'
 import { createQuery } from './registry'
+import { label, placeholder, role, testId, text } from './selector'
 import type { RoleOptions, Selector } from './selector'
 
 /** `{ global: true }` bypasses the host scope — for portals and overlays that
@@ -49,29 +50,26 @@ function elementDecorator(selector: Selector, isGlobal: boolean) {
 }
 
 /** Highest-priority locator. Use it unless the accessible name is unstable or absent. */
-export function ByRole(role: string, options?: RoleOptions & ElementOptions) {
+export function ByRole(name: string, options?: RoleOptions & ElementOptions) {
   const { global: isGlobal = false, ...roleOptions } = options ?? {}
   const hasRoleOptions = Object.keys(roleOptions).length > 0
-  return elementDecorator(
-    hasRoleOptions ? { type: 'role', role, options: roleOptions } : { type: 'role', role },
-    isGlobal,
-  )
+  return elementDecorator(role(name, hasRoleOptions ? roleOptions : undefined), isGlobal)
 }
 
-export function ByTestId(testId: string | RegExp, options?: ElementOptions) {
-  return elementDecorator({ type: 'testId', testId }, options?.global ?? false)
+export function ByTestId(id: string | RegExp, options?: ElementOptions) {
+  return elementDecorator(testId(id), options?.global ?? false)
 }
 
-export function ByLabel(text: string | RegExp, options?: ElementOptions) {
-  return elementDecorator({ type: 'label', text }, options?.global ?? false)
+export function ByLabel(value: string | RegExp, options?: ElementOptions) {
+  return elementDecorator(label(value), options?.global ?? false)
 }
 
-export function ByText(text: string | RegExp, options?: ElementOptions) {
-  return elementDecorator({ type: 'text', text }, options?.global ?? false)
+export function ByText(value: string | RegExp, options?: ElementOptions) {
+  return elementDecorator(text(value), options?.global ?? false)
 }
 
-export function ByPlaceholder(text: string | RegExp, options?: ElementOptions) {
-  return elementDecorator({ type: 'placeholder', text }, options?.global ?? false)
+export function ByPlaceholder(value: string | RegExp, options?: ElementOptions) {
+  return elementDecorator(placeholder(value), options?.global ?? false)
 }
 
 /** A nested harness, inheriting the host's scope chain. */

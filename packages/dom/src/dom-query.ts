@@ -1,6 +1,6 @@
 import { Query, registerDriver } from '@harnessed/core'
 import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed/core'
-import { getConfig } from '@harnessed/core'
+import { checkedFrom, enabledFrom, timeoutFor } from '@harnessed/core'
 import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
@@ -75,7 +75,15 @@ export class DomQuery extends Query {
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
-    await this.user.selectOptions(await this.element(options), value)
+    const element = (await this.element(options)) as HTMLSelectElement
+    // user-event adds to a multi-select's existing selection; Playwright replaces
+    // it. Replacing is the useful semantic and the one the shared API promises,
+    // so clear first.
+    if (element.multiple) {
+      const selected = [...element.selectedOptions].map(option => option.value)
+      if (selected.length > 0) await this.user.deselectOptions(element, selected)
+    }
+    await this.user.selectOptions(element, value)
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
@@ -123,16 +131,21 @@ export class DomQuery extends Query {
 
   override async isEnabled(options?: WaitOptions): Promise<boolean> {
     const element = await this.element(options)
-    if (element.hasAttribute('disabled')) return false
-    return element.getAttribute('aria-disabled') !== 'true'
+    // `disabled` is inherited from an ancestor fieldset, and the DOM property
+    // already accounts for that where the attribute does not. Reading the
+    // attribute alone made a control inside `<fieldset disabled>` report enabled
+    // here and disabled under Playwright.
+    const disabled =
+      (element as HTMLInputElement).disabled === true || element.closest(':disabled') !== null
+    return enabledFrom(disabled, element.getAttribute('aria-disabled'))
   }
 
   override async isChecked(options?: WaitOptions): Promise<boolean> {
     const element = await this.element(options)
-    if (element.getAttribute('aria-checked') !== null) {
-      return element.getAttribute('aria-checked') === 'true'
-    }
-    return Boolean((element as HTMLInputElement).checked)
+    return checkedFrom(
+      element.getAttribute('aria-checked'),
+      Boolean((element as HTMLInputElement).checked),
+    )
   }
 
   override async selectedOptions(options?: WaitOptions): Promise<string[]> {
@@ -143,7 +156,7 @@ export class DomQuery extends Query {
   // --- waiting ------------------------------------------------------------
 
   override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
-    const timeout = options?.timeout ?? getConfig().defaultTimeout
+    const timeout = timeoutFor(options?.timeout)
     if (state === 'visible') {
       await waitForCondition(
         async () => {
