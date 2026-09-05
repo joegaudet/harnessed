@@ -54,7 +54,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "build": "pnpm clean && tsc -b --force . && tsup",
+    "build": "tsup",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {

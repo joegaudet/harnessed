@@ -62,7 +62,7 @@
     "vitest": ">=2"
   },
   "scripts": {
-    "build": "pnpm clean && tsc -b --force . && tsup",
+    "build": "tsup",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {

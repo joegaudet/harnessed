@@ -51,7 +51,7 @@
     "eslint": ">=9"
   },
   "scripts": {
-    "build": "pnpm clean && tsc -b --force . && tsup",
+    "build": "tsup",
     "clean": "rm -rf dist *.tsbuildinfo",
     "test": "vitest run"
   },
