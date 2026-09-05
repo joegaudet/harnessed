@@ -13,6 +13,7 @@
     "packages/*/tsup.config.ts",
     "packages/*/vitest.config.ts",
     "packages/*/tests/**/*.ts",
-    "packages/conformance/runners/**/*.ts"
+    "packages/conformance/runners/**/*.ts",
+    "scripts/*.mjs"
   ]
 }

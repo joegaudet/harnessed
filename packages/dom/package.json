@@ -1,7 +1,7 @@
 {
   "name": "@harnessed-ts/dom",
   "version": "0.2.0",
-  "description": "Testing Library / jsdom driver for @harnessed-ts/core. Framework-agnostic \u2014 no React dependency.",
+  "description": "Testing Library / jsdom driver for @harnessed-ts/core. Framework-agnostic — no React dependency.",
   "keywords": [
     "testing",
     "harness",
@@ -66,8 +66,7 @@
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",

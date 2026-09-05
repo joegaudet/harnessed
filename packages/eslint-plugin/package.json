@@ -56,8 +56,7 @@
     "test": "vitest run"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "devDependencies": {
     "eslint": "^10.10.0",

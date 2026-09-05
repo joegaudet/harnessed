@@ -1,7 +1,7 @@
 {
   "name": "@harnessed-ts/route",
   "version": "0.2.0",
-  "description": "RouteHarness \u2014 one test object per URL, on any driver that can navigate. Typed path params and a required readiness check.",
+  "description": "RouteHarness — one test object per URL, on any driver that can navigate. Typed path params and a required readiness check.",
   "keywords": [
     "testing",
     "harness",
@@ -56,7 +56,6 @@
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   }
 }
