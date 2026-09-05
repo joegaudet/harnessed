@@ -75,6 +75,7 @@
   "files": [
     "dist",
     "!dist/runners",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE"
   ],

@@ -48,6 +48,7 @@
   "files": [
     "dist",
     "tsconfig.harnessed.json",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE"
   ],
