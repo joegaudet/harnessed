@@ -40,6 +40,7 @@ export default tseslint.config(
       'packages/*/vitest.config.ts',
       'packages/*/tests/**/*.ts',
       'packages/conformance/runners/**/*.ts',
+      'scripts/*.mjs',
     ],
     languageOptions: {
       parserOptions: {
@@ -47,6 +48,15 @@ export default tseslint.config(
         project: './tsconfig.tools.json',
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    // A node script, not browser or library code: it runs under node with the
+    // node globals available, and js.configs.recommended's no-undef does not
+    // know that on its own.
+    files: ['scripts/*.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', fetch: 'readonly', process: 'readonly' },
     },
   },
   {

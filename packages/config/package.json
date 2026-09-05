@@ -55,7 +55,6 @@
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   }
 }

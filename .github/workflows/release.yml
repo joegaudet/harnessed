@@ -50,6 +50,7 @@ jobs:
       - run: pnpm build
 
       - name: Version PR, or publish if one was merged
+        id: changesets
         uses: changesets/action@v1
         with:
           version: pnpm changeset version
@@ -61,4 +62,27 @@ jobs:
           # No NODE_AUTH_TOKEN: publishing authenticates through OIDC. Each
           # package must name this repository and this workflow file
           # (release.yml) as a trusted publisher in its npmjs.com settings, or
-          # the publish is refused. Provenance is generated automatically.
+          # the publish is refused.
+          #
+          # `pnpm release` runs scripts/publish.mjs rather than
+          # `changeset publish` -- changesets hands the publish to pnpm in a
+          # pnpm workspace, and pnpm publish speaks neither OIDC nor
+          # provenance. See the script's header.
+
+      # changeset publish used to create the tags; scripts/publish.mjs does
+      # not, because the packages move in a fixed group and one tag describes
+      # the release better than eight do. Tag only when something was actually
+      # published, so a version-PR run leaves no tag behind.
+      - name: Tag the release
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./packages/core/package.json').version")
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "v$version already exists"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$version" -m "v$version"
+          git push origin "v$version"

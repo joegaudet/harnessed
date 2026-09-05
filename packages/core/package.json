@@ -1,7 +1,7 @@
 {
   "name": "@harnessed-ts/core",
   "version": "0.2.0",
-  "description": "Component harnesses that run under any test driver \u2014 the driver-free core.",
+  "description": "Component harnesses that run under any test driver — the driver-free core.",
   "keywords": [
     "testing",
     "harness",
@@ -72,8 +72,7 @@
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "devDependencies": {
     "esbuild": "^0.27.7"
