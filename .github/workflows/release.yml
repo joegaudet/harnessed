@@ -51,7 +51,7 @@ jobs:
 
       - name: Version PR, or publish if one was merged
         id: changesets
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           version: pnpm changeset version
           publish: pnpm release
