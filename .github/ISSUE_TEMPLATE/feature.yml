@@ -1,0 +1,25 @@
+name: Feature request
+description: Something the harness API cannot express.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to test?
+      description: The component or URL, and the question you want a test to ask about it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What does it take today?
+      description: Including whether it can be done at all, and whether it needs reaching past the harness.
+    validations:
+      required: true
+
+  - type: textarea
+    id: parity
+    attributes:
+      label: Can both drivers do it?
+      description: Anything added to the shared API has to work identically under Testing Library and Playwright. If only one can, say which.

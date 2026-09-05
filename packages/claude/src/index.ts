@@ -1,0 +1,6 @@
+export { install } from './install'
+export type { InstallOptions, InstallResult } from './install'
+export { detectLayout, detectTestIdAttribute } from './detect'
+export type { DetectedLayout } from './detect'
+export { placementTable, renderConfig, renderRules, renderSkill } from './render'
+export type { RenderContext } from './render'

@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "types": ["node"],
+    "rootDir": "."
+  },
+  "include": ["src", "fixture", "specs", "runners"],
+  "references": [
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../dom"
+    },
+    {
+      "path": "../playwright"
+    },
+    {
+      "path": "../route"
+    }
+  ]
+}

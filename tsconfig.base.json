@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    /* TC39 standard decorators + `accessor` fields are the authoring surface of this
+       library. All three of the following are load-bearing: turning any of them off
+       breaks every decorated field at RUNTIME, not at typecheck. */
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "ESNext.Decorators", "DOM", "DOM.Iterable"],
+
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": false,
+
+    "declaration": true,
+    "declarationMap": true
+  }
+}

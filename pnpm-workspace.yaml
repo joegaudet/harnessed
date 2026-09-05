@@ -1,0 +1,15 @@
+packages:
+  - 'packages/*'
+
+# core must not silently resolve a driver it does not declare
+strictPeerDependencies: true
+autoInstallPeers: false
+allowBuilds:
+  # tsup's bundler; needs its postinstall to fetch the platform binary
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@changesets/apply-release-plan@8.1.0'
+  - '@changesets/cli@3.0.2'
+  - '@changesets/git@4.0.1'
+  - '@changesets/read@1.0.1'
+  - eslint@10.10.0

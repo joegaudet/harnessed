@@ -1,0 +1,23 @@
+version: 2
+updates:
+  # The peers are what break this library for consumers, and CI already tests
+  # peer majors — so these PRs carry real signal rather than noise.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      testing-library:
+        patterns: ['@testing-library/*']
+      playwright:
+        patterns: ['@playwright/*', 'playwright']
+      lint:
+        patterns: ['eslint', '@eslint/*', 'typescript-eslint', 'prettier']
+      build:
+        patterns: ['tsup', 'esbuild', 'vite', 'vitest', '@vitejs/*']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

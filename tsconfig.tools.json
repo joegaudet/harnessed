@@ -1,0 +1,18 @@
+{
+  "$comment": "Not part of the solution build. Exists so type-aware linting has a project for the build-tooling and test files that the publishable tsconfigs deliberately exclude.",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "types": ["node"],
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "eslint.config.js",
+    "*.config.ts",
+    "packages/*/tsup.config.ts",
+    "packages/*/vitest.config.ts",
+    "packages/*/tests/**/*.ts",
+    "packages/conformance/runners/**/*.ts"
+  ]
+}

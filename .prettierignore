@@ -1,0 +1,6 @@
+dist/
+pnpm-lock.yaml
+.changeset/*.md
+coverage/
+test-results/
+playwright-report/

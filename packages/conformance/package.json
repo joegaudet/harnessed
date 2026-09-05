@@ -1,0 +1,100 @@
+{
+  "name": "@harnessed/conformance",
+  "version": "0.1.0",
+  "description": "The cross-driver certification suite: one set of behavioural specs every @harnessed driver must pass.",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm test:dom && pnpm test:playwright",
+    "test:dom": "vitest run --config runners/vitest.config.ts",
+    "test:playwright": "playwright test --config runners/playwright.config.ts",
+    "dev": "vite --config runners/vite.config.ts",
+    "build": "pnpm clean && tsc -b --force . && tsup",
+    "clean": "rm -rf dist *.tsbuildinfo test-results playwright-report"
+  },
+  "dependencies": {
+    "@harnessed/core": "workspace:^",
+    "@harnessed/route": "workspace:^"
+  },
+  "devDependencies": {
+    "@harnessed/dom": "workspace:^",
+    "@harnessed/playwright": "workspace:^",
+    "@playwright/test": "^1.62.1",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "esbuild": "^0.27.7",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vite": "^8.2.2",
+    "vitest": "^5.0.0"
+  },
+  "keywords": [
+    "testing",
+    "harness",
+    "conformance",
+    "parity"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/conformance"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./fixture": {
+      "types": "./dist/src/fixture.d.ts",
+      "import": "./dist/fixture.js",
+      "require": "./dist/fixture.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/runners",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "peerDependencies": {
+    "@playwright/test": ">=1.40",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
