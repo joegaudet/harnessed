@@ -59,6 +59,9 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The rule tests load a real harnessed.config.ts through @harnessed/config,
+      # which resolves to its build output.
+      - run: pnpm build
       - run: pnpm test:rules
 
   conformance-dom:
