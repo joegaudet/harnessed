@@ -73,6 +73,23 @@ which is the only bug class that matters here.
 3. Make them agree.
 4. Add it to the **Cross-driver guarantees** list in the README.
 
+## Releasing
+
+Once per repository, configure what a release needs:
+
+```bash
+bash scripts/setup-release.sh            # or --dry-run first
+```
+
+It stores the `NPM_TOKEN` secret (read silently, never echoed or passed as an
+argument) and allows Actions to create pull requests. Both have already stopped a
+release here: the first attempt failed opening the changesets version PR and never
+reached npm at all.
+
+After that, releases are automatic. Merging to `main` with changesets pending
+opens a "Version Packages" PR; merging _that_ publishes. With none pending, the
+merge publishes the current versions directly.
+
 ## Changesets
 
 Every change that affects a published package needs one:

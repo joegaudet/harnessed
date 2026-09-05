@@ -48,6 +48,7 @@
   "files": [
     "dist",
     "tsconfig.harnessed.json",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE"
   ],
@@ -67,7 +68,7 @@
     }
   },
   "scripts": {
-    "build": "pnpm clean && tsc -b --force . && tsup",
+    "build": "tsup",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {

@@ -51,6 +51,7 @@
   },
   "files": [
     "dist",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE"
   ],
@@ -64,7 +65,7 @@
     "@playwright/test": ">=1.40"
   },
   "scripts": {
-    "build": "pnpm clean && tsc -b --force . && tsup",
+    "build": "tsup",
     "clean": "rm -rf dist *.tsbuildinfo"
   },
   "publishConfig": {
