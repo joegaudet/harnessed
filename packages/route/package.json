@@ -1,6 +1,6 @@
 {
   "name": "@harnessed/route",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "RouteHarness \u2014 one test object per URL, on any driver that can navigate. Typed path params and a required readiness check.",
   "keywords": [
     "testing",

@@ -1,6 +1,6 @@
 {
   "name": "@harnessed/conformance",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The cross-driver certification suite: one set of behavioural specs every @harnessed driver must pass.",
   "type": "module",
   "scripts": {
