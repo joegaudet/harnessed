@@ -23,6 +23,23 @@ pnpm build
 pnpm test             # rule tests, then both conformance drivers
 ```
 
+**Before pushing, run the whole thing against a clean clone:**
+
+```bash
+bash scripts/verify-like-ci.sh          # every job, ~3 min
+bash scripts/verify-like-ci.sh --quick  # skips the browser and TS matrix
+```
+
+This exists because a passing local run is weaker evidence than it looks. Your
+working tree has a `dist/` from the last build, browsers already installed, and
+whatever directory you happen to be in; CI has none of that. Two failures reached
+CI that way — a job that never built the package it imported, and an install
+command that only resolved from inside a subdirectory. Both reproduce instantly
+against a fresh clone and not at all against a warm tree.
+
+Keep the job list in `scripts/verify-like-ci.sh` in step with
+`.github/workflows/ci.yml`.
+
 ## How this is tested
 
 `packages/conformance` holds one neutral fixture app and **one** set of behavioural
