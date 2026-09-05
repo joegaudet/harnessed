@@ -44,7 +44,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm add -Dw typescript@${{ matrix.typescript }}
-      - run: pnpm typecheck
+      # Only the published packages: the peer range is a promise about them, and
+      # the conformance package pulls in build-tooling types that need newer TS.
+      - run: pnpm typecheck:packages
 
   rules:
     name: eslint rule tests
@@ -97,7 +99,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter conformance add -D @playwright/test@${{ matrix.playwright }}
       - run: pnpm build
-      - run: npx playwright install --with-deps chromium
+      - run: pnpm --filter conformance exec playwright install --with-deps chromium
       - run: pnpm test:playwright
       - uses: actions/upload-artifact@v4
         if: failure()

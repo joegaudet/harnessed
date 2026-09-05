@@ -20,6 +20,7 @@
   "scripts": {
     "build": "pnpm -r --filter './packages/*' build",
     "typecheck": "tsc --build",
+    "typecheck:packages": "tsc --build packages/core packages/dom packages/playwright packages/route packages/eslint-plugin packages/claude",
     "lint": "pnpm --filter @harnessed/eslint-plugin build && eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
