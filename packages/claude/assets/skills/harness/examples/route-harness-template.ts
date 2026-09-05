@@ -20,10 +20,9 @@ export class ThingRoute extends RouteHarness<{ token: string }> {
   @ChildHarness(ThingHarness) accessor thing!: ThingHarness
   @ByText(/that link has expired/i) private accessor expiredNote!: Query
 
-  // Required, and never empty. A route's own waitForReady is the one legitimate
-  // use of this.page.
+  // Required, and never empty. Usually one line against the route's own host.
   protected async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('[data-testid="stage"]')
+    await this.self.waitFor('visible')
   }
 
   async showsExpiredNotice(): Promise<boolean> {

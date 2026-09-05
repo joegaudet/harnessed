@@ -9,6 +9,6 @@ export class NeverReadyRoute extends RouteHarness {
   }
 
   protected async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('[data-testid="never-rendered"]', { timeout: 750 })
+    await this.elementBy(testId('never-rendered')).waitFor('visible', { timeout: 750 })
   }
 }

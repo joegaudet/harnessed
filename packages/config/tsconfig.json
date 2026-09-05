@@ -4,13 +4,9 @@
     "composite": true,
     "rootDir": "src",
     "outDir": "dist",
-    "types": ["node"],
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "types": ["node"]
   },
   "include": ["src"],
-  "references": [
-    {
-      "path": "../config"
-    }
-  ]
+  "references": [{ "path": "../core" }]
 }

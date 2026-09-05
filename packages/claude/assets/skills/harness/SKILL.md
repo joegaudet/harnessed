@@ -63,8 +63,8 @@ Template: `examples/route-harness-template.ts`
   checked against the path rather than trusted.
 - `$param` substitution works in the query string as well as the path, at every
   occurrence, URL-encoded.
-- `waitForReady()` is required and must never be empty. `this.page.waitForSelector`
-  is legitimate here, and only here.
+- `waitForReady()` is required and must never be empty. Usually one line:
+  `await this.self.waitFor('visible')`.
 - Compose screens with `@ChildHarness`.
 
 ## Element locator API
@@ -100,7 +100,7 @@ await form.signInAs('ada@example.com')
 Under Playwright:
 
 ```ts
-const checkout = new CheckoutRoute(page)
+const checkout = new CheckoutRoute(pw(page))
 await checkout.goto({ token })
 await expect(checkout.total).toReadAs(/^\$/)
 ```

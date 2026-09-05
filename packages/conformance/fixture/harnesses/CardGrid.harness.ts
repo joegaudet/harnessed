@@ -90,6 +90,33 @@ export class CardGridHarness extends ComponentHarness {
     return seen
   }
 
+  /**
+   * Chooses every card in order, reading each label AFTER its click — so the page
+   * has re-rendered between the interaction and the read. Exists to prove list
+   * iteration survives mutation; a test suite would never be this contrived.
+   */
+  async chooseEachInTurn(seen: string[]): Promise<void> {
+    await this.card.each(async c => {
+      await c.choose()
+      seen.push(await c.label())
+    })
+  }
+
+  /**
+   * Same walk as chooseEachInTurn but through a raw Query list, where a dom
+   * driver resolves all the nodes up front. Clicking re-keys the card, so the
+   * resolved node is detached before the read — and a detached node still answers
+   * getAttribute, with the OLD value. Only re-resolution reads the truth.
+   */
+  async pressedStatesAfterChoosingEach(): Promise<(string | null)[]> {
+    const states: (string | null)[] = []
+    await this.elementBy(testId('card')).each(async card => {
+      await card.click()
+      states.push(await card.attribute('aria-pressed'))
+    })
+    return states
+  }
+
   /** A selector computed at call time keeps the harness scope via elementBy. */
   async labelTextAt(index: number): Promise<string> {
     return this.elementBy({ type: 'testId', testId: 'card-label', nth: index }).text()

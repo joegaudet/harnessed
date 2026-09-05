@@ -92,6 +92,19 @@ export abstract class Query {
     return filterOf(this, fn)
   }
 
+  /**
+   * Every match, as one query each. The default builds index descriptors, which
+   * is right for a driver whose queries are cheap descriptors resolved per
+   * action (Playwright). A driver that pays a resolution per access (Testing
+   * Library) overrides this to resolve the whole list in one pass — otherwise
+   * every list operation re-walks the scope chain and re-scans the siblings for
+   * every element, which is O(N²) in queries.
+   */
+  async all(): Promise<Query[]> {
+    const total = await this.count()
+    return Array.from({ length: total }, (_, index) => this.nth(index))
+  }
+
   async texts(): Promise<string[]> {
     return this.map(query => query.text())
   }

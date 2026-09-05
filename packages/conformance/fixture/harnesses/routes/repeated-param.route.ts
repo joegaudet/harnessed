@@ -12,6 +12,6 @@ export class RepeatedParamRoute extends RouteHarness<{ token: string }> {
   }
 
   protected async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('[data-testid="stage"]')
+    await this.self.waitFor('visible')
   }
 }

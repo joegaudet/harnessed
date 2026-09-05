@@ -26,8 +26,8 @@ Full API and architecture: the `@harnessed/core` README. Procedural how-to
 
 - **`page` or `screen` inside a harness.** Add an element field, a
   `@ChildHarness`, or use `this.elementBy(selector)` for a selector computed at
-  call time. The one legitimate `this.page` is a `RouteHarness`'s own
-  `waitForReady()`.
+  call time. A route's `waitForReady()` does not need the driver either —
+  `await this.self.waitFor('visible')`.
 - **A CSS class as a state signal.** `className.includes('on')` couples the test
   to styling. Add `aria-pressed` / `aria-expanded` / `aria-selected` to the
   component instead.

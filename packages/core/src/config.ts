@@ -72,6 +72,20 @@ export function getConfig(): Readonly<RuntimeConfig> {
   return globals().merged
 }
 
+/**
+ * Applies the runtime half of a whole `harnessed.config.ts` object.
+ *
+ * Picks only the keys the runtime owns, so handing over the entire config file —
+ * `layout`, `testIdPattern` and all — cannot smuggle tooling settings into the
+ * merged runtime state.
+ */
+export function applyConfig(config: HarnessedConfig): void {
+  const runtime: Partial<RuntimeConfig> = {}
+  if (config.testIdAttribute !== undefined) runtime.testIdAttribute = config.testIdAttribute
+  if (config.defaultTimeout !== undefined) runtime.defaultTimeout = config.defaultTimeout
+  configure(runtime)
+}
+
 /** Milliseconds to wait, honouring an explicit override. */
 export function timeoutFor(explicit?: number): number {
   return explicit ?? getConfig().defaultTimeout

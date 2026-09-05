@@ -1,14 +1,11 @@
 {
-  "name": "@harnessed/claude",
+  "name": "@harnessed/config",
   "version": "0.1.0",
-  "description": "Installs the harness authoring skill, rules, and templates into a repo's .claude/ directory.",
+  "description": "Loads harnessed.config.ts, so the runtime, the linter, and the docs generator read one file.",
   "keywords": [
-    "claude",
-    "claude-code",
-    "agent",
-    "skill",
     "testing",
-    "harness"
+    "harness",
+    "config"
   ],
   "license": "MIT",
   "contributors": [
@@ -24,7 +21,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joegaudet/harnessed.git",
-    "directory": "packages/claude"
+    "directory": "packages/config"
   },
   "homepage": "https://github.com/joegaudet/harnessed#readme",
   "bugs": "https://github.com/joegaudet/harnessed/issues",
@@ -32,9 +29,6 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "harnessed-claude": "./dist/cli.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -45,12 +39,15 @@
   },
   "files": [
     "dist",
-    "assets",
     "README.md",
     "LICENSE"
   ],
   "engines": {
     "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed/core": "workspace:^",
+    "jiti": "^2.4.2"
   },
   "scripts": {
     "build": "pnpm clean && tsc -b --force . && tsup",
@@ -59,8 +56,5 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
-  },
-  "dependencies": {
-    "@harnessed/config": "workspace:^"
   }
 }

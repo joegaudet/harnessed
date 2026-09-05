@@ -7,5 +7,10 @@
     "types": ["node"],
     "emitDeclarationOnly": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../config"
+    }
+  ]
 }

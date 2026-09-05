@@ -1,3 +1,4 @@
+import { loadConfigFor } from '@harnessed/config'
 import type { Rule } from 'eslint'
 
 export interface HarnessRuleOptions {
@@ -28,8 +29,31 @@ function dirsOf(
   return options[key] ?? fallback
 }
 
+/**
+ * Where this repo keeps its harnesses.
+ *
+ * Rule options win, then `harnessed.config.ts`, then the default. Reading the
+ * config is what stops a repo having to state its layout twice — once for the
+ * linter and once for the docs generator — and then watching the two drift.
+ */
 export function harnessDirsOf(context: Rule.RuleContext): string[] {
-  return dirsOf(context, 'harnessDirs', DEFAULT_HARNESS_DIRS)
+  const explicit = (context.options[0] ?? {}) as HarnessRuleOptions
+  if (explicit.harnessDirs !== undefined) return explicit.harnessDirs
+
+  const configured = configuredHarnessDir(context)
+  return configured === undefined ? DEFAULT_HARNESS_DIRS : [configured]
+}
+
+function configuredHarnessDir(context: Rule.RuleContext): string | undefined {
+  try {
+    // From the file, not the process cwd: a lint run started anywhere should
+    // still find the config that governs the file it is checking.
+    return loadConfigFor(context.filename)?.layout?.harnesses
+  } catch {
+    // A malformed config is the config's problem to report, not a reason for
+    // every lint rule in the repo to crash.
+    return undefined
+  }
 }
 
 export function testDirsOf(context: Rule.RuleContext): string[] {

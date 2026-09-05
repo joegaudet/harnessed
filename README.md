@@ -63,7 +63,7 @@ npm i -D @harnessed/core
 # plus the driver(s) you use
 npm i -D @harnessed/dom          # Testing Library / jsdom
 npm i -D @harnessed/playwright   # Playwright
-npm i -D @harnessed/route        # one test object per URL (Playwright)
+npm i -D @harnessed/route        # one test object per URL
 ```
 
 `@harnessed/core` depends on neither driver. A jsdom-only project never resolves
@@ -172,8 +172,10 @@ subclass supplies one. Resolution walks the prototype chain and the nearest
 
 ### `RouteHarness` (`@harnessed/route`)
 
-One test object per URL. Playwright only — route behaviour means navigation, the
-URL, and what the page fetches on the way in.
+One test object per URL. Takes an env like every other harness and runs on the
+driver's **navigation capability**, so any driver that can drive an address bar
+gets routes — and one that cannot (jsdom has no URL) says so in a single readable
+error at construction, rather than failing somewhere inside the first `goto()`.
 
 ```ts
 @Harness({ host: testId('stage') })
@@ -185,11 +187,11 @@ class CheckoutRoute extends RouteHarness<{ token: string }> {
   @ChildHarness(CartHarness) accessor cart!: CartHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('[data-testid="cart"]')
+    await this.self.waitFor('visible')
   }
 }
 
-await new CheckoutRoute(page).goto({ token })
+await new CheckoutRoute(pw(page)).goto({ token })
 ```
 
 The type parameter declares the path's params, so `goto()` is checked against the
@@ -198,8 +200,8 @@ as well as the path, at **every** occurrence, URL-encoded.
 
 `waitForReady()` runs automatically after `goto()` and must never be empty — an
 empty one satisfies the abstract member and silently removes the wait, so the
-failure lands somewhere unrelated later in the test. It is also the one place a
-subclass should touch `this.page`.
+failure lands somewhere unrelated later in the test. The usual body is one line
+against the route's own host: `await this.self.waitFor('visible')`.
 
 Also provides `currentUrl`, `currentPathname`, `currentSearchParams`, and
 `assertPathname()` — which waits, and compares the **pathname**, so it keeps
@@ -232,14 +234,22 @@ export default defineConfig({
 })
 ```
 
-One place to declare these, so the runtime, the linter, and the generated docs
-describe the same layout. `testIdAttribute` is pushed into Testing Library and
-Playwright for you.
+One place to declare these, read by everything that needs them.
+`@harnessed/eslint-plugin` and `@harnessed/claude` load the file themselves — the
+linter resolves it by walking up from the file being checked, so a monorepo and an
+editor started anywhere both find the right one. `testIdAttribute` is pushed into
+Testing Library and Playwright for you.
 
-**It is not loaded automatically yet.** Today you pass the runtime half to
-`configure()`, give `layout.harnesses` to `@harnessed/eslint-plugin` as rule
-options, and re-run `npx @harnessed/claude install` when the layout changes. A
-loader that wires all three from the file is the obvious next step.
+The runtime half is explicit, because your test setup already transforms
+TypeScript and a bundler-free loader has no business running there:
+
+```ts
+// vitest setup file
+import { applyConfig } from '@harnessed/core'
+import config from '../harnessed.config'
+
+applyConfig(config)
+```
 
 ## Keeping the conventions
 
@@ -302,8 +312,28 @@ registerDriver('my-driver', (env, scope, selector) => new MyQuery(env, scope, se
 ```
 
 Everything list-shaped — `nth`, `first`, `last`, `each`, `map`, `filter`, `texts`,
-`isAbsent` — is inherited. The registry lives on `globalThis` under a `Symbol.for`
-key, so a graph that loads both the ESM and the CJS build still has one registry.
+`isAbsent` — is inherited. Override `all()` if resolving a whole list at once is
+cheaper for you than resolving each element (it is, for Testing Library; it is not
+for Playwright, whose locators are descriptors). The registry lives on `globalThis`
+under a `Symbol.for` key, so a graph that loads both the ESM and the CJS build
+still has one registry.
+
+If your driver can navigate, register that too and `@harnessed/route` works
+against it unchanged:
+
+```ts
+registerNavigation('my-driver', { goto, currentUrl, waitForUrl })
+```
+
+**A driver is done when it passes the conformance suite**, which is published for
+exactly this purpose:
+
+```bash
+npm i -D @harnessed/conformance
+```
+
+See [`@harnessed/conformance`](packages/conformance/README.md) — one set of specs,
+run by every driver, so a harness written against one works against yours.
 
 ## Requirements
 

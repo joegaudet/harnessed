@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/core" },
+    { "path": "./packages/config" },
     { "path": "./packages/dom" },
     { "path": "./packages/playwright" },
     { "path": "./packages/route" },

@@ -1,7 +1,7 @@
 {
   "name": "@harnessed/route",
   "version": "0.1.0",
-  "description": "RouteHarness \u2014 one test object per URL, with typed path params and a required readiness check.",
+  "description": "RouteHarness \u2014 one test object per URL, on any driver that can navigate. Typed path params and a required readiness check.",
   "keywords": [
     "testing",
     "harness",
@@ -48,11 +48,7 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed/core": "workspace:^",
-    "@harnessed/playwright": "workspace:^"
-  },
-  "peerDependencies": {
-    "@playwright/test": ">=1.40"
+    "@harnessed/core": "workspace:^"
   },
   "scripts": {
     "build": "pnpm clean && tsc -b --force . && tsup",
@@ -61,8 +57,5 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.62.1"
   }
 }

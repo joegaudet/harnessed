@@ -13,6 +13,6 @@ export class StepOneRoute extends RouteHarness {
   @ChildHarness(StepTwoHarness) accessor stepTwo!: StepTwoHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('[data-testid="screen-step-one"]')
+    await this.elementBy(testId('screen-step-one')).waitFor('visible')
   }
 }

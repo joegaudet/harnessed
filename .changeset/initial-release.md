@@ -5,6 +5,8 @@
 '@harnessed/route': minor
 '@harnessed/eslint-plugin': minor
 '@harnessed/claude': minor
+'@harnessed/config': minor
+'@harnessed/conformance': minor
 ---
 
 First release.
@@ -26,6 +28,10 @@ harness once, use it in a fast jsdom unit test and in a real browser.
 - `@harnessed/eslint-plugin` — five rules making the authoring conventions a gate.
 - `@harnessed/claude` — installs the authoring skill and rules for coding agents,
   generating the file-placement table from the repo's own layout.
+- `@harnessed/config` — loads `harnessed.config.ts`, so the linter and the docs
+  generator read the layout a repo declares once.
+- `@harnessed/conformance` — the certification suite itself, published so a driver
+  written outside this repo can prove it agrees with the others.
 
 Five cross-driver guarantees are each backed by a spec that runs unchanged under
 both drivers, so a disagreement between them fails the build.

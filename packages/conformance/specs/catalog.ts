@@ -284,6 +284,29 @@ export const specs: Spec[] = [
     },
   },
   {
+    name: 'list callbacks that mutate the page keep working',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      // Choosing re-renders the grid mid-iteration. A driver that resolves the
+      // list once must survive its nodes being replaced under it, not act on
+      // detached elements or lose its place.
+      const seen: string[] = []
+      await grid.chooseEachInTurn(seen)
+      assert.deepEqual(seen, ['Small', 'Medium', 'Large'])
+      assert.equal(await grid.chosenLabel(), 'Large')
+    },
+  },
+  {
+    name: 'a resolved list is not fooled by nodes replaced mid-iteration',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      // Choosing re-keys the card, so the clicked node is detached before the
+      // read. A driver holding resolved nodes must notice and re-resolve — a
+      // detached node still answers getAttribute, with the stale value.
+      assert.deepEqual(await grid.pressedStatesAfterChoosingEach(), ['true', 'true', 'true'])
+    },
+  },
+  {
     name: 'selection state is read from aria-pressed, not a class',
     async run(ctx) {
       const grid = new CardGridHarness(await ctx.show('cards'))

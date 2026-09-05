@@ -6,9 +6,10 @@
     "emitDeclarationOnly": true,
     "outDir": "dist",
     "jsx": "react-jsx",
-    "types": ["node"]
+    "types": ["node"],
+    "rootDir": "."
   },
-  "include": ["fixture", "specs", "runners"],
+  "include": ["src", "fixture", "specs", "runners"],
   "references": [
     {
       "path": "../core"

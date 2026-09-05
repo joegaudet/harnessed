@@ -1,4 +1,5 @@
 import { withWorld } from '@harnessed/playwright/bdd'
+import { pw } from '@harnessed/playwright'
 import { expect, test as base } from '@playwright/test'
 import { StepOneRoute } from '../fixture/harnesses/routes/step-one.route'
 
@@ -24,7 +25,7 @@ test('the world carries a route harness across steps within a scenario', async (
   page,
   world,
 }) => {
-  world.stepOne = new StepOneRoute(page)
+  world.stepOne = new StepOneRoute(pw(page))
   await world.stepOne.goto()
   expect(await world.stepOne!.stepOne.heading()).toBe('Step one')
 })

@@ -28,7 +28,15 @@ export function CardGrid({ cards }: { cards: CardSpec[] }) {
       <h1>Options</h1>
       <h2>Pick one</h2>
       {cards.map(c => (
-        <Card key={c.label} {...c} on={chosen === c.label} onChoose={() => setChosen(c.label)} />
+        <Card
+          // The key changes when selection does, so choosing REPLACES the DOM
+          // node rather than mutating it — deliberately, because a resolved-once
+          // list that keeps reading a detached node reads stale values silently.
+          key={`${c.label}:${chosen === c.label}`}
+          {...c}
+          on={chosen === c.label}
+          onChoose={() => setChosen(c.label)}
+        />
       ))}
     </div>
   )

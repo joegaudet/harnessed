@@ -19,12 +19,13 @@ export const DEFAULT_RUNTIME_CONFIG: Readonly<RuntimeConfig> = Object.freeze({
 
 import type { RuntimeConfig } from './config'
 import type { HarnessOptions } from './host-meta'
-import type { QueryFactory } from './registry'
+import type { Navigation, QueryFactory } from './registry'
 
 const SLOT = Symbol.for('harnessed.globals.v1')
 
 export interface HarnessedGlobals {
   drivers: Map<string, QueryFactory>
+  navigations: Map<string, Navigation>
   hostMeta: WeakMap<object, HarnessOptions>
   /** Overrides applied by `configure()`, and the merged view readers get. */
   overrides: Partial<RuntimeConfig>
@@ -41,11 +42,15 @@ export function globals(): HarnessedGlobals {
   if (slot === undefined) {
     slot = {
       drivers: new Map(),
+      navigations: new Map(),
       hostMeta: new WeakMap(),
       overrides: {},
       merged: DEFAULT_RUNTIME_CONFIG,
     }
     carrier[SLOT] = slot
   }
+  // An older copy of this module may have created the slot before this field
+  // existed; sharing state across copies is the slot's whole job, so tolerate it.
+  slot.navigations ??= new Map()
   return slot
 }

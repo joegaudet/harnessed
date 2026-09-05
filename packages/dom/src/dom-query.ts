@@ -1,11 +1,11 @@
 import { Query, registerDriver } from '@harnessed/core'
 import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed/core'
-import { checkedFrom, enabledFrom, timeoutFor } from '@harnessed/core'
+import { checkedFrom, enabledFrom, nth as withNth, timeoutFor } from '@harnessed/core'
 import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
 import type { DomEnv } from './env'
-import { countAll, resolveOne } from './resolve'
+import { countAll, queryAll, resolveOne, resolveScope } from './resolve'
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
@@ -42,8 +42,31 @@ export class DomQuery extends Query {
     return new DomQuery(this.user, this.container, this.scope, selector)
   }
 
-  private element(options?: WaitOptions): Promise<HTMLElement> {
+  protected element(options?: WaitOptions): Promise<HTMLElement> {
     return resolveOne(this.container, this.scope, this.selector, options?.timeout)
+  }
+
+  /**
+   * Every match, resolved in one pass: the scope chain is walked once and the
+   * siblings scanned once, where the inherited default re-does both per element —
+   * O(N²) in Testing Library queries for a list of N.
+   *
+   * Each result is bound to its already-resolved node. A callback that mutates
+   * the page can detach those nodes, so a bound query falls back to ordinary
+   * index resolution the moment its node leaves the document.
+   */
+  override async all(): Promise<Query[]> {
+    const root = await resolveScope(this.container, this.scope)
+    return queryAll(root, this.selector).map(
+      (element, index) =>
+        new BoundDomQuery(
+          this.user,
+          this.container,
+          this.scope,
+          withNth(this.selector, index),
+          element,
+        ),
+    )
   }
 
   // --- interactions -------------------------------------------------------
@@ -178,6 +201,26 @@ export class DomQuery extends Query {
 
   override async count(): Promise<number> {
     return countAll(this.container, this.scope, this.selector)
+  }
+}
+
+/** A query pinned to a node `all()` already found. See `DomQuery.all`. */
+class BoundDomQuery extends DomQuery {
+  constructor(
+    user: UserEvent,
+    container: HTMLElement,
+    scope: readonly Selector[],
+    selector: Selector,
+    private readonly bound: HTMLElement,
+  ) {
+    super(user, container, scope, selector)
+  }
+
+  protected override async element(options?: WaitOptions): Promise<HTMLElement> {
+    if (this.bound.isConnected) return this.bound
+    // A re-render replaced the node; the selector still carries this query's
+    // index, so ordinary resolution finds the replacement.
+    return super.element(options)
   }
 }
 

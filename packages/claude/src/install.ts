@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { loadConfig } from '@harnessed/config'
 import { detectLayout, detectTestIdAttribute } from './detect'
 import type { RenderContext } from './render'
 import { renderConfig, renderRules, renderSkill } from './render'
@@ -20,6 +21,15 @@ export interface InstallResult {
   context: RenderContext
   written: string[]
   skipped: string[]
+  /** True when an existing config supplied part of the layout above. */
+  usedExistingConfig: boolean
+}
+
+/** Drops keys the config did not set, so they do not overwrite detection with undefined. */
+function definedOnly(values: Partial<RenderContext>): Partial<RenderContext> {
+  return Object.fromEntries(
+    Object.entries(values).filter(([, value]) => value !== undefined),
+  ) as Partial<RenderContext>
 }
 
 function assetsDir(): string {
@@ -57,14 +67,32 @@ export function install(options: InstallOptions = {}): InstallResult {
   const dryRun = options.dryRun ?? false
   const assets = assetsDir()
 
-  const detected = detectLayout(root)
+  // An existing config is the repo's own statement of its layout, so it beats
+  // detection. Detection only fills what the config leaves unsaid; explicit
+  // flags still beat both.
+  const existing = loadConfig(root)
   const context: RenderContext = {
-    ...detected,
+    ...detectLayout(root),
     testIdAttribute: detectTestIdAttribute(root),
+    ...definedOnly({
+      components: existing?.layout?.components,
+      screens: existing?.layout?.screens,
+      harnesses: existing?.layout?.harnesses,
+      widgetHarnesses: existing?.layout?.widgetHarnesses,
+      screenHarnesses: existing?.layout?.screenHarnesses,
+      widgetTestId: existing?.testIdPattern?.widget,
+      screenTestId: existing?.testIdPattern?.screen,
+      testIdAttribute: existing?.testIdAttribute,
+    }),
     ...options.layout,
   }
 
-  const result: InstallResult = { context, written: [], skipped: [] }
+  const result: InstallResult = {
+    context,
+    written: [],
+    skipped: [],
+    usedExistingConfig: existing !== undefined,
+  }
 
   const skillTemplate = readFileSync(join(assets, 'skills/harness/SKILL.md'), 'utf8')
   write(

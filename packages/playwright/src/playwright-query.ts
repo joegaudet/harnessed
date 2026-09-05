@@ -1,4 +1,4 @@
-import { Query, registerDriver } from '@harnessed/core'
+import { Query, registerDriver, registerNavigation } from '@harnessed/core'
 import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed/core'
 import { checkedFrom, strictViolation, timeoutFor } from '@harnessed/core'
 import type { Locator, Page } from '@playwright/test'
@@ -158,4 +158,21 @@ export class PlaywrightQuery extends Query {
 
 registerDriver(PLAYWRIGHT_DRIVER, (env: EnvConfig, scope, selector) => {
   return new PlaywrightQuery((env as PlaywrightEnv).page, scope, selector)
+})
+
+/**
+ * This driver can navigate, so it also registers the capability `RouteHarness`
+ * runs on. A driver without one still supports every component harness — routes
+ * are the only thing that needs a URL.
+ */
+registerNavigation(PLAYWRIGHT_DRIVER, {
+  async goto(env, url) {
+    await (env as PlaywrightEnv).page.goto(url, { waitUntil: 'domcontentloaded' })
+  },
+  currentUrl(env) {
+    return (env as PlaywrightEnv).page.url()
+  },
+  async waitForUrl(env, matches, timeout) {
+    await (env as PlaywrightEnv).page.waitForURL(url => matches(url), { timeout })
+  },
 })

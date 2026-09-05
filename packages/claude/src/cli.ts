@@ -110,13 +110,12 @@ function main(): void {
         ? [
             'Left alone (already present — pass --overwrite-config to replace):',
             ...result.skipped.map(path => `  ${relative(process.cwd(), path)}`),
-            '',
-            'Note: the existing config was NOT read. The layout below came from',
-            'detecting this repo, so check it matches what the config says.',
           ]
         : []),
       '',
-      'Layout used (override with the flags in --help if any of this is wrong):',
+      result.usedExistingConfig
+        ? 'Layout used (from harnessed.config.ts, with detection filling any gaps):'
+        : 'Layout used (detected \u2014 override with the flags in --help if any is wrong):',
       `  components      ${context.components}`,
       `  screens         ${context.screens}`,
       `  harnesses       ${context.harnesses}`,

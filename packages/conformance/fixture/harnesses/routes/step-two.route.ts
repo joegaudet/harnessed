@@ -15,6 +15,6 @@ export class StepTwoRoute extends RouteHarness<{ token: string }> {
   @ChildHarness(StepTwoHarness) accessor stepTwo!: StepTwoHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.page.waitForSelector('[data-testid="screen-step-two"]')
+    await this.elementBy(testId('screen-step-two')).waitFor('visible')
   }
 }

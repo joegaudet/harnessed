@@ -1,14 +1,16 @@
 /**
  * The list operations, written once.
  *
- * `Query` and `ComponentHarness` both expose `nth`/`first`/`last`/`each`/`map`/
- * `filter` over "N of these on screen". The algorithm is identical; only what
- * `nth` returns differs. Keeping two copies meant a fix like the empty-list case
- * below had to be made — and remembered — twice.
+ * `Query` and `ComponentHarness` both expose `each`/`map`/`filter` over "N of
+ * these on screen". The algorithm is identical; only what an item *is* differs.
+ * Keeping two copies meant a fix had to be made — and remembered — twice.
+ *
+ * Everything goes through `all()` so a driver can resolve the whole list in one
+ * pass instead of once per element; the naive count-then-index form lives in each
+ * class's default `all()`.
  */
-export interface Indexable<T> {
-  count(): Promise<number>
-  nth(index: number): T
+export interface Listable<T> {
+  all(): Promise<T[]>
 }
 
 /**
@@ -24,19 +26,19 @@ export function lastIndex(total: number): number | undefined {
 }
 
 export async function eachOf<T>(
-  source: Indexable<T>,
+  source: Listable<T>,
   fn: (item: T, index: number) => Promise<void>,
 ): Promise<void> {
-  const total = await source.count()
+  const items = await source.all()
   // Sequential on purpose: callbacks interact with the page, and order is part
   // of the contract.
-  for (let index = 0; index < total; index += 1) {
-    await fn(source.nth(index), index)
+  for (const [index, item] of items.entries()) {
+    await fn(item, index)
   }
 }
 
 export async function mapOf<T, R>(
-  source: Indexable<T>,
+  source: Listable<T>,
   fn: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
   const results: R[] = []
@@ -47,7 +49,7 @@ export async function mapOf<T, R>(
 }
 
 export async function filterOf<T>(
-  source: Indexable<T>,
+  source: Listable<T>,
   fn: (item: T, index: number) => Promise<boolean>,
 ): Promise<T[]> {
   const kept: T[] = []
