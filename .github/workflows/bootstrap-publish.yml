@@ -1,0 +1,70 @@
+# TEMPORARY. Delete this file once every package has been published once.
+#
+# npm will not configure a trusted publisher for a package that has never been
+# published, and unlike PyPI it has no pending-publisher to pre-register one:
+#
+#   https://github.com/npm/cli/issues/8544
+#
+# So the very first publish of a brand new package cannot use OIDC, and
+# release.yml -- which is OIDC-only, on purpose -- cannot perform it. This
+# workflow exists to break that circle exactly once, using a short-lived
+# NPM_TOKEN secret.
+#
+# It runs only when a human dispatches it. It is never triggered by a push, so
+# it cannot publish behind your back.
+#
+# Afterwards:
+#   1. npmjs.com, per package: Settings > Trusted publisher >
+#      repository joegaudet/harnessed, workflow release.yml
+#   2. gh secret delete NPM_TOKEN --repo joegaudet/harnessed
+#   3. Delete this file. release.yml handles every release from then on.
+name: bootstrap publish (one-shot)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "publish" to confirm this is the first publish'
+        required: true
+        default: ''
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    # A typo here publishes to a public registry permanently -- npm does not
+    # let a version number be reused, even after an unpublish. Make the human
+    # say so explicitly.
+    if: inputs.confirm == 'publish'
+    permissions:
+      contents: read
+      # Provenance still works on the token path: the attestation is signed
+      # with this OIDC token even though authentication uses NPM_TOKEN. This
+      # is what keeps the bootstrap release from being the one unsigned
+      # version in the package history.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      # changeset publish skips anything already on the registry, so a re-run
+      # after a partial failure picks up only what is still missing.
+      - name: Publish every unpublished package
+        run: pnpm release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
