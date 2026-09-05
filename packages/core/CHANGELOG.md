@@ -1,5 +1,12 @@
 # @harnessed-ts/core
 
+## 0.2.0
+
+### Minor Changes
+
+- The packages publish under the `@harnessed-ts` scope. Nothing shipped under the
+  previous `@harnessed` scope, so there is no migration to perform.
+
 ## 0.1.0
 
 First release.

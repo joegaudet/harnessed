@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/config",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Loads harnessed.config.ts, so the runtime, the linter, and the docs generator read one file.",
   "keywords": [
     "testing",

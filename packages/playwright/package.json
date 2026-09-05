@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/playwright",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Playwright driver for @harnessed-ts/core, plus API stubbing and BDD world helpers.",
   "keywords": [
     "testing",

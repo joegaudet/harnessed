@@ -13,7 +13,7 @@ export const rules: Record<string, Rule.RuleModule> = {
   'require-wait-for-ready': requireWaitForReady,
 }
 
-const meta = { name: '@harnessed-ts/eslint-plugin', version: '0.1.0' }
+const meta = { name: '@harnessed-ts/eslint-plugin', version: '0.2.0' }
 
 /**
  * Turns the harness conventions into a gate. Written rules get followed until
