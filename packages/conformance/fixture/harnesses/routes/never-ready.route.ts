@@ -1,5 +1,5 @@
-import { Harness, testId } from '@harnessed/core'
-import { RouteHarness } from '@harnessed/route'
+import { Harness, testId } from '@harnessed-ts/core'
+import { RouteHarness } from '@harnessed-ts/route'
 
 /** Waits for something the fixture never renders. Proves goto() awaits waitForReady. */
 @Harness({ host: testId('stage') })

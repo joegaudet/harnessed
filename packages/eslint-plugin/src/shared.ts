@@ -1,4 +1,4 @@
-import { loadConfigFor } from '@harnessed/config'
+import { loadConfigFor } from '@harnessed-ts/config'
 import type { Rule } from 'eslint'
 
 export interface HarnessRuleOptions {

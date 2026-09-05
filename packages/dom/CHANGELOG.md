@@ -1,4 +1,4 @@
-# @harnessed/dom
+# @harnessed-ts/dom
 
 ## 0.1.0
 

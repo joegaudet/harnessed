@@ -9,11 +9,11 @@ body:
       description: If a behaviour differs BETWEEN drivers, that is a parity bug — pick both.
       multiple: true
       options:
-        - '@harnessed/dom (Testing Library / jsdom)'
-        - '@harnessed/playwright'
-        - '@harnessed/route'
-        - '@harnessed/eslint-plugin'
-        - '@harnessed/claude'
+        - '@harnessed-ts/dom (Testing Library / jsdom)'
+        - '@harnessed-ts/playwright'
+        - '@harnessed-ts/route'
+        - '@harnessed-ts/eslint-plugin'
+        - '@harnessed-ts/claude'
         - Not driver-specific
     validations:
       required: true
@@ -22,7 +22,7 @@ body:
     id: versions
     attributes:
       label: Versions
-      description: Output of `npm ls @harnessed/core @harnessed/dom @harnessed/playwright @harnessed/route`, plus node, typescript, and your test runner and bundler versions.
+      description: Output of `npm ls @harnessed-ts/core @harnessed-ts/dom @harnessed-ts/playwright @harnessed-ts/route`, plus node, typescript, and your test runner and bundler versions.
       render: text
     validations:
       required: true
@@ -49,5 +49,5 @@ body:
       label: Setup checks
       description: Both are required, and omitting either fails at runtime rather than at typecheck.
       options:
-        - label: 'My tsconfig extends `@harnessed/core/tsconfig.json`, or sets `target: ES2022`, `useDefineForClassFields: true`, and `ESNext.Decorators` in `lib`.'
-        - label: 'My Vite and Vitest configs list `harnessedDecorators()` from `@harnessed/core/vite` first.'
+        - label: 'My tsconfig extends `@harnessed-ts/core/tsconfig.json`, or sets `target: ES2022`, `useDefineForClassFields: true`, and `ESNext.Decorators` in `lib`.'
+        - label: 'My Vite and Vitest configs list `harnessedDecorators()` from `@harnessed-ts/core/vite` first.'

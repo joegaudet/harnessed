@@ -14,7 +14,7 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.10.0(jiti@2.7.0))
-      '@harnessed/eslint-plugin':
+      '@harnessed-ts/eslint-plugin':
         specifier: workspace:*
         version: link:packages/eslint-plugin
       '@types/node':
@@ -38,13 +38,13 @@ importers:
 
   packages/claude:
     dependencies:
-      '@harnessed/config':
+      '@harnessed-ts/config':
         specifier: workspace:^
         version: link:../config
 
   packages/config:
     dependencies:
-      '@harnessed/core':
+      '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
       jiti:
@@ -53,17 +53,17 @@ importers:
 
   packages/conformance:
     dependencies:
-      '@harnessed/core':
+      '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
-      '@harnessed/route':
+      '@harnessed-ts/route':
         specifier: workspace:^
         version: link:../route
     devDependencies:
-      '@harnessed/dom':
+      '@harnessed-ts/dom':
         specifier: workspace:^
         version: link:../dom
-      '@harnessed/playwright':
+      '@harnessed-ts/playwright':
         specifier: workspace:^
         version: link:../playwright
       '@playwright/test':
@@ -114,7 +114,7 @@ importers:
 
   packages/dom:
     dependencies:
-      '@harnessed/core':
+      '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
@@ -130,7 +130,7 @@ importers:
 
   packages/eslint-plugin:
     dependencies:
-      '@harnessed/config':
+      '@harnessed-ts/config':
         specifier: workspace:^
         version: link:../config
     devDependencies:
@@ -146,7 +146,7 @@ importers:
 
   packages/playwright:
     dependencies:
-      '@harnessed/core':
+      '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
     devDependencies:
@@ -156,7 +156,7 @@ importers:
 
   packages/route:
     dependencies:
-      '@harnessed/core':
+      '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
 

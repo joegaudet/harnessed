@@ -1,5 +1,5 @@
-import { Harness, testId } from '@harnessed/core'
-import { RouteHarness } from '@harnessed/route'
+import { Harness, testId } from '@harnessed-ts/core'
+import { RouteHarness } from '@harnessed-ts/route'
 
 /**
  * The same param twice, and a value that needs encoding. Proves replaceAll rather

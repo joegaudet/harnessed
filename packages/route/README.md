@@ -1,4 +1,4 @@
-# @harnessed/route
+# @harnessed-ts/route
 
 One test object per URL: where it lives, how to get there, and how to know it has
 arrived. Playwright only — a route needs a real page.

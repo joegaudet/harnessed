@@ -1,6 +1,6 @@
-import { Query, registerDriver } from '@harnessed/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed/core'
-import { checkedFrom, enabledFrom, nth as withNth, timeoutFor } from '@harnessed/core'
+import { Query, registerDriver } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import { checkedFrom, enabledFrom, nth as withNth, timeoutFor } from '@harnessed-ts/core'
 import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
@@ -225,7 +225,7 @@ class BoundDomQuery extends DomQuery {
 }
 
 /**
- * Registering on import is what lets `@harnessed/core` stay driver-free: core
+ * Registering on import is what lets `@harnessed-ts/core` stay driver-free: core
  * holds a registry keyed by driver id and never imports a driver itself.
  */
 registerDriver(DOM_DRIVER, (env: EnvConfig, scope, selector) => {

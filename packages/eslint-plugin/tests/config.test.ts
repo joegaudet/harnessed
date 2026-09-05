@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { clearConfigCache, loadConfig, loadConfigFor } from '@harnessed/config'
+import { clearConfigCache, loadConfig, loadConfigFor } from '@harnessed-ts/config'
 import { RuleTester } from 'eslint'
 import tseslint from 'typescript-eslint'
 import { beforeEach, describe, expect, it } from 'vitest'

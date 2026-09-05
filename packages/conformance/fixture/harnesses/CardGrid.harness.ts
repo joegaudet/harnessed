@@ -1,5 +1,12 @@
-import { ByRole, ByTestId, ChildHarness, ComponentHarness, Harness, testId } from '@harnessed/core'
-import type { Query } from '@harnessed/core'
+import {
+  ByRole,
+  ByTestId,
+  ChildHarness,
+  ComponentHarness,
+  Harness,
+  testId,
+} from '@harnessed-ts/core'
+import type { Query } from '@harnessed-ts/core'
 
 /** The host is itself the button, so `choose()` acts on `self`. */
 @Harness({ host: testId('card') })

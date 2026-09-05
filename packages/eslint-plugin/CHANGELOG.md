@@ -1,4 +1,4 @@
-# @harnessed/eslint-plugin
+# @harnessed-ts/eslint-plugin
 
 ## 0.1.0
 

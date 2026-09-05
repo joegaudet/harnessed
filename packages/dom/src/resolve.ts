@@ -1,5 +1,5 @@
-import { indexOutOfRange, strictViolation, testIdSync, timeoutFor } from '@harnessed/core'
-import type { Selector } from '@harnessed/core'
+import { indexOutOfRange, strictViolation, testIdSync, timeoutFor } from '@harnessed-ts/core'
+import type { Selector } from '@harnessed-ts/core'
 import { configure as configureTestingLibrary, within } from '@testing-library/dom'
 import type { ByRoleMatcher } from '@testing-library/dom'
 

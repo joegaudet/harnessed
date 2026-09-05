@@ -1,7 +1,7 @@
 {
-  "name": "@harnessed/playwright",
+  "name": "@harnessed-ts/playwright",
   "version": "0.1.0",
-  "description": "Playwright driver for @harnessed/core, plus API stubbing and BDD world helpers.",
+  "description": "Playwright driver for @harnessed-ts/core, plus API stubbing and BDD world helpers.",
   "keywords": [
     "testing",
     "harness",
@@ -59,7 +59,7 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed/core": "workspace:^"
+    "@harnessed-ts/core": "workspace:^"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40"

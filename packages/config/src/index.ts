@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { dirname, join, parse } from 'node:path'
-import type { HarnessedConfig } from '@harnessed/core'
+import type { HarnessedConfig } from '@harnessed-ts/core'
 import { createJiti } from 'jiti'
 
 export type { HarnessedConfig }
@@ -26,7 +26,7 @@ export function findConfig(root: string = process.cwd()): string | undefined {
  * Synchronous and TypeScript-capable, because the callers are an ESLint rule and
  * a CLI — neither of which runs inside a bundler that would transform the file
  * for them. That is what `jiti` is for, and why this is a separate package:
- * `@harnessed/core` stays dependency-free and usable in a browser.
+ * `@harnessed-ts/core` stays dependency-free and usable in a browser.
  *
  * Cached per root: an ESLint run asks once per file, and the answer cannot change
  * within a run.

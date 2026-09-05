@@ -1,7 +1,7 @@
 /**
  * The driver certification suite.
  *
- * A driver for `@harnessed/core` is not "done" when it compiles — it is done when
+ * A driver for `@harnessed-ts/core` is not "done" when it compiles — it is done when
  * it agrees with every other driver about what the shared API means. These are the
  * specs that decide that, exported so a driver living outside this repo can run
  * exactly the same ones.
@@ -10,8 +10,8 @@
  * source holds the two reference implementations (Vitest + jsdom, and Playwright).
  *
  * ```ts
- * import { specs } from '@harnessed/conformance'
- * import { App } from '@harnessed/conformance/fixture'
+ * import { specs } from '@harnessed-ts/conformance'
+ * import { App } from '@harnessed-ts/conformance/fixture'
  *
  * for (const spec of specs) {
  *   it(spec.name, () => spec.run({ show: view => mountAndBuildEnv(view) }))

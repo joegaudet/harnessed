@@ -7,5 +7,5 @@ export default defineConfig({
   dts: false,
   sourcemap: true,
   clean: false,
-  external: ['eslint', '@harnessed/config'],
+  external: ['eslint', '@harnessed-ts/config'],
 })

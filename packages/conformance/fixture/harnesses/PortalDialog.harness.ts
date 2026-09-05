@@ -1,5 +1,5 @@
-import { ByRole, ByTestId, ComponentHarness, Harness, testId } from '@harnessed/core'
-import type { Query } from '@harnessed/core'
+import { ByRole, ByTestId, ComponentHarness, Harness, testId } from '@harnessed-ts/core'
+import type { Query } from '@harnessed-ts/core'
 
 /** The dialog is portalled to document.body, outside this host's subtree. */
 @Harness({ host: testId('portal-host') })

@@ -1,5 +1,5 @@
-import { ByRole, ByTestId, ComponentHarness, Harness, testId } from '@harnessed/core'
-import type { Query } from '@harnessed/core'
+import { ByRole, ByTestId, ComponentHarness, Harness, testId } from '@harnessed-ts/core'
+import type { Query } from '@harnessed-ts/core'
 
 /**
  * Shared shape for both wizard steps: a level-1 title and nothing else in common.

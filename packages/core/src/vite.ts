@@ -9,7 +9,7 @@
  * Put it first in the plugin list so it runs before the framework plugin.
  *
  * ```ts
- * import { harnessedDecorators } from '@harnessed/core/vite'
+ * import { harnessedDecorators } from '@harnessed-ts/core/vite'
  *
  * export default defineConfig({
  *   plugins: [harnessedDecorators(), react()],

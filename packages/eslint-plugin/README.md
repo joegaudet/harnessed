@@ -1,9 +1,9 @@
-# @harnessed/eslint-plugin
+# @harnessed-ts/eslint-plugin
 
 Five rules that turn the harness authoring conventions into a gate.
 
 ```js
-import harnessed from '@harnessed/eslint-plugin'
+import harnessed from '@harnessed-ts/eslint-plugin'
 export default [harnessed.configs.recommended] // or .strict
 ```
 

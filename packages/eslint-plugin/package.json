@@ -1,5 +1,5 @@
 {
-  "name": "@harnessed/eslint-plugin",
+  "name": "@harnessed-ts/eslint-plugin",
   "version": "0.1.0",
   "description": "ESLint rules that enforce the harness authoring conventions mechanically.",
   "keywords": [
@@ -65,6 +65,6 @@
     "vitest": "^5.0.0"
   },
   "dependencies": {
-    "@harnessed/config": "workspace:^"
+    "@harnessed-ts/config": "workspace:^"
   }
 }

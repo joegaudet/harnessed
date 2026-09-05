@@ -9,8 +9,8 @@ import { describe, expect, it } from 'vitest'
  * `Symbol.for` key precisely so that cannot happen.
  */
 const require = createRequire(import.meta.url)
-const esm = await import('@harnessed/core')
-const cjs = require('@harnessed/core') as typeof esm
+const esm = await import('@harnessed-ts/core')
+const cjs = require('@harnessed-ts/core') as typeof esm
 
 describe('dual publish', () => {
   it('really does load two separate module instances', () => {

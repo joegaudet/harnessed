@@ -8,5 +8,5 @@ export default defineConfig({
   sourcemap: true,
   clean: false,
   treeshake: true,
-  external: ['@harnessed/core', 'jiti'],
+  external: ['@harnessed-ts/core', 'jiti'],
 })

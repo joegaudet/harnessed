@@ -1,5 +1,5 @@
-import { navigationFor, ScopedHarness, timeoutFor } from '@harnessed/core'
-import type { EnvConfig, Navigation } from '@harnessed/core'
+import { navigationFor, ScopedHarness, timeoutFor } from '@harnessed-ts/core'
+import type { EnvConfig, Navigation } from '@harnessed-ts/core'
 
 /** No declared params means `goto()` takes no argument; declaring some makes it required. */
 export type GotoArgs<Params> = [keyof Params] extends [never]

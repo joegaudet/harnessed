@@ -73,7 +73,7 @@ else
   TOKEN="${NPM_TOKEN:-}"
   if [ -z "$TOKEN" ]; then
     cat <<'EOS'
-  Needs an npm token with publish rights for the @harnessed scope. Either:
+  Needs an npm token with publish rights for the @harnessed-ts scope. Either:
     - npmjs.com → Access Tokens → Generate → Granular or Automation, or
     - npm token create        (classic token, needs `npm login` first)
   It is read silently and never echoed.

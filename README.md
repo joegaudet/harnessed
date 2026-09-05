@@ -58,15 +58,15 @@ Inspired by [Angular CDK Component Harnesses][cdk],
 ## Install
 
 ```bash
-npm i -D @harnessed/core
+npm i -D @harnessed-ts/core
 
 # plus the driver(s) you use
-npm i -D @harnessed/dom          # Testing Library / jsdom
-npm i -D @harnessed/playwright   # Playwright
-npm i -D @harnessed/route        # one test object per URL
+npm i -D @harnessed-ts/dom          # Testing Library / jsdom
+npm i -D @harnessed-ts/playwright   # Playwright
+npm i -D @harnessed-ts/route        # one test object per URL
 ```
 
-`@harnessed/core` depends on neither driver. A jsdom-only project never resolves
+`@harnessed-ts/core` depends on neither driver. A jsdom-only project never resolves
 Playwright, and vice versa.
 
 ### Required setup
@@ -79,7 +79,7 @@ two things.
 ```jsonc
 // tsconfig.json
 {
-  "extends": "@harnessed/core/tsconfig.json",
+  "extends": "@harnessed-ts/core/tsconfig.json",
   // → target: ES2022, useDefineForClassFields: true, lib includes ESNext.Decorators
 }
 ```
@@ -89,7 +89,7 @@ yet, and Vite's default transform passes it through untouched. Add the plugin
 first in the list:
 
 ```ts
-import { harnessedDecorators } from '@harnessed/core/vite'
+import { harnessedDecorators } from '@harnessed-ts/core/vite'
 
 export default defineConfig({
   plugins: [harnessedDecorators(), react()],
@@ -170,7 +170,7 @@ An **abstract** base may carry fields and methods with no host of its own; each
 subclass supplies one. Resolution walks the prototype chain and the nearest
 `@Harness` wins, so a subclass can also override a base's host.
 
-### `RouteHarness` (`@harnessed/route`)
+### `RouteHarness` (`@harnessed-ts/route`)
 
 One test object per URL. Takes an env like every other harness and runs on the
 driver's **navigation capability**, so any driver that can drive an address bar
@@ -210,7 +210,7 @@ matching once the URL carries a query string.
 ### Matchers
 
 ```ts
-import '@harnessed/dom/matchers' // or '@harnessed/playwright/matchers'
+import '@harnessed-ts/dom/matchers' // or '@harnessed-ts/playwright/matchers'
 
 await expect(card).toBeSelected()
 await expect(banner).toBeAbsent()
@@ -224,7 +224,7 @@ Playwright already ships a `toHaveText` for Locators.
 
 ```ts
 // harnessed.config.ts
-import { defineConfig } from '@harnessed/core'
+import { defineConfig } from '@harnessed-ts/core'
 
 export default defineConfig({
   testIdAttribute: 'data-testid',
@@ -235,7 +235,7 @@ export default defineConfig({
 ```
 
 One place to declare these, read by everything that needs them.
-`@harnessed/eslint-plugin` and `@harnessed/claude` load the file themselves — the
+`@harnessed-ts/eslint-plugin` and `@harnessed-ts/claude` load the file themselves — the
 linter resolves it by walking up from the file being checked, so a monorepo and an
 editor started anywhere both find the right one. `testIdAttribute` is pushed into
 Testing Library and Playwright for you.
@@ -245,7 +245,7 @@ TypeScript and a bundler-free loader has no business running there:
 
 ```ts
 // vitest setup file
-import { applyConfig } from '@harnessed/core'
+import { applyConfig } from '@harnessed-ts/core'
 import config from '../harnessed.config'
 
 applyConfig(config)
@@ -253,10 +253,10 @@ applyConfig(config)
 
 ## Keeping the conventions
 
-**`@harnessed/eslint-plugin`** turns the authoring rules into a gate:
+**`@harnessed-ts/eslint-plugin`** turns the authoring rules into a gate:
 
 ```js
-import harnessed from '@harnessed/eslint-plugin'
+import harnessed from '@harnessed-ts/eslint-plugin'
 export default [harnessed.configs.recommended]
 ```
 
@@ -268,10 +268,10 @@ export default [harnessed.configs.recommended]
 | `no-reach-through-cast`        | `(harness as unknown as { page }).page`                                                                                                                         |
 | `no-raw-locator-in-test`       | a raw `page.getByRole(…)` in a test that should go through a harness (a warning in `recommended`, an error in `strict`)                                         |
 
-**`@harnessed/claude`** installs the authoring conventions for coding agents:
+**`@harnessed-ts/claude`** installs the authoring conventions for coding agents:
 
 ```bash
-npm i -D @harnessed/claude && npx @harnessed/claude install
+npm i -D @harnessed-ts/claude && npx @harnessed-ts/claude install
 ```
 
 It writes `.claude/skills/harness/` and `.claude/rules/harness.md`, generating the
@@ -281,16 +281,16 @@ your config alone.
 
 ## Packages
 
-| Package                    | What                                                                                                                                  |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `@harnessed/core`          | `Query`, `Selector`, `ComponentHarness`, the decorators, the driver registry, `configure()`, the Vite plugin, matcher implementations |
-| `@harnessed/dom`           | Testing Library driver + matchers. No React dependency                                                                                |
-| `@harnessed/playwright`    | Playwright driver + matchers, `createApiStubs`, `withWorld`                                                                           |
-| `@harnessed/route`         | `RouteHarness`                                                                                                                        |
-| `@harnessed/eslint-plugin` | the five rules above                                                                                                                  |
-| `@harnessed/claude`        | authoring skill, rules, templates, and the install CLI                                                                                |
+| Package                       | What                                                                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `@harnessed-ts/core`          | `Query`, `Selector`, `ComponentHarness`, the decorators, the driver registry, `configure()`, the Vite plugin, matcher implementations |
+| `@harnessed-ts/dom`           | Testing Library driver + matchers. No React dependency                                                                                |
+| `@harnessed-ts/playwright`    | Playwright driver + matchers, `createApiStubs`, `withWorld`                                                                           |
+| `@harnessed-ts/route`         | `RouteHarness`                                                                                                                        |
+| `@harnessed-ts/eslint-plugin` | the five rules above                                                                                                                  |
+| `@harnessed-ts/claude`        | authoring skill, rules, templates, and the install CLI                                                                                |
 
-### Extras in `@harnessed/playwright`
+### Extras in `@harnessed-ts/playwright`
 
 **`createApiStubs`** fulfils API requests from an in-memory object, so a browser
 suite runs with no backend and no database — with a flag to send everything to the
@@ -304,7 +304,7 @@ worker.
 
 ## Adding a driver
 
-`@harnessed/core` holds a registry keyed by driver id and never imports a driver.
+`@harnessed-ts/core` holds a registry keyed by driver id and never imports a driver.
 A driver supplies an env, 19 `Query` members, and a registration:
 
 ```ts
@@ -318,7 +318,7 @@ for Playwright, whose locators are descriptors). The registry lives on `globalTh
 under a `Symbol.for` key, so a graph that loads both the ESM and the CJS build
 still has one registry.
 
-If your driver can navigate, register that too and `@harnessed/route` works
+If your driver can navigate, register that too and `@harnessed-ts/route` works
 against it unchanged:
 
 ```ts
@@ -329,10 +329,10 @@ registerNavigation('my-driver', { goto, currentUrl, waitForUrl })
 exactly this purpose:
 
 ```bash
-npm i -D @harnessed/conformance
+npm i -D @harnessed-ts/conformance
 ```
 
-See [`@harnessed/conformance`](packages/conformance/README.md) — one set of specs,
+See [`@harnessed-ts/conformance`](packages/conformance/README.md) — one set of specs,
 run by every driver, so a harness written against one works against yours.
 
 ## Requirements

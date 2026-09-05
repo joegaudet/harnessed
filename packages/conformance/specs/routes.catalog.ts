@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
-import { registerDriver } from '@harnessed/core'
-import type { EnvConfig, Query } from '@harnessed/core'
+import { registerDriver } from '@harnessed-ts/core'
+import type { EnvConfig, Query } from '@harnessed-ts/core'
 import { NeverReadyRoute } from '../fixture/harnesses/routes/never-ready.route'
 import { RepeatedParamRoute } from '../fixture/harnesses/routes/repeated-param.route'
 import { StepOneRoute } from '../fixture/harnesses/routes/step-one.route'

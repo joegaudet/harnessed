@@ -1,5 +1,5 @@
-import { ChildHarness, Harness, testId } from '@harnessed/core'
-import { RouteHarness } from '@harnessed/route'
+import { ChildHarness, Harness, testId } from '@harnessed-ts/core'
+import { RouteHarness } from '@harnessed-ts/route'
 import { StepTwoHarness } from '../Wizard.harness'
 
 /**

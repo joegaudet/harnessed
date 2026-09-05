@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import type { EnvConfig } from '@harnessed/core'
+import type { EnvConfig } from '@harnessed-ts/core'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
 import { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'
 import { PortalDialogHarness } from '../fixture/harnesses/PortalDialog.harness'

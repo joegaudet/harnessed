@@ -1,7 +1,7 @@
 {
-  "name": "@harnessed/dom",
+  "name": "@harnessed-ts/dom",
   "version": "0.1.0",
-  "description": "Testing Library / jsdom driver for @harnessed/core. Framework-agnostic \u2014 no React dependency.",
+  "description": "Testing Library / jsdom driver for @harnessed-ts/core. Framework-agnostic \u2014 no React dependency.",
   "keywords": [
     "testing",
     "harness",
@@ -54,7 +54,7 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed/core": "workspace:^"
+    "@harnessed-ts/core": "workspace:^"
   },
   "peerDependencies": {
     "@testing-library/dom": ">=10",

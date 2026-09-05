@@ -4,7 +4,7 @@ paths: ['{{HARNESS_DIR}}/**']
 
 ## Harness authoring
 
-Full API and architecture: the `@harnessed/core` README. Procedural how-to
+Full API and architecture: the `@harnessed-ts/core` README. Procedural how-to
 (placement, naming, templates): the `harness` skill.
 
 ### Required

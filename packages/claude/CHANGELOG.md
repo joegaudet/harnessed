@@ -1,4 +1,4 @@
-# @harnessed/claude
+# @harnessed-ts/claude
 
 ## 0.1.0
 

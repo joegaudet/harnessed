@@ -13,7 +13,7 @@ export const rules: Record<string, Rule.RuleModule> = {
   'require-wait-for-ready': requireWaitForReady,
 }
 
-const meta = { name: '@harnessed/eslint-plugin', version: '0.1.0' }
+const meta = { name: '@harnessed-ts/eslint-plugin', version: '0.1.0' }
 
 /**
  * Turns the harness conventions into a gate. Written rules get followed until
@@ -21,7 +21,7 @@ const meta = { name: '@harnessed/eslint-plugin', version: '0.1.0' }
  *
  * ```js
  * // eslint.config.js
- * import harnessed from '@harnessed/eslint-plugin'
+ * import harnessed from '@harnessed-ts/eslint-plugin'
  *
  * export default [harnessed.configs.recommended]
  * ```
