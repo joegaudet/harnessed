@@ -28,7 +28,7 @@
     "test": "pnpm --filter @harnessed-ts/eslint-plugin test && pnpm --filter conformance test",
     "test:dom": "pnpm --filter conformance test:dom",
     "test:playwright": "pnpm --filter conformance test:playwright",
-    "release": "pnpm build && changeset publish --provenance",
+    "release": "pnpm build && changeset publish",
     "test:rules": "pnpm --filter @harnessed-ts/eslint-plugin test",
     "clean": "pnpm -r --filter './packages/*' run clean && rm -rf tsconfig.tsbuildinfo"
   },

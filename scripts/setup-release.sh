@@ -4,31 +4,33 @@
 #
 #   bash scripts/setup-release.sh              # do it
 #   bash scripts/setup-release.sh --dry-run    # say what it would do
-#   bash scripts/setup-release.sh --no-token   # settings only, no prompt
-#
-# Reads the token from $NPM_TOKEN when set, so it can run unattended.
 #
 # Two things, both of which have already bitten this repo:
 #
-#   1. The NPM_TOKEN secret. Without it the release workflow reaches npm and is
-#      turned away.
+#   1. Trusted publishing. Releases authenticate to npm over OIDC, not with a
+#      stored token, so every package must name this repository and
+#      .github/workflows/release.yml as a trusted publisher on npmjs.com.
+#      This script reports which packages still need it; the setting itself
+#      lives in the npm UI and cannot be scripted.
 #   2. "Allow GitHub Actions to create and approve pull requests". Changesets
 #      opens a version PR before publishing, and the first release attempt died
-#      on exactly this — the publish step was never reached.
+#      on exactly this -- the publish step was never reached.
 #
-# Safe to re-run. The token is never printed, never passed as an argument (where
-# it would show up in the process list), and never written to disk.
+# Note the bootstrap hole: npm will not let you configure a trusted publisher
+# for a package that has never been published, and has no "pending publisher"
+# to pre-register one. The first release of a brand new package therefore has
+# to go out with a token or an OTP; every release after it is tokenless.
+#
+# Safe to re-run. Changes no npm state.
 set -euo pipefail
 
 DRY_RUN=false
-SKIP_TOKEN=false
 REPO=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --dry-run) DRY_RUN=true ;;
-    --no-token) SKIP_TOKEN=true ;;
     --repo) REPO="${2:?--repo needs a value}"; shift ;;
-    -h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) printf 'Unknown option: %s\n' "$1" >&2; exit 2 ;;
   esac
   shift
@@ -59,38 +61,41 @@ if ! gh api "repos/$REPO/actions/permissions/workflow" >/dev/null 2>&1; then
   die "cannot read Actions settings for $REPO — you need admin on it, and gh needs the 'repo' scope (gh auth refresh -s repo)"
 fi
 
-# ------------------------------------------------------- 1. the npm token
+# ------------------------------------------------ 1. trusted publishing
 
-info "1. NPM_TOKEN secret"
+info "1. Trusted publishing"
 
+# A leftover NPM_TOKEN is not merely unused now -- it is a long-lived publish
+# credential sitting in the repo for no reason.
 if gh secret list --repo "$REPO" --json name --jq '.[].name' 2>/dev/null | grep -qx NPM_TOKEN; then
-  ok "already set (delete it with: gh secret delete NPM_TOKEN --repo $REPO)"
-elif [ "$SKIP_TOKEN" = true ]; then
-  warn "skipped (--no-token). A release cannot publish until this is set."
-elif [ "$DRY_RUN" = true ]; then
-  would "prompt for an npm token and store it as the NPM_TOKEN secret"
+  warn "an NPM_TOKEN secret still exists but is no longer used by release.yml"
+  warn "delete it: gh secret delete NPM_TOKEN --repo $REPO"
 else
-  TOKEN="${NPM_TOKEN:-}"
-  if [ -z "$TOKEN" ]; then
-    cat <<'EOS'
-  Needs an npm token with publish rights for the @harnessed-ts scope. Either:
-    - npmjs.com → Access Tokens → Generate → Granular or Automation, or
-    - npm token create        (classic token, needs `npm login` first)
-  It is read silently and never echoed.
-EOS
-    printf '  npm token: '
-    read -rs TOKEN
-    printf '\n'
-  else
-    ok "using the NPM_TOKEN already in the environment"
-  fi
-  [ -n "$TOKEN" ] || die "no token given"
+  ok "no stale NPM_TOKEN secret"
+fi
 
-  # Piped, not passed as an argument: arguments are visible to every other
-  # process on the machine.
-  printf '%s' "$TOKEN" | gh secret set NPM_TOKEN --repo "$REPO"
-  unset TOKEN
-  ok "NPM_TOKEN stored"
+# Trusted publishing cannot be configured for a package that does not exist,
+# so say plainly which ones still need a bootstrap publish.
+UNPUBLISHED=""
+for dir in packages/*/; do
+  pkg=$(node -p "require('./${dir}package.json').name" 2>/dev/null) || continue
+  if npm view "$pkg" version >/dev/null 2>&1; then
+    ok "$pkg is on npm -- confirm its trusted publisher in Settings > Trusted publisher"
+  else
+    UNPUBLISHED="$UNPUBLISHED $pkg"
+  fi
+done
+
+if [ -n "$UNPUBLISHED" ]; then
+  warn "never published, so a trusted publisher cannot be configured yet:"
+  for pkg in $UNPUBLISHED; do printf '      %s\n' "$pkg"; done
+  cat <<'EOS'
+      Bootstrap each one once, then the workflow takes over:
+        npm publish --access public --otp=<code>     (from the package dir)
+      or publish with a granular token that has "Bypass 2FA" enabled.
+      Then on npmjs.com, per package: Settings > Trusted publisher >
+        repository: this repo, workflow: release.yml
+EOS
 fi
 
 # --------------------------------- 2. let Actions open the version PR
