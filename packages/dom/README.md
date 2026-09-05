@@ -1,11 +1,11 @@
-# @harnessed/dom
+# @harnessed-ts/dom
 
-Testing Library driver for `@harnessed/core`. Framework-agnostic — it queries the
+Testing Library driver for `@harnessed-ts/core`. Framework-agnostic — it queries the
 DOM, so it has no React dependency and works with any Testing Library setup.
 
 ```ts
-import { dom } from "@harnessed/dom"
-import "@harnessed/dom/matchers"
+import { dom } from "@harnessed-ts/dom"
+import "@harnessed-ts/dom/matchers"
 
 render(<LoginForm />)
 const form = new LoginFormHarness(dom({ user: userEvent.setup() }))

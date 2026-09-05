@@ -1,4 +1,4 @@
-import { dom } from '@harnessed/dom'
+import { dom } from '@harnessed-ts/dom'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it } from 'vitest'

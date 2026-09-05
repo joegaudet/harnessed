@@ -1,5 +1,5 @@
-import { testIdSync } from '@harnessed/core'
-import type { Selector } from '@harnessed/core'
+import { testIdSync } from '@harnessed-ts/core'
+import type { Selector } from '@harnessed-ts/core'
 import { selectors } from '@playwright/test'
 import type { Locator, Page } from '@playwright/test'
 

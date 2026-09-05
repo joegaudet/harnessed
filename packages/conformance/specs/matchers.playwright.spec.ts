@@ -1,4 +1,4 @@
-import '@harnessed/playwright/matchers'
+import '@harnessed-ts/playwright/matchers'
 import { expect, test } from '@playwright/test'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
 import { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'

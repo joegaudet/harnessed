@@ -1,5 +1,5 @@
 {
-  "name": "@harnessed/claude",
+  "name": "@harnessed-ts/claude",
   "version": "0.1.0",
   "description": "Installs the harness authoring skill, rules, and templates into a repo's .claude/ directory.",
   "keywords": [
@@ -62,6 +62,6 @@
     "provenance": true
   },
   "dependencies": {
-    "@harnessed/config": "workspace:^"
+    "@harnessed-ts/config": "workspace:^"
   }
 }

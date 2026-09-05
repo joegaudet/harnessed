@@ -1,6 +1,6 @@
 import js from '@eslint/js'
 // Resolved through the workspace link, so this lints against the built plugin.
-import harnessed from '@harnessed/eslint-plugin'
+import harnessed from '@harnessed-ts/eslint-plugin'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(

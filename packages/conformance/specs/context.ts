@@ -1,5 +1,5 @@
-import type { EnvConfig } from '@harnessed/core'
-import { pw } from '@harnessed/playwright'
+import type { EnvConfig } from '@harnessed-ts/core'
+import { pw } from '@harnessed-ts/playwright'
 import type { Page } from '@playwright/test'
 import type { ConformanceCtx, View } from './catalog'
 import { viewSearch } from './views'

@@ -41,8 +41,8 @@ export interface TestIdPatternConfig {
  * so the runtime, the linter, and the docs generator describe the same layout.
  *
  * There is no loader yet: nothing reads this file off disk. Today `configure()`
- * takes the runtime half by hand, `@harnessed/eslint-plugin` takes `layout` as
- * rule options, and `@harnessed/claude` writes the file from what it detects.
+ * takes the runtime half by hand, `@harnessed-ts/eslint-plugin` takes `layout` as
+ * rule options, and `@harnessed-ts/claude` writes the file from what it detects.
  * Wiring a real loader through all three is tracked as follow-up work.
  */
 export interface HarnessedConfig extends Partial<RuntimeConfig> {

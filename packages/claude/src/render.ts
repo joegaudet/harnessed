@@ -64,14 +64,14 @@ function substitute(text: string, context: RenderContext): string {
 
 /** The `harnessed.config.ts` the generator writes. */
 export function renderConfig(context: RenderContext): string {
-  return `import { defineConfig } from '@harnessed/core'
+  return `import { defineConfig } from '@harnessed-ts/core'
 
 /**
  * Where this repo keeps its harnesses, and what its test ids look like.
  *
  * Nothing loads this file automatically yet. Pass the runtime half to
- * \`configure()\`, give \`layout.harnesses\` to @harnessed/eslint-plugin as rule
- * options, and re-run \`npx @harnessed/claude install\` after changing it.
+ * \`configure()\`, give \`layout.harnesses\` to @harnessed-ts/eslint-plugin as rule
+ * options, and re-run \`npx @harnessed-ts/claude install\` after changing it.
  */
 export default defineConfig({
   testIdAttribute: '${context.testIdAttribute}',

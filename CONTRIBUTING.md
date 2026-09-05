@@ -46,8 +46,8 @@ Keep the job list in `scripts/verify-like-ci.sh` in step with
 specs, executed twice:
 
 ```bash
-pnpm test:dom          # @harnessed/dom, under Vitest + jsdom
-pnpm test:playwright   # @harnessed/playwright, against the fixture served by Vite
+pnpm test:dom          # @harnessed-ts/dom, under Vitest + jsdom
+pnpm test:playwright   # @harnessed-ts/playwright, against the fixture served by Vite
 ```
 
 The specs live in `specs/catalog.ts` as plain async functions using

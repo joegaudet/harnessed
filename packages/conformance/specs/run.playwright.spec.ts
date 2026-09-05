@@ -1,4 +1,4 @@
-import { pw } from '@harnessed/playwright'
+import { pw } from '@harnessed-ts/playwright'
 import { test } from '@playwright/test'
 import { specs } from './catalog'
 import { playwrightContext } from './context'

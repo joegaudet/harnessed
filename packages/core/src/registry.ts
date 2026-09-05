@@ -43,7 +43,7 @@ export function navigationFor(env: EnvConfig): Navigation {
     const capable = [...globals().navigations.keys()].sort()
     const suffix =
       capable.length === 0
-        ? 'No registered driver can navigate. Import a browser driver for its side effect, e.g. `import { pw } from "@harnessed/playwright"`.'
+        ? 'No registered driver can navigate. Import a browser driver for its side effect, e.g. `import { pw } from "@harnessed-ts/playwright"`.'
         : `Drivers that can: ${capable.join(', ')}.`
     throw new Error(
       `harnessed: the "${env.driver}" driver cannot navigate, so a RouteHarness cannot use it. ${suffix}`,
@@ -59,7 +59,7 @@ export function createQuery(env: EnvConfig, scope: readonly Selector[], selector
     const known = registeredDrivers()
     const suffix =
       known.length === 0
-        ? 'No driver is registered. Import a driver package for its side effect, e.g. `import { dom } from "@harnessed/dom"`.'
+        ? 'No driver is registered. Import a driver package for its side effect, e.g. `import { dom } from "@harnessed-ts/dom"`.'
         : `Registered drivers: ${known.join(', ')}.`
     throw new Error(`harnessed: no driver registered for "${env.driver}". ${suffix}`)
   }

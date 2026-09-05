@@ -1,4 +1,4 @@
-import { harnessedDecorators } from '@harnessed/core/vite'
+import { harnessedDecorators } from '@harnessed-ts/core/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 

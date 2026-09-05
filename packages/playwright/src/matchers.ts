@@ -1,8 +1,8 @@
-import { harnessMatchers } from '@harnessed/core'
-import type { Assertable } from '@harnessed/core'
+import { harnessMatchers } from '@harnessed-ts/core'
+import type { Assertable } from '@harnessed-ts/core'
 import { expect } from '@playwright/test'
 
-// Registering on import is the point: `import '@harnessed/playwright/matchers'`
+// Registering on import is the point: `import '@harnessed-ts/playwright/matchers'`
 // in a fixture or setup file is all a suite needs.
 expect.extend(harnessMatchers)
 

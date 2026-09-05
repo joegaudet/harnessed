@@ -1,5 +1,5 @@
 {
-  "name": "@harnessed/route",
+  "name": "@harnessed-ts/route",
   "version": "0.1.0",
   "description": "RouteHarness \u2014 one test object per URL, on any driver that can navigate. Typed path params and a required readiness check.",
   "keywords": [
@@ -49,7 +49,7 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed/core": "workspace:^"
+    "@harnessed-ts/core": "workspace:^"
   },
   "scripts": {
     "build": "tsup",

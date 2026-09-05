@@ -1,4 +1,4 @@
-import type { EnvConfig } from '@harnessed/core'
+import type { EnvConfig } from '@harnessed-ts/core'
 import type { Page } from '@playwright/test'
 import { PLAYWRIGHT_DRIVER } from './driver-id'
 // Side effect: constructing an env is the moment the driver has to be registered.

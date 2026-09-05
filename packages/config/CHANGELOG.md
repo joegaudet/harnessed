@@ -1,4 +1,4 @@
-# @harnessed/config
+# @harnessed-ts/config
 
 ## 0.1.0
 

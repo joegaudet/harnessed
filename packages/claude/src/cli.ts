@@ -6,7 +6,7 @@ import type { RenderContext } from './render'
 const USAGE = `harnessed-claude — install the harness authoring skill and rules
 
 Usage
-  npx @harnessed/claude install [options]
+  npx @harnessed-ts/claude install [options]
 
 Options
   --dry-run             Report what would change, write nothing

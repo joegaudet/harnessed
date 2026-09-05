@@ -1,9 +1,9 @@
-# @harnessed/claude
+# @harnessed-ts/claude
 
 Installs the harness authoring conventions for coding agents.
 
 ```bash
-npm i -D @harnessed/claude && npx @harnessed/claude install
+npm i -D @harnessed-ts/claude && npx @harnessed-ts/claude install
 ```
 
 Writes `.claude/skills/harness/` (with templates) and `.claude/rules/harness.md`,

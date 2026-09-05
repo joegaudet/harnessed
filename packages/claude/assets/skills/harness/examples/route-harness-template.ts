@@ -1,6 +1,6 @@
-import { ByText, ChildHarness, Harness, testId } from '@harnessed/core'
-import type { Query } from '@harnessed/core'
-import { RouteHarness } from '@harnessed/route'
+import { ByText, ChildHarness, Harness, testId } from '@harnessed-ts/core'
+import type { Query } from '@harnessed-ts/core'
+import { RouteHarness } from '@harnessed-ts/route'
 import { ThingHarness } from './Thing.harness'
 
 /**

@@ -9,7 +9,7 @@ export default defineConfig([
     sourcemap: true,
     clean: false,
     shims: true,
-    external: ['@harnessed/config'],
+    external: ['@harnessed-ts/config'],
   },
   {
     // The bin is ESM only: it resolves its packaged assets via import.meta.url.
@@ -19,6 +19,6 @@ export default defineConfig([
     dts: false,
     sourcemap: true,
     clean: false,
-    external: ['@harnessed/config'],
+    external: ['@harnessed-ts/config'],
   },
 ])

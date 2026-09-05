@@ -1,4 +1,4 @@
-# @harnessed/playwright
+# @harnessed-ts/playwright
 
 ## 0.1.0
 

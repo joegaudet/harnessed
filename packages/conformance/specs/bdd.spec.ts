@@ -1,5 +1,5 @@
-import { withWorld } from '@harnessed/playwright/bdd'
-import { pw } from '@harnessed/playwright'
+import { withWorld } from '@harnessed-ts/playwright/bdd'
+import { pw } from '@harnessed-ts/playwright'
 import { expect, test as base } from '@playwright/test'
 import { StepOneRoute } from '../fixture/harnesses/routes/step-one.route'
 

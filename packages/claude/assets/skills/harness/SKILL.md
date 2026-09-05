@@ -9,7 +9,7 @@ A harness is a class that lets a test drive a component the way a person would,
 through methods named for what the component _does_. Tests state intent; the
 harness owns the DOM wiring. The same harness runs under every driver.
 
-Architecture and full API: the `@harnessed/core` README.
+Architecture and full API: the `@harnessed-ts/core` README.
 
 ## Consumer-side rule
 
@@ -27,7 +27,7 @@ Banned:
 - `screen.getByText(...)` in a test whose component has a harness.
 - A raw locator in a step file.
 
-`@harnessed/eslint-plugin` enforces all three.
+`@harnessed-ts/eslint-plugin` enforces all three.
 
 ## File placement and test-id naming
 
@@ -123,6 +123,6 @@ await expect(checkout.total).toReadAs(/^\$/)
    fix for a query that accidentally matches two different things — scope that
    instead.
 8. **`useDefineForClassFields` must stay `true`**, with `target: ES2022` and
-   `ESNext.Decorators` in `lib`. Extend `@harnessed/core/tsconfig.json` to get
-   all three. Add `harnessedDecorators()` from `@harnessed/core/vite` as the first
+   `ESNext.Decorators` in `lib`. Extend `@harnessed-ts/core/tsconfig.json` to get
+   all three. Add `harnessedDecorators()` from `@harnessed-ts/core/vite` as the first
    Vite plugin, or `accessor` reaches the runtime unlowered and fails to parse.

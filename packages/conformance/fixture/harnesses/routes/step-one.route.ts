@@ -1,5 +1,5 @@
-import { ChildHarness, Harness, testId } from '@harnessed/core'
-import { RouteHarness } from '@harnessed/route'
+import { ChildHarness, Harness, testId } from '@harnessed-ts/core'
+import { RouteHarness } from '@harnessed-ts/route'
 import { StepOneHarness, StepTwoHarness } from '../Wizard.harness'
 
 /** `/` — takes no params, so goto() must be callable with no argument. */

@@ -6,8 +6,8 @@ import {
   ComponentHarness,
   Harness,
   testId,
-} from '@harnessed/core'
-import type { Query } from '@harnessed/core'
+} from '@harnessed-ts/core'
+import type { Query } from '@harnessed-ts/core'
 
 export interface Credentials {
   email?: string

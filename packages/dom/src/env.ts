@@ -1,4 +1,4 @@
-import type { EnvConfig } from '@harnessed/core'
+import type { EnvConfig } from '@harnessed-ts/core'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
 // Imported for its side effect: constructing an env is the moment the driver has

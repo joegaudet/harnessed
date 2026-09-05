@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { loadConfig } from '@harnessed/config'
+import { loadConfig } from '@harnessed-ts/config'
 import { detectLayout, detectTestIdAttribute } from './detect'
 import type { RenderContext } from './render'
 import { renderConfig, renderRules, renderSkill } from './render'

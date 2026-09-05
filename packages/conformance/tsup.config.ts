@@ -14,10 +14,10 @@ export default defineConfig({
     options.jsx = 'automatic'
   },
   external: [
-    '@harnessed/core',
-    '@harnessed/dom',
-    '@harnessed/playwright',
-    '@harnessed/route',
+    '@harnessed-ts/core',
+    '@harnessed-ts/dom',
+    '@harnessed-ts/playwright',
+    '@harnessed-ts/route',
     '@playwright/test',
     '@testing-library/dom',
     '@testing-library/react',

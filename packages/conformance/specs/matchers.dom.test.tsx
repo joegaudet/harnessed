@@ -1,5 +1,5 @@
-import '@harnessed/dom/matchers'
-import { dom } from '@harnessed/dom'
+import '@harnessed-ts/dom/matchers'
+import { dom } from '@harnessed-ts/dom'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'

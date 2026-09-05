@@ -1,8 +1,8 @@
-import { harnessMatchers } from '@harnessed/core'
-import type { Assertable } from '@harnessed/core'
+import { harnessMatchers } from '@harnessed-ts/core'
+import type { Assertable } from '@harnessed-ts/core'
 import { expect } from 'vitest'
 
-// `import '@harnessed/dom/matchers'` from a setup file registers all three.
+// `import '@harnessed-ts/dom/matchers'` from a setup file registers all three.
 expect.extend(harnessMatchers)
 
 declare module 'vitest' {

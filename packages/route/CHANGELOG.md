@@ -1,4 +1,4 @@
-# @harnessed/route
+# @harnessed-ts/route
 
 ## 0.1.0
 
@@ -9,4 +9,4 @@ First release.
 every occurrence; `waitForReady()` is required and runs after every navigation.
 
 Runs on the driver's navigation capability, so it depends only on
-`@harnessed/core` and works against any driver that can drive an address bar.
+`@harnessed-ts/core` and works against any driver that can drive an address bar.
