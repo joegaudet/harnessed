@@ -29,17 +29,21 @@ jobs:
           run_install: false
       - uses: actions/setup-node@v5
         with:
-          # Trusted publishing needs node >= 22.14.0.
-          node-version: 22.14.0
+          # Trusted publishing needs node >= 22.14.0; the npm upgrade below
+          # needs more than that again, so track the 24 line.
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
       # The runner images ship npm 10.x, which predates trusted publishing and
       # fails an OIDC publish with a misleading E404. npm >= 11.5.1 is the real
       # requirement; upgrade before anything tries to publish.
+      # Pinned to the 11 line rather than @latest: npm 12 raised its own node
+      # floor past what this job pins, and an unpinned upgrade turns a node
+      # bump into a surprise release failure. 11.5.1 is the real minimum.
       - name: Upgrade npm for trusted publishing
         run: |
-          npm install -g npm@latest
+          npm install -g 'npm@^11.5.1'
           npm --version
 
       - run: pnpm install --frozen-lockfile
