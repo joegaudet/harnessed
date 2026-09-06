@@ -27,7 +27,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           run_install: false
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           # Trusted publishing needs node >= 22.14.0; the npm upgrade below
           # needs more than that again, so track the 24 line.
