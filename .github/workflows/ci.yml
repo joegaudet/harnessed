@@ -104,7 +104,7 @@ jobs:
       - run: pnpm build
       - run: pnpm --filter conformance exec playwright install --with-deps chromium
       - run: pnpm test:playwright
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report-${{ matrix.node }}-${{ matrix.playwright }}
