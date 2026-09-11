@@ -101,7 +101,9 @@ if [ "$QUICK" != "--quick" ]; then
   isolate
   pnpm build >/dev/null 2>&1
   run "test:dom against @testing-library/dom@10" pnpm test:dom
-  pnpm --filter conformance add -D @playwright/test@1.62 >/dev/null 2>&1
+  # Same as ci.yml: the driver package must move with conformance, or two
+  # playwright-core copies make Page two distinct types.
+  pnpm --filter conformance --filter @harnessed-ts/playwright add -D @playwright/test@1.62 >/dev/null 2>&1
   isolate
   pnpm build >/dev/null 2>&1
   run "test:playwright against @playwright/test@1.62" pnpm test:playwright
