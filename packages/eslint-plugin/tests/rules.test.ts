@@ -1,11 +1,13 @@
 import { RuleTester } from 'eslint'
 import tseslint from 'typescript-eslint'
-import { describe, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import noComponentHarnessInTest from '../src/rules/no-component-harness-in-test'
 import noPageOrScreenInHarness from '../src/rules/no-page-or-screen-in-harness'
 import noRawLocatorInTest from '../src/rules/no-raw-locator-in-test'
 import noReachThroughCast from '../src/rules/no-reach-through-cast'
 import requireHost from '../src/rules/require-host'
 import requireWaitForReady from '../src/rules/require-wait-for-ready'
+import { classifyConstructed, matchesAnyGlob } from '../src/shared'
 
 // RuleTester drives the rules through ESLint itself, so a rule that crashes on a
 // shape it did not expect fails here rather than in a consumer's build.
@@ -74,8 +76,30 @@ describe('require-host', () => {
         filename: '/repo/harness/util.ts',
         code: `class Helper extends Object {}`,
       },
+      {
+        name: 'an abstract page base may leave the host to its subclasses',
+        filename: '/repo/harness/pages/app.page.ts',
+        code: `abstract class AppPage extends PageHarness { async heading() { return '' } }`,
+      },
+      {
+        name: 'a decorated concrete page',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `@Harness({ host: testId('page-checkout') }) class CheckoutPage extends PageHarness {}`,
+      },
     ],
     invalid: [
+      {
+        name: 'a concrete page with no decorator',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `class CheckoutPage extends PageHarness {}`,
+        errors: [{ messageId: 'missing' }],
+      },
+      {
+        name: 'a subclass of a page base (name ending in Page) with no decorator',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `class CheckoutPage extends AppPage {}`,
+        errors: [{ messageId: 'missing' }],
+      },
       {
         name: 'concrete harness with no decorator',
         filename: '/repo/harness/components/Form.harness.ts',
@@ -105,8 +129,47 @@ describe('require-wait-for-ready', () => {
         filename: '/repo/harness/routes/checkout.route.ts',
         code: `class R extends RouteHarness<{ token: string }> { async waitForReady() { await this.page.waitForSelector('x') } }`,
       },
+      {
+        name: 'a page with a non-empty implementation',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `class P extends PageHarness { async waitForReady() { await this.self.waitFor('visible') } }`,
+      },
+      {
+        name: 'a generic PageHarness base is recognised',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `class P extends PageHarness<{ token: string }> { async waitForReady() { await this.self.waitFor('visible') } }`,
+      },
+      {
+        name: 'an abstract page base may leave waitForReady to its subclasses',
+        filename: '/repo/harness/pages/app.page.ts',
+        code: `abstract class AppPage extends PageHarness { }`,
+      },
     ],
     invalid: [
+      {
+        name: 'an abstract page base with an empty waitForReady removes the wait from every subclass',
+        filename: '/repo/harness/pages/app.page.ts',
+        code: `abstract class AppPage extends PageHarness { async waitForReady() {} }`,
+        errors: [{ messageId: 'empty' }],
+      },
+      {
+        name: 'a page missing waitForReady entirely',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `class P extends PageHarness { }`,
+        errors: [{ messageId: 'missing' }],
+      },
+      {
+        name: 'a page without a path still needs the wait',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `class P extends PageHarness { async waitForReady() {} }`,
+        errors: [{ messageId: 'empty' }],
+      },
+      {
+        name: 'a namespaced page base is still a page',
+        filename: '/repo/harness/pages/checkout.page.ts',
+        code: `class P extends ns.PageHarness { }`,
+        errors: [{ messageId: 'missing' }],
+      },
       {
         name: 'missing entirely',
         filename: '/repo/harness/routes/checkout.route.ts',
@@ -193,5 +256,137 @@ describe('no-raw-locator-in-test', () => {
         errors: [{ messageId: 'raw' }],
       },
     ],
+  })
+})
+
+describe('no-component-harness-in-test', () => {
+  tester.run('no-component-harness-in-test', noComponentHarnessInTest, {
+    valid: [
+      {
+        name: 'a test enters through a page',
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: `const checkout = new CheckoutPage(pw(page)); await checkout.goto()`,
+      },
+      {
+        name: 'a route (the deprecated page) is still a page',
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: `const checkout = new CheckoutRoute(pw(page))`,
+      },
+      {
+        name: 'a test that renders the component itself may construct its harness',
+        filename: '/repo/src/Form.test.tsx',
+        code: `render(<Form />); const form = new FormHarness(dom({ user }))`,
+      },
+      {
+        name: 'render after the construction still exempts the file',
+        filename: '/repo/src/Form.test.tsx',
+        code: `const form = new FormHarness(dom({ user })); render(<Form />)`,
+      },
+      {
+        name: 'a namespaced render call counts',
+        filename: '/repo/src/Form.test.tsx',
+        code: `rtl.render(<Form />); const form = new FormHarness(dom({ user }))`,
+      },
+      {
+        name: 'a Cypress component test mounts the component',
+        filename: '/repo/src/Form.cy.tsx',
+        code: `cy.mount(<Form />); const form = new FormHarness(env)`,
+      },
+      {
+        name: "a file that is not a test is not this rule's business",
+        filename: '/repo/src/app.ts',
+        code: `const cart = new CartHarness(env)`,
+      },
+      {
+        name: 'an anonymous class expression is not a named component harness',
+        filename: '/repo/e2e/probe.spec.ts',
+        code: `const probe = new (class extends ComponentHarness {})(env)`,
+      },
+      {
+        name: 'custom testFiles globs replace the default',
+        filename: '/repo/src/Form.test.ts',
+        code: `const form = new FormHarness(env)`,
+        options: [{ testFiles: ['e2e/**'] }],
+      },
+      {
+        name: 'custom renderCallees replace the default',
+        filename: '/repo/src/Form.test.tsx',
+        code: `renderWithProviders(<Form />); const form = new FormHarness(env)`,
+        options: [{ renderCallees: ['renderWithProviders'] }],
+      },
+    ],
+    invalid: [
+      {
+        name: 'a component harness constructed in a step file',
+        filename: '/repo/e2e/steps/cart.steps.ts',
+        code: `world.cart = new CartHarness(pw(page))`,
+        errors: [{ messageId: 'enterThroughPage', data: { name: 'CartHarness' } }],
+      },
+      {
+        name: 'a file under a steps directory with no suffix',
+        filename: '/repo/features/steps/cart.ts',
+        code: `const cart = new CartHarness(pw(page))`,
+        errors: [{ messageId: 'enterThroughPage' }],
+      },
+      {
+        name: 'a namespaced component harness in a spec',
+        filename: '/repo/tests/cards.spec.ts',
+        code: `const grid = new harnesses.CardGridHarness(env)`,
+        errors: [{ messageId: 'enterThroughPage', data: { name: 'CardGridHarness' } }],
+      },
+      {
+        name: 'a unit test that constructs a harness without rendering anything',
+        filename: '/repo/src/form.test.tsx',
+        code: `const form = new FormHarness(env)`,
+        errors: [{ messageId: 'enterThroughPage' }],
+      },
+      {
+        name: 'render only mentioned in a string or comment does not exempt',
+        filename: '/repo/src/form.test.tsx',
+        code: `// render(<Form />)\nconst note = 'render'; const form = new FormHarness(env)`,
+        errors: [{ messageId: 'enterThroughPage' }],
+      },
+      {
+        name: 'every construction is reported, not just the first',
+        filename: '/repo/e2e/cart.spec.ts',
+        code: `const a = new CartHarness(env); const b = new FormHarness(env)`,
+        errors: [{ messageId: 'enterThroughPage' }, { messageId: 'enterThroughPage' }],
+      },
+    ],
+  })
+})
+
+describe('shared helpers', () => {
+  const DEFAULTS = ['**/*.spec.*', '**/*.test.*', '**/*.cy.*', '**/*.steps.*', '**/steps/**']
+
+  it('matchesAnyGlob covers the default test-file shapes', () => {
+    expect(matchesAnyGlob('/repo/e2e/foo.spec.ts', DEFAULTS)).toBe(true)
+    expect(matchesAnyGlob('/repo/src/foo.test.tsx', DEFAULTS)).toBe(true)
+    expect(matchesAnyGlob('/repo/src/foo.cy.tsx', DEFAULTS)).toBe(true)
+    expect(matchesAnyGlob('/repo/features/foo.steps.ts', DEFAULTS)).toBe(true)
+    expect(matchesAnyGlob('/repo/features/steps/foo.ts', DEFAULTS)).toBe(true)
+    expect(matchesAnyGlob('foo.spec.ts', DEFAULTS)).toBe(true)
+    expect(matchesAnyGlob('C:\\repo\\e2e\\foo.spec.ts', DEFAULTS)).toBe(true)
+  })
+
+  it('matchesAnyGlob leaves ordinary source alone', () => {
+    expect(matchesAnyGlob('/repo/src/app.ts', DEFAULTS)).toBe(false)
+    expect(matchesAnyGlob('/repo/src/specs.ts', DEFAULTS)).toBe(false)
+    expect(matchesAnyGlob('/repo/src/stepsHelper.ts', DEFAULTS)).toBe(false)
+  })
+
+  it('matchesAnyGlob honours a single-level star and braces', () => {
+    expect(matchesAnyGlob('/repo/e2e/foo.ts', ['e2e/*.ts'])).toBe(true)
+    expect(matchesAnyGlob('/repo/e2e/nested/foo.ts', ['e2e/*.ts'])).toBe(false)
+    expect(matchesAnyGlob('/repo/e2e/foo.spec.js', ['**/*.{spec,test}.{js,ts}'])).toBe(true)
+  })
+
+  it('classifyConstructed tells pages from component harnesses', () => {
+    expect(classifyConstructed('CheckoutPage')).toBe('page')
+    expect(classifyConstructed('CheckoutRoute')).toBe('page')
+    expect(classifyConstructed('PageHarness')).toBe('page')
+    expect(classifyConstructed('RouteHarness')).toBe('page')
+    expect(classifyConstructed('CartHarness')).toBe('component')
+    expect(classifyConstructed('Helper')).toBeUndefined()
   })
 })

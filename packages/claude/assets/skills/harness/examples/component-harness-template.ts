@@ -19,7 +19,7 @@ export interface ThingFormData {
  * harness author needs that is not obvious from the source — which branches
  * exist, what renders only conditionally, why a query is shaped the way it is.
  */
-@Harness({ host: testId('screen-thing') })
+@Harness({ host: testId('ui-thing') })
 export class ThingHarness extends ComponentHarness {
   // Element fields stay private: the public surface is behaviour.
   @ByRole('textbox', { name: /name/i }) private accessor nameInput!: Query

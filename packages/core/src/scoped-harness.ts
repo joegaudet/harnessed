@@ -1,4 +1,3 @@
-import type { ComponentHarness, ComponentHarnessConstructor } from './component-harness'
 import type { EnvConfig } from './env'
 import type { HarnessHost } from './harness-host'
 import { requireHostMeta } from './host-meta'
@@ -7,17 +6,23 @@ import { createQuery } from './registry'
 import type { Selector } from './selector'
 
 /**
+ * Anything constructible as a harness: an env and an optional parent scope. Both
+ * `ComponentHarness` and `PageHarness` subclasses satisfy it, which is what lets a
+ * page nest a page as readily as it nests a component.
+ */
+export interface ScopedHarnessConstructor<T extends ScopedHarness = ScopedHarness> {
+  new (env: EnvConfig, parentScope?: readonly Selector[]): T
+  readonly name: string
+}
+
+/**
  * The host plumbing every harness shares: an env, a scope chain anchored on the
  * class's `@Harness({ host })`, and the two supported ways to reach inside it.
  *
- * `ComponentHarness` and `RouteHarness` both extend this. It exists because the
- * route class used to re-implement all of it privately — two copies of
- * `elementBy`/`childHarness` that were already drifting (the route copy had no
- * `self` and no `count`), and any change to how a child inherits scope had to
- * land twice.
- *
- * The import cycle with `component-harness.ts` is type-only and therefore erased;
- * keep those imports `type`-qualified.
+ * `ComponentHarness` and `PageHarness` both extend this. It exists because the
+ * page class's ancestor used to re-implement all of it privately — two copies of
+ * `elementBy`/`childHarness` that were already drifting (one had no `self` and no
+ * `count`), and any change to how a child inherits scope had to land twice.
  */
 export abstract class ScopedHarness implements HarnessHost {
   /** @internal */ _env: EnvConfig
@@ -39,7 +44,7 @@ export abstract class ScopedHarness implements HarnessHost {
   /**
    * The host element itself. The right thing when the host *is* the control — a
    * card that is itself a button has nothing inside it to click — and the thing a
-   * route's `waitForReady()` waits on.
+   * page's `waitForReady()` waits on.
    */
   get self(): Query {
     return createQuery(this._env, this._parentScope, this._hostSelector)
@@ -64,10 +69,8 @@ export abstract class ScopedHarness implements HarnessHost {
     return createQuery(this._env, this._scope, selector)
   }
 
-  /** A nested harness, inheriting this one's scope chain. */
-  protected childHarness<T extends ComponentHarness>(
-    HarnessClass: ComponentHarnessConstructor<T>,
-  ): T {
+  /** A nested harness — a component or a page — inheriting this one's scope chain. */
+  protected childHarness<T extends ScopedHarness>(HarnessClass: ScopedHarnessConstructor<T>): T {
     return new HarnessClass(this._env, this._scope)
   }
 }

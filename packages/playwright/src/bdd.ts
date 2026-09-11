@@ -1,7 +1,7 @@
 import type { TestType } from '@playwright/test'
 
 /**
- * A scenario-scoped bag for the route harnesses a Gherkin scenario builds up.
+ * A scenario-scoped bag for the pages a Gherkin scenario builds up.
  *
  * Steps are separate functions, so the obvious place to put a harness is a
  * module-level `let` — which breaks the moment Playwright reuses a worker,

@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
-    "@harnessed-ts/route": "workspace:^"
+    "@harnessed-ts/page": "workspace:^"
   },
   "devDependencies": {
     "@harnessed-ts/dom": "workspace:^",

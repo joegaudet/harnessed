@@ -7,8 +7,8 @@ export type QueryFactory = (env: EnvConfig, scope: readonly Selector[], selector
 
 /**
  * What a driver that can drive a browser's address bar provides. Optional: a
- * jsdom driver has no URL to navigate, and that is fine — only `RouteHarness`
- * needs this, and it says so clearly when handed an env that cannot.
+ * jsdom driver has no URL to navigate, and that is fine — only a `PageHarness`'s
+ * URL members need this, and they say so clearly when handed an env that cannot.
  */
 export interface Navigation {
   /** Navigate to a URL and wait for the document to be ready enough to query. */
@@ -46,7 +46,7 @@ export function navigationFor(env: EnvConfig): Navigation {
         ? 'No registered driver can navigate. Import a browser driver for its side effect, e.g. `import { pw } from "@harnessed-ts/playwright"`.'
         : `Drivers that can: ${capable.join(', ')}.`
     throw new Error(
-      `harnessed: the "${env.driver}" driver cannot navigate, so a RouteHarness cannot use it. ${suffix}`,
+      `harnessed: the "${env.driver}" driver cannot navigate, so a page cannot navigate with it. ${suffix}`,
     )
   }
   return navigation

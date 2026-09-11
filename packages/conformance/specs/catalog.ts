@@ -3,7 +3,7 @@ import type { EnvConfig } from '@harnessed-ts/core'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
 import { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'
 import { PortalDialogHarness } from '../fixture/harnesses/PortalDialog.harness'
-import { StepOneHarness, StepTwoHarness } from '../fixture/harnesses/Wizard.harness'
+import { StepOnePage, StepTwoPage } from '../fixture/harnesses/pages/wizard-step.page'
 
 export type View = 'login' | 'login-error' | 'login-late-duplicates' | 'cards' | 'dialog' | 'wizard'
 export interface ConformanceCtx {
@@ -14,9 +14,9 @@ export interface ConformanceCtx {
 /**
  * Every spec runs under every driver. There is deliberately no per-driver opt-out:
  * the moment one exists, "both drivers agree" stops meaning what it says. The two
- * things that genuinely cannot be shared — route behaviour, which needs a real
- * page, and matcher registration, which is runner-specific — live in their own
- * files rather than as exceptions here.
+ * things that genuinely cannot be shared — URL behaviour, which needs a driver
+ * that can navigate, and matcher registration, which is runner-specific — live in
+ * their own files rather than as exceptions here.
  */
 export interface Spec {
   name: string
@@ -321,7 +321,7 @@ export const specs: Spec[] = [
     name: '@Harness on a subclass supplies the host for an undecorated abstract base',
     async run(ctx) {
       const env = await ctx.show('wizard')
-      const stepOne = new StepOneHarness(env)
+      const stepOne = new StepOnePage(env)
       // heading() is declared on the abstract base; the host comes from the subclass.
       assert.equal(await stepOne.heading(), 'Step one')
     },
@@ -330,8 +330,8 @@ export const specs: Spec[] = [
     name: 'two subclasses of one abstract base resolve to different hosts',
     async run(ctx) {
       const env = await ctx.show('wizard')
-      const stepOne = new StepOneHarness(env)
-      const stepTwo = new StepTwoHarness(env)
+      const stepOne = new StepOnePage(env)
+      const stepTwo = new StepTwoPage(env)
       assert.equal(await stepOne.heading(), 'Step one')
       assert.equal(await stepTwo.isAbsent(), true)
       await stepOne.continue()

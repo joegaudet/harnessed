@@ -10,7 +10,7 @@ One set of behavioural specs, executed by every driver. If yours passes, a harne
 written against another driver works against yours unchanged.
 
 ```ts
-import { specs, routeSpecs } from '@harnessed-ts/conformance'
+import { specs, pageSpecs, urlSpecs } from '@harnessed-ts/conformance'
 import { App } from '@harnessed-ts/conformance/fixture'
 
 for (const spec of specs) {
@@ -22,8 +22,10 @@ for (const spec of specs) {
 `EnvConfig` a harness is constructed with. Everything else is the suite's job.
 
 - **`specs`** — the shared behavioural suite. Every driver runs all of them.
-- **`routeSpecs`** — navigation, for drivers that register a `Navigation`
-  capability. Skip them if yours cannot drive a URL; component harnesses still work.
+- **`pageSpecs`** — page composition, readiness, transitions, and the refusal a
+  page gives a driver that cannot navigate. Every driver runs all of them too.
+- **`urlSpecs`** — `goto()` and the URL after it, for drivers that register a
+  `Navigation` capability. Skip them if yours cannot drive a URL; pages still work.
 - **`@harnessed-ts/conformance/fixture`** — the React app the specs drive. Serve it or
   render it. React is an optional peer: port the fixture instead if you would rather
   not take it.

@@ -100,7 +100,11 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter conformance add -D @playwright/test@${{ matrix.playwright }}
+      # Both packages, not just conformance: the driver's own devDependency is
+      # what its .d.ts resolves `Page` against. Upgrading one side leaves two
+      # playwright-core copies in the store and every Page/TestType becomes a
+      # distinct type, so the conformance build fails before a test runs.
+      - run: pnpm --filter conformance --filter @harnessed-ts/playwright add -D @playwright/test@${{ matrix.playwright }}
       - run: pnpm build
       - run: pnpm --filter conformance exec playwright install --with-deps chromium
       - run: pnpm test:playwright

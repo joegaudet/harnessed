@@ -1,4 +1,5 @@
 import type { Rule } from 'eslint'
+import noComponentHarnessInTest from './rules/no-component-harness-in-test'
 import noPageOrScreenInHarness from './rules/no-page-or-screen-in-harness'
 import noRawLocatorInTest from './rules/no-raw-locator-in-test'
 import noReachThroughCast from './rules/no-reach-through-cast'
@@ -6,6 +7,7 @@ import requireHost from './rules/require-host'
 import requireWaitForReady from './rules/require-wait-for-ready'
 
 export const rules: Record<string, Rule.RuleModule> = {
+  'no-component-harness-in-test': noComponentHarnessInTest,
   'no-page-or-screen-in-harness': noPageOrScreenInHarness,
   'no-raw-locator-in-test': noRawLocatorInTest,
   'no-reach-through-cast': noReachThroughCast,
@@ -13,7 +15,7 @@ export const rules: Record<string, Rule.RuleModule> = {
   'require-wait-for-ready': requireWaitForReady,
 }
 
-const meta = { name: '@harnessed-ts/eslint-plugin', version: '0.2.0' }
+const meta = { name: '@harnessed-ts/eslint-plugin', version: '0.3.0' }
 
 /**
  * Turns the harness conventions into a gate. Written rules get followed until
@@ -51,7 +53,13 @@ plugin.configs.recommended = {
 plugin.configs.strict = {
   name: 'harnessed/strict',
   plugins: { harnessed: plugin },
-  rules: { ...recommendedRules, 'harnessed/no-raw-locator-in-test': 'error' },
+  rules: {
+    ...recommendedRules,
+    'harnessed/no-raw-locator-in-test': 'error',
+    // Strict only: a repo mid-adoption has tests that reach a component harness
+    // directly, and those should keep passing until it has pages to enter through.
+    'harnessed/no-component-harness-in-test': 'error',
+  },
 }
 
 export default plugin

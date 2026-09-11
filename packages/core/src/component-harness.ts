@@ -2,13 +2,13 @@ import type { EnvConfig } from './env'
 import { emptySet } from './errors'
 import { eachOf, filterOf, lastIndex, mapOf } from './list'
 import { ScopedHarness } from './scoped-harness'
+import type { ScopedHarnessConstructor } from './scoped-harness'
 import { nth as withNth } from './selector'
 import type { Selector } from './selector'
 
-export interface ComponentHarnessConstructor<T extends ComponentHarness = ComponentHarness> {
-  new (env: EnvConfig, parentScope?: readonly Selector[]): T
-  readonly name: string
-}
+/** Kept for callers that named it; `ScopedHarnessConstructor` is the general form. */
+export type ComponentHarnessConstructor<T extends ComponentHarness = ComponentHarness> =
+  ScopedHarnessConstructor<T>
 
 /**
  * One per component. A harness lets a test drive a component the way a person

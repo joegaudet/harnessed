@@ -3,14 +3,14 @@ import { join } from 'node:path'
 
 export interface DetectedLayout {
   components: string
-  screens: string
+  pages: string
   harnesses: string
   /** Where widget harnesses go. May be a subdirectory of `harnesses`. */
   widgetHarnesses: string
-  /** Where screen harnesses go. May be a subdirectory of `harnesses`. */
-  screenHarnesses: string
+  /** Where page harnesses go. May be a subdirectory of `harnesses`. */
+  pageHarnesses: string
   widgetTestId: string
-  screenTestId: string
+  pageTestId: string
 }
 
 const COMPONENT_CANDIDATES = [
@@ -19,7 +19,7 @@ const COMPONENT_CANDIDATES = [
   'src/lib/components',
   'components',
 ]
-const SCREEN_CANDIDATES = ['src/screens', 'src/pages', 'app/routes', 'src/views', 'pages']
+const PAGE_CANDIDATES = ['src/pages', 'src/screens', 'app/routes', 'src/views', 'pages']
 const HARNESS_CANDIDATES = ['harness', 'harnesses', 'test/harness', 'tests/harness']
 
 function firstExisting(root: string, candidates: string[]): string | undefined {
@@ -88,19 +88,21 @@ export function detectLayout(root: string): DetectedLayout {
       join(harnesses, 'components/widgets'),
       join(harnesses, 'components'),
     ]) ?? harnesses
-  const screenHarnesses =
+  const pageHarnesses =
     firstExisting(root, [
+      join(harnesses, 'components/pages'),
+      join(harnesses, 'pages'),
       join(harnesses, 'components/screens'),
       join(harnesses, 'screens'),
       join(harnesses, 'components'),
     ]) ?? harnesses
   return {
     components: firstExisting(root, COMPONENT_CANDIDATES) ?? 'src/components',
-    screens: firstExisting(root, SCREEN_CANDIDATES) ?? 'src/screens',
+    pages: firstExisting(root, PAGE_CANDIDATES) ?? 'src/pages',
     harnesses,
     widgetHarnesses,
-    screenHarnesses,
+    pageHarnesses,
     widgetTestId: 'ui-<kebab>',
-    screenTestId: 'screen-<kebab>',
+    pageTestId: 'page-<kebab>',
   }
 }

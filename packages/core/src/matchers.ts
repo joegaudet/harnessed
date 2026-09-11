@@ -1,5 +1,5 @@
-import type { ComponentHarness } from './component-harness'
 import type { Query } from './query'
+import type { ScopedHarness } from './scoped-harness'
 
 export interface MatcherResult {
   pass: boolean
@@ -7,7 +7,7 @@ export interface MatcherResult {
 }
 
 /** Either a raw target or a harness — a harness asserts against its own host. */
-export type Assertable = Query | ComponentHarness
+export type Assertable = Query | ScopedHarness
 
 function asQuery(subject: Assertable): Query {
   return 'self' in subject ? subject.self : subject

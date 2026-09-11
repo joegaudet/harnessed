@@ -1,7 +1,7 @@
 {
   "name": "@harnessed-ts/route",
   "version": "0.2.0",
-  "description": "RouteHarness — one test object per URL, on any driver that can navigate. Typed path params and a required readiness check.",
+  "description": "Deprecated shim: RouteHarness is now PageHarness in @harnessed-ts/page. Removed in the next minor.",
   "keywords": [
     "testing",
     "harness",
@@ -49,7 +49,7 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed-ts/core": "workspace:^"
+    "@harnessed-ts/page": "workspace:^"
   },
   "scripts": {
     "build": "tsup",

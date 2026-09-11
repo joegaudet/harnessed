@@ -12,13 +12,13 @@ Options
   --dry-run             Report what would change, write nothing
   --overwrite-config    Rewrite an existing harnessed.config.ts
   --components <dir>    Where reusable widgets live
-  --screens <dir>       Where screens or pages live
+  --pages <dir>         Where pages live
   --harnesses <dir>     Where harnesses should be written
   --widget-harnesses <dir>  Where widget harnesses go (default: detected)
-  --screen-harnesses <dir>  Where screen harnesses go (default: detected)
+  --page-harnesses <dir>    Where page harnesses go (default: detected)
   --test-id-attr <str>  The test-id attribute in use (default: detected)
   --widget-testid <p>   Widget test-id pattern (default: ui-<kebab>)
-  --screen-testid <p>   Screen test-id pattern (default: screen-<kebab>)
+  --page-testid <p>     Page test-id pattern (default: page-<kebab>)
   -h, --help            Show this
 `
 
@@ -53,8 +53,8 @@ function parse(argv: string[]): {
       case '--components':
         layout.components = next()
         break
-      case '--screens':
-        layout.screens = next()
+      case '--pages':
+        layout.pages = next()
         break
       case '--harnesses':
         layout.harnesses = next()
@@ -62,8 +62,8 @@ function parse(argv: string[]): {
       case '--widget-harnesses':
         layout.widgetHarnesses = next()
         break
-      case '--screen-harnesses':
-        layout.screenHarnesses = next()
+      case '--page-harnesses':
+        layout.pageHarnesses = next()
         break
       case '--test-id-attr':
         layout.testIdAttribute = next()
@@ -71,8 +71,8 @@ function parse(argv: string[]): {
       case '--widget-testid':
         layout.widgetTestId = next()
         break
-      case '--screen-testid':
-        layout.screenTestId = next()
+      case '--page-testid':
+        layout.pageTestId = next()
         break
       case '-h':
       case '--help':
@@ -106,6 +106,12 @@ function main(): void {
     [
       dryRun ? 'Would install (dry run):' : 'Installed:',
       ...result.written.map(path => `  ${relative(process.cwd(), path)}`),
+      ...(result.removed.length > 0
+        ? [
+            dryRun ? 'Would remove (superseded):' : 'Removed (superseded):',
+            ...result.removed.map(path => `  ${relative(process.cwd(), path)}`),
+          ]
+        : []),
       ...(result.skipped.length > 0
         ? [
             'Left alone (already present — pass --overwrite-config to replace):',
@@ -117,13 +123,13 @@ function main(): void {
         ? 'Layout used (from harnessed.config.ts, with detection filling any gaps):'
         : 'Layout used (detected \u2014 override with the flags in --help if any is wrong):',
       `  components      ${context.components}`,
-      `  screens         ${context.screens}`,
+      `  pages           ${context.pages}`,
       `  harnesses       ${context.harnesses}`,
       `  widget harness  ${context.widgetHarnesses}`,
-      `  screen harness  ${context.screenHarnesses}`,
+      `  page harness    ${context.pageHarnesses}`,
       `  test-id attr    ${context.testIdAttribute}`,
       `  widget test id  ${context.widgetTestId}`,
-      `  screen test id  ${context.screenTestId}`,
+      `  page test id    ${context.pageTestId}`,
       '',
     ].join('\n'),
   )
