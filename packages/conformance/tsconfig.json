@@ -21,7 +21,7 @@
       "path": "../playwright"
     },
     {
-      "path": "../route"
+      "path": "../page"
     }
   ]
 }

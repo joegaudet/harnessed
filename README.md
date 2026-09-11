@@ -63,7 +63,7 @@ npm i -D @harnessed-ts/core
 # plus the driver(s) you use
 npm i -D @harnessed-ts/dom          # Testing Library / jsdom
 npm i -D @harnessed-ts/playwright   # Playwright
-npm i -D @harnessed-ts/route        # one test object per URL
+npm i -D @harnessed-ts/page         # page objects: screens composed of harnesses
 ```
 
 `@harnessed-ts/core` depends on neither driver. A jsdom-only project never resolves
@@ -119,6 +119,20 @@ agreement is the whole reason the abstraction exists.
    still scoped to the host, so a matching node elsewhere on the page is not found.
 5. **`{ global: true }` escapes the scope, and only it does.** A portalled dialog is
    reachable from a global field and invisible to a scoped one.
+6. **A page composes under its own scope.** A component harness or a page nested
+   in a page with `@ChildHarness` inherits the page's scope chain, so a matching
+   node elsewhere on the screen is not found.
+7. **Readiness is one check, phrased one way.** `expectReady()` resolves once the
+   page's `waitForReady()` does, and otherwise rejects naming the page —
+   `<Page> did not become ready.` with the original failure as `cause`, or
+   `<Page> did not become ready within <n>ms.` when an explicit `{ timeout }`
+   elapsed first. `isReady()` answers `false` and never throws.
+8. **Transitions hand back a ready page.** `transitionTo(NextPage)` constructs the
+   next page in the same scope and awaits its readiness before returning it.
+9. **A page constructs under every driver.** Only `goto()` and the URL members
+   need a driver that can navigate; under one that cannot they fail at call time
+   with `the "<driver>" driver cannot navigate`. `goto()` on a page with no `path`
+   fails with `<Page> declares no path` before touching the driver.
 
 Where the drivers genuinely cannot match, the difference is documented rather than
 papered over:
@@ -170,17 +184,16 @@ An **abstract** base may carry fields and methods with no host of its own; each
 subclass supplies one. Resolution walks the prototype chain and the nearest
 `@Harness` wins, so a subclass can also override a base's host.
 
-### `RouteHarness` (`@harnessed-ts/route`)
+### `PageHarness` (`@harnessed-ts/page`)
 
-One test object per URL. Takes an env like every other harness and runs on the
-driver's **navigation capability**, so any driver that can drive an address bar
-gets routes — and one that cannot (jsdom has no URL) says so in a single readable
-error at construction, rather than failing somewhere inside the first `goto()`.
+One test object per screen: what it is composed of, how to know it has arrived,
+and — when it has a URL — how to get there. A page nests component harnesses and
+other pages with `@ChildHarness`, and tests enter through it.
 
 ```ts
-@Harness({ host: testId('stage') })
-class CheckoutRoute extends RouteHarness<{ token: string }> {
-  get path() {
+@Harness({ host: testId('page-checkout') })
+class CheckoutPage extends PageHarness<{ token: string }> {
+  override get path() {
     return '/checkout?token=$token'
   }
 
@@ -189,23 +202,55 @@ class CheckoutRoute extends RouteHarness<{ token: string }> {
   protected async waitForReady(): Promise<void> {
     await this.self.waitFor('visible')
   }
+
+  async placeOrder(): Promise<ConfirmationPage> {
+    await this.cart.checkout()
+    return this.transitionTo(ConfirmationPage)
+  }
 }
 
-await new CheckoutRoute(pw(page)).goto({ token })
+// a real browser
+const checkout = new CheckoutPage(pw(page))
+await checkout.goto({ token })
+const confirmation = await checkout.placeOrder()
+
+// jsdom — the test renders the app, then waits for the page
+render(<App />)
+const rendered = new CheckoutPage(dom({ user: userEvent.setup() }))
+await rendered.expectReady()
 ```
 
-The type parameter declares the path's params, so `goto()` is checked against the
-path rather than trusted. Substitution is textual, so it works in the query string
-as well as the path, at **every** occurrence, URL-encoded.
+A page constructs under **every** driver: navigation is resolved lazily, so only
+`goto()` and the URL members need a driver that can drive an address bar, and
+under one that cannot (jsdom has no URL) they fail at call time with one readable
+error.
 
-`waitForReady()` runs automatically after `goto()` and must never be empty — an
-empty one satisfies the abstract member and silently removes the wait, so the
+`path` is optional. A page reached by URL overrides `get path()`; the type
+parameter declares its params, so `goto()` is checked against the path rather
+than trusted. Substitution is textual, so it works in the query string as well as
+the path, at **every** occurrence, URL-encoded. A page reached by interaction
+leaves `path` out, and `goto()` on it is a refusal, not a silent no-op.
+
+`waitForReady()` runs behind `goto()` and `expectReady()` and must never be empty —
+an empty one satisfies the abstract member and silently removes the wait, so the
 failure lands somewhere unrelated later in the test. The usual body is one line
-against the route's own host: `await this.self.waitFor('visible')`.
+against the page's own host: `await this.self.waitFor('visible')`. With no
+`{ timeout }` the wait is bounded only by what `waitForReady()` itself waits on;
+an explicit one adds a second clock. `isReady()` is the non-throwing probe; pass
+a short `{ timeout }`.
+
+`transitionTo(NextPage)` is how an action returns the page it leads to: it
+constructs `NextPage` with the same env and scope and awaits its readiness. A
+shared app shell — nav, header, toasts — is an **abstract** page base carrying
+those fields (`abstract class AppPage extends PageHarness`); each concrete page
+extends it and supplies its own host.
 
 Also provides `currentUrl`, `currentPathname`, `currentSearchParams`, and
 `assertPathname()` — which waits, and compares the **pathname**, so it keeps
 matching once the URL carries a query string.
+
+`RouteHarness` in `@harnessed-ts/route` is the old name for this class. It is a
+deprecated re-export for one release.
 
 ### Matchers
 
@@ -229,8 +274,8 @@ import { defineConfig } from '@harnessed-ts/core'
 export default defineConfig({
   testIdAttribute: 'data-testid',
   defaultTimeout: 5000,
-  layout: { components: 'src/components', screens: 'src/screens', harnesses: 'harness' },
-  testIdPattern: { widget: 'ui-<kebab>', screen: 'screen-<kebab>' },
+  layout: { components: 'src/components', pages: 'src/pages', harnesses: 'harness' },
+  testIdPattern: { widget: 'ui-<kebab>', page: 'page-<kebab>' },
 })
 ```
 
@@ -260,13 +305,14 @@ import harnessed from '@harnessed-ts/eslint-plugin'
 export default [harnessed.configs.recommended]
 ```
 
-| Rule                           | Catches                                                                                                                                                         |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no-page-or-screen-in-harness` | a harness reaching for the driver's own query API, which drops the scope chain and leaks the coupling it exists to contain. Exempts a route's `waitForReady()`. |
-| `require-host`                 | a concrete harness with no `@Harness({ host })` — otherwise a runtime throw in whichever test ran first                                                         |
-| `require-wait-for-ready`       | a route with a missing or empty `waitForReady()`                                                                                                                |
-| `no-reach-through-cast`        | `(harness as unknown as { page }).page`                                                                                                                         |
-| `no-raw-locator-in-test`       | a raw `page.getByRole(…)` in a test that should go through a harness (a warning in `recommended`, an error in `strict`)                                         |
+| Rule                           | Catches                                                                                                                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no-page-or-screen-in-harness` | a harness reaching for the driver's own query API, which drops the scope chain and leaks the coupling it exists to contain. Exempts a page's `waitForReady()`.                              |
+| `require-host`                 | a concrete harness or page with no `@Harness({ host })` — otherwise a runtime throw in whichever test ran first                                                                             |
+| `require-wait-for-ready`       | a page with a missing or empty `waitForReady()`                                                                                                                                             |
+| `no-reach-through-cast`        | `(harness as unknown as { page }).page`                                                                                                                                                     |
+| `no-raw-locator-in-test`       | a raw `page.getByRole(…)` in a test that should go through a harness (a warning in `recommended`, an error in `strict`)                                                                     |
+| `no-component-harness-in-test` | a test constructing a component harness directly instead of entering through a page. Runtime-agnostic (`testFiles` globs); exempts a file that renders the component itself. `strict` only. |
 
 **`@harnessed-ts/claude`** installs the authoring conventions for coding agents:
 
@@ -286,8 +332,9 @@ your config alone.
 | `@harnessed-ts/core`          | `Query`, `Selector`, `ComponentHarness`, the decorators, the driver registry, `configure()`, the Vite plugin, matcher implementations |
 | `@harnessed-ts/dom`           | Testing Library driver + matchers. No React dependency                                                                                |
 | `@harnessed-ts/playwright`    | Playwright driver + matchers, `createApiStubs`, `withWorld`                                                                           |
-| `@harnessed-ts/route`         | `RouteHarness`                                                                                                                        |
-| `@harnessed-ts/eslint-plugin` | the five rules above                                                                                                                  |
+| `@harnessed-ts/page`          | `PageHarness`                                                                                                                         |
+| `@harnessed-ts/route`         | deprecated: re-exports `PageHarness` as `RouteHarness` for one release                                                                |
+| `@harnessed-ts/eslint-plugin` | the six rules above                                                                                                                   |
 | `@harnessed-ts/claude`        | authoring skill, rules, templates, and the install CLI                                                                                |
 
 ### Extras in `@harnessed-ts/playwright`
@@ -297,8 +344,8 @@ suite runs with no backend and no database — with a flag to send everything to
 real one instead. A green stubbed run is not a promise that the real endpoints
 work; keep a separate check against a deployed environment.
 
-**`withWorld`** adds a scenario-scoped bag for the route harnesses a Gherkin
-scenario builds up. Steps are separate functions, so the obvious place to put a
+**`withWorld`** adds a scenario-scoped bag for the pages a Gherkin scenario
+builds up. Steps are separate functions, so the obvious place to put a
 harness is a module-level `let` — which breaks the moment Playwright reuses a
 worker.
 
@@ -318,7 +365,7 @@ for Playwright, whose locators are descriptors). The registry lives on `globalTh
 under a `Symbol.for` key, so a graph that loads both the ESM and the CJS build
 still has one registry.
 
-If your driver can navigate, register that too and `@harnessed-ts/route` works
+If your driver can navigate, register that too and a page's `goto()` works
 against it unchanged:
 
 ```ts

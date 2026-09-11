@@ -108,11 +108,125 @@ export function superClassName(node: Rule.Node): string | undefined {
 
 export function extendsHarnessBase(node: Rule.Node): boolean {
   const name = superClassName(node) ?? ''
-  return name.endsWith('Harness') || name.endsWith('Route')
+  return name.endsWith('Harness') || name.endsWith('Page') || name.endsWith('Route')
 }
 
-export function isRouteHarness(node: Rule.Node): boolean {
-  return superClassName(node) === 'RouteHarness'
+/** `RouteHarness` is the deprecated name for `PageHarness`; both are pages. */
+export function isPageHarness(node: Rule.Node): boolean {
+  const name = superClassName(node)
+  return name === 'PageHarness' || name === 'RouteHarness'
+}
+
+/**
+ * The shapes a test file takes across runners: Vitest and Jest (`.test.`),
+ * Playwright (`.spec.`), Cypress (`.cy.`), and Gherkin step definitions. Runtime
+ * agnostic on purpose — a rule that knew one runner's AST would miss the others.
+ */
+export const DEFAULT_TEST_FILES = [
+  '**/*.spec.*',
+  '**/*.test.*',
+  '**/*.cy.*',
+  '**/*.steps.*',
+  '**/steps/**',
+]
+
+/** Calls that put a component on screen inside the test itself. */
+export const DEFAULT_RENDER_CALLEES = ['render', 'mount']
+
+const globCache = new Map<string, RegExp>()
+
+/**
+ * A glob matcher small enough to own. `**` crosses directories, `*` and `?` do
+ * not, `{a,b}` alternates over literal alternatives (no nesting, no wildcards
+ * inside the braces). No dependency, because this plugin has none and a crash
+ * here takes a consumer's whole build down. Memoised: it runs per file.
+ */
+function globToRegExp(glob: string): RegExp {
+  const cached = globCache.get(glob)
+  if (cached !== undefined) return cached
+  const compiled = compileGlob(glob)
+  globCache.set(glob, compiled)
+  return compiled
+}
+
+function compileGlob(glob: string): RegExp {
+  let source = ''
+  for (let index = 0; index < glob.length; index += 1) {
+    const char = glob[index]!
+    if (char === '*') {
+      if (glob[index + 1] === '*') {
+        index += 1
+        if (glob[index + 1] === '/') {
+          index += 1
+          source += '(?:.*/)?'
+        } else {
+          source += '.*'
+        }
+      } else {
+        source += '[^/]*'
+      }
+    } else if (char === '?') {
+      source += '[^/]'
+    } else if (char === '{') {
+      const close = glob.indexOf('}', index)
+      if (close === -1) {
+        source += '\\{'
+      } else {
+        const alternatives = glob
+          .slice(index + 1, close)
+          .split(',')
+          .map(alternative => alternative.replace(/[.+^$()|[\]\\]/g, '\\$&'))
+        source += `(?:${alternatives.join('|')})`
+        index = close
+      }
+    } else {
+      source += char.replace(/[.+^$()|[\]\\]/g, '\\$&')
+    }
+  }
+  return new RegExp(`^${source}$`)
+}
+
+/** True when the (normalised) filename matches any of the globs. */
+export function matchesAnyGlob(filename: string, globs: string[]): boolean {
+  const path = normalise(filename)
+  const relative = path.replace(/^\/+/, '')
+  return globs.some(glob => {
+    const pattern = globToRegExp(glob)
+    if (pattern.test(path) || pattern.test(relative)) return true
+    // A glob with no leading `**/` still matches from any directory boundary.
+    if (!glob.startsWith('**/') && !glob.startsWith('/')) {
+      return globToRegExp(`**/${glob}`).test(path)
+    }
+    return false
+  })
+}
+
+/**
+ * What a `new X(...)` builds, judged by name. Pages are checked first because
+ * `PageHarness` itself ends in `Harness`. A page named against convention —
+ * `CheckoutPageHarness` — reads as a component; name pages `<Name>Page`.
+ */
+export function classifyConstructed(name: string): 'page' | 'component' | undefined {
+  if (name === 'PageHarness' || name === 'RouteHarness') return 'page'
+  if (name.endsWith('Page') || name.endsWith('Route')) return 'page'
+  if (name.endsWith('Harness')) return 'component'
+  return undefined
+}
+
+interface NamedExpression {
+  type: string
+  name?: string
+  property?: { type: string; name?: string }
+}
+
+/** `X` for `new X()` / `x()`, or `X` for `new ns.X()` / `ns.x()`. */
+export function expressionName(node: NamedExpression | null | undefined): string | undefined {
+  if (node === null || node === undefined) return undefined
+  if (node.type === 'Identifier') return node.name
+  if (node.type === 'MemberExpression' && node.property?.type === 'Identifier') {
+    return node.property.name
+  }
+  return undefined
 }
 
 /** An abstract class may leave its host to subclasses. */

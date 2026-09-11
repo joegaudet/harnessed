@@ -1,6 +1,6 @@
 ---
 name: harness
-description: Create and use component harnesses for cross-environment testing. Use when creating harnesses, test fixtures for components, or route test objects.
+description: Create and use component harnesses and page objects for cross-environment testing. Use when creating harnesses, test fixtures for components, or pages.
 ---
 
 # Harness
@@ -8,6 +8,10 @@ description: Create and use component harnesses for cross-environment testing. U
 A harness is a class that lets a test drive a component the way a person would,
 through methods named for what the component _does_. Tests state intent; the
 harness owns the DOM wiring. The same harness runs under every driver.
+
+A **page** is a harness one level up: a screen composed of component harnesses
+and other pages, that knows when it has arrived and, when it has a URL, how to
+get there. Tests enter through a page.
 
 Architecture and full API: the `@harnessed-ts/core` README.
 
@@ -20,14 +24,20 @@ something a harness covers.
 Harness missing a method you need? **Add a public method to the harness.** Do not
 work around it.
 
+**Tests enter through a page.** Construct a component harness directly only in a
+test that renders the component itself (`render(<Form />)` / `cy.mount`). An
+end-to-end test, a spec, or a step file constructs a page and reaches the
+component through it.
+
 Banned:
 
 - `(harness as unknown as { page }).page` — casting through `unknown` to reach a
   protected member.
 - `screen.getByText(...)` in a test whose component has a harness.
 - A raw locator in a step file.
+- `new CartHarness(...)` in a spec or step file that has no page to go through.
 
-`@harnessed-ts/eslint-plugin` enforces all three.
+`@harnessed-ts/eslint-plugin` enforces all four.
 
 ## File placement and test-id naming
 
@@ -52,20 +62,31 @@ Template: `examples/component-harness-template.ts`
   would not.
 - Public methods are behavioural — `signInAs`, `chooseByLabel`, `lineItems` — not
   element accessors.
-- Screens that share a shape can extend an **abstract** base that carries the
+- Components that share a shape can extend an **abstract** base that carries the
   fields and methods; each subclass supplies only its own `@Harness({ host })`.
 
-## Creating a route harness
+## Creating a page
 
-Template: `examples/route-harness-template.ts`
+Template: `examples/page-harness-template.ts`
 
-- `RouteHarness<{ token: string }>` declares the path's params, so `goto()` is
-  checked against the path rather than trusted.
-- `$param` substitution works in the query string as well as the path, at every
+- `PageHarness` from `@harnessed-ts/page`. `@Harness({ host })` is required, and
+  the host is the page's root test id.
+- `path` is optional. Override `get path()` for a page reached by URL; leave it
+  out for one reached by interaction. `PageHarness<{ token: string }>` declares
+  the path's params, so `goto()` is checked against the path rather than trusted.
+  `$param` substitution works in the query string as well as the path, at every
   occurrence, URL-encoded.
 - `waitForReady()` is required and must never be empty. Usually one line:
-  `await this.self.waitFor('visible')`.
-- Compose screens with `@ChildHarness`.
+  `await this.self.waitFor('visible')`. It runs behind `goto()` and
+  `expectReady()`; `isReady()` is the non-throwing probe.
+- An action that leads to another page returns it:
+  `return this.transitionTo(NextPage)` constructs the next page in the same
+  scope and awaits its readiness.
+- Compose component harnesses **and** other pages with `@ChildHarness`.
+- A shared app shell (nav, header, toasts) is an **abstract** page base carrying
+  those fields; each concrete page extends it and supplies its own host.
+- A page constructs under every driver. Only `goto()` and the URL members
+  (`currentUrl`, `assertPathname`, …) need one that can navigate.
 
 ## Element locator API
 
@@ -88,21 +109,28 @@ render outside the component's own subtree.
 
 ## Using it
 
-Under Testing Library:
+Under Testing Library, a component test renders the component and drives its
+harness; a page test renders the app, then waits for the page:
 
 ```ts
 render(<LoginForm />)                 // render FIRST
 const user = userEvent.setup()        // then set up
 const form = new LoginFormHarness(dom({ user }))
 await form.signInAs('ada@example.com')
+
+render(<App />)
+const login = new LoginPage(dom({ user: userEvent.setup() }))
+await login.expectReady()
+const dashboard = await login.signIn('ada@example.com') // returns DashboardPage
 ```
 
-Under Playwright:
+Under Playwright, enter through the page's URL:
 
 ```ts
-const checkout = new CheckoutRoute(pw(page))
+const checkout = new CheckoutPage(pw(page))
 await checkout.goto({ token })
 await expect(checkout.total).toReadAs(/^\$/)
+const confirmation = await checkout.placeOrder()
 ```
 
 ## Gotchas

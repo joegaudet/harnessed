@@ -17,7 +17,7 @@ export default defineConfig({
     '@harnessed-ts/core',
     '@harnessed-ts/dom',
     '@harnessed-ts/playwright',
-    '@harnessed-ts/route',
+    '@harnessed-ts/page',
     '@playwright/test',
     '@testing-library/dom',
     '@testing-library/react',

@@ -1,26 +1,17 @@
 # @harnessed-ts/route
 
-One test object per URL: where it lives, how to get there, and how to know it has
-arrived. Playwright only — a route needs a real page.
+**Deprecated.** `RouteHarness` became `PageHarness`: a route is a page with a
+`path`. This package re-exports `PageHarness` under the old name for one release
+and is removed in the next minor.
 
-```ts
-@Harness({ host: testId('stage') })
-class CheckoutRoute extends RouteHarness<{ token: string }> {
-  get path() {
-    return '/checkout?token=$token'
-  }
-  protected async waitForReady() {
-    await this.page.waitForSelector('[data-testid=cart]')
-  }
-}
-
-await new CheckoutRoute(page).goto({ token })
+```bash
+npm i -D @harnessed-ts/page
 ```
 
-The type parameter declares the path's params, so `goto()` is checked against the
-path. Substitution is URL-encoded and applies at every occurrence.
+```ts
+import { PageHarness } from '@harnessed-ts/page'
+```
 
-Full guide, the cross-driver guarantees, and the API: the
-[harnessed README](https://github.com/joegaudet/harnessed#readme).
+Full guide: the [harnessed README](https://github.com/joegaudet/harnessed#readme).
 
 MIT © Joe Gaudet, Jay Seo

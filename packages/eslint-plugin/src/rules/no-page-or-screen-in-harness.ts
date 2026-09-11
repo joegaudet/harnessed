@@ -6,8 +6,8 @@ import { dirOptionSchema, harnessDirsOf, inAnyDir, insideMethodNamed } from '../
  * abstraction: the scope chain is dropped, and the coupling it exists to contain
  * leaks straight back into the tests.
  *
- * The one legitimate exception is a RouteHarness's own `waitForReady()`, which has
- * to talk to the page to know the URL has arrived.
+ * The one legitimate exception is a PageHarness's own `waitForReady()`, which may
+ * have to talk to the driver to know the page has arrived.
  */
 const rule: Rule.RuleModule = {
   meta: {
@@ -20,7 +20,7 @@ const rule: Rule.RuleModule = {
     schema: [dirOptionSchema],
     messages: {
       noPage:
-        "A harness must not use `{{name}}`. Add a decorated field, a @ChildHarness, or use this.elementBy(selector) for a selector computed at call time. The only exception is a RouteHarness's own waitForReady().",
+        "A harness must not use `{{name}}`. Add a decorated field, a @ChildHarness, or use this.elementBy(selector) for a selector computed at call time. The only exception is a PageHarness's own waitForReady().",
     },
   },
   create(context) {

@@ -59,9 +59,10 @@ with their own runner.
 what stops the drivers drifting apart — which is the failure this library exists to
 prevent, and the reason its ancestors accumulated three divergence fixes.
 
-Route behaviour has no jsdom counterpart and lives in `specs/routes.catalog.ts`.
-Matcher registration is runner-specific, so those specs are per-driver too. Both
-exceptions are deliberate; anything else should be shared.
+Page behaviour lives in `specs/pages.catalog.ts`: `pageSpecs` run under every
+driver, and `urlSpecs` — `goto()` and the URL after it — only under a driver that
+can navigate. Matcher registration is runner-specific, so those specs are
+per-driver too. Both exceptions are deliberate; anything else should be shared.
 
 There is no coverage threshold. A percentage would not catch two drivers disagreeing,
 which is the only bug class that matters here.

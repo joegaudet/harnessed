@@ -11,7 +11,7 @@ body:
       options:
         - '@harnessed-ts/dom (Testing Library / jsdom)'
         - '@harnessed-ts/playwright'
-        - '@harnessed-ts/route'
+        - '@harnessed-ts/page'
         - '@harnessed-ts/eslint-plugin'
         - '@harnessed-ts/claude'
         - Not driver-specific
@@ -22,7 +22,7 @@ body:
     id: versions
     attributes:
       label: Versions
-      description: Output of `npm ls @harnessed-ts/core @harnessed-ts/dom @harnessed-ts/playwright @harnessed-ts/route`, plus node, typescript, and your test runner and bundler versions.
+      description: Output of `npm ls @harnessed-ts/core @harnessed-ts/dom @harnessed-ts/playwright @harnessed-ts/page`, plus node, typescript, and your test runner and bundler versions.
       render: text
     validations:
       required: true

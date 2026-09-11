@@ -1,7 +1,7 @@
 import { withWorld } from '@harnessed-ts/playwright/bdd'
 import { pw } from '@harnessed-ts/playwright'
 import { expect, test as base } from '@playwright/test'
-import { StepOneRoute } from '../fixture/harnesses/routes/step-one.route'
+import { WizardPage } from '../fixture/harnesses/pages/wizard.page'
 
 /**
  * `withWorld` had no coverage at all, and two things about it are easy to get
@@ -11,7 +11,7 @@ import { StepOneRoute } from '../fixture/harnesses/routes/step-one.route'
  * is invisible to every step that destructures it.
  */
 interface World {
-  stepOne: StepOneRoute
+  wizard: WizardPage
   note: string
 }
 
@@ -21,18 +21,15 @@ test('the world fixture is available and starts empty', async ({ world }) => {
   expect(world).toEqual({})
 })
 
-test('the world carries a route harness across steps within a scenario', async ({
-  page,
-  world,
-}) => {
-  world.stepOne = new StepOneRoute(pw(page))
-  await world.stepOne.goto()
-  expect(await world.stepOne!.stepOne.heading()).toBe('Step one')
+test('the world carries a page across steps within a scenario', async ({ page, world }) => {
+  world.wizard = new WizardPage(pw(page))
+  await world.wizard.goto()
+  expect(await world.wizard!.stepOne.heading()).toBe('Step one')
 })
 
 test('each test gets its own world, so nothing leaks between them', async ({ world }) => {
   // Would hold a value from the test above if the fixture were shared.
-  expect(world.stepOne).toBeUndefined()
+  expect(world.wizard).toBeUndefined()
   expect(world.note).toBeUndefined()
 })
 

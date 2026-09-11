@@ -11,20 +11,21 @@ function widgetExampleOf(context: RenderContext): string {
 
 /** The placement table, rendered from the repo's actual layout. */
 export function placementTable(context: RenderContext): string {
-  const { components, screens, harnesses, widgetHarnesses, screenHarnesses } = context
-  const { widgetTestId, screenTestId, testIdAttribute } = context
+  const { components, pages, widgetHarnesses, pageHarnesses } = context
+  const { widgetTestId, pageTestId, testIdAttribute } = context
   const widgetExample = widgetExampleOf(context)
-  const screenExample = screenTestId.replace('<kebab>', 'checkout')
+  const pageExample = pageTestId.replace('<kebab>', 'checkout')
 
   return [
     `| Kind | Source | Harness | \`${testIdAttribute}\` |`,
     '|---|---|---|---|',
     `| Widget | \`${components}/<Name>.tsx\` | \`${widgetHarnesses}/<Name>.harness.ts\` | \`${widgetTestId}\` |`,
-    `| Screen | \`${screens}/<Name>.tsx\` | \`${screenHarnesses}/<Name>.harness.ts\` | \`${screenTestId}\` |`,
-    `| Route | a URL | \`${harnesses}/routes/<name>.route.ts\` | the stage element it renders into |`,
+    `| Page | \`${pages}/<Name>.tsx\`, or a URL | \`${pageHarnesses}/<name>.page.ts\` | \`${pageTestId}\` |`,
     '',
-    `Examples: a \`SelCard\` widget gets \`${widgetExample}\`; a \`Checkout\` screen gets`,
-    `\`${screenExample}\`.`,
+    'A page with a `path` is reachable by `goto()`; one without is reached by interaction.',
+    '',
+    `Examples: a \`SelCard\` widget gets \`${widgetExample}\`; a \`Checkout\` page gets`,
+    `\`${pageExample}\`.`,
   ].join('\n')
 }
 
@@ -57,7 +58,7 @@ function substitute(text: string, context: RenderContext): string {
   return text
     .replaceAll('{{HARNESS_DIR}}', context.harnesses)
     .replaceAll('{{COMPONENTS_DIR}}', context.components)
-    .replaceAll('{{SCREENS_DIR}}', context.screens)
+    .replaceAll('{{PAGES_DIR}}', context.pages)
     .replaceAll('{{TESTID_ATTRIBUTE}}', context.testIdAttribute)
     .replaceAll('{{WIDGET_EXAMPLE}}', widgetExampleOf(context))
 }
@@ -78,14 +79,14 @@ export default defineConfig({
   defaultTimeout: 5000,
   layout: {
     components: '${context.components}',
-    screens: '${context.screens}',
+    pages: '${context.pages}',
     harnesses: '${context.harnesses}',
     widgetHarnesses: '${context.widgetHarnesses}',
-    screenHarnesses: '${context.screenHarnesses}',
+    pageHarnesses: '${context.pageHarnesses}',
   },
   testIdPattern: {
     widget: '${context.widgetTestId}',
-    screen: '${context.screenTestId}',
+    page: '${context.pageTestId}',
   },
 })
 `

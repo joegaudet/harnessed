@@ -13,7 +13,8 @@ export const CARDS = [
 /**
  * The Playwright side of the conformance suite drives the real app; `?view=` picks
  * which component is under test and the pathname picks the wizard step. Everything
- * renders inside one `stage` element, so route harnesses share a host selector.
+ * renders inside one `stage` element, and each view inside its own `page-*`
+ * section, so a page harness has a host and the specs can prove its scope.
  */
 export function App() {
   const url = new URL(window.location.href)
@@ -23,27 +24,35 @@ export function App() {
   return (
     <div data-testid="stage">
       {view === 'login' ? (
-        <LoginForm
-          error={url.searchParams.get('error') ?? undefined}
-          lateDuplicates={url.searchParams.get('late') === '1'}
-        />
+        <section data-testid="page-login">
+          <LoginForm
+            error={url.searchParams.get('error') ?? undefined}
+            lateDuplicates={url.searchParams.get('late') === '1'}
+          />
+        </section>
       ) : null}
       {view === 'cards' ? (
-        <>
+        <section data-testid="page-cards">
           <CardGrid cards={CARDS} />
           {/* Same test id, outside the grid: a scope-dropping query finds this. */}
           <span data-testid="card-hint">decoy outside the grid</span>
-        </>
+        </section>
       ) : null}
-      {view === 'dialog' ? <PortalDialog /> : null}
+      {view === 'dialog' ? (
+        <section data-testid="page-dialog">
+          <PortalDialog />
+        </section>
+      ) : null}
       {view === 'wizard' ? (
-        url.pathname === '/step-two' ? (
-          <StepTwo token={url.searchParams.get('token')} />
-        ) : step === 'two' ? (
-          <StepTwo token="in-page" />
-        ) : (
-          <StepOne onNext={() => setStep('two')} />
-        )
+        <section data-testid="page-wizard">
+          {url.pathname === '/step-two' ? (
+            <StepTwo token={url.searchParams.get('token')} />
+          ) : step === 'two' ? (
+            <StepTwo token="in-page" />
+          ) : (
+            <StepOne onNext={() => setStep('two')} />
+          )}
+        </section>
       ) : null}
     </div>
   )

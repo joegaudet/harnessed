@@ -1,13 +1,13 @@
 {
-  "name": "@harnessed-ts/route",
+  "name": "@harnessed-ts/page",
   "version": "0.2.0",
-  "description": "Deprecated shim: RouteHarness is now PageHarness in @harnessed-ts/page. Removed in the next minor.",
+  "description": "PageHarness — a page object composed of component harnesses and other pages, on any driver. Optional typed path params, a required readiness check, and typed transitions.",
   "keywords": [
     "testing",
     "harness",
     "playwright",
     "page-object",
-    "routing"
+    "page-harness"
   ],
   "license": "MIT",
   "contributors": [
@@ -23,7 +23,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joegaudet/harnessed.git",
-    "directory": "packages/route"
+    "directory": "packages/page"
   },
   "homepage": "https://github.com/joegaudet/harnessed#readme",
   "bugs": "https://github.com/joegaudet/harnessed/issues",
@@ -49,7 +49,7 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed-ts/page": "workspace:^"
+    "@harnessed-ts/core": "workspace:^"
   },
   "scripts": {
     "build": "tsup",

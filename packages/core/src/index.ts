@@ -23,6 +23,7 @@ export { harnessMatchers } from './matchers'
 export type { Assertable, MatcherResult } from './matchers'
 export { Query } from './query'
 export { ScopedHarness } from './scoped-harness'
+export type { ScopedHarnessConstructor } from './scoped-harness'
 export type { WaitOptions, WaitState } from './query'
 export {
   createQuery,

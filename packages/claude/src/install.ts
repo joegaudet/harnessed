@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadConfig } from '@harnessed-ts/config'
@@ -21,6 +21,8 @@ export interface InstallResult {
   context: RenderContext
   written: string[]
   skipped: string[]
+  /** Files a previous version installed that this one no longer ships. */
+  removed: string[]
   /** True when an existing config supplied part of the layout above. */
   usedExistingConfig: boolean
 }
@@ -76,12 +78,12 @@ export function install(options: InstallOptions = {}): InstallResult {
     testIdAttribute: detectTestIdAttribute(root),
     ...definedOnly({
       components: existing?.layout?.components,
-      screens: existing?.layout?.screens,
+      pages: existing?.layout?.pages,
       harnesses: existing?.layout?.harnesses,
       widgetHarnesses: existing?.layout?.widgetHarnesses,
-      screenHarnesses: existing?.layout?.screenHarnesses,
+      pageHarnesses: existing?.layout?.pageHarnesses,
       widgetTestId: existing?.testIdPattern?.widget,
-      screenTestId: existing?.testIdPattern?.screen,
+      pageTestId: existing?.testIdPattern?.page,
       testIdAttribute: existing?.testIdAttribute,
     }),
     ...options.layout,
@@ -91,6 +93,7 @@ export function install(options: InstallOptions = {}): InstallResult {
     context,
     written: [],
     skipped: [],
+    removed: [],
     usedExistingConfig: existing !== undefined,
   }
 
@@ -105,7 +108,7 @@ export function install(options: InstallOptions = {}): InstallResult {
   const rulesTemplate = readFileSync(join(assets, 'rules/harness.md'), 'utf8')
   write(join(root, '.claude/rules/harness.md'), renderRules(rulesTemplate, context), result, dryRun)
 
-  for (const template of ['component-harness-template.ts', 'route-harness-template.ts']) {
+  for (const template of ['component-harness-template.ts', 'page-harness-template.ts']) {
     // Through `write` rather than copyFileSync, so dry-run semantics cannot
     // diverge between the rendered files and the copied ones.
     write(
@@ -114,6 +117,15 @@ export function install(options: InstallOptions = {}): InstallResult {
       result,
       dryRun,
     )
+  }
+
+  // A template an earlier version wrote and this one renamed. Left behind, it
+  // sits beside its replacement and contradicts it.
+  for (const stale of ['route-harness-template.ts']) {
+    const path = join(root, '.claude/skills/harness/examples', stale)
+    if (!existsSync(path)) continue
+    if (!dryRun) rmSync(path)
+    result.removed.push(path)
   }
 
   const configPath = join(root, 'harnessed.config.ts')

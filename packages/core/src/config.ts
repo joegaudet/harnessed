@@ -15,8 +15,8 @@ export interface RuntimeConfig {
 export interface LayoutConfig {
   /** Directory holding reusable widgets. */
   components?: string
-  /** Directory holding screens or pages. */
-  screens?: string
+  /** Directory holding pages. */
+  pages?: string
   /** Directory harnesses are written to. */
   harnesses?: string
   /**
@@ -25,15 +25,15 @@ export interface LayoutConfig {
    * wrong path puts the file somewhere the suite will not find it.
    */
   widgetHarnesses?: string
-  /** Where screen harnesses go, if not directly under `harnesses`. */
-  screenHarnesses?: string
+  /** Where page harnesses go, if not directly under `harnesses`. */
+  pageHarnesses?: string
 }
 
 export interface TestIdPatternConfig {
   /** Pattern for a widget's root test id, e.g. `ui-<kebab>`. */
   widget?: string
-  /** Pattern for a screen's root test id, e.g. `screen-<kebab>`. */
-  screen?: string
+  /** Pattern for a page's root test id, e.g. `page-<kebab>`. */
+  page?: string
 }
 
 /**

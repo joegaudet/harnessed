@@ -5,6 +5,7 @@
     { "path": "./packages/config" },
     { "path": "./packages/dom" },
     { "path": "./packages/playwright" },
+    { "path": "./packages/page" },
     { "path": "./packages/route" },
     { "path": "./packages/eslint-plugin" },
     { "path": "./packages/claude" },

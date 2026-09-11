@@ -20,8 +20,8 @@
  */
 export { specs } from '../specs/catalog'
 export type { ConformanceCtx, Spec, View } from '../specs/catalog'
-export { routeSpecs } from '../specs/routes.catalog'
-export type { RouteCtx, RouteSpec } from '../specs/routes.catalog'
+export { pageSpecs, urlSpecs } from '../specs/pages.catalog'
+export type { PageSpec, UrlCtx, UrlSpec } from '../specs/pages.catalog'
 export { viewSearch } from '../specs/views'
 
 // The harnesses the specs drive. A driver author needs these to understand what
@@ -30,12 +30,14 @@ export { CardGridHarness, CardHarness } from '../fixture/harnesses/CardGrid.harn
 export { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'
 export type { Credentials } from '../fixture/harnesses/LoginForm.harness'
 export { PortalDialogHarness } from '../fixture/harnesses/PortalDialog.harness'
+export { CardsPage } from '../fixture/harnesses/pages/cards.page'
+export { DialogPage } from '../fixture/harnesses/pages/dialog.page'
+export { LoginPage } from '../fixture/harnesses/pages/login.page'
+export { NeverReadyPage } from '../fixture/harnesses/pages/never-ready.page'
+export { RepeatedParamPage } from '../fixture/harnesses/pages/repeated-param.page'
 export {
-  StepOneHarness,
-  StepTwoHarness,
-  WizardStepHarness,
-} from '../fixture/harnesses/Wizard.harness'
-export { NeverReadyRoute } from '../fixture/harnesses/routes/never-ready.route'
-export { RepeatedParamRoute } from '../fixture/harnesses/routes/repeated-param.route'
-export { StepOneRoute } from '../fixture/harnesses/routes/step-one.route'
-export { StepTwoRoute } from '../fixture/harnesses/routes/step-two.route'
+  StepOnePage,
+  StepTwoPage,
+  WizardStepPage,
+} from '../fixture/harnesses/pages/wizard-step.page'
+export { WizardPage } from '../fixture/harnesses/pages/wizard.page'

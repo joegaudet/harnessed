@@ -3,7 +3,7 @@ import type { Selector } from './selector'
 
 /**
  * What a decorator needs from the object it is attached to. Satisfied by both
- * `ComponentHarness` and `RouteHarness`, which is why one set of decorators works
+ * `ComponentHarness` and `PageHarness`, which is why one set of decorators works
  * on both.
  */
 export interface HarnessHost {

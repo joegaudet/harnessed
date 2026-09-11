@@ -8,5 +8,5 @@ export default defineConfig({
   sourcemap: true,
   clean: false,
   treeshake: true,
-  external: ['@harnessed-ts/page'],
+  external: ['@harnessed-ts/core'],
 })

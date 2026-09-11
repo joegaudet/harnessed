@@ -161,9 +161,9 @@ registerDriver(PLAYWRIGHT_DRIVER, (env: EnvConfig, scope, selector) => {
 })
 
 /**
- * This driver can navigate, so it also registers the capability `RouteHarness`
- * runs on. A driver without one still supports every component harness — routes
- * are the only thing that needs a URL.
+ * This driver can navigate, so it also registers the capability a page's `goto()`
+ * runs on. A driver without one still supports every harness and page — only
+ * `goto()` and the URL members need a URL.
  */
 registerNavigation(PLAYWRIGHT_DRIVER, {
   async goto(env, url) {

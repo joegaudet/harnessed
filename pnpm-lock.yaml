@@ -56,9 +56,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
-      '@harnessed-ts/route':
+      '@harnessed-ts/page':
         specifier: workspace:^
-        version: link:../route
+        version: link:../page
     devDependencies:
       '@harnessed-ts/dom':
         specifier: workspace:^
@@ -144,6 +144,12 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
 
+  packages/page:
+    dependencies:
+      '@harnessed-ts/core':
+        specifier: workspace:^
+        version: link:../core
+
   packages/playwright:
     dependencies:
       '@harnessed-ts/core':
@@ -156,9 +162,9 @@ importers:
 
   packages/route:
     dependencies:
-      '@harnessed-ts/core':
+      '@harnessed-ts/page':
         specifier: workspace:^
-        version: link:../core
+        version: link:../page
 
 packages:
 
