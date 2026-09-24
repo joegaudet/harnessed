@@ -52,11 +52,13 @@ jobs:
       - name: Version PR, or publish if one was merged
         id: changesets
         uses: changesets/action@v2
+        # changesets/action v2 renamed every input; the v1 names fail the
+        # step before it does anything, which is how 0.3.0 first stalled.
         with:
-          version: pnpm changeset version
-          publish: pnpm release
-          commit: 'chore: version packages'
-          title: 'chore: version packages'
+          version-script: pnpm changeset version
+          publish-script: pnpm release
+          commit-message: 'chore: version packages'
+          pr-title: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # No NODE_AUTH_TOKEN: publishing authenticates through OIDC. Each
