@@ -33,7 +33,7 @@
     "clean": "pnpm -r --filter './packages/*' run clean && rm -rf tsconfig.tsbuildinfo"
   },
   "devDependencies": {
-    "@changesets/cli": "^3.0.2",
+    "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
     "@harnessed-ts/eslint-plugin": "workspace:*",
     "@types/node": "^26.4.1",
