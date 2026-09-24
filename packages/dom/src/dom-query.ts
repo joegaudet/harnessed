@@ -5,14 +5,15 @@ import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
 import type { DomEnv } from './env'
-import { countAll, queryAll, resolveOne, resolveScope } from './resolve'
+import { countAll, FrameEntryError, queryAll, resolveOne, resolveScope } from './resolve'
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
   return key.length === 1 ? key : `{${key}}`
 }
 
-function isVisibleByStyle(element: HTMLElement): boolean {
+/** `home` is the env's own document: the walk crosses only frames the scope entered. */
+function isVisibleByStyle(element: HTMLElement, home: Document): boolean {
   // jsdom computes no layout, so offsetParent is always null and getBoundingClientRect
   // is always zero. Computed style is the only signal available here.
   let current: HTMLElement | null = element
@@ -25,9 +26,31 @@ function isVisibleByStyle(element: HTMLElement): boolean {
     }
     if (current.hasAttribute('hidden')) return false
     // At a frame's root, carry on from the iframe: a hidden frame hides its content.
-    current = current.parentElement ?? (view.frameElement as HTMLElement | null)
+    current =
+      current.parentElement ??
+      (current.ownerDocument === home ? null : (view.frameElement as HTMLElement | null))
   }
   return true
+}
+
+/**
+ * Testing Library's `waitFor` retries every throw, but a frame that cannot be
+ * entered never becomes enterable — so that refusal ends the wait at once.
+ */
+async function waitUntil(condition: () => Promise<void>, timeout: number): Promise<void> {
+  let refused: FrameEntryError | undefined
+  await waitForCondition(
+    async () => {
+      try {
+        await condition()
+      } catch (error) {
+        if (!(error instanceof FrameEntryError)) throw error
+        refused = error
+      }
+    },
+    { timeout },
+  )
+  if (refused !== undefined) throw refused
 }
 
 /** Testing Library driver. Framework-agnostic: it knows about the DOM, not React. */
@@ -147,8 +170,9 @@ export class DomQuery extends Query {
 
   override async isVisible(options?: WaitOptions): Promise<boolean> {
     try {
-      return isVisibleByStyle(await this.element(options))
-    } catch {
+      return isVisibleByStyle(await this.element(options), this.container.ownerDocument)
+    } catch (error) {
+      if (error instanceof FrameEntryError) throw error
       // Not on screen at all. Prefer isAbsent() to ask this — it answers without
       // first waiting out the retry timeout.
       return false
@@ -184,22 +208,16 @@ export class DomQuery extends Query {
   override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
     if (state === 'visible') {
-      await waitForCondition(
-        async () => {
-          if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
-        },
-        { timeout },
-      )
+      await waitUntil(async () => {
+        if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
+      }, timeout)
       return
     }
-    await waitForCondition(
-      async () => {
-        if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
-          throw new Error('still visible')
-        }
-      },
-      { timeout },
-    )
+    await waitUntil(async () => {
+      if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
+        throw new Error('still visible')
+      }
+    }, timeout)
   }
 
   override async count(): Promise<number> {

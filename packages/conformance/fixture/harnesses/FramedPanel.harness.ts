@@ -1,4 +1,5 @@
 import {
+  ByLabel,
   ByRole,
   ByTestId,
   ChildHarness,
@@ -15,6 +16,9 @@ export class CounterHarness extends ComponentHarness {
   @ByTestId('frame-count') private accessor total!: Query
   @ByRole('button', { name: 'Add one' }) private accessor adder!: Query
   @ByTestId('not-rendered') private accessor missing!: Query
+  @ByLabel('Note') private accessor note!: Query
+  /** Portalled outside the host, still inside the frame's document. */
+  @ByTestId('frame-toast', { global: true }) private accessor toast!: Query
 
   async text(options?: WaitOptions): Promise<string> {
     return this.total.text(options)
@@ -27,17 +31,49 @@ export class CounterHarness extends ComponentHarness {
   async missingCount(): Promise<number> {
     return this.missing.count()
   }
+
+  async writeNote(value: string): Promise<void> {
+    await this.note.fill(value)
+  }
+
+  async pressInNote(key: string): Promise<void> {
+    await this.note.press(key)
+  }
+
+  async noteValue(): Promise<string> {
+    return this.note.inputValue()
+  }
+
+  async toastTexts(): Promise<string[]> {
+    return this.toast.texts()
+  }
+
+  async isVisible(): Promise<boolean> {
+    return this.total.isVisible()
+  }
+
+  async waitVisible(options?: WaitOptions): Promise<void> {
+    await this.total.waitFor('visible', options)
+  }
+
+  async waitHidden(options?: WaitOptions): Promise<void> {
+    await this.total.waitFor('hidden', options)
+  }
 }
 
-/** Reaches an ordinary harness through `@ChildHarness(…, { frame })`. */
 @Harness({ host: testId('frame-host') })
 export class FramedPanelHarness extends ComponentHarness {
   @ChildHarness(CounterHarness, { frame: testId('framed') }) accessor counter!: CounterHarness
   /** Outside the frame: must find only the decoy, never the counter's line. */
   @ByTestId('frame-count') private accessor outside!: Query
+  @ByRole('button', { name: 'Hide frame' }) private accessor hider!: Query
 
   async outsideTexts(): Promise<string[]> {
     return this.outside.texts()
+  }
+
+  async hideFrame(): Promise<void> {
+    await this.hider.click()
   }
 
   /** A frame marker on a `<p>`: there is no document to enter. */
@@ -45,17 +81,14 @@ export class FramedPanelHarness extends ComponentHarness {
     return this.childHarness(CounterHarness, { frame: testId('frame-count') })
   }
 
-  /** The same child, reached through `childHarness()` rather than the decorator. */
   counterByMethod(): CounterHarness {
     return this.childHarness(CounterHarness, { frame: testId('framed') })
   }
 }
 
-/** A harness whose host IS the iframe: `self` is the element, children are inside. */
 @Harness({ host: frame(testId('framed')) })
 export class FrameHarness extends ComponentHarness {
   @ByTestId('frame-count') private accessor total!: Query
-  @ByTestId('frame-count', { global: true }) private accessor anywhere!: Query
 
   async title(): Promise<string | null> {
     return this.self.attribute('title')
@@ -63,10 +96,5 @@ export class FrameHarness extends ComponentHarness {
 
   async text(): Promise<string> {
     return this.total.text()
-  }
-
-  /** Global starts from the top document, so only the decoy is in reach. */
-  async globalTexts(): Promise<string[]> {
-    return this.anywhere.texts()
   }
 }

@@ -15,12 +15,13 @@ export interface RoleOptions {
  * scoped under it run inside the frame's document. As the target itself it is
  * still the iframe element — which is what a frame host's `self` addresses.
  */
-export type Selector =
-  | { type: 'role'; role: string; options?: RoleOptions; nth?: number; frame?: true }
-  | { type: 'label'; text: string | RegExp; nth?: number; frame?: true }
-  | { type: 'testId'; testId: string | RegExp; nth?: number; frame?: true }
-  | { type: 'text'; text: string | RegExp; nth?: number; frame?: true }
-  | { type: 'placeholder'; text: string | RegExp; nth?: number; frame?: true }
+export type Selector = (
+  | { type: 'role'; role: string; options?: RoleOptions }
+  | { type: 'label'; text: string | RegExp }
+  | { type: 'testId'; testId: string | RegExp }
+  | { type: 'text'; text: string | RegExp }
+  | { type: 'placeholder'; text: string | RegExp }
+) & { nth?: number; frame?: true }
 
 export type SelectorType = Selector['type']
 
@@ -58,6 +59,17 @@ export function nth(selector: Selector, index: number): Selector {
  */
 export function frame(selector: Selector): Selector {
   return { ...selector, frame: true }
+}
+
+/**
+ * Where a global query starts: the scope up to its innermost frame, so a harness
+ * nested in a frame finds its own portals rather than the embedding page's nodes.
+ */
+export function documentScope(scope: readonly Selector[]): readonly Selector[] {
+  for (let index = scope.length - 1; index >= 0; index--) {
+    if (scope[index]!.frame === true) return scope.slice(0, index + 1)
+  }
+  return []
 }
 
 /** For error messages — a selector rendered the way an author wrote it. */

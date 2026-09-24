@@ -5,11 +5,12 @@ import type { Query } from './query'
 import { createQuery } from './registry'
 import { childScope } from './scoped-harness'
 import type { ChildHarnessOptions, ScopedHarness, ScopedHarnessConstructor } from './scoped-harness'
-import { label, placeholder, role, testId, text } from './selector'
+import { documentScope, label, placeholder, role, testId, text } from './selector'
 import type { RoleOptions, Selector } from './selector'
 
 /** `{ global: true }` bypasses the host scope — for portals and overlays that
- *  render outside the component's own subtree. */
+ *  render outside the component's own subtree. Inside a frame, it searches the
+ *  frame's document. */
 export interface ElementOptions {
   global?: boolean
 }
@@ -44,7 +45,7 @@ function elementDecorator(selector: Selector, isGlobal: boolean) {
       get(this: This): Query {
         // A fresh query on every access: nothing is cached, so a field declared
         // before the component rendered still resolves once it has.
-        return createQuery(this._env, isGlobal ? [] : this._scope, selector)
+        return createQuery(this._env, isGlobal ? documentScope(this._scope) : this._scope, selector)
       },
     }
   }

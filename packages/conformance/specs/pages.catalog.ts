@@ -143,6 +143,18 @@ export const pageSpecs: PageSpec[] = [
       await assert.rejects(() => stepOne.goto(), /StepOnePage declares no path/)
     },
   },
+
+  // --------------------------------------------------------------- guarantee 10
+  {
+    name: 'guarantee 10: a page nested in a frame refuses the URL members of the page around it',
+    async run(ctx) {
+      const { counter } = new FramePage(await ctx.show('frame'))
+      await counter.expectReady()
+      await assert.rejects(() => counter.goto(), /CounterPage is nested in a frame/)
+      assert.throws(() => counter.currentUrl, /CounterPage is nested in a frame/)
+      await assert.rejects(() => counter.assertPathname('/'), /CounterPage is nested in a frame/)
+    },
+  },
 ]
 
 export interface UrlCtx {

@@ -2,6 +2,7 @@
 '@harnessed-ts/core': minor
 '@harnessed-ts/dom': minor
 '@harnessed-ts/playwright': minor
+'@harnessed-ts/page': minor
 '@harnessed-ts/claude': minor
 '@harnessed-ts/conformance': minor
 ---
@@ -15,6 +16,10 @@ document:
   app drives it from the page that embeds it.
 - `@Harness({ host: frame(testId('…')) })` makes the iframe itself the host:
   `self` is the element, fields are inside its document.
+- Inside a frame, `{ global: true }` searches the frame's document, so a framed
+  harness still finds its own portals.
+- A page nested in a frame refuses `goto()` and its other URL members, which
+  would otherwise act on the page around it.
 
 Playwright enters cross-origin frames via `Locator.contentFrame()`, so
 `@harnessed-ts/playwright` (and the conformance suite) now need

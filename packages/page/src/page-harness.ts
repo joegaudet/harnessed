@@ -1,6 +1,6 @@
 import { navigationFor, ScopedHarness, timeoutFor } from '@harnessed-ts/core'
 import type { EnvConfig, Navigation, Selector, WaitOptions } from '@harnessed-ts/core'
-import { noPath, notReady, notReadyWithin } from './errors'
+import { nestedInFrame, noPath, notReady, notReadyWithin } from './errors'
 
 /** No declared params means `goto()` takes no argument; declaring some makes it required. */
 export type GotoArgs<Params> = [keyof Params] extends [never]
@@ -194,6 +194,10 @@ export abstract class PageHarness<Params extends Record<string, string> = Record
 
   /** Resolved per access, never cached: a page constructs under any driver. */
   private get navigation(): Navigation {
+    // A page whose own host is a frame still lives at the top-level URL.
+    if (this._parentScope.some(link => link.frame === true)) {
+      throw nestedInFrame(this.constructor.name)
+    }
     return navigationFor(this._env)
   }
 

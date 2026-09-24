@@ -135,9 +135,10 @@ agreement is the whole reason the abstraction exists.
    fails with `<Page> declares no path` before touching the driver.
 10. **A frame is a scope boundary, crossed only by `frame()`.** A harness nested
     through a frame reads and drives the frame's document; a scoped query outside
-    it never sees in; `{ global: true }` inside it reaches the top document; and a
-    frame marker on anything but an `<iframe>` rejects. The dom driver enters
-    same-origin frames only, and names the frame when it cannot.
+    it never sees in; `{ global: true }` inside it stays in the frame's document;
+    a frame marker on anything but an `<iframe>` rejects; and a page nested in a
+    frame refuses its URL members with `<Page> is nested in a frame`. The dom
+    driver enters same-origin frames only, and names the frame when it cannot.
 
 Where the drivers genuinely cannot match, the difference is documented rather than
 papered over:

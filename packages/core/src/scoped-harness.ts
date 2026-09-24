@@ -15,9 +15,11 @@ export interface ChildHarnessOptions {
   frame?: Selector
 }
 
-/** The scope a child harness is constructed under. */
-export function childScope(parent: readonly Selector[], options?: ChildHarnessOptions): Selector[] {
-  return options?.frame === undefined ? [...parent] : [...parent, frame(options.frame)]
+export function childScope(
+  parent: readonly Selector[],
+  options?: ChildHarnessOptions,
+): readonly Selector[] {
+  return options?.frame === undefined ? parent : [...parent, frame(options.frame)]
 }
 
 /**
