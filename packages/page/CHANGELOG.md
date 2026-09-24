@@ -1,4 +1,4 @@
-# @harnessed-ts/dom
+# @harnessed-ts/page
 
 ## 0.3.0
 
@@ -56,24 +56,3 @@
 - Updated dependencies [b2d1130]
 - Updated dependencies [66deb00]
   - @harnessed-ts/core@0.3.0
-
-## 0.2.0
-
-### Minor Changes
-
-- The packages publish under the `@harnessed-ts` scope. Nothing shipped under the
-  previous `@harnessed` scope, so there is no migration to perform.
-
-### Patch Changes
-
-- Updated dependencies
-  - @harnessed-ts/core@0.2.0
-
-## 0.1.0
-
-First release.
-
-Testing Library driver. Queries the DOM rather than React, so it carries no React
-dependency and works with any Testing Library setup. Takes an optional `container`
-to scope a harness to one tree, and resolves whole lists in a single pass so
-`each`/`map`/`filter` cost one scope walk instead of one per element.

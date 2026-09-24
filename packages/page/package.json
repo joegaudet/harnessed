@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/page",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "PageHarness — a page object composed of component harnesses and other pages, on any driver. Optional typed path params, a required readiness check, and typed transitions.",
   "keywords": [
     "testing",
