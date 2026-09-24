@@ -1,14 +1,14 @@
 import { testIdSync } from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
 import { selectors } from '@playwright/test'
-import type { Locator, Page } from '@playwright/test'
+import type { FrameLocator, Locator, Page } from '@playwright/test'
 
 type RoleName = Parameters<Page['getByRole']>[0]
 
 const syncTestIdAttribute = testIdSync(attribute => selectors.setTestIdAttribute(attribute))
 
 type Scoped = Pick<
-  Locator,
+  Locator | FrameLocator,
   'getByRole' | 'getByLabel' | 'getByTestId' | 'getByText' | 'getByPlaceholder'
 >
 
@@ -38,7 +38,9 @@ export function locatorFor(page: Page, scope: readonly Selector[], selector: Sel
   syncTestIdAttribute()
   let current: Scoped = page
   for (const link of scope) {
-    current = step(current, link)
+    const found = step(current, link)
+    // Cross-origin frames included: Playwright enters out-of-process frames too.
+    current = link.frame === true ? found.contentFrame() : found
   }
   return step(current, selector)
 }

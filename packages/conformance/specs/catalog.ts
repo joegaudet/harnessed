@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict'
 import type { EnvConfig } from '@harnessed-ts/core'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
+import { FrameHarness, FramedPanelHarness } from '../fixture/harnesses/FramedPanel.harness'
 import { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'
 import { PortalDialogHarness } from '../fixture/harnesses/PortalDialog.harness'
 import { StepOnePage, StepTwoPage } from '../fixture/harnesses/pages/wizard-step.page'
 
-export type View = 'login' | 'login-error' | 'login-late-duplicates' | 'cards' | 'dialog' | 'wizard'
+export type View =
+  'login' | 'login-error' | 'login-late-duplicates' | 'cards' | 'dialog' | 'frame' | 'wizard'
 export interface ConformanceCtx {
   /** Puts the named view on screen and returns the env a harness is constructed with. */
   show(view: View): Promise<EnvConfig>
@@ -119,6 +121,61 @@ export const specs: Spec[] = [
       assert.equal(await dialog.bodyText(), 'Are you sure?')
       // Same test id, reached only because the field is global.
       assert.equal(await dialog.scopedBodyCount(), 0)
+    },
+  },
+  // --------------------------------------------------------------- guarantee 10
+  {
+    name: 'guarantee 10: a harness nested in a frame reads and drives the frame content',
+    async run(ctx) {
+      const panel = new FramedPanelHarness(await ctx.show('frame'))
+      assert.equal(await panel.counter.text(), 'Clicked 0 times')
+      await panel.counter.addOne()
+      assert.equal(await panel.counter.text(), 'Clicked 1 times')
+      assert.equal(await panel.counterByMethod().text(), 'Clicked 1 times')
+    },
+  },
+  {
+    name: 'guarantee 10: a scoped query does not see into a frame it was not told to enter',
+    async run(ctx) {
+      const panel = new FramedPanelHarness(await ctx.show('frame'))
+      // Wait for the framed content first, so a zero here is not a race.
+      assert.equal(await panel.counter.text(), 'Clicked 0 times')
+      assert.deepEqual(await panel.outsideTexts(), ['decoy outside the frame'])
+    },
+  },
+  {
+    name: 'guarantee 10: a frame host is the iframe element, and its fields are inside it',
+    async run(ctx) {
+      const framed = new FrameHarness(await ctx.show('frame'))
+      assert.equal(await framed.title(), 'Framed counter')
+      assert.equal(await framed.count(), 1)
+      assert.equal(await framed.text(), 'Clicked 0 times')
+    },
+  },
+  {
+    name: 'guarantee 10: global escapes a frame to the top document',
+    async run(ctx) {
+      const framed = new FrameHarness(await ctx.show('frame'))
+      assert.equal(await framed.text(), 'Clicked 0 times')
+      assert.deepEqual(await framed.globalTexts(), ['decoy outside the frame'])
+    },
+  },
+  {
+    name: 'guarantee 10: a frame marker on an element that is not an iframe rejects',
+    async run(ctx) {
+      const panel = new FramedPanelHarness(await ctx.show('frame'))
+      await assert.rejects(() => panel.counterInWrongElement().text({ timeout: 500 }))
+    },
+  },
+  {
+    name: 'guarantee 10: absence inside a frame answers immediately',
+    async run(ctx) {
+      const panel = new FramedPanelHarness(await ctx.show('frame'))
+      assert.equal(await panel.counter.text(), 'Clicked 0 times')
+      const started = Date.now()
+      assert.equal(await panel.counter.missingCount(), 0)
+      const elapsed = Date.now() - started
+      assert.ok(elapsed < IMMEDIATE_MS, `count() inside a frame took ${elapsed}ms`)
     },
   },
   {

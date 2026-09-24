@@ -1,4 +1,10 @@
-import { indexOutOfRange, strictViolation, testIdSync, timeoutFor } from '@harnessed-ts/core'
+import {
+  describeSelector,
+  indexOutOfRange,
+  strictViolation,
+  testIdSync,
+  timeoutFor,
+} from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
 import { configure as configureTestingLibrary, within } from '@testing-library/dom'
 import type { ByRoleMatcher } from '@testing-library/dom'
@@ -101,9 +107,33 @@ export async function resolveScope(
   for (const [index, step] of scope.entries()) {
     // Each link is reported with the path that reached it, so an ambiguous
     // container names the container rather than the leaf you asked for.
-    current = await findOne(current, scope.slice(0, index), step, timeout)
+    const found = await findOne(current, scope.slice(0, index), step, timeout)
+    current = step.frame === true ? frameBody(found, scope.slice(0, index + 1)) : found
   }
   return current
+}
+
+/**
+ * The body a frame link's children are queried within. Only a same-origin frame
+ * exposes one — a cross-origin document is unreachable from script by design, and
+ * no amount of waiting changes that, so this refuses at once.
+ */
+function frameBody(element: HTMLElement, path: readonly Selector[]): HTMLElement {
+  const described = path.map(describeSelector).join(' > ')
+  // tagName, not instanceof: a frame nested in a frame belongs to another realm.
+  if (element.tagName !== 'IFRAME') {
+    throw new Error(
+      `harnessed: ${described} is marked as a frame but is a <${element.tagName.toLowerCase()}>, not an <iframe>.`,
+    )
+  }
+  const body = (element as HTMLIFrameElement).contentDocument?.body
+  if (body == null) {
+    throw new Error(
+      `harnessed: ${described} has no reachable document. The dom driver can only enter ` +
+        `same-origin frames; drive a cross-origin one with a browser driver.`,
+    )
+  }
+  return body
 }
 
 /** The single node a strict operation acts on. */

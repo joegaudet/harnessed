@@ -83,7 +83,7 @@
     "node": ">=22.12.0"
   },
   "peerDependencies": {
-    "@playwright/test": ">=1.40",
+    "@playwright/test": ">=1.43",
     "react": ">=18"
   },
   "peerDependenciesMeta": {

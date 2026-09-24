@@ -16,6 +16,8 @@ export function viewSearch(view: View): string {
       return '?view=cards'
     case 'dialog':
       return '?view=dialog'
+    case 'frame':
+      return '?view=frame'
     case 'wizard':
       return '?view=wizard'
   }

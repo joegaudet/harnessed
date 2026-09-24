@@ -17,12 +17,15 @@ function isVisibleByStyle(element: HTMLElement): boolean {
   // is always zero. Computed style is the only signal available here.
   let current: HTMLElement | null = element
   while (current !== null) {
-    const style = window.getComputedStyle(current)
+    // The node's own window: inside a frame, that is the frame's.
+    const view: Window = current.ownerDocument.defaultView ?? window
+    const style = view.getComputedStyle(current)
     if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
       return false
     }
     if (current.hasAttribute('hidden')) return false
-    current = current.parentElement
+    // At a frame's root, carry on from the iframe: a hidden frame hides its content.
+    current = current.parentElement ?? (view.frameElement as HTMLElement | null)
   }
   return true
 }

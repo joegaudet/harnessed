@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CardGrid } from './components/CardGrid'
+import { FramedPanel } from './components/FramedPanel'
 import { LoginForm } from './components/LoginForm'
 import { PortalDialog } from './components/PortalDialog'
 import { StepOne, StepTwo } from './components/Wizard'
@@ -41,6 +42,11 @@ export function App() {
       {view === 'dialog' ? (
         <section data-testid="page-dialog">
           <PortalDialog />
+        </section>
+      ) : null}
+      {view === 'frame' ? (
+        <section data-testid="page-frame">
+          <FramedPanel />
         </section>
       ) : null}
       {view === 'wizard' ? (

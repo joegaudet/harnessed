@@ -133,6 +133,11 @@ agreement is the whole reason the abstraction exists.
    need a driver that can navigate; under one that cannot they fail at call time
    with `the "<driver>" driver cannot navigate`. `goto()` on a page with no `path`
    fails with `<Page> declares no path` before touching the driver.
+10. **A frame is a scope boundary, crossed only by `frame()`.** A harness nested
+    through a frame reads and drives the frame's document; a scoped query outside
+    it never sees in; `{ global: true }` inside it reaches the top document; and a
+    frame marker on anything but an `<iframe>` rejects. The dom driver enters
+    same-origin frames only, and names the frame when it cannot.
 
 Where the drivers genuinely cannot match, the difference is documented rather than
 papered over:
@@ -151,6 +156,26 @@ papered over:
 `testId('x')`, `role('button', { name: /save/i, level: 2 })`, `label('Email')`,
 `text(/expired/)`, `placeholder('you@example.com')`. Each returns a `Selector`, a
 plain data description of a query.
+
+`frame(selector)` marks an `<iframe>`. Used as a host, the harness's `self` is the
+iframe element and its fields resolve inside the frame's document:
+
+```ts
+@Harness({ host: frame(testId('payment-frame')) })
+class PaymentFrame extends ComponentHarness {
+  @ByRole('button', { name: 'Pay' }) private accessor pay!: Query
+}
+```
+
+To reuse a harness written for the framed app itself, pass the iframe to
+`@ChildHarness` instead — the child is unchanged:
+
+```ts
+@ChildHarness(CheckoutPage, { frame: testId('checkout-frame') }) accessor checkout!: CheckoutPage
+```
+
+Playwright enters cross-origin frames as well. The dom driver can only enter
+same-origin ones; jsdom cannot load another origin's document.
 
 ### `Query`
 
@@ -172,13 +197,14 @@ Every method takes an optional `{ timeout }`.
 `@Harness({ host })` declares the root element. Element fields are
 `private accessor` and use `@ByRole` / `@ByTestId` / `@ByLabel` / `@ByText` /
 `@ByPlaceholder`, scoped to the host. `@ChildHarness(Cls)` nests a harness and
-passes the scope chain down.
+passes the scope chain down; `@ChildHarness(Cls, { frame: testId('…') })` nests it
+inside an iframe.
 
 - `self` — the host element. Right when the host _is_ the control.
 - `count` / `isAbsent` / `nth` / `first` / `last` / `each` / `map` / `filter` — for a
   component rendered several times on one screen.
 - `elementBy(selector)` — a selector computed at call time, still scoped.
-- `childHarness(Cls)` — the method form of `@ChildHarness`.
+- `childHarness(Cls, { frame })` — the method form of `@ChildHarness`.
 
 An **abstract** base may carry fields and methods with no host of its own; each
 subclass supplies one. Resolution walks the prototype chain and the nearest
@@ -384,7 +410,8 @@ run by every driver, so a harness written against one works against yours.
 
 ## Requirements
 
-Node ≥ 22.12, TypeScript ≥ 5.2. Published as ESM and CJS.
+Node ≥ 22.12, TypeScript ≥ 5.2, and — for `@harnessed-ts/playwright` —
+`@playwright/test` ≥ 1.43. Published as ESM and CJS.
 
 ## Contributing
 

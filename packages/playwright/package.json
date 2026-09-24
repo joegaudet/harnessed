@@ -62,7 +62,7 @@
     "@harnessed-ts/core": "workspace:^"
   },
   "peerDependencies": {
-    "@playwright/test": ">=1.40"
+    "@playwright/test": ">=1.43"
   },
   "scripts": {
     "build": "tsup",

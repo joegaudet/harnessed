@@ -3,7 +3,8 @@ import type { HarnessOptions } from './host-meta'
 import { setHostMeta } from './host-meta'
 import type { Query } from './query'
 import { createQuery } from './registry'
-import type { ScopedHarness, ScopedHarnessConstructor } from './scoped-harness'
+import { childScope } from './scoped-harness'
+import type { ChildHarnessOptions, ScopedHarness, ScopedHarnessConstructor } from './scoped-harness'
 import { label, placeholder, role, testId, text } from './selector'
 import type { RoleOptions, Selector } from './selector'
 
@@ -73,14 +74,17 @@ export function ByPlaceholder(value: string | RegExp, options?: ElementOptions) 
 }
 
 /** A nested harness — a component or a page — inheriting the host's scope chain. */
-export function ChildHarness<T extends ScopedHarness>(HarnessClass: ScopedHarnessConstructor<T>) {
+export function ChildHarness<T extends ScopedHarness>(
+  HarnessClass: ScopedHarnessConstructor<T>,
+  options?: ChildHarnessOptions,
+) {
   return function decorate<This extends HarnessHost>(
     _target: ClassAccessorDecoratorTarget<This, T>,
     _context: ClassAccessorDecoratorContext<This, T>,
   ): ClassAccessorDecoratorResult<This, T> {
     return {
       get(this: This): T {
-        return new HarnessClass(this._env, this._scope)
+        return new HarnessClass(this._env, childScope(this._scope, options))
       },
     }
   }
