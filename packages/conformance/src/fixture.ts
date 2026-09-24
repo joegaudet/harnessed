@@ -10,6 +10,7 @@
 export { App, CARDS } from '../fixture/App'
 export { Card, CardGrid } from '../fixture/components/CardGrid'
 export type { CardProps, CardSpec } from '../fixture/components/CardGrid'
+export { FramedPanel } from '../fixture/components/FramedPanel'
 export { LoginForm } from '../fixture/components/LoginForm'
 export type { LoginFormProps, LoginStatus } from '../fixture/components/LoginForm'
 export { PortalDialog } from '../fixture/components/PortalDialog'

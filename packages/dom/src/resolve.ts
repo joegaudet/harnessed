@@ -1,4 +1,10 @@
-import { indexOutOfRange, strictViolation, testIdSync, timeoutFor } from '@harnessed-ts/core'
+import {
+  describeScope,
+  indexOutOfRange,
+  strictViolation,
+  testIdSync,
+  timeoutFor,
+} from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
 import { configure as configureTestingLibrary, within } from '@testing-library/dom'
 import type { ByRoleMatcher } from '@testing-library/dom'
@@ -101,9 +107,43 @@ export async function resolveScope(
   for (const [index, step] of scope.entries()) {
     // Each link is reported with the path that reached it, so an ambiguous
     // container names the container rather than the leaf you asked for.
-    current = await findOne(current, scope.slice(0, index), step, timeout)
+    const path = scope.slice(0, index)
+    const found = await findOne(current, path, step, timeout)
+    current = step.frame === true ? frameBody(found, path, step) : found
   }
   return current
+}
+
+/** A frame link that cannot be entered — a wiring mistake, never "not rendered yet". */
+export class FrameEntryError extends Error {
+  override name = 'FrameEntryError'
+}
+
+/**
+ * The body a frame link's children are queried within. Only a same-origin frame
+ * exposes one — a cross-origin document is unreachable from script by design, and
+ * no amount of waiting changes that, so this refuses at once.
+ */
+function frameBody(
+  element: HTMLElement,
+  scope: readonly Selector[],
+  selector: Selector,
+): HTMLElement {
+  // localName, not instanceof: a frame nested in a frame belongs to another realm.
+  if (element.localName !== 'iframe') {
+    throw new FrameEntryError(
+      `harnessed: ${describeScope(scope, selector)} is marked as a frame but is a <${element.localName}>, not an <iframe>.`,
+    )
+  }
+  const body = (element as HTMLIFrameElement).contentDocument?.body
+  if (body == null) {
+    throw new FrameEntryError(
+      `harnessed: ${describeScope(scope, selector)} has no reachable document: it is ` +
+        `cross-origin, or its document has no body. The dom driver enters same-origin ` +
+        `frames only; drive a cross-origin one with a browser driver.`,
+    )
+  }
+  return body
 }
 
 /** The single node a strict operation acts on. */
@@ -132,7 +172,8 @@ export async function countAll(
   let root: HTMLElement
   try {
     root = await resolveScope(container, scope, timeout)
-  } catch {
+  } catch (error) {
+    if (error instanceof FrameEntryError) throw error
     // The scope itself is not on screen, so nothing inside it can be either.
     return 0
   }

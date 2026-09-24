@@ -13,6 +13,14 @@ export function notReady(name: string, cause: unknown): Error {
   return new Error(`harnessed: ${name} did not become ready. ${reason}`, { cause })
 }
 
+/** The page's URL members would read and drive the embedding page, not the frame. */
+export function nestedInFrame(name: string): Error {
+  return new Error(
+    `harnessed: ${name} is nested in a frame, so its URL members would act on the ` +
+      'page around it. Navigate the embedding page instead.',
+  )
+}
+
 /** The caller's explicit timeout elapsed before the readiness check resolved. */
 export function notReadyWithin(name: string, timeout: number): Error {
   return new Error(`harnessed: ${name} did not become ready within ${timeout}ms.`)

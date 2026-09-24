@@ -10,12 +10,18 @@ export interface RoleOptions {
   level?: number
 }
 
-export type Selector =
-  | { type: 'role'; role: string; options?: RoleOptions; nth?: number }
-  | { type: 'label'; text: string | RegExp; nth?: number }
-  | { type: 'testId'; testId: string | RegExp; nth?: number }
-  | { type: 'text'; text: string | RegExp; nth?: number }
-  | { type: 'placeholder'; text: string | RegExp; nth?: number }
+/**
+ * `frame: true` marks an `<iframe>`: as a link in a scope chain, the queries
+ * scoped under it run inside the frame's document. As the target itself it is
+ * still the iframe element — which is what a frame host's `self` addresses.
+ */
+export type Selector = (
+  | { type: 'role'; role: string; options?: RoleOptions }
+  | { type: 'label'; text: string | RegExp }
+  | { type: 'testId'; testId: string | RegExp }
+  | { type: 'text'; text: string | RegExp }
+  | { type: 'placeholder'; text: string | RegExp }
+) & { nth?: number; frame?: true }
 
 export type SelectorType = Selector['type']
 
@@ -46,8 +52,33 @@ export function nth(selector: Selector, index: number): Selector {
   return { ...selector, nth: index }
 }
 
+/**
+ * An `<iframe>` whose document the scope enters. Use it as a harness's host —
+ * `@Harness({ host: frame(testId('checkout')) })` — or pass the plain selector
+ * as `@ChildHarness(Checkout, { frame: testId('checkout') })`.
+ */
+export function frame(selector: Selector): Selector {
+  return { ...selector, frame: true }
+}
+
+/**
+ * Where a global query starts: the scope up to its innermost frame, so a harness
+ * nested in a frame finds its own portals rather than the embedding page's nodes.
+ */
+export function documentScope(scope: readonly Selector[]): readonly Selector[] {
+  for (let index = scope.length - 1; index >= 0; index--) {
+    if (scope[index]!.frame === true) return scope.slice(0, index + 1)
+  }
+  return []
+}
+
 /** For error messages — a selector rendered the way an author wrote it. */
 export function describeSelector(selector: Selector): string {
+  const described = describeBare(selector)
+  return selector.frame === true ? `frame(${described})` : described
+}
+
+function describeBare(selector: Selector): string {
   const suffix = selector.nth === undefined ? '' : `[${selector.nth}]`
   switch (selector.type) {
     case 'role': {

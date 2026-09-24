@@ -107,6 +107,13 @@ table cell).
 Pass `{ global: true }` to bypass the host scope — for portals and overlays that
 render outside the component's own subtree.
 
+Content inside an `<iframe>` is a separate document that no scoped query reaches.
+Nest the harness written for the framed app with
+`@ChildHarness(CheckoutPage, { frame: testId('checkout-frame') })`, or make the
+iframe a host with `@Harness({ host: frame(testId('checkout-frame')) })`. Inside
+a frame, `{ global: true }` searches the frame's document. Never reach in with a
+driver's own frame API from a test.
+
 ## Using it
 
 Under Testing Library, a component test renders the component and drives its

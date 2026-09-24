@@ -27,11 +27,17 @@ export { viewSearch } from '../specs/views'
 // The harnesses the specs drive. A driver author needs these to understand what
 // the specs are asking for, and may reuse them directly.
 export { CardGridHarness, CardHarness } from '../fixture/harnesses/CardGrid.harness'
+export {
+  CounterHarness,
+  FrameHarness,
+  FramedPanelHarness,
+} from '../fixture/harnesses/FramedPanel.harness'
 export { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'
 export type { Credentials } from '../fixture/harnesses/LoginForm.harness'
 export { PortalDialogHarness } from '../fixture/harnesses/PortalDialog.harness'
 export { CardsPage } from '../fixture/harnesses/pages/cards.page'
 export { DialogPage } from '../fixture/harnesses/pages/dialog.page'
+export { CounterPage, FramePage } from '../fixture/harnesses/pages/frame.page'
 export { LoginPage } from '../fixture/harnesses/pages/login.page'
 export { NeverReadyPage } from '../fixture/harnesses/pages/never-ready.page'
 export { RepeatedParamPage } from '../fixture/harnesses/pages/repeated-param.page'

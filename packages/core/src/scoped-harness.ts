@@ -3,7 +3,24 @@ import type { HarnessHost } from './harness-host'
 import { requireHostMeta } from './host-meta'
 import type { Query } from './query'
 import { createQuery } from './registry'
+import { frame } from './selector'
 import type { Selector } from './selector'
+
+export interface ChildHarnessOptions {
+  /**
+   * An `<iframe>` inside the host that the child lives in. The child resolves
+   * within the frame's document, so a harness written for the framed app works
+   * unchanged from the page that embeds it.
+   */
+  frame?: Selector
+}
+
+export function childScope(
+  parent: readonly Selector[],
+  options?: ChildHarnessOptions,
+): readonly Selector[] {
+  return options?.frame === undefined ? parent : [...parent, frame(options.frame)]
+}
 
 /**
  * Anything constructible as a harness: an env and an optional parent scope. Both
@@ -70,7 +87,10 @@ export abstract class ScopedHarness implements HarnessHost {
   }
 
   /** A nested harness — a component or a page — inheriting this one's scope chain. */
-  protected childHarness<T extends ScopedHarness>(HarnessClass: ScopedHarnessConstructor<T>): T {
-    return new HarnessClass(this._env, this._scope)
+  protected childHarness<T extends ScopedHarness>(
+    HarnessClass: ScopedHarnessConstructor<T>,
+    options?: ChildHarnessOptions,
+  ): T {
+    return new HarnessClass(this._env, childScope(this._scope, options))
   }
 }

@@ -3,6 +3,7 @@ import { registerDriver } from '@harnessed-ts/core'
 import type { EnvConfig, Query } from '@harnessed-ts/core'
 import { CardsPage } from '../fixture/harnesses/pages/cards.page'
 import { DialogPage } from '../fixture/harnesses/pages/dialog.page'
+import { FramePage } from '../fixture/harnesses/pages/frame.page'
 import { LoginPage } from '../fixture/harnesses/pages/login.page'
 import { NeverReadyPage } from '../fixture/harnesses/pages/never-ready.page'
 import { RepeatedParamPage } from '../fixture/harnesses/pages/repeated-param.page'
@@ -52,6 +53,14 @@ export const pageSpecs: PageSpec[] = [
       await page.dialog.open()
       assert.equal(await page.dialog.bodyText(), 'Are you sure?')
       assert.equal(await page.dialog.scopedBodyCount(), 0)
+    },
+  },
+  {
+    name: 'guarantee 6: a page composes a harness inside a frame, through its own scope',
+    async run(ctx) {
+      const page = new FramePage(await ctx.show('frame'))
+      await page.panel.counter.addOne()
+      assert.equal(await page.panel.counter.text(), 'Clicked 1 times')
     },
   },
   {
@@ -132,6 +141,18 @@ export const pageSpecs: PageSpec[] = [
     async run(ctx) {
       const stepOne = new StepOnePage(await ctx.show('wizard'))
       await assert.rejects(() => stepOne.goto(), /StepOnePage declares no path/)
+    },
+  },
+
+  // --------------------------------------------------------------- guarantee 10
+  {
+    name: 'guarantee 10: a page nested in a frame refuses the URL members of the page around it',
+    async run(ctx) {
+      const { counter } = new FramePage(await ctx.show('frame'))
+      await counter.expectReady()
+      await assert.rejects(() => counter.goto(), /CounterPage is nested in a frame/)
+      assert.throws(() => counter.currentUrl, /CounterPage is nested in a frame/)
+      await assert.rejects(() => counter.assertPathname('/'), /CounterPage is nested in a frame/)
     },
   },
 ]
