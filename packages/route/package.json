@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/route",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Deprecated shim: RouteHarness is now PageHarness in @harnessed-ts/page. Removed in the next minor.",
   "keywords": [
     "testing",
