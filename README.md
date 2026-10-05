@@ -544,11 +544,17 @@ Differences worth knowing:
 - **Frames, cross-origin included.** Each `frame()` link is resolved in the
   document around it and entered with `contentFrame()`, so the driver reaches
   frames that no in-page resolver can.
-- **`isVisible()` uses real layout**: a node with no box, `visibility: hidden`, or
-  inside a hidden frame reads as hidden. Like the dom driver, it waits for the
-  target first; ask `isAbsent()` when you mean "not on screen".
+- **`isVisible()` uses real layout**, by the same rule as Playwright's: a node
+  with an empty box, `visibility: hidden`, or inside a hidden frame reads as
+  hidden, and a `display: contents` node is as visible as what it contains. Like
+  the dom driver, it waits for the target first; ask `isAbsent()` when you mean
+  "not on screen".
 - **`fill()` replaces** the value, as Playwright's does: it selects what is there
-  and inserts the new text as one input event, and `fill('')` clears.
+  and inserts the new text as one input event, and `fill('')` clears. It waits,
+  within the timeout, for the target to be editable and focused, and rejects a
+  disabled or readonly target rather than typing into whatever had focus.
+- **Navigation mid-lookup** is retried in the next document until the timeout,
+  so a query that spans a full-page load waits for it.
 - **`press()`** takes Playwright's key names and chords (`Shift+ArrowLeft`).
 - **`selectOption()`** matches an option's value, then its label, and replaces a
   multi-select's selection.
