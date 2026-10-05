@@ -14,6 +14,9 @@ updates:
         patterns: ['@playwright/*', 'playwright']
       lint:
         patterns: ['eslint', '@eslint/*', 'typescript-eslint', 'prettier']
+      # react-dom throws unless it matches react exactly, so they move together.
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
       build:
         patterns: ['tsup', 'esbuild', 'vite', 'vitest', '@vitejs/*']
 
