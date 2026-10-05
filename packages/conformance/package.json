@@ -9,7 +9,8 @@
     "test:playwright": "playwright test --config runners/playwright.config.ts",
     "dev": "vite --config runners/vite.config.ts",
     "build": "tsup",
-    "clean": "rm -rf dist *.tsbuildinfo test-results playwright-report"
+    "clean": "rm -rf dist *.tsbuildinfo test-results playwright-report",
+    "serve:fixture": "vite --config runners/vite.config.ts"
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
