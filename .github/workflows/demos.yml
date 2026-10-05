@@ -1,0 +1,30 @@
+name: demos
+
+# The README's GIFs come from one demo flow run under five environments (RTL,
+# Playwright and Cypress, against the React fixture and its Ember copy). This
+# runs that flow, without recording, so the demo cannot rot behind the GIFs.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: demos-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: demos
+      # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
+      setup: >-
+        pnpm --filter test-app-demos exec playwright install --with-deps chromium &&
+        pnpm --filter test-app-demos exec cypress install
+      test: pnpm --filter test-app-demos test
+      artifacts: |
+        test-apps/demos/test-results
+        test-apps/demos/raw/cypress-screenshots

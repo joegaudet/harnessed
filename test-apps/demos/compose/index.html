@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>demo compositor</title>
+    <!--
+      One frame of a demo GIF. scripts/compose.mjs opens this page, calls setup()
+      once and frame() per output frame, and screenshots each. Every environment
+      gets this same layout and this same code panel.
+    -->
+    <style>
+      :root {
+        --bg: #0d1117;
+        --panel: #161b22;
+        --line: #30363d;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --accent: #f0883e;
+        --hl: rgba(240, 136, 62, 0.16);
+        --string: #a5d6ff;
+        --keyword: #ff7b72;
+        --type: #ffa657;
+        --call: #d2a8ff;
+        --stage: #e9ecef;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 960px;
+        height: 540px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+      }
+      header {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        top: 0;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .title {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      .title .sep {
+        color: var(--accent);
+        padding: 0 6px;
+      }
+      .driver {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+        font-family: Menlo, Monaco, Consolas, monospace;
+      }
+      .same {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: right;
+        line-height: 1.5;
+      }
+      .same b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      #footage {
+        position: absolute;
+        left: 16px;
+        top: 64px;
+        width: 544px;
+        height: 430px;
+        background: var(--stage);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #footage img {
+        display: block;
+      }
+      #footage .viewport {
+        background: white;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      }
+      #footage iframe {
+        border: 0;
+        display: block;
+        background: white;
+      }
+      #caption {
+        position: absolute;
+        left: 16px;
+        top: 502px;
+        width: 544px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.35;
+      }
+      #code {
+        position: absolute;
+        left: 572px;
+        top: 64px;
+        width: 372px;
+        height: 460px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      #code .file {
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        border-bottom: 1px solid var(--line);
+        font-size: 11px;
+        color: var(--muted);
+        font-family: Menlo, Monaco, Consolas, monospace;
+      }
+      #code .file #progress {
+        color: var(--accent);
+        white-space: nowrap;
+      }
+      #code pre {
+        margin: 0;
+        padding: 6px 0;
+        font-family: Menlo, Monaco, Consolas, monospace;
+        font-size: 10px;
+        line-height: 15.2px;
+      }
+      #code .ln {
+        display: block;
+        padding: 0 8px 0 10px;
+        border-left: 3px solid transparent;
+        white-space: pre;
+      }
+      #code .ln.active {
+        background: var(--hl);
+        border-left-color: var(--accent);
+      }
+      .tok-string {
+        color: var(--string);
+      }
+      .tok-keyword {
+        color: var(--keyword);
+      }
+      .tok-type {
+        color: var(--type);
+      }
+      .tok-call {
+        color: var(--call);
+      }
+      .tok-step {
+        color: var(--muted);
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <div class="title" id="title"></div>
+        <div class="driver" id="driver"></div>
+      </div>
+      <div class="same">
+        <b>Same harness classes. Same demo code.</b><br />
+        Five environments, one <span style="font-family: Menlo, monospace">demo()</span>
+      </div>
+    </header>
+    <div id="footage"></div>
+    <div id="caption"></div>
+    <div id="code">
+      <div class="file"><span>src/demo.ts</span><span id="progress"></span></div>
+      <pre id="lines"></pre>
+    </div>
+    <script>
+      const KEYWORDS = new Set([
+        'export',
+        'async',
+        'function',
+        'await',
+        'const',
+        'new',
+        'return',
+        'let',
+        'if',
+      ])
+
+      function escape(text) {
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+
+      /** Just enough highlighting to read: strings, keywords, types, calls. */
+      function highlight(line) {
+        if (/^\s*await step\(/.test(line)) {
+          return `<span class="tok-step">${escape(line)}</span>`
+        }
+        let out = ''
+        const pattern = /('[^']*')|([A-Za-z_$][\w$]*)(\s*\()?|([^'A-Za-z_$]+)/g
+        for (const match of line.matchAll(pattern)) {
+          const [, string, word, call, other] = match
+          if (string) out += `<span class="tok-string">${escape(string)}</span>`
+          else if (word && KEYWORDS.has(word))
+            out += `<span class="tok-keyword">${word}</span>${call ?? ''}`
+          else if (word && /^[A-Z]/.test(word))
+            out += `<span class="tok-type">${word}</span>${call ?? ''}`
+          else if (word && call) out += `<span class="tok-call">${word}</span>${call}`
+          else if (word) out += word
+          else out += escape(other)
+        }
+        return out
+      }
+
+      let config
+      let shownHtml = null
+
+      window.setup = cfg => {
+        config = cfg
+        document.getElementById('title').innerHTML = cfg.title
+          .map(escape)
+          .join('<span class="sep">·</span>')
+        document.getElementById('driver').textContent = cfg.driver
+        document.getElementById('caption').textContent = cfg.caption
+        document.getElementById('lines').innerHTML = cfg.code
+          .map((line, i) => `<span class="ln" data-i="${i}">${highlight(line) || ' '}</span>`)
+          .join('')
+        const footage = document.getElementById('footage')
+        if (cfg.footage.kind === 'frames') {
+          footage.innerHTML = `<img id="shot" width="${cfg.footage.width}" height="${cfg.footage.height}" alt="">`
+        } else {
+          footage.innerHTML = `<div class="viewport"><iframe id="replay" width="${cfg.footage.width}" height="${cfg.footage.height}"></iframe></div>`
+        }
+      }
+
+      /** Shows output frame `index`: the footage at time `t`, and step `active` lit. */
+      window.frame = async ({ index, t, active, finished }) => {
+        const lines = document.querySelectorAll('#lines .ln')
+        lines.forEach(line => line.classList.remove('active'))
+        if (active >= 0) {
+          const block = config.blocks[active]
+          for (let i = block.start; i <= block.end; i++) lines[i].classList.add('active')
+        }
+        const steps = config.blocks.length
+        document.getElementById('progress').textContent =
+          active < 0
+            ? ''
+            : finished
+              ? `all ${steps} steps passed`
+              : `step ${active + 1} of ${steps}: ${config.blocks[active].label}`
+
+        if (config.footage.kind === 'frames') {
+          const shot = document.getElementById('shot')
+          shot.src = `${config.footage.dir}${String(index + 1).padStart(4, '0')}.png`
+          await shot.decode()
+        } else {
+          const snapshots = config.footage.snapshots
+          let html = snapshots[0].html
+          for (const snapshot of snapshots) if (snapshot.at <= t) html = snapshot.html
+          if (html !== shownHtml) {
+            shownHtml = html
+            const replay = document.getElementById('replay')
+            const loaded = new Promise(resolve => (replay.onload = resolve))
+            replay.srcdoc = `<!doctype html><html><head><meta charset="utf-8"></head><body>${html}</body></html>`
+            await loaded
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
