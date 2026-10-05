@@ -5,6 +5,7 @@
     { "path": "./packages/config" },
     { "path": "./packages/resolve" },
     { "path": "./packages/dom" },
+    { "path": "./packages/vitest-browser" },
     { "path": "./packages/playwright" },
     { "path": "./packages/page" },
     { "path": "./packages/chai" },
