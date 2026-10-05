@@ -112,7 +112,10 @@ agreement is the whole reason the abstraction exists.
    not on screen return straight away. They never wait out a timeout and never
    throw.
 2. **Single-target operations are strict.** More than one match is an error naming
-   the selector, raised at once — never a silent pick of the first.
+   the selector, raised at once — never a silent pick of the first. That holds for
+   questions and waits too: `isVisible()`, `waitForVisible()` and `waitForHidden()`
+   on duplicates reject with the same violation rather than answering `false` or
+   waiting out the timeout.
 3. **`role` selectors honour `level`.** `@ByRole('heading', { level: 1 })` picks the
    `h1` on a screen that also has an `h2`.
 4. **`elementBy()` keeps the harness's scope.** A selector computed at call time is
@@ -188,7 +191,7 @@ its component has rendered.
 | ------------ | -------------------------------------------------------------------------------------- |
 | Interactions | `click` `fill` `clear` `check` `uncheck` `selectOption` `hover` `focus` `blur` `press` |
 | Observations | `text` `inputValue` `attribute` `isVisible` `isEnabled` `isChecked` `selectedOptions`  |
-| Waiting      | `waitFor(state, { timeout })`                                                          |
+| Waiting      | `waitForVisible` `waitForHidden`                                                       |
 | Lists        | `count` `isAbsent` `nth` `first` `last` `each` `map` `filter` `texts`                  |
 
 Every method takes an optional `{ timeout }`.
@@ -227,7 +230,7 @@ class CheckoutPage extends PageHarness<{ token: string }> {
   @ChildHarness(CartHarness) accessor cart!: CartHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitFor('visible')
+    await this.self.waitForVisible()
   }
 
   async placeOrder(): Promise<ConfirmationPage> {
@@ -261,7 +264,7 @@ leaves `path` out, and `goto()` on it is a refusal, not a silent no-op.
 `waitForReady()` runs behind `goto()` and `expectReady()` and must never be empty —
 an empty one satisfies the abstract member and silently removes the wait, so the
 failure lands somewhere unrelated later in the test. The usual body is one line
-against the page's own host: `await this.self.waitFor('visible')`. With no
+against the page's own host: `await this.self.waitForVisible()`. With no
 `{ timeout }` the wait is bounded only by what `waitForReady()` itself waits on;
 an explicit one adds a second clock. `isReady()` is the non-throwing probe; pass
 a short `{ timeout }`.

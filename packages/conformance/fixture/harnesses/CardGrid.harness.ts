@@ -6,7 +6,7 @@ import {
   Harness,
   testId,
 } from '@harnessed-ts/core'
-import type { Query } from '@harnessed-ts/core'
+import type { Query, WaitOptions } from '@harnessed-ts/core'
 
 /** The host is itself the button, so `choose()` acts on `self`. */
 @Harness({ host: testId('card') })
@@ -144,5 +144,23 @@ export class CardGridHarness extends ComponentHarness {
    */
   async ambiguousCardText(): Promise<string> {
     return this.elementBy(testId('card')).text()
+  }
+
+  /** The same ambiguity, asked as a yes/no question — which must not answer "no". */
+  async ambiguousCardIsVisible(): Promise<boolean> {
+    return this.elementBy(testId('card')).isVisible()
+  }
+
+  async waitForAmbiguousCard(options?: WaitOptions): Promise<void> {
+    await this.elementBy(testId('card')).waitForVisible(options)
+  }
+
+  async waitForAmbiguousCardToHide(options?: WaitOptions): Promise<void> {
+    await this.elementBy(testId('card')).waitForHidden(options)
+  }
+
+  /** Three cards render, so index 5 names nothing — the same answer as absent. */
+  async missingCardIsVisible(): Promise<boolean> {
+    return this.elementBy(testId('card')).nth(5).isVisible()
   }
 }

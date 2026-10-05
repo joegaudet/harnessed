@@ -13,6 +13,6 @@ export class WizardPage extends PageHarness {
   @ChildHarness(StepTwoPage) accessor stepTwo!: StepTwoPage
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitFor('visible')
+    await this.self.waitForVisible()
   }
 }

@@ -12,6 +12,6 @@ export class RepeatedParamPage extends PageHarness<{ token: string }> {
   }
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitFor('visible')
+    await this.self.waitForVisible()
   }
 }

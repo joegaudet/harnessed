@@ -10,6 +10,16 @@ import { describeScope } from './selector'
 /**
  * More than one node matched a query that addresses a single target.
  *
+ * A class of its own so a driver can tell it apart from "not found": a yes/no
+ * question such as `isVisible()` answers `false` for an absent target, but must
+ * let this through, and a wait must stop on it rather than retry — more than one
+ * match never becomes one by waiting.
+ */
+export class StrictModeViolation extends Error {
+  override name = 'StrictModeViolation'
+}
+
+/**
  * Both drivers raise this, with the same wording and the same scope-chain path,
  * so a failure reads identically wherever it happens.
  */
@@ -17,8 +27,8 @@ export function strictViolation(
   matches: number,
   scope: readonly Selector[],
   selector: Selector,
-): Error {
-  return new Error(
+): StrictModeViolation {
+  return new StrictModeViolation(
     `harnessed: strict mode violation — ${matches} nodes match ` +
       `${describeScope(scope, selector)}. Scope the query, or use nth()/first() only when ` +
       `the matches genuinely are the same control rendered more than once.`,

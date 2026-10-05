@@ -17,7 +17,7 @@ export abstract class WizardStepPage<
   }
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitFor('visible')
+    await this.self.waitForVisible()
   }
 }
 
