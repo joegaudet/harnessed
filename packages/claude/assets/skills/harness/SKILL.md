@@ -77,7 +77,7 @@ Template: `examples/page-harness-template.ts`
   `$param` substitution works in the query string as well as the path, at every
   occurrence, URL-encoded.
 - `waitForReady()` is required and must never be empty. Usually one line:
-  `await this.self.waitFor('visible')`. It runs behind `goto()` and
+  `await this.self.waitForVisible()`. It runs behind `goto()` and
   `expectReady()`; `isReady()` is the non-throwing probe.
 - An action that leads to another page returns it:
   `return this.transitionTo(NextPage)` constructs the next page in the same

@@ -29,7 +29,7 @@ Full API and architecture: the `@harnessed-ts/core` README. Procedural how-to
 - **`page` or `screen` inside a harness.** Add an element field, a
   `@ChildHarness`, or use `this.elementBy(selector)` for a selector computed at
   call time. A page's `waitForReady()` does not need the driver either —
-  `await this.self.waitFor('visible')`.
+  `await this.self.waitForVisible()`.
 - **A CSS class as a state signal.** `className.includes('on')` couples the test
   to styling. Add `aria-pressed` / `aria-expanded` / `aria-selected` to the
   component instead.

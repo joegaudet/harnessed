@@ -7,8 +7,6 @@ export interface WaitOptions {
   timeout?: number
 }
 
-export type WaitState = 'visible' | 'hidden'
-
 /**
  * A query descriptor — a scope chain plus a selector. Not a resolved node: nothing
  * is looked up until a method is called, which is what lets one harness field work
@@ -17,7 +15,7 @@ export type WaitState = 'visible' | 'hidden'
  * Single-target methods resolve strictly: more than one match is an error, never a
  * silent pick of the first. Multi-target methods work across every match.
  *
- * A driver implements 19 members; everything list-shaped is inherited from here.
+ * A driver implements 20 members; everything list-shaped is inherited from here.
  */
 export abstract class Query {
   constructor(
@@ -47,7 +45,10 @@ export abstract class Query {
   abstract selectedOptions(options?: WaitOptions): Promise<string[]>
 
   // --- waiting ------------------------------------------------------------
-  abstract waitFor(state: WaitState, options?: WaitOptions): Promise<void>
+  /** Resolves once the target is on screen and visible. */
+  abstract waitForVisible(options?: WaitOptions): Promise<void>
+  /** Resolves once the target is hidden or gone — absent counts as hidden. */
+  abstract waitForHidden(options?: WaitOptions): Promise<void>
 
   /**
    * How many nodes match. Zero is an answer, not a failure: this resolves the

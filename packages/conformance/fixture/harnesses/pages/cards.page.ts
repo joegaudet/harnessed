@@ -12,6 +12,6 @@ export class CardsPage extends PageHarness {
   @ChildHarness(CardGridHarness) accessor grid!: CardGridHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitFor('visible')
+    await this.self.waitForVisible()
   }
 }
