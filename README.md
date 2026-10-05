@@ -358,6 +358,7 @@ your config alone.
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `@harnessed-ts/core`          | `Query`, `Selector`, `ComponentHarness`, the decorators, the driver registry, `configure()`, the Vite plugin, matcher implementations |
 | `@harnessed-ts/dom`           | Testing Library driver + matchers. No React dependency                                                                                |
+| `@harnessed-ts/resolve`       | the shared selector resolver, plus an injectable build for remote drivers. A driver author's dependency                               |
 | `@harnessed-ts/playwright`    | Playwright driver + matchers, `createApiStubs`, `withWorld`                                                                           |
 | `@harnessed-ts/page`          | `PageHarness`                                                                                                                         |
 | `@harnessed-ts/route`         | deprecated: re-exports `PageHarness` as `RouteHarness` for one release                                                                |
@@ -391,6 +392,12 @@ cheaper for you than resolving each element (it is, for Testing Library; it is n
 for Playwright, whose locators are descriptors). The registry lives on `globalThis`
 under a `Symbol.for` key, so a graph that loads both the ESM and the CJS build
 still has one registry.
+
+Resolving selectors is the part most likely to drift. If your driver can run
+JavaScript in the page, use [`@harnessed-ts/resolve`](packages/resolve/README.md)
+rather than writing your own: it is what the Testing Library driver uses, so role,
+label, strictness and frame semantics come out identical. A driver that resolves
+from Node injects its self-contained build (`@harnessed-ts/resolve/inject`).
 
 If your driver can navigate, register that too and a page's `goto()` works
 against it unchanged:

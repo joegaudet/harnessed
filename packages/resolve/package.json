@@ -1,13 +1,12 @@
 {
-  "name": "@harnessed-ts/dom",
+  "name": "@harnessed-ts/resolve",
   "version": "0.3.0",
-  "description": "Testing Library / jsdom driver for @harnessed-ts/core. Framework-agnostic \u2014 no React dependency.",
+  "description": "The shared selector resolver behind the Testing Library-family drivers, plus an injectable build for drivers that resolve inside a remote page.",
   "keywords": [
     "testing",
     "harness",
     "testing-library",
-    "jsdom",
-    "vitest"
+    "resolver"
   ],
   "license": "MIT",
   "contributors": [
@@ -23,7 +22,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joegaudet/harnessed.git",
-    "directory": "packages/dom"
+    "directory": "packages/resolve"
   },
   "homepage": "https://github.com/joegaudet/harnessed#readme",
   "bugs": "https://github.com/joegaudet/harnessed/issues",
@@ -37,11 +36,12 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./matchers": {
-      "types": "./dist/matchers.d.ts",
-      "import": "./dist/matchers.js",
-      "require": "./dist/matchers.cjs"
+    "./inject": {
+      "types": "./dist/inject.d.ts",
+      "import": "./dist/inject.js",
+      "require": "./dist/inject.cjs"
     },
+    "./inject.global.js": "./dist/inject.global.js",
     "./package.json": "./package.json"
   },
   "files": [
@@ -54,29 +54,23 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed-ts/core": "workspace:^",
-    "@harnessed-ts/resolve": "workspace:^"
+    "@harnessed-ts/core": "workspace:^"
   },
   "peerDependencies": {
-    "@testing-library/dom": ">=10",
-    "@testing-library/user-event": ">=14",
-    "vitest": ">=2"
+    "@testing-library/dom": ">=10"
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/user-event": "^14.6.7",
-    "vitest": "^5.0.0"
-  },
-  "peerDependenciesMeta": {
-    "vitest": {
-      "optional": true
-    }
+    "jsdom": "^30.0.1",
+    "vitest": "^5.0.0",
+    "@types/node": "^26.4.1"
   }
 }

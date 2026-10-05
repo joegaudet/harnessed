@@ -8,5 +8,11 @@ export default defineConfig({
   sourcemap: true,
   clean: false,
   treeshake: true,
-  external: ['@harnessed-ts/core', '@testing-library/dom', '@testing-library/user-event', 'vitest'],
+  external: [
+    '@harnessed-ts/core',
+    '@harnessed-ts/resolve',
+    '@testing-library/dom',
+    '@testing-library/user-event',
+    'vitest',
+  ],
 })

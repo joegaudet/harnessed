@@ -5,7 +5,13 @@ import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
 import type { DomEnv } from './env'
-import { countAll, FrameEntryError, queryAll, resolveOne, resolveScope } from './resolve'
+import {
+  countAll,
+  FrameEntryError,
+  queryAll,
+  resolveOne,
+  resolveScope,
+} from '@harnessed-ts/resolve'
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
