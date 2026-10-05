@@ -54,6 +54,12 @@ runtime config travels with each call because the page cannot see the test
 process's `configure()`. `injectPath()` gives the file's path for tools that inject
 by path.
 
+An error the page throws comes back as a plain error: WebDriver, CDP and TestCafe
+keep its message and, at most, its name. Pass it through `reviveStrictViolation()`
+from `@harnessed-ts/core` so a strict-mode violation is `StrictModeViolation`
+again, worded exactly as an in-process driver words it — that is how a caller
+tells ambiguity apart from absence.
+
 Full guide: the [harnessed README](https://github.com/joegaudet/harnessed#readme).
 
 MIT © Joe Gaudet, Jay Seo

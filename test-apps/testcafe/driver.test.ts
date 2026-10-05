@@ -228,14 +228,14 @@ test('reads display: contents as visible when what it contains is', async t => {
   await setContent(`<div data-testid="group" style="display: contents"><span>shown</span></div>`)
   const group = createQuery(testcafe(t), [], testId('group'))
   assert.equal(await group.isVisible(), true)
-  await group.waitFor('visible', { timeout: 1000 })
+  await group.waitForVisible({ timeout: 1000 })
 })
 
 test('reads visibility: collapse as hidden', async t => {
   await setContent(`<div data-testid="row" style="visibility: collapse">gone</div>`)
   const row = createQuery(testcafe(t), [], testId('row'))
   assert.equal(await row.isVisible(), false)
-  await row.waitFor('hidden', { timeout: 1000 })
+  await row.waitForHidden({ timeout: 1000 })
 })
 
 // The paragraph holding the two late nodes renders late itself, so these wait

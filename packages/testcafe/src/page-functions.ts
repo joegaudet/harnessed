@@ -127,6 +127,19 @@ export function pageCall(
     return true
   }
 
+  // The single target now, for a yes/no question: `null` when it is not there,
+  // including an index past the last match. Ambiguity and a frame that cannot
+  // be entered still throw — neither is an answer.
+  const present = (): Element | null => {
+    try {
+      return resolver.oneNow(null, scope, selector, options)
+    } catch (error) {
+      const name = (error as { name?: string } | null)?.name
+      if (name === 'StrictModeViolation' || name === 'FrameEntryError') throw error
+      return null
+    }
+  }
+
   // A single target. `now` hands back `null` for "not there yet"; the driver
   // polls, so a wait never holds TestCafe's one command queue for long.
   const target = (): Promise<Element | null> =>
@@ -168,11 +181,11 @@ export function pageCall(
     case 'texts':
       return withList(matches => matches.map(node => (node.textContent ?? '').trim()))
     case 'visible': {
-      const node = resolver.oneNow(null, scope, selector, options)
+      const node = present()
       return done(node !== null && isVisible(node))
     }
     case 'hidden': {
-      const node = resolver.oneNow(null, scope, selector, options)
+      const node = present()
       return done(node === null || !isVisible(node))
     }
     case 'text':

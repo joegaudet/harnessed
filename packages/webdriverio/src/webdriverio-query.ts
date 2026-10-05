@@ -1,9 +1,10 @@
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
 import {
   checkedFrom,
   describeScope,
   enabledFrom,
+  StrictModeViolation,
   strictViolation,
   timeoutFor,
 } from '@harnessed-ts/core'
@@ -72,9 +73,16 @@ function optionValues(
   })
 }
 
-/** An error from the page about the scope, rather than a refusal or a WebDriver failure. */
+/**
+ * An error from the page about the scope — not there, or not one node — rather
+ * than a refusal or a WebDriver failure.
+ */
 function isScopeMiss(error: unknown): boolean {
-  return error instanceof FrameAbsent || (error instanceof PageError && !isFrameEntryError(error))
+  return (
+    error instanceof FrameAbsent ||
+    error instanceof StrictModeViolation ||
+    (error instanceof PageError && !isFrameEntryError(error))
+  )
 }
 
 /**
@@ -304,16 +312,24 @@ export class WebdriverioQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
+  override async waitForVisible(options?: WaitOptions): Promise<void> {
+    await this.waitUntilVisible(true, options)
+  }
+
+  override async waitForHidden(options?: WaitOptions): Promise<void> {
+    await this.waitUntilVisible(false, options)
+  }
+
+  private async waitUntilVisible(wanted: boolean, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
     const deadline = Date.now() + timeout
     for (;;) {
       // Refusals and strict violations end the wait at once: neither changes by waiting.
-      if ((await this.isVisible()) === (state === 'visible')) return
+      if ((await this.isVisible()) === wanted) return
       const left = deadline - Date.now()
       if (left <= 0) {
         throw new Error(
-          `harnessed: ${describeScope(this.scope, this.selector)} did not become ${state} within ${timeout}ms.`,
+          `harnessed: ${describeScope(this.scope, this.selector)} did not become ${wanted ? 'visible' : 'hidden'} within ${timeout}ms.`,
         )
       }
       await sleep(Math.min(POLL_MS, left))

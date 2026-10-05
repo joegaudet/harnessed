@@ -1,10 +1,11 @@
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
 import {
   checkedFrom,
   describeScope,
   enabledFrom,
   nth as withNth,
+  StrictModeViolation,
   timeoutFor,
 } from '@harnessed-ts/core'
 import {
@@ -50,20 +51,23 @@ function userFor(env: CypressEnv): UserEvent {
 
 /**
  * Testing Library's `waitFor` retries every throw, but a frame that cannot be
- * entered never becomes enterable — so that refusal ends the wait at once.
+ * entered never becomes enterable, and several matches never become one — so
+ * either ends the wait at once.
  */
 async function waitUntil(
   condition: () => Promise<void>,
   container: HTMLElement,
   timeout: number,
 ): Promise<void> {
-  let refused: FrameEntryError | undefined
+  let refused: FrameEntryError | StrictModeViolation | undefined
   await waitForCondition(
     async () => {
       try {
         await condition()
       } catch (error) {
-        if (!(error instanceof FrameEntryError)) throw error
+        if (!(error instanceof FrameEntryError || error instanceof StrictModeViolation)) {
+          throw error
+        }
         refused = error
       }
     },
@@ -248,9 +252,11 @@ export class CypressQuery extends Query {
     try {
       return isVisibleInLayout(await this.element(options), this.env.document)
     } catch (error) {
-      if (error instanceof FrameEntryError) throw error
-      // Not on screen at all. Prefer isAbsent() to ask this — it answers without
-      // first waiting out the retry timeout.
+      // Several matches is ambiguity, not invisibility: answering false would
+      // claim that nodes on screen are not.
+      if (error instanceof FrameEntryError || error instanceof StrictModeViolation) throw error
+      // Not on screen at all, or an index past the last match. Prefer isAbsent()
+      // to ask this — it answers without first waiting out the retry timeout.
       return false
     }
   }
@@ -282,27 +288,28 @@ export class CypressQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
-    this.log('waitFor', state)
+  override async waitForVisible(options?: WaitOptions): Promise<void> {
+    this.log('waitForVisible')
     const timeout = timeoutFor(options?.timeout)
-    const root = this.env.document.documentElement
-    if (state === 'visible') {
-      await waitUntil(
-        async () => {
-          if (!(await this.visible({ timeout }))) throw new Error('not visible yet')
-        },
-        root,
-        timeout,
-      )
-      return
-    }
+    await waitUntil(
+      async () => {
+        if (!(await this.visible({ timeout }))) throw new Error('not visible yet')
+      },
+      this.env.document.documentElement,
+      timeout,
+    )
+  }
+
+  override async waitForHidden(options?: WaitOptions): Promise<void> {
+    this.log('waitForHidden')
+    const timeout = timeoutFor(options?.timeout)
     await waitUntil(
       async () => {
         if ((await this.count()) !== 0 && (await this.visible({ timeout }))) {
           throw new Error('still visible')
         }
       },
-      root,
+      this.env.document.documentElement,
       timeout,
     )
   }

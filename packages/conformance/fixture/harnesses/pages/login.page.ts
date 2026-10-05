@@ -12,6 +12,6 @@ export class LoginPage extends PageHarness {
   @ChildHarness(LoginFormHarness) accessor form!: LoginFormHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitFor('visible')
+    await this.self.waitForVisible()
   }
 }

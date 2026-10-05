@@ -1,4 +1,4 @@
-import { getConfig } from '@harnessed-ts/core'
+import { getConfig, reviveStrictViolation } from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
 import { encodeSelector, injectSource, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import { rememberUrl } from './location'
@@ -115,7 +115,8 @@ export async function callPage(
   if (reply.kind === 'missing') {
     throw new Error('harnessed: the resolver could not be injected into the page.')
   }
-  if (reply.kind === 'error') throw new PageError(reply.name, reply.message)
+  // A strict violation comes back as core's own class, as under every driver.
+  if (reply.kind === 'error') throw reviveStrictViolation(new PageError(reply.name, reply.message))
   if (site.top) rememberUrl(site.browser, reply.url)
   return reply.value
 }

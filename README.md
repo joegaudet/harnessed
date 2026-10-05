@@ -256,8 +256,16 @@ agreement is the whole reason the abstraction exists.
 1. **Absence answers immediately.** `count()` and `isAbsent()` on something that is
    not on screen return straight away. They never wait out a timeout and never
    throw.
-2. **Single-target operations are strict.** More than one match is an error naming
-   the selector, raised at once — never a silent pick of the first.
+2. **Single-target operations are strict.** More than one match is a
+   `StrictModeViolation` naming the selector, raised at once — never a silent pick
+   of the first. That holds for questions and waits too: `isVisible()`,
+   `waitForVisible()` and `waitForHidden()` on duplicates reject with the same
+   violation rather than answering `false` or waiting out the timeout. It is core's
+   class, in the same wording, under every driver — those that resolve inside a
+   remote page included — so `instanceof StrictModeViolation` tells ambiguity
+   apart from absence. An `nth()` past the last match is not ambiguous: there
+   `isVisible()` answers `false` and `waitForHidden()` resolves, as for an absent
+   target.
 3. **`role` selectors honour `level`.** `@ByRole('heading', { level: 1 })` picks the
    `h1` on a screen that also has an `h2`.
 4. **`elementBy()` keeps the harness's scope.** A selector computed at call time is
@@ -346,10 +354,13 @@ its component has rendered.
 | ------------ | -------------------------------------------------------------------------------------- |
 | Interactions | `click` `fill` `clear` `check` `uncheck` `selectOption` `hover` `focus` `blur` `press` |
 | Observations | `text` `inputValue` `attribute` `isVisible` `isEnabled` `isChecked` `selectedOptions`  |
-| Waiting      | `waitFor(state, { timeout })`                                                          |
+| Waiting      | `waitForVisible` `waitForHidden`                                                       |
 | Lists        | `count` `isAbsent` `nth` `first` `last` `each` `map` `filter` `texts`                  |
 
-Every method takes an optional `{ timeout }`.
+Every method takes an optional `{ timeout }`. `waitForVisible()` resolves once
+the target is on screen and visible; `waitForHidden()` once it is hidden or gone —
+absent counts as hidden. Both reject at once on a target that matches more than
+one node (guarantee 2), and otherwise when the timeout runs out.
 
 ### `ComponentHarness`
 
@@ -385,7 +396,7 @@ class CheckoutPage extends PageHarness<{ token: string }> {
   @ChildHarness(CartHarness) accessor cart!: CartHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitFor('visible')
+    await this.self.waitForVisible()
   }
 
   async placeOrder(): Promise<ConfirmationPage> {
@@ -419,7 +430,7 @@ leaves `path` out, and `goto()` on it is a refusal, not a silent no-op.
 `waitForReady()` runs behind `goto()` and `expectReady()` and must never be empty —
 an empty one satisfies the abstract member and silently removes the wait, so the
 failure lands somewhere unrelated later in the test. The usual body is one line
-against the page's own host: `await this.self.waitFor('visible')`. With no
+against the page's own host: `await this.self.waitForVisible()`. With no
 `{ timeout }` the wait is bounded only by what `waitForReady()` itself waits on;
 an explicit one adds a second clock. `isReady()` is the non-throwing probe; pass
 a short `{ timeout }`.
@@ -1152,7 +1163,7 @@ work; keep a separate check against a deployed environment.
 ## Adding a driver
 
 `@harnessed-ts/core` holds a registry keyed by driver id and never imports a driver.
-A driver supplies an env, 19 `Query` members, and a registration:
+A driver supplies an env, 20 `Query` members, and a registration:
 
 ```ts
 registerDriver('my-driver', (env, scope, selector) => new MyQuery(env, scope, selector))
@@ -1169,7 +1180,9 @@ Resolving selectors is the part most likely to drift. If your driver can run
 JavaScript in the page, use [`@harnessed-ts/resolve`](packages/resolve/README.md)
 rather than writing your own: it is what the Testing Library driver uses, so role,
 label, strictness and frame semantics come out identical. A driver that resolves
-from Node injects its self-contained build (`@harnessed-ts/resolve/inject`).
+from Node injects its self-contained build (`@harnessed-ts/resolve/inject`), and
+passes what the page throws through core's `reviveStrictViolation()`: a class
+does not survive the trip back, and that restores `StrictModeViolation`.
 
 If your driver can navigate, register that too and a page's `goto()` works
 against it unchanged:

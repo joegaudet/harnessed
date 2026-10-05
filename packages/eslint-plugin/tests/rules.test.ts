@@ -186,12 +186,12 @@ describe('require-wait-for-ready', () => {
       {
         name: 'a page with a non-empty implementation',
         filename: '/repo/harness/pages/checkout.page.ts',
-        code: `class P extends PageHarness { async waitForReady() { await this.self.waitFor('visible') } }`,
+        code: `class P extends PageHarness { async waitForReady() { await this.self.waitForVisible() } }`,
       },
       {
         name: 'a generic PageHarness base is recognised',
         filename: '/repo/harness/pages/checkout.page.ts',
-        code: `class P extends PageHarness<{ token: string }> { async waitForReady() { await this.self.waitFor('visible') } }`,
+        code: `class P extends PageHarness<{ token: string }> { async waitForReady() { await this.self.waitForVisible() } }`,
       },
       {
         name: 'an abstract page base may leave waitForReady to its subclasses',

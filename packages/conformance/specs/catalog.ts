@@ -1,4 +1,5 @@
 import assert from './assert'
+import { StrictModeViolation } from '@harnessed-ts/core'
 import type { EnvConfig } from '@harnessed-ts/core'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
 import { FrameHarness, FramedPanelHarness } from '../fixture/harnesses/FramedPanel.harness'
@@ -28,6 +29,19 @@ export interface Spec {
 /** How long "immediately" is allowed to take. A driver that waits out a retry
  *  timeout instead of answering blows straight through this. */
 const IMMEDIATE_MS = 400
+
+/**
+ * The shared strict violation on the cards: core's own class, so a caller can
+ * tell ambiguity apart from absence, in the shared wording from its first
+ * character — a driver that resolves in the page must not hand back a plain
+ * error, or one whose message a transport has prefixed.
+ */
+function strictOnCards(error: unknown): boolean {
+  return (
+    error instanceof StrictModeViolation &&
+    /^harnessed: strict mode violation — 3 nodes match .*card-grid.*card/s.test(error.message)
+  )
+}
 
 /**
  * The parity suite. Every spec here is written once and executed by every driver.
@@ -74,10 +88,56 @@ export const specs: Spec[] = [
     async run(ctx) {
       const grid = new CardGridHarness(await ctx.show('cards'))
       assert.equal(await grid.cardCount(), 3)
-      await assert.rejects(
-        () => grid.ambiguousCardText(),
-        'a single-target read matching 3 nodes must reject, not pick one',
-      )
+      // Not a pick of the first card, and the same violation under every driver.
+      await assert.rejects(() => grid.ambiguousCardText(), strictOnCards)
+    },
+  },
+  {
+    name: 'guarantee 2: isVisible on a target matching several nodes rejects with a strict-mode violation, at once',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      const started = Date.now()
+      // Answering false here would claim three rendered cards are not visible.
+      await assert.rejects(() => grid.ambiguousCardIsVisible(), strictOnCards)
+      const elapsed = Date.now() - started
+      assert.ok(elapsed < IMMEDIATE_MS, `isVisible on duplicates took ${elapsed}ms`)
+    },
+  },
+  {
+    name: 'guarantee 2: waitForVisible on a target matching several nodes rejects with a strict-mode violation, at once',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      const started = Date.now()
+      await assert.rejects(() => grid.waitForAmbiguousCard({ timeout: 2000 }), strictOnCards)
+      const elapsed = Date.now() - started
+      assert.ok(elapsed < IMMEDIATE_MS, `waitForVisible on duplicates took ${elapsed}ms`)
+    },
+  },
+  {
+    name: 'guarantee 2: waitForHidden on a target matching several nodes rejects with a strict-mode violation, at once',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      const started = Date.now()
+      await assert.rejects(() => grid.waitForAmbiguousCardToHide({ timeout: 2000 }), strictOnCards)
+      const elapsed = Date.now() - started
+      assert.ok(elapsed < IMMEDIATE_MS, `waitForHidden on duplicates took ${elapsed}ms`)
+    },
+  },
+  {
+    name: 'isVisible on an index past the last match is false, like an absent target',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      assert.equal(await grid.missingCardIsVisible(), false)
+    },
+  },
+  {
+    name: 'waitForHidden on an index past the last match resolves at once, like an absent target',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      const started = Date.now()
+      await grid.waitForMissingCardToHide({ timeout: 2000 })
+      const elapsed = Date.now() - started
+      assert.ok(elapsed < IMMEDIATE_MS, `waitForHidden past the last match took ${elapsed}ms`)
     },
   },
 
@@ -191,7 +251,7 @@ export const specs: Spec[] = [
         /<iframe>/,
       )
       const elapsed = Date.now() - started
-      assert.ok(elapsed < IMMEDIATE_MS, `waitFor on a non-iframe frame took ${elapsed}ms`)
+      assert.ok(elapsed < IMMEDIATE_MS, `waitForVisible on a non-iframe frame took ${elapsed}ms`)
       await assert.rejects(
         () => panel.counterInWrongElement().waitHidden({ timeout: 2000 }),
         /<iframe>/,
@@ -498,7 +558,7 @@ export const specs: Spec[] = [
     },
   },
   {
-    name: 'waitFor resolves once a late node is visible',
+    name: 'waitForVisible resolves once a late node is visible',
     async run(ctx) {
       const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
       assert.equal(await form.lateCount(), 0)

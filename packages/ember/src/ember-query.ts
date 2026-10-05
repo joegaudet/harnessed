@@ -1,7 +1,13 @@
 import { click, fillIn, getRootElement, settled } from '@ember/test-helpers'
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
-import { checkedFrom, enabledFrom, nth as withNth, timeoutFor } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import {
+  checkedFrom,
+  enabledFrom,
+  nth as withNth,
+  StrictModeViolation,
+  timeoutFor,
+} from '@harnessed-ts/core'
 import {
   countAll,
   FrameEntryError,
@@ -38,18 +44,20 @@ function toKeyboardInput(key: string): string {
 
 /**
  * Testing Library's `waitFor` retries every throw, but a frame that cannot be
- * entered never becomes enterable — so that refusal ends the wait at once.
- * Not test-helpers' `waitUntil`: its callback is synchronous, and every check
- * here resolves through the async resolver.
+ * entered never becomes enterable, and several matches never become one — so
+ * either ends the wait at once. Not test-helpers' `waitUntil`: its callback is
+ * synchronous, and every check here resolves through the async resolver.
  */
 async function waitUntil(condition: () => Promise<void>, timeout: number): Promise<void> {
-  let refused: FrameEntryError | undefined
+  let refused: FrameEntryError | StrictModeViolation | undefined
   await waitForCondition(
     async () => {
       try {
         await condition()
       } catch (error) {
-        if (!(error instanceof FrameEntryError)) throw error
+        if (!(error instanceof FrameEntryError || error instanceof StrictModeViolation)) {
+          throw error
+        }
         refused = error
       }
     },
@@ -190,7 +198,10 @@ export class EmberQuery extends Query {
       // computed-style walk.
       return isVisibleInLayout(await this.element(options), this.container().ownerDocument)
     } catch (error) {
-      if (error instanceof FrameEntryError) throw error
+      // Several matches is ambiguity, not invisibility: answering false would
+      // claim that nodes on screen are not.
+      if (error instanceof FrameEntryError || error instanceof StrictModeViolation) throw error
+      // Not on screen at all, or an index past the last match.
       return false
     }
   }
@@ -218,21 +229,24 @@ export class EmberQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
+  override async waitForVisible(options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
-    if (state === 'visible') {
-      await waitUntil(async () => {
-        if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
-      }, timeout)
-    } else {
-      await waitUntil(async () => {
-        if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
-          throw new Error('still visible')
-        }
-      }, timeout)
-    }
-    // Whatever made it appear or go may have scheduled more work; hand back a
-    // settled app, as every interaction does.
+    await waitUntil(async () => {
+      if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
+    }, timeout)
+    // Whatever made it appear may have scheduled more work; hand back a settled
+    // app, as every interaction does.
+    await settled()
+  }
+
+  override async waitForHidden(options?: WaitOptions): Promise<void> {
+    const timeout = timeoutFor(options?.timeout)
+    await waitUntil(async () => {
+      if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
+        throw new Error('still visible')
+      }
+    }, timeout)
+    // Whatever made it go may have scheduled more work, as above.
     await settled()
   }
 

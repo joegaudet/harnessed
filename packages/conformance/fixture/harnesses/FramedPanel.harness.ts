@@ -53,11 +53,11 @@ export class CounterHarness extends ComponentHarness {
   }
 
   async waitVisible(options?: WaitOptions): Promise<void> {
-    await this.total.waitFor('visible', options)
+    await this.total.waitForVisible(options)
   }
 
   async waitHidden(options?: WaitOptions): Promise<void> {
-    await this.total.waitFor('hidden', options)
+    await this.total.waitForHidden(options)
   }
 }
 

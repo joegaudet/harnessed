@@ -136,7 +136,7 @@ describe('puppeteer driver', () => {
     )
     await createQuery(puppeteer(page), [], role('button', { name: 'Next' })).click()
     const heading = createQuery(puppeteer(page), [], role('heading', { level: 1 }))
-    await heading.waitFor('visible', { timeout: 10_000 })
+    await heading.waitForVisible({ timeout: 10_000 })
   })
 
   it('reads display: contents as visible when what it contains is', async () => {
@@ -146,7 +146,7 @@ describe('puppeteer driver', () => {
     )
     const group = createQuery(puppeteer(page), [], testId('group'))
     expect(await group.isVisible()).toBe(true)
-    await group.waitFor('visible', { timeout: 1000 })
+    await group.waitForVisible({ timeout: 1000 })
   })
 
   it('restates a frame error with a test id that reads as a replacement pattern', async () => {
