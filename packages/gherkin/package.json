@@ -87,7 +87,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^13.3.0",
+    "@cucumber/cucumber": "~13.2.1",
     "@playwright/test": "^1.62.1",
     "vitest": "^5.0.0"
   },

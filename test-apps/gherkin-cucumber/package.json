@@ -6,7 +6,7 @@
     "test": "start-server-and-test 'FIXTURE_PORT=5188 pnpm --filter conformance serve:fixture' http://localhost:5188 'cucumber-js'"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^13.3.0",
+    "@cucumber/cucumber": "~13.2.1",
     "@harnessed-ts/conformance": "workspace:^",
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/gherkin": "workspace:^",

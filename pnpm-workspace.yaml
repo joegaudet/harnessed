@@ -44,3 +44,9 @@ minimumReleaseAgeExclude:
   - '@wdio/session@10.0.0'
   - '@wdio/spec-reporter@10.0.0'
   - create-wdio@10.0.0
+
+overrides:
+  # 13.3.0 is younger than the minimum release age, and the Cypress preprocessor
+  # asks for ^13 — it would resolve there and fail the frozen install. Lift the
+  # pin once 13.3 is old enough to pass the policy.
+  '@cucumber/cucumber': ~13.2.1

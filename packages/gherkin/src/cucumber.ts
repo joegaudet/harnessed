@@ -9,7 +9,10 @@ import type { PageMap, PageRegistry } from './index'
  * per scenario, so everything here is scenario-scoped by construction.
  *
  * ```ts
- * class AppWorld extends HarnessedWorld<{ checkout: CheckoutPage }, typeof pages> {
+ * const pageMap = { checkout: CheckoutPage }
+ * const pages = definePages(pageMap)
+ *
+ * class AppWorld extends HarnessedWorld<{ checkout: CheckoutPage }, typeof pageMap> {
  *   override pages = pages
  * }
  * setWorldConstructor(AppWorld)
