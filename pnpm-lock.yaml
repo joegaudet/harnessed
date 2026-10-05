@@ -604,6 +604,27 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(@types/node@26.4.1)(@vitest/browser-playwright@5.0.0)(@vitest/ui@5.0.0)(jsdom@30.0.1)(vite@8.3.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0))
 
+  test-apps/puppeteer:
+    devDependencies:
+      '@harnessed-ts/conformance':
+        specifier: workspace:*
+        version: link:../../packages/conformance
+      '@harnessed-ts/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@harnessed-ts/puppeteer':
+        specifier: workspace:*
+        version: link:../../packages/puppeteer
+      '@types/node':
+        specifier: ^26.4.1
+        version: 26.4.1
+      puppeteer:
+        specifier: ^25.12.0
+        version: 25.12.0
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.4.1)(@vitest/browser-playwright@5.0.0)(@vitest/ui@5.0.0)(jsdom@30.0.1)(vite@8.3.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.0))
+
   test-apps/vitest-browser:
     devDependencies:
       '@harnessed-ts/conformance':
