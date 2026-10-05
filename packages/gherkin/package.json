@@ -73,10 +73,10 @@
     "@harnessed-ts/core": "workspace:^"
   },
   "peerDependencies": {
-    "@playwright/test": ">=1.43",
     "@cucumber/cucumber": ">=10",
+    "@playwright/test": ">=1.43",
     "cypress": ">=13",
-    "yadda": ">=2"
+    "yadda": ">=3"
   },
   "scripts": {
     "build": "tsup",
@@ -89,7 +89,8 @@
   "devDependencies": {
     "@cucumber/cucumber": "~13.2.1",
     "@playwright/test": "^1.62.1",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.0",
+    "yadda": "^3.2.0"
   },
   "peerDependenciesMeta": {
     "@playwright/test": {

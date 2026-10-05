@@ -19,6 +19,9 @@ allowBuilds:
   # Its postinstall downloads a ~500 MB app. Only the Cypress runs need it, and
   # they fetch it with `cypress install`, so every other install stays light.
   cypress: false
+  # A postinstall that only prints a funding message; ember-cli-yadda brings it
+  # in through ember-cli-babel 7.
+  core-js: false
 minimumReleaseAgeExclude:
   - '@changesets/apply-release-plan@8.1.0'
   - '@changesets/cli@3.0.2'
@@ -50,3 +53,7 @@ overrides:
   # asks for ^13 — it would resolve there and fail the frozen install. Lift the
   # pin once 13.3 is old enough to pass the policy.
   '@cucumber/cucumber': ~13.2.1
+  # ember-cli-yadda 0.7 (its last release, 2022) depends on ember-cli-htmlbars 5,
+  # which finds the template compiler through an ember-source path Ember 7 no
+  # longer has. The addon has no templates; it only needs the dependency to load.
+  'ember-cli-yadda>ember-cli-htmlbars': ^7.0.1
