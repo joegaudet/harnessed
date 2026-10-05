@@ -17,8 +17,8 @@ const checkout = new CheckoutPage(ember())
 await checkout.goto({ token })
 ```
 
-Works under ember-qunit, on classic and Embroider + Vite builds, Ember 5.12 and
-later.
+Works under ember-qunit, ember-exam, and Vitest browser mode (with
+`ember-vitest`), on classic and Embroider + Vite builds, Ember 5.12 and later.
 Harness files need `@harnessed-ts/core/babel` in the app's Babel config — Ember's
 own decorators are legacy, harnesses are standard.
 

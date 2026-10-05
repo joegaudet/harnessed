@@ -433,9 +433,12 @@ const checkout = new CheckoutPage(ember())
 await checkout.goto({ token })
 ```
 
-| Runner      | How                                                      |
-| ----------- | -------------------------------------------------------- |
-| ember-qunit | as above; `assert.harness(x)` from `@harnessed-ts/qunit` |
+| Runner              | How                                                                                                                                                                                                                                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ember-qunit         | as above; `assert.harness(x)` from `@harnessed-ts/qunit`                                                                                                                                                                                                                                                                       |
+| ember-exam          | use ember-exam's `start` in `test-helper` as usual; harnesses keep no state between tests                                                                                                                                                                                                                                      |
+| Vitest browser mode | [`ember-vitest`](https://github.com/NullVoxPopuli/ember-vitest)'s `renderingTest` / `applicationTest`, describe/it, and `chai.use(harnessedChai)` from `@harnessed-ts/chai`. An app built with Embroider needs two Vitest workarounds — see [`test-apps/ember-vite/vitest.config.mts`](test-apps/ember-vite/vitest.config.mts) |
+| ember-mocha         | not supported: its last release depends on `@ember/test-helpers` 1.x. For BDD-style Ember tests, use Vitest browser mode as above                                                                                                                                                                                              |
 
 Classic and Embroider + Vite builds, Ember 5.12 and later.
 
