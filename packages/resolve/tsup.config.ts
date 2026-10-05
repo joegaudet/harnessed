@@ -9,8 +9,9 @@ export default defineConfig([
     sourcemap: true,
     clean: false,
     treeshake: true,
-    // `import.meta.url` in inject.ts must work from the CJS build too.
-    shims: true,
+    // No `shims`: tsup's import.meta shim runs at load and takes a browser branch
+    // whenever a `document` global exists — a test process under jsdom. The CJS
+    // build finds its directory through __filename instead (see inject.ts).
     external: ['@harnessed-ts/core', '@testing-library/dom'],
   },
   {

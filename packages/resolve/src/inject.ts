@@ -16,9 +16,8 @@ declare const __filename: string | undefined
  * (TestCafe's `clientScripts`, Puppeteer's `addScriptTag`).
  */
 export function injectPath(): string {
-  // A sibling in dist/. The CJS build uses __filename rather than tsup's
-  // import.meta shim, which takes a browser branch whenever a `document` global
-  // exists — as it does in a test process running under jsdom.
+  // A sibling in dist/. The CJS build has __filename; the ESM build has
+  // import.meta.url and no __filename, so each takes its own branch.
   if (typeof __filename === 'string') return join(dirname(__filename), 'inject.global.js')
   return fileURLToPath(new URL('./inject.global.js', import.meta.url))
 }

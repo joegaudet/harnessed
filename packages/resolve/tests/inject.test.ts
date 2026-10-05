@@ -114,16 +114,21 @@ describe('the Node-side inject entry', () => {
     }
   })
 
-  it('finds the injectable build from CJS even when a document global exists', async () => {
+  it('loads and finds the injectable build from CJS under any document global', async () => {
     const { createRequire } = await import('node:module')
     const requireCjs = createRequire(import.meta.url)
+    const entry = requireCjs.resolve('../dist/inject.cjs')
     const saved = (globalThis as Record<string, unknown>).document
-    ;(globalThis as Record<string, unknown>).document = { baseURI: 'http://localhost:3000/' }
-    try {
-      const { injectPath } = requireCjs('../dist/inject.cjs') as { injectPath(): string }
-      expect(injectPath()).toMatch(/dist[/\\]inject\.global\.js$/)
-    } finally {
-      ;(globalThis as Record<string, unknown>).document = saved
+    // Both shapes a jsdom-style global takes; the second broke tsup's shim at load.
+    for (const baseURI of ['http://localhost:3000/', 'about:blank']) {
+      ;(globalThis as Record<string, unknown>).document = { baseURI }
+      try {
+        delete requireCjs.cache[entry]
+        const { injectPath } = requireCjs(entry) as { injectPath(): string }
+        expect(injectPath(), baseURI).toMatch(/dist[/\\]inject\.global\.js$/)
+      } finally {
+        ;(globalThis as Record<string, unknown>).document = saved
+      }
     }
   })
 })
