@@ -1,0 +1,14 @@
+name: conformance-puppeteer
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: puppeteer
+      # puppeteer's own postinstall is not allowed to run (pnpm-workspace.yaml),
+      # so Chrome is installed here, once, for the run.
+      setup: pnpm --filter test-app-puppeteer install:browser
+      test: pnpm --filter test-app-puppeteer test
