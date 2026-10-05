@@ -102,16 +102,23 @@ function envFor(window: Window, options?: HarnessCommandOptions): CypressEnv {
  * enqueue one — so a harness runs entirely inside a single `then`, as plain
  * promises against the AUT document. Cypress waits for the promise and fails the
  * test with whatever it rejects with.
+ *
+ * What it yields is `Yielded`: the result, or the subject when the result is
+ * `undefined`. A `then` cannot yield `undefined` — it passes its own subject,
+ * the AUT window, through instead — so the result travels boxed, and `cy.wrap`
+ * yields it as is, `undefined` included.
  */
 function inPage<T>(
   subject: unknown,
   fn: (env: CypressEnv) => T | PromiseLike<T>,
   options?: HarnessCommandOptions,
 ): Cypress.Chainable<unknown> {
-  return cy.window({ log: false }).then({ timeout: timeoutOf(options) }, async window => {
-    const result = await fn(envFor(window, options))
-    return result === undefined ? subject : result
-  })
+  return cy
+    .window({ log: false })
+    .then({ timeout: timeoutOf(options) }, async window => ({
+      result: await fn(envFor(window, options)),
+    }))
+    .then(({ result }) => cy.wrap(result === undefined ? subject : result, { log: false }))
 }
 
 /**

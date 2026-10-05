@@ -10,13 +10,17 @@ function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Where a relative URL is resolved from. The AUT starts each test on
- * `about:blank`, which resolves nothing, so until it has been somewhere the base
- * is Cypress's `baseUrl` — where `cy.visit` would have resolved it too.
+ * Where a relative URL is resolved from: Cypress's `baseUrl`, as Playwright
+ * resolves against its `baseURL` — never the page the AUT happens to be on, or
+ * the same `goto('step-two')` would land somewhere different from each page.
+ * Without a `baseUrl`, the AUT's own URL is the only base there is; the AUT
+ * starts each test on `about:blank`, which resolves nothing.
  */
 function baseOf(window: Window): string | undefined {
+  const baseUrl = Cypress.config('baseUrl')
+  if (baseUrl !== null && baseUrl !== '') return baseUrl
   if (/^https?:$/.test(window.location.protocol)) return window.location.href
-  return Cypress.config('baseUrl') ?? undefined
+  return undefined
 }
 
 function resolveUrl(window: Window, url: string): URL {

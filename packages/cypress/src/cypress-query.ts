@@ -313,12 +313,43 @@ export class CypressQuery extends Query {
 }
 
 /**
+ * Input types Playwright's `fill()` sets directly rather than types into: their
+ * value is not text, so keystrokes into them mean nothing.
+ */
+const SET_VALUE_TYPES = ['color', 'date', 'time', 'datetime-local', 'month', 'range', 'week']
+
+/**
+ * Sets the value and fires the events a person's edit ends with, as Playwright
+ * does for these types. The setter is the prototype's, not the element's own:
+ * React shadows `value` on the instance to track it, and a write through that
+ * shadow would make the `input` event look like no change at all.
+ */
+function setValue(input: HTMLInputElement, value: string): void {
+  const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), 'value')?.set
+  if (setter === undefined) input.value = value
+  else setter.call(input, value)
+  if (input.value !== value) {
+    throw new Error(
+      `harnessed: "${value}" is not a valid value for an <input type="${input.type}">.`,
+    )
+  }
+  input.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+  input.dispatchEvent(new Event('change', { bubbles: true }))
+}
+
+/**
  * Selects what the field holds and types over it, so the browser fires the
- * trusted input events a person's keystrokes would. Empty means delete.
+ * trusted input events a person's keystrokes would. Empty means delete. A
+ * date, time, colour or range input takes no typing, so its value is set.
  */
 async function realReplace(element: HTMLElement, value: string): Promise<void> {
   element.focus()
   // localName, not instanceof: the element belongs to the AUT's realm, not ours.
+  const input = element as HTMLInputElement
+  if (element.localName === 'input' && SET_VALUE_TYPES.includes(input.type)) {
+    setValue(input, value)
+    return
+  }
   if (element.localName === 'input' || element.localName === 'textarea') {
     ;(element as HTMLInputElement | HTMLTextAreaElement).select()
   } else {

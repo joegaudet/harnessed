@@ -643,15 +643,18 @@ it('signs in', () => {
 ```
 
 - `cy.harness(Cls, fn?, options?)` constructs the harness and awaits `fn`,
-  yielding what it resolves to; without `fn` it yields the harness.
+  yielding what it resolves to; without `fn` it yields the harness. When `fn`
+  resolves nothing, the previous subject passes through, as with `cy.then` —
+  `undefined` at the start of a chain.
   `cy.harnessEnv(env => …)` hands you the env to build several at once. Each
   harness action is written to the command log.
 - `options.timeout` covers the whole callback. It defaults to four times
   `defaultTimeout`, since one flow is several waits in a row.
 - Inside the callback, use `await` and harness methods only — never `cy.*`.
 - `cy.visitPage(Page, params?)` is the Cypress-native way in. In e2e tests,
-  `page.goto()` also works inside the callback. In component tests it refuses,
-  because the spec frame is the page.
+  `page.goto()` also works inside the callback, resolving a relative URL against
+  `baseUrl` (or, without one, the page the AUT is on). In component tests it
+  refuses, because the spec frame is the page.
 - Component tests: `cy.mount(<LoginForm />)`, then `cy.harness(LoginFormHarness, …)`.
   Mount with `cypress/react`. If you compile your own harnesses, add
   `harnessedDecorators()` from `@harnessed-ts/core/vite` to the dev server's Vite
@@ -664,7 +667,9 @@ it('signs in', () => {
 - **Trusted input.** Pass `{ realEvents: true }` to get real browser input through
   the Chrome DevTools Protocol. This covers click, hover, fill, clear, check and
   press. It needs a Chromium-family browser (Chrome, Edge or Electron) and is
-  refused by name elsewhere.
+  refused by name elsewhere. As under Playwright, `fill` sets a date, time,
+  datetime-local, month, week, color or range input's value directly and fires
+  `input` and `change`, since those take no typing.
 - **`selectOption` under `realEvents`** still goes through user-event, because
   CDP input cannot operate a native `<select>` popup.
 - **`press` under `realEvents`** takes single characters and the named keys
