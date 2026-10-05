@@ -1,0 +1,23 @@
+{
+  "name": "test-app-vitest-browser",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/vitest-browser": "workspace:^",
+    "@testing-library/dom": "^10.4.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/browser-playwright": "5.0.0",
+    "playwright": "^1.62.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vitest": "^5.0.0",
+    "vitest-browser-react": "^2.3.0"
+  }
+}
