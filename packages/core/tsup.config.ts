@@ -2,8 +2,8 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig({
   entry: ['src/index.ts', 'src/vite.ts', 'src/babel.ts'],
-  // `import.meta.url` in babel.ts must work from the CJS build Babel loads.
-  shims: true,
+  // No `shims`: tsup's import.meta shim runs at load and breaks under a
+  // jsdom-style `document`. babel.ts uses __filename in the CJS build instead.
   format: ['esm', 'cjs'],
   target: 'es2022',
   dts: false,
