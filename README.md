@@ -99,6 +99,35 @@ export default defineConfig({
 Both your Vite config and your Vitest config need it. Playwright's own transform
 handles decorators already, so its config does not.
 
+**Ember, and any app compiled by Babel with legacy decorators.** Your app's
+`@tracked`, `@service` and `@action` only work with the legacy transform, so it
+cannot switch wholesale. `@harnessed-ts/core/babel` claims harness files only —
+`*.harness.*`, `*.page.*`, and anything under `harness/` or `harnesses/` — and
+lowers them with the standard transform before the app's own plugins run.
+Everything else is left alone. Put it first:
+
+```js
+// babel.config.cjs — Embroider + Vite (the Ember 6 blueprint)
+module.exports = {
+  plugins: [
+    require.resolve('@harnessed-ts/core/babel'),
+    // …the blueprint's plugins, decorator-transforms among them
+  ],
+}
+
+// ember-cli-build.js — classic builds
+const app = new EmberApp(defaults, {
+  babel: { plugins: [require.resolve('@harnessed-ts/core/babel')] },
+})
+```
+
+```bash
+npm i -D @babel/plugin-proposal-decorators @babel/plugin-syntax-typescript @babel/plugin-transform-class-static-block
+```
+
+Pass `[require.resolve('@harnessed-ts/core/babel'), { include: [/\/tests\/pages\//] }]`
+if your harnesses live elsewhere.
+
 > Omitting either step fails at runtime, not at typecheck: every decorated field
 > becomes a syntax error or silently loses its getter.
 

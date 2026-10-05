@@ -1,7 +1,7 @@
 {
   "name": "@harnessed-ts/core",
   "version": "0.3.0",
-  "description": "Component harnesses that run under any test driver — the driver-free core.",
+  "description": "Component harnesses that run under any test driver \u2014 the driver-free core.",
   "keywords": [
     "testing",
     "harness",
@@ -43,6 +43,11 @@
       "types": "./dist/vite.d.ts",
       "import": "./dist/vite.js",
       "require": "./dist/vite.cjs"
+    },
+    "./babel": {
+      "types": "./dist/babel.d.ts",
+      "import": "./dist/babel.js",
+      "require": "./dist/babel.cjs"
     }
   },
   "files": [
@@ -57,7 +62,11 @@
   },
   "peerDependencies": {
     "typescript": ">=5.2",
-    "esbuild": ">=0.21"
+    "esbuild": ">=0.21",
+    "@babel/core": ">=7.23",
+    "@babel/plugin-proposal-decorators": ">=7.23",
+    "@babel/plugin-syntax-typescript": ">=7.23",
+    "@babel/plugin-transform-class-static-block": ">=7.23"
   },
   "peerDependenciesMeta": {
     "typescript": {
@@ -65,16 +74,40 @@
     },
     "esbuild": {
       "optional": true
+    },
+    "@babel/core": {
+      "optional": true
+    },
+    "@babel/plugin-proposal-decorators": {
+      "optional": true
+    },
+    "@babel/plugin-syntax-typescript": {
+      "optional": true
+    },
+    "@babel/plugin-transform-class-static-block": {
+      "optional": true
     }
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "esbuild": "^0.28.2"
+    "esbuild": "^0.28.2",
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-proposal-decorators": "^7.29.7",
+    "@babel/plugin-syntax-typescript": "^7.29.7",
+    "@babel/plugin-transform-class-properties": "^7.29.7",
+    "@babel/plugin-transform-modules-commonjs": "^7.29.7",
+    "@babel/plugin-transform-typescript": "^7.29.7",
+    "@types/babel__core": "^7.20.5",
+    "@types/node": "^26.4.1",
+    "decorator-transforms": "^2.4.0",
+    "vitest": "^5.0.0",
+    "@babel/plugin-transform-class-static-block": "^7.29.7"
   }
 }
