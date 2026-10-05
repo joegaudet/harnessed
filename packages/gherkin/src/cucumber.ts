@@ -18,11 +18,17 @@ import type { PageMap, PageRegistry } from './index'
  * setWorldConstructor(AppWorld)
  * defineParameterType(pageParameter(pages))
  *
- * Before(async function (this: AppWorld) {
- *   this.env = pw(await this.browser.newPage())   // or wdio(browser), …
+ * // One browser for the run; a page per scenario.
+ * let browser: Browser
+ * BeforeAll(async () => {
+ *   browser = await chromium.launch()
  * })
- * Given('I open the {page} page', async function (this: AppWorld, name) {
- *   this.bag.current = this.open(name)
+ * Before(async function (this: AppWorld) {
+ *   this.env = pw(await browser.newPage()) // or wdio(browser), …
+ * })
+ * Given('I open the {page} page', async function (this: AppWorld, name: 'checkout') {
+ *   this.bag.checkout = this.open(name)
+ *   await this.bag.checkout.goto()
  * })
  * ```
  */

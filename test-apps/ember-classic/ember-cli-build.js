@@ -6,6 +6,9 @@ const { Funnel } = require('broccoli-funnel')
 const { MergeTrees } = require('broccoli-merge-trees')
 const webpack = require('webpack')
 
+/** Yadda's installed files, wherever pnpm puts them. */
+const yaddaModule = /[\\/]node_modules[\\/]yadda(?:[\\/]|$)/
+
 module.exports = function (defaults) {
   const app = new EmberApp(defaults, {
     'ember-cli-babel': { enableTypeScriptTransform: true },
@@ -20,12 +23,23 @@ module.exports = function (defaults) {
         // browser never calls. ember-cli-yadda stubs the bare `fs` and `path`
         // Yadda 2 imported; Yadda 3 writes `node:fs`, a scheme webpack will not
         // resolve to a fallback, so strip the scheme first and stub all three.
+        // Both apply only to Yadda's own modules: a `node:` import anywhere else
+        // still fails the build, where it belongs.
         plugins: [
           new webpack.NormalModuleReplacementPlugin(/^node:/, resource => {
-            resource.request = resource.request.replace(/^node:/, '')
+            if (yaddaModule.test(resource.context ?? '')) {
+              resource.request = resource.request.replace(/^node:/, '')
+            }
           }),
         ],
-        resolve: { fallback: { fs: false, path: false, test: false } },
+        module: {
+          rules: [
+            {
+              test: yaddaModule,
+              resolve: { fallback: { fs: false, path: false, test: false } },
+            },
+          ],
+        },
       },
     },
     trees: {

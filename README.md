@@ -902,11 +902,17 @@ export default function (assert: Assert) {
 }
 ```
 
+To add `$page` to a dictionary that defines other terms, pass it in:
+`steps({ pages, env, dictionary: pageDictionary(pages, { dictionary }) })`. Adding
+the term to the same dictionary again returns it unchanged, so a module-level
+dictionary is safe inside the per-scenario default export.
+
 Make the feature an application test (`@setupapplicationtest`, or a default in
 `tests/helpers/yadda-annotations`) so `goto()` drives the router. ember-cli-yadda
 0.7 predates Ember 6: override its `ember-cli-htmlbars` to `^7`, and since Yadda 3
-imports `node:fs`, strip the `node:` scheme in ember-auto-import's webpack config
-— `test-apps/ember-classic/ember-cli-build.js` shows both.
+imports `node:fs`, strip the `node:` scheme for Yadda's modules in
+ember-auto-import's webpack config — `test-apps/ember-classic/ember-cli-build.js`
+shows both.
 
 ## Keeping the conventions
 

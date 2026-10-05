@@ -4,25 +4,68 @@ import { createWorld, pageParameter } from './index'
 import type { PageMap, PageRegistry } from './index'
 
 /**
+ * The page terms each dictionary was given, and the pattern each one matches.
+ * Yadda refuses to define a term twice, and ember-cli-yadda calls a steps
+ * module's default export once per scenario, so extending a module-level
+ * dictionary there would throw from the second scenario on. Copying it instead
+ * is no answer: Yadda's `merge` drops converters.
+ */
+const extended = new WeakMap<Yadda.Dictionary, Map<string, string>>()
+
+/**
  * A Yadda dictionary with a `$page` term built from a page registry — the same
  * names and pattern as `{page}`, so the two cannot drift. A step reading
  * `I open the $page page` matches only a registered name (longest first), and a
  * feature naming an unknown page fails as an undefined step, where the typo is.
  *
  * Pass `dictionary` to add the term to one that already defines others, and
- * `term` to call it something else.
+ * `term` to call it something else. Adding the same term to the same dictionary
+ * again returns it unchanged, so it is safe inside a per-scenario steps function.
  */
 export function pageDictionary<P extends PageMap>(
   registry: PageRegistry<P>,
   options: { term?: string; dictionary?: Yadda.Dictionary } = {},
 ): Yadda.Dictionary {
   const { regexp, transformer } = pageParameter(registry)
+  const term = options.term ?? 'page'
   const dictionary = options.dictionary ?? new Yadda.Dictionary()
-  // An async converter: Yadda counts a callback converter's captures from its
-  // arity, an async one's from its parameters, and only the latter types cleanly.
-  return dictionary.define(options.term ?? 'page', `(${regexp.source})`, async (match: string) =>
-    transformer(match),
-  )
+  const pattern = `(${regexp.source})`
+  const terms = extended.get(dictionary) ?? new Map<string, string>()
+  extended.set(dictionary, terms)
+  const existing = terms.get(term)
+  if (existing === pattern) return dictionary
+  if (existing !== undefined) {
+    throw new Error(
+      `harnessed: this dictionary already defines $${term} with other pages. ` +
+        'Give the second registry its own term.',
+    )
+  }
+  // A callback converter, not an async one: Yadda tells an async converter by
+  // its constructor's name, which a transpiler that rewrites async functions (an
+  // Ember build's Babel) changes. A callback converter's captures are its arity
+  // less the callback, so this names exactly two parameters and checks them;
+  // they are optional, and the rest parameter there, only because Yadda types a
+  // callback converter as any number of captures followed by the callback.
+  const convert = (
+    match?: string | Yadda.ConverterCallback,
+    next?: string | Yadda.ConverterCallback,
+    ..._unused: Array<string | Yadda.ConverterCallback>
+  ): void => {
+    if (typeof match !== 'string' || typeof next !== 'function') {
+      throw new Error(`harnessed: $${term} expects one capture and Yadda's callback.`)
+    }
+    let page: keyof P & string
+    try {
+      page = transformer(match)
+    } catch (error) {
+      next(error)
+      return
+    }
+    next(null, page)
+  }
+  dictionary.define(term, pattern, convert)
+  terms.set(term, pattern)
+  return dictionary
 }
 
 /** What a harnessed Yadda step receives first. */

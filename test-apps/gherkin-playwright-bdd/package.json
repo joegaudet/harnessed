@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bddgen && playwright test"
+    "test": "tsc --noEmit && bddgen && playwright test",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@harnessed-ts/conformance": "workspace:^",
@@ -11,6 +12,8 @@
     "@harnessed-ts/gherkin": "workspace:^",
     "@harnessed-ts/playwright": "workspace:^",
     "@playwright/test": "^1.62.1",
-    "playwright-bdd": "^9.2.1"
+    "@types/node": "^26.4.1",
+    "playwright-bdd": "^9.2.1",
+    "typescript": "^6.0.3"
   }
 }

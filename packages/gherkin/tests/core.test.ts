@@ -1,3 +1,8 @@
+import {
+  CucumberExpression,
+  ParameterType,
+  ParameterTypeRegistry,
+} from '@cucumber/cucumber-expressions'
 import type { EnvConfig } from '@harnessed-ts/core'
 import { describe, expect, it } from 'vitest'
 import { createWorld, definePages, pageParameter } from '../src/index'
@@ -32,6 +37,17 @@ describe('@harnessed-ts/gherkin', () => {
     )
   })
 
+  it('refuses a name the registry only inherits, like constructor', () => {
+    expect(pages.has('constructor')).toBe(false)
+    expect(() => pages.open('constructor' as 'checkout', env)).toThrow(
+      /no page named "constructor"/,
+    )
+  })
+
+  it('refuses an empty registry, whose {page} would match the empty string', () => {
+    expect(() => definePages({})).toThrow(/at least one page/)
+  })
+
   it('matches exactly the registered names, longest first', () => {
     const { regexp } = pageParameter(pages)
     const whole = new RegExp(`^(?:${regexp.source})$`)
@@ -40,6 +56,24 @@ describe('@harnessed-ts/gherkin', () => {
     // An unknown name does not match, so the step is undefined — the typo is
     // reported where it is, in the feature file.
     expect(whole.test('checkuot')).toBe(false)
+  })
+
+  it('rejects an unknown page in a real cucumber expression, and hands back a known one', () => {
+    const { name, regexp, transformer, useForSnippets } = pageParameter(pages)
+    const registry = new ParameterTypeRegistry()
+    registry.defineParameterType(
+      new ParameterType(name, regexp, null, transformer, useForSnippets, false),
+    )
+    const expression = new CucumberExpression('I open the {page} page', registry)
+
+    const known = expression.match('I open the checkout summary page')
+    expect(known?.map(argument => argument.getValue(null))).toEqual(['checkout summary'])
+    expect(expression.match('I open the wizard (beta) page')?.[0]?.getValue(null)).toBe(
+      'wizard (beta)',
+    )
+    // The step does not match, so the runner reports it undefined at the typo.
+    expect(expression.match('I open the checkuot page')).toBeNull()
+    expect(expression.match('I open the  page')).toBeNull()
   })
 
   it('names the parameter type {page} unless told otherwise', () => {

@@ -34,16 +34,22 @@ export interface PageRegistry<P extends PageMap> {
 
 export function definePages<P extends PageMap>(pages: P): PageRegistry<P> {
   const names = (Object.keys(pages) as Array<keyof P & string>).sort((a, b) => b.length - a.length)
+  if (names.length === 0) {
+    // `{page}` is an alternation of the names; with none it is the empty
+    // pattern, which matches anywhere and would let any step through.
+    throw new Error('harnessed: definePages() needs at least one page.')
+  }
+  const has = (name: string): name is keyof P & string =>
+    Object.prototype.hasOwnProperty.call(pages, name)
   return {
     names,
-    has(name: string): name is keyof P & string {
-      return Object.prototype.hasOwnProperty.call(pages, name)
-    },
+    has,
     open(name, env) {
-      const Page = pages[name]
-      if (Page === undefined) {
+      // Own names only: `constructor` and the rest of Object.prototype are not pages.
+      if (!has(name)) {
         throw new Error(`harnessed: no page named "${name}". Registered: ${names.join(', ')}.`)
       }
+      const Page = pages[name]
       return new Page(env) as InstanceType<P[typeof name]>
     },
   }
