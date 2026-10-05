@@ -391,6 +391,53 @@ import config from '../harnessed.config'
 applyConfig(config)
 ```
 
+## Using with Ember
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/ember @harnessed-ts/qunit
+npm i -D @babel/plugin-proposal-decorators @babel/plugin-transform-typescript @babel/plugin-transform-class-static-block
+```
+
+Add `@harnessed-ts/core/babel` to the app's Babel config (see
+[Required setup](#required-setup)), then build envs with `ember()`. Queries
+resolve through the shared resolver; interactions go through
+`@ember/test-helpers`, so each one returns once the app has settled.
+
+```ts
+// tests/test-helper.ts
+import { install } from '@harnessed-ts/qunit'
+install(QUnit)
+
+// a rendering test
+await render(<template><LoginForm /></template>)
+const form = new LoginFormHarness(ember())
+await form.signInAs('ada@example.com', 'hunter2')
+await assert.harness(form.error).isAbsent()
+
+// an application test: goto() drives the router
+const checkout = new CheckoutPage(ember())
+await checkout.goto({ token })
+```
+
+| Runner      | How                                                      |
+| ----------- | -------------------------------------------------------- |
+| ember-qunit | as above; `assert.harness(x)` from `@harnessed-ts/qunit` |
+
+Classic and Embroider + Vite builds, Ember 5.12 and later.
+
+Where Ember differs from the other drivers:
+
+- **Queries start at the test's root element** (`#ember-testing`), for scoped and
+  `{ global: true }` fields alike — not `document.body`, which also holds QUnit's
+  report. Render portals (`{{in-element}}`, modal containers) inside it, or pass
+  `ember({ root })`.
+- **`isVisible()` is a layout check**, as in a browser driver: the tests run in a
+  real browser.
+- **`press()`** inserts printable characters and handles Backspace and Delete;
+  other keys are dispatched as key events only.
+- **`goto()` works in application tests only.** A rendering test has no router;
+  there it refuses with `@ember/test-helpers`' own message.
+
 ## Keeping the conventions
 
 **`@harnessed-ts/eslint-plugin`** turns the authoring rules into a gate:
@@ -428,6 +475,7 @@ your config alone.
 | `@harnessed-ts/dom`           | Testing Library driver + matchers. No React dependency                                                                                |
 | `@harnessed-ts/resolve`       | the shared selector resolver, plus an injectable build for remote drivers. A driver author's dependency                               |
 | `@harnessed-ts/playwright`    | Playwright driver + matchers, `createApiStubs`, `withWorld`                                                                           |
+| `@harnessed-ts/ember`         | Ember driver over `@ember/test-helpers`: rendering and application tests                                                              |
 | `@harnessed-ts/qunit`         | `assert.harness(x)` checks for QUnit and ember-qunit                                                                                  |
 | `@harnessed-ts/chai`          | `expect(x).to.be.absent` and friends for Chai: Mocha, ember-mocha, Cypress, WebdriverIO                                               |
 | `@harnessed-ts/page`          | `PageHarness`                                                                                                                         |

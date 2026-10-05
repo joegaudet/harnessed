@@ -1,0 +1,70 @@
+{
+  "name": "@harnessed-ts/ember",
+  "version": "0.3.0",
+  "description": "Ember driver for @harnessed-ts/core: interactions through @ember/test-helpers, settled after every one. Rendering and application tests.",
+  "keywords": [
+    "testing",
+    "harness",
+    "ember",
+    "ember-qunit",
+    "test-helpers"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/ember"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/resolve": "workspace:^"
+  },
+  "peerDependencies": {
+    "@ember/test-helpers": ">=4",
+    "@testing-library/dom": ">=10"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@ember/test-helpers": "^5.4.3",
+    "@testing-library/dom": "^10.4.1"
+  }
+}
