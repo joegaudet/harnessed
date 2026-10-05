@@ -1,0 +1,18 @@
+{
+  "name": "testcafe-conformance",
+  "private": true,
+  "description": "Runs the @harnessed-ts/conformance catalog under TestCafe with @harnessed-ts/testcafe.",
+  "scripts": {
+    "test": "start-server-and-test 'pnpm serve:fixture' http://127.0.0.1:5184 'pnpm conformance'",
+    "serve:fixture": "FIXTURE_PORT=5184 pnpm --filter conformance serve:fixture --host 127.0.0.1",
+    "conformance": "testcafe"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:*",
+    "@harnessed-ts/core": "workspace:*",
+    "@harnessed-ts/testcafe": "workspace:*",
+    "start-server-and-test": "^3.0.12",
+    "typescript": "^6.0.3",
+    "testcafe": "^3.7.6"
+  }
+}
