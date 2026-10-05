@@ -62,7 +62,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/playwright/src/bdd.ts'],
+    files: ['packages/gherkin/src/playwright-bdd.ts'],
     rules: {
       // Playwright reads a fixture's destructured parameter names to work out its
       // dependencies and rejects a plain parameter, so an empty pattern is the

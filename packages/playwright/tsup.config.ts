@@ -8,5 +8,5 @@ export default defineConfig({
   sourcemap: true,
   clean: false,
   treeshake: true,
-  external: ['@harnessed-ts/core', '@playwright/test'],
+  external: [/^@harnessed-ts\//, '@playwright/test'],
 })
