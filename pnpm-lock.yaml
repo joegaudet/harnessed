@@ -349,6 +349,9 @@ importers:
       testcafe:
         specifier: ^3.7.6
         version: 3.7.6(supports-color@8.1.1)
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.4.1)(@vitest/browser-playwright@5.0.0)(@vitest/ui@5.0.0)(jsdom@30.0.1)(vite@8.3.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))
 
   packages/vitest-browser:
     dependencies:
@@ -765,6 +768,9 @@ importers:
       '@harnessed-ts/testcafe':
         specifier: workspace:*
         version: link:../../packages/testcafe
+      '@types/node':
+        specifier: ^26.4.1
+        version: 26.4.1
       start-server-and-test:
         specifier: ^3.0.12
         version: 3.0.12(supports-color@8.1.1)

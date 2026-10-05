@@ -26,15 +26,38 @@ export type PageOp =
   | 'visible'
   | 'hidden'
   | 'resolve'
+  | 'editable'
   | 'focus'
   | 'blur'
   | 'select'
+
+/**
+ * How a single-target operation looks for its node. `now` answers at once,
+ * with `absent` when nothing matches yet, so the driver polls from Node; `wait`
+ * waits in the page for `options.timeout`, and is what the last poll uses so
+ * that a target never found fails in the resolver's own words.
+ */
+export type Lookup = 'now' | 'wait'
 
 /** What a page call answers with: the value, and the top-level URL it was read at. */
 export interface PageResult {
   value: unknown
   href: string
+  /** A `now` lookup found nothing to answer about yet. */
+  absent?: true
 }
+
+/** What `select` takes: the values to pick, and the target named for its errors. */
+export interface SelectArg {
+  values: string[]
+  target: string
+}
+
+/**
+ * Whether a node can be typed into: `ok`, why not yet (`disabled`, `readonly`),
+ * or — when it is not a text control at all — its tag, as `<div>`.
+ */
+export type Editable = 'ok' | 'disabled' | 'readonly' | `<${string}>`
 
 /**
  * One client function for every read: compiled once per test, called with the
@@ -59,6 +82,7 @@ export function pageCall(
   selector: WireSelector,
   options: PageApiOptions,
   arg: unknown,
+  lookup: Lookup,
 ): PageResult | Promise<PageResult> {
   let api: PageApi | null = null
   let home: Window = window
@@ -89,33 +113,48 @@ export function pageCall(
   const href = home.location.href
   const done = (value: unknown): PageResult => ({ value, href })
 
-  // Playwright's definition, so the two browser drivers agree: a non-empty box
-  // and not `visibility: hidden`. A frame that is itself hidden hides its
-  // content, so the walk carries on through every enclosing iframe.
+  // The shared layout rule, judged in each element's own document, carried on
+  // through every iframe the scope entered: a hidden frame hides its content.
   const isVisible = (element: Element): boolean => {
     let node: Element | null = element
     while (node !== null) {
+      if (!resolver.visible(node)) return false
       const view: Window | null = node.ownerDocument.defaultView
-      if (view === null) return false
-      const box = node.getBoundingClientRect()
-      if (box.width === 0 || box.height === 0) return false
-      if (view.getComputedStyle(node).visibility === 'hidden') return false
-      node = view === home ? null : view.frameElement
+      node = view === null || view === home ? null : view.frameElement
     }
     return true
   }
 
-  const one = (): Promise<Element> => resolver.one(null, scope, selector, options)
+  // A single target. `now` hands back `null` for "not there yet"; the driver
+  // polls, so a wait never holds TestCafe's one command queue for long.
+  const target = (): Promise<Element | null> =>
+    lookup === 'now'
+      ? Promise.resolve(resolver.oneNow(null, scope, selector, options))
+      : resolver.one(null, scope, selector, options)
+  const withTarget = (read: (node: Element) => unknown): Promise<PageResult> =>
+    target().then(node => (node === null ? { value: null, href, absent: true } : done(read(node))))
 
   switch (op) {
     case 'count':
-      return done(resolver.allNow(null, scope, selector, options).length)
-    case 'texts':
-      return done(
-        resolver
-          .allNow(null, scope, selector, options)
-          .map(node => (node.textContent ?? '').trim()),
+      // The scope waits; the count at the end does not.
+      return resolver.count(null, scope, selector, options).then(done)
+    case 'texts': {
+      // `all` ignores `nth`, as any list does; a list read through `nth()` is
+      // that one match, or none.
+      const index = (selector as { nth?: number }).nth
+      return resolver.all(null, scope, selector, options).then(
+        matches => {
+          const listed = index === undefined ? matches : matches.slice(index, index + 1)
+          return done(listed.map(node => (node.textContent ?? '').trim()))
+        },
+        (error: unknown) => {
+          // A scope that never appeared holds nothing, as `count` says; only a
+          // frame that cannot be entered is an error.
+          if ((error as { name?: string } | null)?.name === 'FrameEntryError') throw error
+          return done([])
+        },
       )
+    }
     case 'visible': {
       const node = resolver.oneNow(null, scope, selector, options)
       return done(node !== null && isVisible(node))
@@ -125,74 +164,84 @@ export function pageCall(
       return done(node === null || !isVisible(node))
     }
     case 'text':
-      return one().then(node => done((node.textContent ?? '').trim()))
+      return withTarget(node => (node.textContent ?? '').trim())
     case 'value':
-      return one().then(node => done((node as HTMLInputElement).value ?? ''))
+      return withTarget(node => (node as HTMLInputElement).value ?? '')
     case 'attribute':
-      return one().then(node => done(node.getAttribute(arg as string)))
+      return withTarget(node => node.getAttribute(arg as string))
     case 'enabled':
       // `disabled` is inherited from an ancestor fieldset; `:disabled` sees that
       // where the element's own attribute does not.
-      return one().then(node =>
-        done([
-          (node as HTMLInputElement).disabled === true || node.closest(':disabled') !== null,
-          node.getAttribute('aria-disabled'),
-        ]),
-      )
+      return withTarget(node => [
+        (node as HTMLInputElement).disabled === true || node.closest(':disabled') !== null,
+        node.getAttribute('aria-disabled'),
+      ])
     case 'checked':
-      return one().then(node =>
-        done([node.getAttribute('aria-checked'), Boolean((node as HTMLInputElement).checked)]),
-      )
+      return withTarget(node => [
+        node.getAttribute('aria-checked'),
+        Boolean((node as HTMLInputElement).checked),
+      ])
     case 'selected':
-      return one().then(node =>
-        done(
-          Array.prototype.map.call(
-            (node as HTMLSelectElement).selectedOptions ?? [],
-            (option: HTMLOptionElement) => option.value,
-          ),
+      return withTarget(node =>
+        Array.prototype.map.call(
+          (node as HTMLSelectElement).selectedOptions ?? [],
+          (option: HTMLOptionElement) => option.value,
         ),
       )
     case 'resolve':
-      return one().then(() => done(null))
+      return withTarget(() => null)
+    case 'editable':
+      // TestCafe's typeText types into the first editable descendant of a
+      // wrapper, and does nothing at all to a disabled or readonly control; both
+      // are refused before it is asked.
+      return withTarget((node): Editable => {
+        const control = node.localName === 'input' || node.localName === 'textarea'
+        if (!control && !(node as HTMLElement).isContentEditable) return `<${node.localName}>`
+        if (control && node.matches(':disabled')) return 'disabled'
+        if (control && (node as HTMLInputElement).readOnly) return 'readonly'
+        return 'ok'
+      })
     case 'focus':
-      return one().then(node => {
+      return withTarget(node => {
         ;(node as HTMLElement).focus()
-        return done(null)
+        return null
       })
     case 'blur':
-      return one().then(node => {
+      return withTarget(node => {
         ;(node as HTMLElement).blur()
-        return done(null)
+        return null
       })
     case 'select':
-      return one().then(node => {
+      return withTarget(node => {
+        const { values, target: named } = arg as SelectArg
         if (node.localName !== 'select') {
           throw new Error(
-            `harnessed: selectOption() needs a <select>, but the target is a <${node.localName}>.`,
+            `harnessed: selectOption() needs a <select>, but ${named} is a <${node.localName}>.`,
           )
         }
         const element = node as HTMLSelectElement
         const all: HTMLOptionElement[] = Array.prototype.slice.call(element.options)
-        const wanted = arg as string[]
         // By value first, then by label — what Playwright's selectOption matches.
-        const picked = wanted.map(value => {
+        const picked = values.map(value => {
           const option =
             all.find(candidate => candidate.value === value) ??
             all.find(candidate => candidate.label === value)
-          if (option === undefined) throw new Error(`harnessed: no <option> matches "${value}".`)
+          if (option === undefined) {
+            throw new Error(`harnessed: no <option> of ${named} matches "${value}".`)
+          }
           return option
         })
         if (!element.multiple && picked.length > 1) {
           throw new Error(
-            'harnessed: selectOption() was given several values for a single <select>.',
+            `harnessed: selectOption() was given several values for ${named}, a single-select.`,
           )
         }
         // Replaces the selection, as Playwright does, rather than adding to it.
         for (const option of all) option.selected = picked.includes(option)
         const view = element.ownerDocument.defaultView ?? window
-        element.dispatchEvent(new view.Event('input', { bubbles: true }))
+        element.dispatchEvent(new view.Event('input', { bubbles: true, composed: true }))
         element.dispatchEvent(new view.Event('change', { bubbles: true }))
-        return done(null)
+        return null
       })
   }
 }

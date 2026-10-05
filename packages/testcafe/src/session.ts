@@ -1,8 +1,9 @@
 import { ClientFunction } from 'testcafe'
 import { injectSource, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import type { PageApiOptions, WireSelector } from '@harnessed-ts/resolve/inject'
+import { messageOf, toError } from './errors'
 import { currentHref, NOT_INJECTED, pageCall } from './page-functions'
-import type { PageOp, PageResult } from './page-functions'
+import type { Lookup, PageOp, PageResult } from './page-functions'
 
 /**
  * What the driver keeps per test. Keyed by the controller: TestCafe hands every
@@ -16,14 +17,18 @@ export interface Session {
    * refreshes it afterwards.
    */
   href: string | undefined
-  /** Read one value through the shared resolver. */
+  /**
+   * One round trip through the shared resolver. Under a `now` lookup a
+   * single-target operation answers `absent` rather than waiting for its node.
+   */
   read(
     op: PageOp,
     scope: WireSelector[],
     selector: WireSelector,
     options: PageApiOptions,
-    arg?: unknown,
-  ): Promise<unknown>
+    arg: unknown,
+    lookup: Lookup,
+  ): Promise<PageResult>
   /** Re-read the top-level URL; needs no resolver, so it is safe after a navigation. */
   locate(): Promise<string>
   /**
@@ -32,9 +37,26 @@ export interface Session {
    * and nor may a plain action, whose selector would run in the wrong window.
    */
   exclusive<T>(run: () => Promise<T>): Promise<T>
+  /** The page was replaced: the next call carries the resolver with it. */
+  navigated(): void
 }
 
 const sessions = new WeakMap<TestController, Session>()
+
+/**
+ * The `t` exported by 'testcafe' is one shared proxy that looks up whichever
+ * test is running when it is used. A client function bound to it does not
+ * bind, and a session keyed by it would be shared by every test — so only the
+ * controller a test function is handed, which carries its own test run, will do.
+ */
+export function assertOwnController(t: TestController): void {
+  if (typeof (t as { testRun?: unknown }).testRun !== 'object') {
+    throw new Error(
+      "harnessed: pass the test function's own t, not the one imported from 'testcafe': " +
+        "test('…', async t => { … testcafe(t) … }).",
+    )
+  }
+}
 
 /**
  * The resolver, as TestCafe sees it. Client functions are compiled when they are
@@ -46,21 +68,27 @@ const sessions = new WeakMap<TestController, Session>()
 export function sessionFor(t: TestController): Session {
   const existing = sessions.get(t)
   if (existing !== undefined) return existing
+  assertOwnController(t)
 
   const call = ClientFunction(pageCall, { boundTestRun: t })
   const href = ClientFunction(currentHref, { boundTestRun: t })
   let queue: Promise<unknown> = Promise.resolve()
   // A session starts on a page the driver has not seen, so its first call
-  // carries the resolver. After that the source is sent only when a call finds
-  // a fresh document — the first call after a navigation.
+  // carries the resolver. After that the source is sent only when the page may
+  // be a fresh document — after a navigation, or once the URL has changed — and
+  // when a call finds the resolver missing anyway.
   let carrySource = true
+  const seen = (url: string): void => {
+    if (session.href !== undefined && url !== session.href) carrySource = true
+    session.href = url
+  }
 
   const session: Session = {
     href: undefined,
-    async read(op, scope, selector, options, arg) {
+    async read(op, scope, selector, options, arg, lookup) {
       // The page answers with a value or a promise of one; awaiting flattens both.
       const run = async (source: string | null): Promise<PageResult> =>
-        await call(PAGE_API_GLOBAL, source, op, scope, selector, options, arg)
+        await call(PAGE_API_GLOBAL, source, op, scope, selector, options, arg, lookup)
       let result: PageResult
       try {
         result = await run(carrySource ? injectSource() : null)
@@ -74,15 +102,20 @@ export function sessionFor(t: TestController): Session {
       }
       carrySource = false
       session.href = result.href
-      return result.value
+      return result
     },
     async locate() {
+      let current: string
       try {
-        session.href = await href()
+        current = await href()
       } catch (error) {
         throw toError(error)
       }
-      return session.href
+      seen(current)
+      return current
+    },
+    navigated() {
+      carrySource = true
     },
     exclusive(run) {
       const next = queue.then(run, run)
@@ -92,38 +125,4 @@ export function sessionFor(t: TestController): Session {
   }
   sessions.set(t, session)
   return session
-}
-
-/** A TestCafe error is a plain object; `errMsg` is the page's own error, stringified. */
-interface TestCafeError {
-  code?: string
-  errMsg?: string
-  /** A JavaScript error the page itself raised. */
-  errStack?: string
-}
-
-function messageOf(error: unknown): string {
-  if (error instanceof Error) return error.message
-  const { errMsg } = (error ?? {}) as TestCafeError
-  return typeof errMsg === 'string' ? errMsg : ''
-}
-
-/**
- * TestCafe rejects with plain objects. The specs, the page package and any
- * `catch` in a test expect an `Error` whose message is the cause — for an error
- * thrown in the page that is the resolver's own wording, so a strict-mode
- * violation reads the same here as under every other driver.
- */
-export function toError(error: unknown, context?: string): Error {
-  if (error instanceof Error) return error
-  const { code, errMsg, errStack } = (error ?? {}) as TestCafeError
-  if (typeof errMsg === 'string') {
-    return new Error(errMsg.replace(/^[A-Za-z]*Error: /, ''), { cause: error })
-  }
-  // Anything else is TestCafe's own failure, which it renders from a code; keep
-  // the code and the original object so its report stays reachable.
-  const what = context === undefined ? '' : ` ${context}`
-  const why = code === undefined ? '' : ` (TestCafe error ${code})`
-  const page = typeof errStack === 'string' ? `: the page raised ${errStack.split('\n')[0]}` : ''
-  return new Error(`harnessed: TestCafe failed${what}${why}${page}.`, { cause: error })
 }

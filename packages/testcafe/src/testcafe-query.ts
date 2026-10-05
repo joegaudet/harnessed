@@ -6,14 +6,34 @@ import { encodeSelector, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import type { PageApiOptions } from '@harnessed-ts/resolve/inject'
 import { TESTCAFE_DRIVER } from './driver-id'
 import type { TestCafeEnv } from './env'
+import { toError } from './errors'
 import { toTestCafeKey } from './keys'
 import { pickTarget } from './page-functions'
-import type { PageOp, TargetDependency } from './page-functions'
-import { sessionFor, toError } from './session'
+import type { Editable, PageOp, SelectArg, TargetDependency } from './page-functions'
+import { sessionFor } from './session'
 import type { Session } from './session'
 
 /** How often a wait re-asks the page. Each ask is one short round trip. */
 const POLL_MS = 50
+
+/**
+ * The least TestCafe's own selector is given to find the node actionable. The
+ * resolver has already found it by then, so this only matters when that ate
+ * the whole timeout: a selector timeout of zero would fail at once instead.
+ */
+const ACTIONABLE_MS = 500
+
+/**
+ * The last poll of a single-target read waits in the page this long, so that a
+ * target never found fails in the resolver's own words.
+ */
+const LAST_WAIT_MS = POLL_MS
+
+/** Why a text control cannot be typed into yet. */
+const NOT_EDITABLE: Record<'disabled' | 'readonly', string> = {
+  disabled: 'it is disabled',
+  readonly: 'it is readonly',
+}
 
 /** A frame link's own element: the iframe itself, not the document inside it. */
 function unframed(link: Selector): Selector {
@@ -34,6 +54,11 @@ function delay(ms: number): Promise<void> {
  * `Selector`, whose node must belong to the window TestCafe is switched into —
  * so an action under a frame switches into each iframe in turn, acts, and
  * always switches back.
+ *
+ * TestCafe runs one command at a time, so nothing here waits inside the page
+ * for long: a wait held open there would block every other call until it
+ * settled — including after a caller such as `isReady()` has stopped
+ * listening. Single-target reads poll from Node instead.
  */
 export class TestCafeQuery extends Query {
   constructor(
@@ -52,19 +77,51 @@ export class TestCafeQuery extends Query {
     return sessionFor(this.t)
   }
 
+  private get described(): string {
+    return describeScope(this.scope, this.selector)
+  }
+
   /** Runtime config travels with every call: the page cannot see `configure()`. */
   private pageOptions(timeout?: number): PageApiOptions {
     return { testIdAttribute: getConfig().testIdAttribute, timeout: timeoutFor(timeout) }
   }
 
-  private read<T>(op: PageOp, options?: WaitOptions, arg?: unknown): Promise<T> {
-    return this.session.read(
+  /** One round trip, answered at once or, for `count` and `texts`, once the scope is there. */
+  private async read<T>(op: PageOp, options?: WaitOptions, arg?: unknown): Promise<T> {
+    const result = await this.session.read(
       op,
       this.scope.map(encodeSelector),
       encodeSelector(this.selector),
       this.pageOptions(options?.timeout),
       arg,
-    ) as Promise<T>
+      'now',
+    )
+    return result.value as T
+  }
+
+  /**
+   * A single-target operation, polled from Node until its node is there. The
+   * last poll waits briefly in the page, so a target that never appears fails
+   * with the resolver's own message; a strict violation fails on the first.
+   */
+  private async readOne<T>(op: PageOp, options?: WaitOptions, arg?: unknown): Promise<T> {
+    const timeout = timeoutFor(options?.timeout)
+    const deadline = Date.now() + timeout
+    const scope = this.scope.map(encodeSelector)
+    const selector = encodeSelector(this.selector)
+    for (;;) {
+      const last = Date.now() >= deadline
+      const result = await this.session.read(
+        op,
+        scope,
+        selector,
+        this.pageOptions(last ? LAST_WAIT_MS : timeout),
+        arg,
+        last ? 'wait' : 'now',
+      )
+      if (result.absent !== true) return result.value as T
+      await delay(POLL_MS)
+    }
   }
 
   /** A TestCafe selector for one link of the chain, resolved by the same resolver. */
@@ -93,18 +150,21 @@ export class TestCafeQuery extends Query {
    * violation, a missing target or a frame marker on a non-iframe fail at once
    * with the shared wording. An error thrown inside a TestCafe selector is
    * instead retried until the selector times out, and a strict violation never
-   * becomes a single match by waiting. After that, TestCafe's own selector only
-   * has to wait for the node to be actionable.
+   * becomes a single match by waiting. `prepare` then refuses what TestCafe
+   * would get silently wrong, within the same deadline. After that, TestCafe's
+   * own selector only has to wait for the node to be actionable.
    */
   private act(
-    run: (target: ReturnType<typeof TestCafeSelector>) => Promise<unknown>,
+    run: (target: ReturnType<typeof TestCafeSelector>, deadline: number) => Promise<unknown>,
     options?: WaitOptions,
+    prepare?: (deadline: number, timeout: number) => Promise<void>,
   ): Promise<void> {
     return this.session.exclusive(async () => {
       const timeout = timeoutFor(options?.timeout)
-      const started = Date.now()
-      await this.read('resolve', { timeout })
-      const remaining = Math.max(timeout - (Date.now() - started), 0)
+      const deadline = Date.now() + timeout
+      await this.readOne('resolve', { timeout })
+      if (prepare !== undefined) await prepare(deadline, timeout)
+      const remaining = Math.max(deadline - Date.now(), ACTIONABLE_MS)
       const frames = this.scope.flatMap((link, index) => (link.frame === true ? [index] : []))
       try {
         for (const index of frames) {
@@ -112,15 +172,40 @@ export class TestCafeQuery extends Query {
             this.selectorFor(this.scope.slice(0, index), unframed(this.scope[index]!), remaining),
           )
         }
-        await run(this.selectorFor(this.scope, this.selector, remaining))
+        await run(this.selectorFor(this.scope, this.selector, remaining), deadline)
       } catch (error) {
-        throw toError(error, `to act on ${describeScope(this.scope, this.selector)}`)
+        throw toError(error, `act on ${this.described}`)
       } finally {
         if (frames.length > 0) await this.t.switchToMainWindow()
       }
       // An action can navigate; `currentUrl` must not report the page it left.
       await this.session.locate()
     })
+  }
+
+  /**
+   * Waits until the target can be typed into, and refuses one that never can.
+   * TestCafe's typeText would otherwise do nothing to a disabled or readonly
+   * control, and type into the first editable descendant of a wrapper.
+   */
+  private async editable(action: 'fill' | 'clear', deadline: number, timeout: number) {
+    for (;;) {
+      const state = await this.readOne<Editable>('editable', {
+        timeout: Math.max(deadline - Date.now(), 0),
+      })
+      if (state === 'ok') return
+      if (state !== 'disabled' && state !== 'readonly') {
+        throw new Error(
+          `harnessed: ${action}() needs an <input>, <textarea> or [contenteditable] element, but ${this.described} is a ${state}.`,
+        )
+      }
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `harnessed: ${action}() could not edit ${this.described} within ${timeout}ms: ${NOT_EDITABLE[state]}.`,
+        )
+      }
+      await delay(POLL_MS)
+    }
   }
 
   // --- interactions -------------------------------------------------------
@@ -130,19 +215,32 @@ export class TestCafeQuery extends Query {
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
-    // typeText refuses an empty string, and clearing is the whole intent anyway —
-    // which is also what Playwright's fill('') does.
-    if (value === '') return this.clear(options)
-    // `paste` sets the whole value in one input event, as Playwright's fill does,
-    // rather than typing character by character.
-    await this.act(
-      target => this.t.typeText(target, value, { replace: true, paste: true }),
-      options,
-    )
+    await this.replaceValue('fill', value, options)
   }
 
   override async clear(options?: WaitOptions): Promise<void> {
-    await this.act(target => this.t.selectText(target).pressKey('delete'), options)
+    await this.replaceValue('clear', '', options)
+  }
+
+  /**
+   * Replaces the value, as Playwright's `fill()` does. `paste` sets the whole
+   * value in one input event rather than typing character by character; an
+   * empty value — which typeText refuses — selects what is there and deletes
+   * it, so `fill('')` and `clear()` are one operation with one set of checks.
+   */
+  private async replaceValue(
+    action: 'fill' | 'clear',
+    value: string,
+    options?: WaitOptions,
+  ): Promise<void> {
+    await this.act(
+      target =>
+        value === ''
+          ? this.t.selectText(target).pressKey('delete')
+          : this.t.typeText(target, value, { replace: true, paste: true }),
+      options,
+      (deadline, timeout) => this.editable(action, deadline, timeout),
+    )
   }
 
   override async check(options?: WaitOptions): Promise<void> {
@@ -157,10 +255,18 @@ export class TestCafeQuery extends Query {
    * TestCafe has no select API, and driving a native dropdown by clicking is
    * platform-dependent. The selection is set in the page and `input` and
    * `change` dispatched — what Playwright's selectOption does — replacing any
-   * existing selection of a multi-select.
+   * existing selection of a multi-select. A change handler can navigate, so
+   * this is an action like any other: it takes its turn, and re-reads the URL.
    */
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
-    await this.read('select', options, Array.isArray(value) ? value : [value])
+    const arg: SelectArg = {
+      values: Array.isArray(value) ? value : [value],
+      target: this.described,
+    }
+    await this.session.exclusive(async () => {
+      await this.readOne('select', options, arg)
+      await this.session.locate()
+    })
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
@@ -168,33 +274,38 @@ export class TestCafeQuery extends Query {
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
-    await this.read('focus', options)
+    await this.readOne('focus', options)
   }
 
   override async blur(options?: WaitOptions): Promise<void> {
-    await this.read('blur', options)
+    await this.readOne('blur', options)
   }
 
-  /** Focuses the target first, as Playwright's press does; keys go to the focused node. */
+  /**
+   * Focuses the target first, as Playwright's press does; keys go to the
+   * focused node. The key is checked before anything happens, and the focus
+   * spends only what is left of the one timeout.
+   */
   override async press(key: string, options?: WaitOptions): Promise<void> {
-    await this.act(async () => {
-      await this.read('focus', options)
-      await this.t.pressKey(toTestCafeKey(key))
+    const keys = toTestCafeKey(key)
+    await this.act(async (_target, deadline) => {
+      await this.readOne('focus', { timeout: Math.max(deadline - Date.now(), 0) })
+      await this.t.pressKey(keys)
     }, options)
   }
 
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
-    return this.read<string>('text', options)
+    return this.readOne<string>('text', options)
   }
 
   override async inputValue(options?: WaitOptions): Promise<string> {
-    return this.read<string>('value', options)
+    return this.readOne<string>('value', options)
   }
 
   override async attribute(name: string, options?: WaitOptions): Promise<string | null> {
-    return this.read<string | null>('attribute', options, name)
+    return this.readOne<string | null>('attribute', options, name)
   }
 
   /** Answers at once, as Playwright's does: an absent target is not visible. */
@@ -203,27 +314,25 @@ export class TestCafeQuery extends Query {
   }
 
   override async isEnabled(options?: WaitOptions): Promise<boolean> {
-    const [disabled, ariaDisabled] = await this.read<[boolean, string | null]>('enabled', options)
+    const [disabled, ariaDisabled] = await this.readOne<[boolean, string | null]>(
+      'enabled',
+      options,
+    )
     return enabledFrom(disabled, ariaDisabled)
   }
 
   override async isChecked(options?: WaitOptions): Promise<boolean> {
-    const [aria, native] = await this.read<[string | null, boolean]>('checked', options)
+    const [aria, native] = await this.readOne<[string | null, boolean]>('checked', options)
     return checkedFrom(aria, native)
   }
 
   override async selectedOptions(options?: WaitOptions): Promise<string[]> {
-    return this.read<string[]>('selected', options)
+    return this.readOne<string[]>('selected', options)
   }
 
   // --- waiting ------------------------------------------------------------
 
-  /**
-   * Polls from Node rather than waiting inside the page. TestCafe runs one
-   * command at a time, so a wait held open in the page would block every other
-   * call until it settled — including after a caller such as `isReady()` has
-   * stopped listening.
-   */
+  /** Polls from Node rather than waiting inside the page, as every read here does. */
   override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
     const deadline = Date.now() + timeout
@@ -231,19 +340,18 @@ export class TestCafeQuery extends Query {
     for (;;) {
       if (await this.read<boolean>(op, { timeout })) return
       if (Date.now() >= deadline) {
-        throw new Error(
-          `harnessed: ${describeScope(this.scope, this.selector)} did not become ${state} within ${timeout}ms.`,
-        )
+        throw new Error(`harnessed: ${this.described} did not become ${state} within ${timeout}ms.`)
       }
       await delay(POLL_MS)
     }
   }
 
+  /** Waits for the scope chain, as every driver does; the count itself answers at once. */
   override async count(): Promise<number> {
     return this.read<number>('count')
   }
 
-  /** Every match read in one round trip, trimmed to match `text()`. */
+  /** Every match read in one round trip, once the scope is there; trimmed to match `text()`. */
   override async texts(): Promise<string[]> {
     return this.read<string[]>('texts')
   }
@@ -274,7 +382,10 @@ registerNavigation(TESTCAFE_DRIVER, {
     try {
       await t.navigateTo(target)
     } catch (error) {
-      throw toError(error, `to navigate to ${target}`)
+      throw toError(error, `navigate to ${target}`)
+    } finally {
+      // A new document, which has no resolver until one is sent.
+      session.navigated()
     }
     await session.locate()
   },

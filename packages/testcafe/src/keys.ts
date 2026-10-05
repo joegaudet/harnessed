@@ -28,11 +28,67 @@ const NAMES: Record<string, string> = {
   CapsLock: 'capslock',
 }
 
-/** `Control+Shift+ArrowLeft` → `ctrl+shift+left`. A lone `+` is the plus key. */
-export function toTestCafeKey(key: string): string {
-  if (key === '+') return '+'
-  return key
-    .split('+')
-    .map(part => NAMES[part] ?? (part.length === 1 ? part : part.toLowerCase()))
+/**
+ * Every multi-character name TestCafe's `pressKey` accepts: its modifiers and
+ * its special keys. Anything else it rejects with an opaque "incorrect key"
+ * error, so a name outside this set is refused here first, with the key named.
+ */
+const SUPPORTED = new Set([
+  'alt',
+  'ctrl',
+  'meta',
+  'shift',
+  'backspace',
+  'capslock',
+  'delete',
+  'down',
+  'end',
+  'enter',
+  'esc',
+  'home',
+  'ins',
+  'left',
+  'pagedown',
+  'pageup',
+  'right',
+  'space',
+  'tab',
+  'up',
+])
+
+/** A chord's parts. A lone `+` is the plus key, and `Control++` holds Control over it. */
+function parts(key: string): string[] {
+  if (key.length <= 1) return [key]
+  const plus = key.endsWith('++')
+  const split = (plus ? key.slice(0, -2) : key).split('+')
+  return plus ? [...split, '+'] : split
+}
+
+function toPart(part: string, platform: string): string | undefined {
+  if (part === 'ControlOrMeta') return platform === 'darwin' ? 'meta' : 'ctrl'
+  const code = /^(?:Key([A-Z])|Digit(\d))$/.exec(part)
+  if (code !== null) return (code[1] ?? code[2]!).toLowerCase()
+  const named = NAMES[part]
+  if (named !== undefined) return named
+  if (part.length === 1) return part
+  return SUPPORTED.has(part) ? part : undefined
+}
+
+/**
+ * `Control+Shift+ArrowLeft` → `ctrl+shift+left`, `ControlOrMeta+KeyA` →
+ * `meta+a` on macOS. Throws before anything is pressed for a key TestCafe has
+ * no way to send, such as a function key.
+ */
+export function toTestCafeKey(key: string, platform: string = process.platform): string {
+  return parts(key)
+    .map(part => {
+      const mapped = toPart(part, platform)
+      if (mapped === undefined) {
+        throw new Error(
+          `harnessed: press() cannot send "${key}" under TestCafe, which has no "${part}" key.`,
+        )
+      }
+      return mapped
+    })
     .join('+')
 }

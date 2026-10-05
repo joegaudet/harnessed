@@ -685,9 +685,10 @@ it('signs in', () => {
 npm i -D @harnessed-ts/core @harnessed-ts/testcafe testcafe typescript
 ```
 
-Build the env from the test's controller. There is nothing else to wire: the
-driver installs the shared resolver in each page the first time a harness
-touches it.
+Build the env from the test's controller — the `t` the test function is
+handed, not the `t` exported by `'testcafe'`, which belongs to no one test and
+is refused. There is nothing else to wire: the driver installs the shared
+resolver in each page the first time a harness touches it.
 
 ```ts
 import { testcafe } from '@harnessed-ts/testcafe'
@@ -735,8 +736,14 @@ is no `/matchers` entry. Documented differences:
   and otherwise against the page the test is on.
 - **`selectOption()`** sets the selection and dispatches `input` and `change`,
   as Playwright does, rather than clicking through a native dropdown.
-- **`isVisible()`** uses Playwright's definition: a non-empty box and not
-  `visibility: hidden`, and content inside a hidden frame is hidden.
+- **`fill()` and `clear()`** refuse what TestCafe's `typeText` would get
+  silently wrong: an element that is not an `<input>`, `<textarea>` or
+  `[contenteditable]` (rather than typing into whatever it contains), and,
+  once the timeout runs out, a disabled or readonly control.
+- **`press()`** takes Playwright's key names and chords. TestCafe has no
+  function or numpad keys, so `press('F5')` throws before anything is sent.
+- **`isVisible()`** uses the shared layout rule: a non-empty box that
+  `visibility` does not hide, and content inside a hidden frame is hidden.
 
 ## Keeping the conventions
 

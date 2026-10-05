@@ -4,7 +4,7 @@
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,
-    "types": []
+    "types": ["node"]
   },
   "include": ["*.ts", ".testcaferc.cjs"]
 }

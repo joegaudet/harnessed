@@ -2,7 +2,7 @@
 /* global module, require */
 
 module.exports = {
-  src: ['conformance.test.ts'],
+  src: ['conformance.test.ts', 'driver.test.ts'],
   browsers: ['chrome:headless'],
   hostname: '127.0.0.1',
   disableScreenshots: true,
