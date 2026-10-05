@@ -1,0 +1,22 @@
+name: conformance-ember-exam
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-ember-exam-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: ember-exam
+      # Split into three randomised partitions: no harness may lean on state a
+      # test in another partition left behind.
+      test: pnpm --filter test-app-ember-classic test:exam
