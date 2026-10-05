@@ -74,8 +74,7 @@ step "job: rules"
 isolate
 run "pnpm build" pnpm build
 run "pnpm test:rules" pnpm test:rules
-run "pnpm test:resolve" pnpm test:resolve
-run "pnpm test:core" pnpm test:core
+run "pnpm test:units" pnpm test:units
 
 step "job: conformance-dom"
 isolate

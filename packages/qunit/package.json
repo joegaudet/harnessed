@@ -1,0 +1,73 @@
+{
+  "name": "@harnessed-ts/qunit",
+  "version": "0.3.0",
+  "description": "QUnit assertions for harnesses: `await assert.harness(banner).isAbsent()`, for ember-qunit and any QUnit suite.",
+  "keywords": [
+    "testing",
+    "harness",
+    "qunit",
+    "ember"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/qunit"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "qunit": ">=2.19"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@harnessed-ts/dom": "workspace:^",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/qunit": "^2.19.14",
+    "jsdom": "^30.0.1",
+    "qunit": "^3.0.0",
+    "vitest": "^5.0.0"
+  }
+}
