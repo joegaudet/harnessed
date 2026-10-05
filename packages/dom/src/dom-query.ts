@@ -5,7 +5,7 @@ import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
 import type { DomEnv } from './env'
-import { countAll, FrameEntryError, queryAll, resolveOne, resolveScope } from './resolve'
+import { countAll, FrameEntryError, resolveAll, resolveOne } from '@harnessed-ts/resolve'
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
@@ -82,8 +82,7 @@ export class DomQuery extends Query {
    * index resolution the moment its node leaves the document.
    */
   override async all(): Promise<Query[]> {
-    const root = await resolveScope(this.container, this.scope)
-    return queryAll(root, this.selector).map(
+    return (await resolveAll(this.container, this.scope, this.selector)).map(
       (element, index) =>
         new BoundDomQuery(
           this.user,

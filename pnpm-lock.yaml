@@ -117,6 +117,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      '@harnessed-ts/resolve':
+        specifier: workspace:^
+        version: link:../resolve
     devDependencies:
       '@testing-library/dom':
         specifier: ^10.4.1
@@ -159,6 +162,25 @@ importers:
       '@playwright/test':
         specifier: ^1.62.1
         version: 1.62.1
+
+  packages/resolve:
+    dependencies:
+      '@harnessed-ts/core':
+        specifier: workspace:^
+        version: link:../core
+    devDependencies:
+      '@testing-library/dom':
+        specifier: ^10.4.1
+        version: 10.4.1
+      '@types/node':
+        specifier: ^26.4.1
+        version: 26.4.1
+      jsdom:
+        specifier: ^30.0.1
+        version: 30.0.1
+      vitest:
+        specifier: ^5.0.0
+        version: 5.0.0(@types/node@26.4.1)(jsdom@30.0.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
 
   packages/route:
     dependencies:
