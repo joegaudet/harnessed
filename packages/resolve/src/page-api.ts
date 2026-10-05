@@ -2,6 +2,7 @@ import { configure } from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
 import { PAGE_API_GLOBAL } from './global-name'
 import { countAll, resolveAll, resolveAllNow, resolveOne, resolveOneNow } from './resolve'
+import { isVisibleInLayout } from './visible'
 import { decodeSelector } from './wire'
 import type { WireSelector } from './wire'
 
@@ -61,6 +62,13 @@ export interface PageApi {
   ): Element | null
   /** Every match now. */
   allNow(root: Element | null, scope: Wire[], selector: Wire, options: PageApiOptions): Element[]
+  /**
+   * Whether an element is visible by layout, within its own document only. A
+   * driver that enters frames from outside the page asks about each iframe it
+   * crossed in that iframe's own document, which also covers a cross-origin
+   * frame no in-page walk could cross.
+   */
+  visible(element: Element): boolean
 }
 
 export function createPageApi(document: Document): PageApi {
@@ -100,6 +108,9 @@ export function createPageApi(document: Document): PageApi {
       apply(options)
       const [steps, target] = decode(scope, selector)
       return resolveAllNow(start(root), steps, target)
+    },
+    visible(element) {
+      return isVisibleInLayout(element, element.ownerDocument)
     },
   }
 }
