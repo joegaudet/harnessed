@@ -1,6 +1,6 @@
 import '@harnessed-ts/webdriverio/matchers'
 import { CardsPage, LoginPage } from '@harnessed-ts/conformance'
-import { expect } from '@wdio/globals'
+import { $, expect } from '@wdio/globals'
 import { show } from './stage'
 
 // Matcher *registration* is runner-specific, which is why this is not in the catalog.
@@ -26,6 +26,13 @@ describe('matchers: expect-webdriverio', () => {
     await expect(cards.grid.cardAt(1)).not.toBeSelected()
     await cards.grid.chooseByLabel('Medium')
     await expect(cards.grid.cardAt(1)).toBeSelected()
+  })
+
+  it("leaves expect-webdriverio's own toBeSelected to WebdriverIO elements", async () => {
+    await show('login')
+    // An <option>: WebdriverIO's isSelected, not a harness's aria-pressed.
+    await expect($('option[value="free"]')).toBeSelected()
+    await expect($('option[value="pro"]')).not.toBeSelected()
   })
 
   it('a page is assertable against its own host', async () => {

@@ -581,6 +581,9 @@ it('signs in', async () => {
 })
 ```
 
+On a harness or a query, `toBeSelected` is harnessed's (`aria-pressed`); on a
+WebdriverIO element it is still expect-webdriverio's own (`isSelected`).
+
 Under Mocha you can assert in Chai's style instead: `chai.use(harnessedChai)`
 from `@harnessed-ts/chai`, then `await expect(banner).to.be.absent`.
 
