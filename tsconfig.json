@@ -10,6 +10,7 @@
     { "path": "./packages/puppeteer" },
     { "path": "./packages/webdriverio" },
     { "path": "./packages/cypress" },
+    { "path": "./packages/testcafe" },
     { "path": "./packages/page" },
     { "path": "./packages/chai" },
     { "path": "./packages/qunit" },
