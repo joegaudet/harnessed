@@ -1,0 +1,24 @@
+{
+  "name": "test-app-cypress-e2e",
+  "private": true,
+  "description": "Runs the conformance catalog under @harnessed-ts/cypress, as Cypress e2e specs against the served React fixture.",
+  "type": "module",
+  "scripts": {
+    "serve": "FIXTURE_PORT=5181 pnpm --filter conformance serve:fixture",
+    "cy:run": "cypress run --e2e --browser ${CYPRESS_BROWSER:-electron}",
+    "test": "tsc --noEmit && start-server-and-test serve http-get://localhost:5181 cy:run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@harnessed-ts/chai": "workspace:*",
+    "@harnessed-ts/conformance": "workspace:*",
+    "@harnessed-ts/core": "workspace:*",
+    "@harnessed-ts/cypress": "workspace:*",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.4.1",
+    "cypress": "^16.1.1",
+    "start-server-and-test": "^3.0.12",
+    "typescript": "^6.0.3"
+  }
+}

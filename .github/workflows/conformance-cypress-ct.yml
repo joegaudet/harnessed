@@ -1,0 +1,14 @@
+name: conformance-cypress-ct
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: cypress-ct
+      # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
+      setup: pnpm --filter test-app-cypress-ct exec cypress install
+      test: pnpm --filter test-app-cypress-ct test
+      artifacts: test-apps/cypress-ct/cypress/screenshots
