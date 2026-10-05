@@ -11,7 +11,6 @@ import { classifyConstructed, matchesAnyGlob } from '../src/shared'
 
 // RuleTester drives the rules through ESLint itself, so a rule that crashes on a
 // shape it did not expect fails here rather than in a consumer's build.
-RuleTester.afterAll = () => {}
 RuleTester.describe = describe
 RuleTester.it = it
 

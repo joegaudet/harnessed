@@ -69,6 +69,7 @@ isolate
 run "pnpm format:check" pnpm format:check
 run "pnpm build" pnpm build
 run "pnpm lint" pnpm lint
+run "pnpm typecheck:tools" pnpm typecheck:tools
 
 step "job: rules"
 isolate

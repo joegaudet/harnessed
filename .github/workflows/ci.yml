@@ -27,6 +27,9 @@ jobs:
       - run: pnpm format:check
       - run: pnpm build
       - run: pnpm lint
+      # Tests and build tooling sit outside the package projects (their tsconfigs
+      # include only src), so this is the only gate that typechecks them.
+      - run: pnpm typecheck:tools
 
   typecheck:
     name: typecheck (ts ${{ matrix.typescript }})
