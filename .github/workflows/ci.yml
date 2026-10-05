@@ -49,7 +49,7 @@ jobs:
       - run: pnpm typecheck:packages
 
   rules:
-    name: eslint rule, resolver, and babel tests
+    name: eslint rules and package unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -63,11 +63,10 @@ jobs:
       # which resolves to its build output.
       - run: pnpm build
       - run: pnpm test:rules
-      # The injectable resolver is tested from its built file, as a remote
-      # driver would load it.
-      - run: pnpm test:resolve
-      # The Babel plugin, compiled through both Ember decorator pipelines.
-      - run: pnpm test:core
+      # Package unit tests: the Babel plugin through both Ember decorator
+      # pipelines, the injectable resolver from its built file, and the chai and
+      # qunit assertion adapters.
+      - run: pnpm test:units
 
   conformance-dom:
     name: conformance/dom (node ${{ matrix.node }}, tl-dom ${{ matrix.testing-library }})

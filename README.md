@@ -64,6 +64,10 @@ npm i -D @harnessed-ts/core
 npm i -D @harnessed-ts/dom          # Testing Library / jsdom
 npm i -D @harnessed-ts/playwright   # Playwright
 npm i -D @harnessed-ts/page         # page objects: screens composed of harnesses
+
+# plus the assertion style your runner uses, if it is not `expect.extend`-based
+npm i -D @harnessed-ts/qunit        # assert.harness(x) — ember-qunit, QUnit
+npm i -D @harnessed-ts/chai         # expect(x).to.be.absent — Mocha, ember-mocha, Cypress
 ```
 
 `@harnessed-ts/core` depends on neither driver. A jsdom-only project never resolves
@@ -332,6 +336,30 @@ await expect(price).toReadAs(/^\$/)
 They take a target or a harness. `toReadAs` rather than `toHaveText` because
 Playwright already ships a `toHaveText` for Locators.
 
+The same three checks, with the same failure messages, in the two other
+assertion styles a runner is likely to use. All of them are async — await them.
+
+```ts
+// QUnit (ember-qunit): call install(QUnit) once, from tests/test-helper
+import { install } from '@harnessed-ts/qunit'
+install(QUnit)
+
+await assert.harness(card).isSelected() // .isNotSelected()
+await assert.harness(banner).isAbsent() // .isPresent()
+await assert.harness(price).readsAs(/^\$/) // .doesNotReadAs()
+
+// Chai (Mocha, ember-mocha, Cypress, WebdriverIO under Mocha)
+import { harnessedChai } from '@harnessed-ts/chai'
+chai.use(harnessedChai)
+
+await expect(card).to.be.selected
+await expect(banner).to.be.absent // .not.to.be.absent
+await expect(price).to.readAs(/^\$/)
+```
+
+A failure under QUnit or Chai also reports what was read beside what was wanted,
+so their reporters show both.
+
 ### Configuration
 
 ```ts
@@ -400,6 +428,8 @@ your config alone.
 | `@harnessed-ts/dom`           | Testing Library driver + matchers. No React dependency                                                                                |
 | `@harnessed-ts/resolve`       | the shared selector resolver, plus an injectable build for remote drivers. A driver author's dependency                               |
 | `@harnessed-ts/playwright`    | Playwright driver + matchers, `createApiStubs`, `withWorld`                                                                           |
+| `@harnessed-ts/qunit`         | `assert.harness(x)` checks for QUnit and ember-qunit                                                                                  |
+| `@harnessed-ts/chai`          | `expect(x).to.be.absent` and friends for Chai: Mocha, ember-mocha, Cypress, WebdriverIO                                               |
 | `@harnessed-ts/page`          | `PageHarness`                                                                                                                         |
 | `@harnessed-ts/route`         | deprecated: re-exports `PageHarness` as `RouteHarness` for one release                                                                |
 | `@harnessed-ts/eslint-plugin` | the six rules above                                                                                                                   |
