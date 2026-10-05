@@ -62,10 +62,10 @@ Inspired by [Angular CDK Component Harnesses][cdk],
 | Runner                                                 | Package          | Component harnesses    | Pages and `goto()`        | Assertions              | Gherkin                                            | Frames                           | Conformance in CI  |
 | ------------------------------------------------------ | ---------------- | ---------------------- | ------------------------- | ----------------------- | -------------------------------------------------- | -------------------------------- | ------------------ |
 | [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                      | constructs; no navigation | `expect` matchers       | —                                                  | same-origin                      | ✓                  |
-| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                         | `expect` matchers       | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓                  |
+| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                         | `expect` matchers       | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓ React and Ember  |
 | [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests      | ✓ application tests       | `assert.harness`        | [ember-cli-yadda](#ember-cli-yadda)                | same-origin                      | ✓                  |
 | [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                      | ✓ application tests       | Chai                    | —                                                  | same-origin                      | ✓                  |
-| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`          | Chai                    | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓                  |
+| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`          | Chai                    | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓ React and Ember  |
 | [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness` | constructs; no navigation | Chai                    | —                                                  | same-origin                      | ✓                  |
 | [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                      | ✓                         | `expect` matchers, Chai | —                                                  | cross-origin                     | ✓ BiDi and Classic |
 | [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                      | constructs; no navigation | `expect` matchers       | —                                                  | same-origin, Playwright provider | ✓                  |
@@ -74,7 +74,9 @@ Inspired by [Angular CDK Component Harnesses][cdk],
 
 Every package is `@harnessed-ts/<name>`. "Conformance" means the shared catalog in
 `packages/conformance` runs, unchanged, under that runner on every pull request —
-see [Cross-driver guarantees](#cross-driver-guarantees). "Constructs; no
+see [Cross-driver guarantees](#cross-driver-guarantees). Playwright and Cypress e2e
+run it twice: against the React fixture, and against its Ember port, built by
+Vite and served as an app in a real browser. "Constructs; no
 navigation": a page builds and reads under that runner, but `goto()` and the URL
 members are refused, since there is no address bar (`urlFor()` still works).
 `HarnessedWorld`, the cucumber-js adapter, takes any env; CI runs it with

@@ -12,6 +12,7 @@
     "build": "vite build --mode development",
     "test": "pnpm typecheck && vite build --mode development && testem ci --port 0",
     "start": "vite",
+    "serve:fixture": "vite build --mode development --outDir tmp/serve-${FIXTURE_PORT:-4200} && vite preview --outDir tmp/serve-${FIXTURE_PORT:-4200} --port ${FIXTURE_PORT:-4200} --strictPort",
     "typecheck": "ember-tsc --build",
     "test:vitest": "vitest run --config vitest.config.mts"
   },

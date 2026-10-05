@@ -15,7 +15,8 @@ Each app:
 - registers every entry of `specs`, `pageSpecs` and, if its driver can navigate,
   `urlSpecs` with its runner — no opt-outs;
 - serves or mounts the fixture itself. A browser driver points at the React
-  fixture served by `pnpm --filter conformance serve:fixture`, with a
-  `FIXTURE_PORT` of its own so runners can work side by side;
+  fixture served by `pnpm --filter conformance serve:fixture`, or at its Ember
+  port built and served by `pnpm --filter test-app-ember-vite serve:fixture`,
+  with a `FIXTURE_PORT` of its own so runners can work side by side;
 - has a `test` script, and a `.github/workflows/conformance-<name>.yml` that
   calls the reusable `conformance-driver.yml`.
