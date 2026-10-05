@@ -1,5 +1,7 @@
 packages:
   - 'packages/*'
+  # Private apps that run the conformance catalog under one driver and runner each.
+  - 'test-apps/*'
 
 # core must not silently resolve a driver it does not declare
 strictPeerDependencies: true

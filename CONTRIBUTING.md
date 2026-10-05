@@ -68,6 +68,41 @@ per-driver too. Both exceptions are deliberate; anything else should be shared.
 There is no coverage threshold. A percentage would not catch two drivers disagreeing,
 which is the only bug class that matters here.
 
+## Adding a driver's conformance run
+
+Drivers beyond the two reference ones run the catalog from an app under
+`test-apps/` — see [`test-apps/README.md`](test-apps/README.md). Give the app a
+`test` script and add a caller workflow next to the others:
+
+```yaml
+# .github/workflows/conformance-<name>.yml
+name: conformance-<name>
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: conformance-<name>-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: <name>
+      setup: pnpm --filter <app> exec <install browsers>
+      test: pnpm --filter <app> test
+```
+
+The check reports as `run / conformance/<name>` — that is the string to mark as
+required. Name the app outside the `@harnessed-ts/` scope (`test-app-<name>`):
+changesets versions that scope as one fixed group.
+
+A browser driver serves the React fixture with
+`FIXTURE_PORT=<port> pnpm --filter conformance serve:fixture`; pick a port no
+other runner uses, so they can run side by side locally.
+
 ## Adding a guarantee
 
 1. Add a spec to `specs/catalog.ts` describing the behaviour.
