@@ -4,13 +4,19 @@ import { checkedFrom, describeScope, enabledFrom, timeoutFor } from '@harnessed-
 import type { ElementHandle, KeyInput, Page } from 'puppeteer'
 import { PUPPETEER_DRIVER } from './driver-id'
 import type { PuppeteerEnv } from './env'
-import { countIn, disposeAll, enterFrames, FrameEntryError, oneIn } from './resolve'
+import {
+  countIn,
+  disposeAll,
+  enterFrames,
+  isNavigationError,
+  isNotFound,
+  isResolverOutcome,
+  oneIn,
+  POLL_MS,
+  sleep,
+  visibleInOwnDocument,
+} from './resolve'
 import type { Entered, Lookup } from './resolve'
-
-/** How often a wait re-asks the page. Each ask is one CDP round-trip per frame crossed. */
-const POLL_MS = 50
-
-const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
 
 /** A resolved target: the node, plus the frames crossed to reach it. */
 interface Target {
@@ -23,6 +29,15 @@ interface Target {
  * value is not text, so typing characters into them means nothing.
  */
 const SET_VALUE_TYPES = ['color', 'date', 'time', 'datetime-local', 'month', 'range', 'week']
+
+/** Why an element cannot be typed into yet; each may change while a fill waits. */
+type NotEditable = 'disabled' | 'readonly' | 'unfocused'
+
+const NOT_EDITABLE: Record<NotEditable, string> = {
+  disabled: 'it is disabled',
+  readonly: 'it is readonly',
+  unfocused: 'focus did not land on it',
+}
 
 /**
  * Playwright's chord syntax (`Shift+ArrowLeft`, `Control+a`), which Puppeteer's
@@ -106,17 +121,20 @@ export class PuppeteerQuery extends Query {
     }
   }
 
-  /** Visible means laid out with a size, not `visibility: hidden`, in a visible frame. */
+  /**
+   * Visible by the shared layout rule, in a visible frame. Each iframe crossed is
+   * judged in its own document, which is how a cross-origin frame is covered.
+   */
   private async visible(target: Target): Promise<boolean> {
     for (const element of [...target.entered.hosts, target.element]) {
-      if (!(await element.isVisible())) return false
+      if (!(await visibleInOwnDocument(element))) return false
     }
     return true
   }
 
   /** Whether the target is visible now. Absent is not visible; ambiguity still throws. */
-  private async visibleNow(): Promise<boolean> {
-    const target = await this.resolve('now')
+  private async visibleNow(timeout: number): Promise<boolean> {
+    const target = await this.resolve('now', timeout)
     if (target === null) return false
     try {
       return await this.visible(target)
@@ -131,53 +149,46 @@ export class PuppeteerQuery extends Query {
     await this.withTarget(options, element => element.click())
   }
 
+  override async fill(value: string, options?: WaitOptions): Promise<void> {
+    await this.replaceValue('fill', value, options)
+  }
+
+  override async clear(options?: WaitOptions): Promise<void> {
+    await this.replaceValue('clear', '', options)
+  }
+
   /**
    * Replaces the value, as Playwright's `fill()` does: select what is there, then
    * insert the new text as one input event — or delete the selection, which is
    * what makes `fill('')` clear rather than type nothing.
+   *
+   * The keys go to whatever has focus, so the target must be editable and hold
+   * focus first. Until it does — disabled, readonly, or focus refused — this
+   * waits, within the same timeout as the lookup, and then fails rather than
+   * typing into some other element.
    */
-  override async fill(value: string, options?: WaitOptions): Promise<void> {
+  private async replaceValue(
+    action: 'fill' | 'clear',
+    value: string,
+    options?: WaitOptions,
+  ): Promise<void> {
+    const timeout = timeoutFor(options?.timeout)
+    const deadline = Date.now() + timeout
     await this.withTarget(options, async element => {
-      const mode = await element.evaluate(
-        (node, setValueTypes, next) => {
-          const input = node as HTMLInputElement
-          if (node.localName === 'input' && setValueTypes.includes(input.type)) {
-            input.focus()
-            input.value = next
-            if (input.value !== next) throw new Error(`harnessed: malformed value "${next}".`)
-            node.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
-            node.dispatchEvent(new Event('change', { bubbles: true }))
-            return 'done'
-          }
-          if (node.localName === 'input' || node.localName === 'textarea') {
-            input.focus()
-            input.select()
-            return 'type'
-          }
-          if ((node as HTMLElement).isContentEditable) {
-            ;(node as HTMLElement).focus()
-            const range = node.ownerDocument.createRange()
-            range.selectNodeContents(node)
-            const selection = node.ownerDocument.getSelection()
-            selection?.removeAllRanges()
-            selection?.addRange(range)
-            return 'type'
-          }
+      for (;;) {
+        const mode = await element.evaluate(prepareEdit, SET_VALUE_TYPES, value)
+        if (mode === 'done') return
+        if (mode === 'type') break
+        if (Date.now() >= deadline) {
           throw new Error(
-            `harnessed: fill() needs an <input>, <textarea> or [contenteditable] element, not a <${node.localName}>.`,
+            `harnessed: ${action}() could not edit ${describeScope(this.scope, this.selector)} within ${timeout}ms: ${NOT_EDITABLE[mode]}.`,
           )
-        },
-        SET_VALUE_TYPES,
-        value,
-      )
-      if (mode === 'done') return
+        }
+        await sleep(POLL_MS)
+      }
       if (value === '') await this.page.keyboard.press('Delete')
       else await this.page.keyboard.sendCharacter(value)
     })
-  }
-
-  override async clear(options?: WaitOptions): Promise<void> {
-    await this.fill('', options)
   }
 
   override async check(options?: WaitOptions): Promise<void> {
@@ -287,7 +298,9 @@ export class PuppeteerQuery extends Query {
     try {
       target = await this.target(options?.timeout)
     } catch (error) {
-      if (error instanceof FrameEntryError) throw error
+      // Only the resolver's own "nothing there" is an answer. A broken
+      // connection, an ambiguous match or a frame that cannot be entered is not.
+      if (!isNotFound(error)) throw error
       // Not on screen at all. Prefer isAbsent() to ask this — it answers without
       // first waiting out the retry timeout.
       return false
@@ -327,14 +340,21 @@ export class PuppeteerQuery extends Query {
   /**
    * Polls from Node rather than waiting inside the page: the target can sit
    * behind frames, each its own document, and a navigation mid-wait would take
-   * an in-page wait down with the document it ran in.
+   * an in-page wait down with the document it ran in. A poll a navigation tore
+   * down answers nothing, and the next poll asks the new document.
    */
   override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
     const deadline = Date.now() + timeout
     for (;;) {
       // A frame that cannot be entered never becomes enterable: that throws at once.
-      if ((await this.visibleNow()) === (state === 'visible')) return
+      const visible = await this.visibleNow(Math.max(0, deadline - Date.now())).catch(
+        (error: unknown) => {
+          if (isNavigationError(error)) return undefined
+          throw error
+        },
+      )
+      if (visible !== undefined && visible === (state === 'visible')) return
       if (Date.now() >= deadline) {
         throw new Error(
           `harnessed: ${describeScope(this.scope, this.selector)} did not become ${state} within ${timeout}ms.`,
@@ -349,8 +369,10 @@ export class PuppeteerQuery extends Query {
     try {
       entered = await enterFrames(this.page, this.scope, 'wait')
     } catch (error) {
-      if (error instanceof FrameEntryError) throw error
-      // A frame on the way is not on screen, so nothing inside it can be either.
+      // A frame on the way that is not on screen, or not one frame, holds
+      // nothing: the resolver's own rule for a scope. Anything else, from a
+      // frame that cannot be entered to a broken connection, is an error.
+      if (!isResolverOutcome(error)) throw error
       return 0
     }
     if (entered === null) return 0
@@ -360,6 +382,52 @@ export class PuppeteerQuery extends Query {
       await disposeAll(entered.hosts)
     }
   }
+}
+
+/**
+ * The page side of `fill()`: makes the element ready to take typed text, or
+ * says why it cannot yet. Serialised into the page: no closures.
+ */
+function prepareEdit(
+  node: Element,
+  setValueTypes: string[],
+  next: string,
+): 'done' | 'type' | NotEditable {
+  const element = node as HTMLElement
+  const control = node.localName === 'input' || node.localName === 'textarea'
+  if (!control && !element.isContentEditable) {
+    throw new Error(
+      `harnessed: fill() needs an <input>, <textarea> or [contenteditable] element, not a <${node.localName}>.`,
+    )
+  }
+  const input = node as HTMLInputElement
+  // `:disabled` covers a control disabled by an ancestor fieldset.
+  if (control && node.matches(':disabled')) return 'disabled'
+  if (control && input.readOnly) return 'readonly'
+  element.focus()
+  const active = node.ownerDocument.activeElement
+  // Inside a contenteditable host, focus lands on the host.
+  const host = active as HTMLElement | null
+  const focused =
+    active === node || (!control && host !== null && host.isContentEditable && host.contains(node))
+  if (!focused) return 'unfocused'
+  if (node.localName === 'input' && setValueTypes.includes(input.type)) {
+    input.value = next
+    if (input.value !== next) throw new Error(`harnessed: malformed value "${next}".`)
+    node.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    node.dispatchEvent(new Event('change', { bubbles: true }))
+    return 'done'
+  }
+  if (control) {
+    input.select()
+    return 'type'
+  }
+  const range = node.ownerDocument.createRange()
+  range.selectNodeContents(node)
+  const selection = node.ownerDocument.getSelection()
+  selection?.removeAllRanges()
+  selection?.addRange(range)
+  return 'type'
 }
 
 async function release(target: Target): Promise<void> {

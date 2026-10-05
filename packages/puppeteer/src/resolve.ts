@@ -33,10 +33,15 @@ export type Lookup = 'wait' | 'now'
 
 type ApiMethod = 'one' | 'oneNow'
 
-function apiOptions(timeout?: number): PageApiOptions {
+/** How long a lookup waits before asking a document that is mid-navigation again. */
+export const POLL_MS = 50
+
+export const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms))
+
+function apiOptions(timeout: number): PageApiOptions {
   // The page cannot see this process's configure(), so the config travels with
   // every call.
-  return { testIdAttribute: getConfig().testIdAttribute, timeout: timeoutFor(timeout) }
+  return { testIdAttribute: getConfig().testIdAttribute, timeout }
 }
 
 /** Navigation replaces the document, and the injected resolver goes with it. */
@@ -45,18 +50,77 @@ function isMissingApi(error: unknown): boolean {
 }
 
 /**
- * Runs a call against the injected resolver, injecting it first if the frame's
- * current document has none. Checking inside the call rather than before it
- * keeps the common case to a single round-trip, and cannot be raced by a
- * navigation landing between a check and the call.
+ * What Puppeteer reports when the document a call ran in was torn down under
+ * it — a full-page navigation, or a frame whose parent navigated. Never an
+ * answer about the page: the next document may well have the target.
  */
-async function withApi<T>(frame: Frame, call: () => Promise<T>): Promise<T> {
-  try {
-    return await call()
-  } catch (error) {
-    if (!isMissingApi(error)) throw error
-    await frame.evaluate(injectSource())
-    return call()
+const NAVIGATION_ERRORS = [
+  'Execution context was destroyed',
+  'Cannot find context with specified id',
+  'Execution context is not available in detached frame',
+  'Attempted to use detached Frame',
+]
+
+export function isNavigationError(error: unknown): boolean {
+  return (
+    error instanceof Error && NAVIGATION_ERRORS.some(message => error.message.includes(message))
+  )
+}
+
+/**
+ * Whether the resolver answered "nothing there" after waiting: Testing
+ * Library's own wording when a waited-for query finds nothing. A protocol or
+ * navigation error is not that answer, and must not be read as absence.
+ */
+export function isNotFound(error: unknown): boolean {
+  return error instanceof Error && error.message.startsWith('Unable to find')
+}
+
+/**
+ * Whether the resolver refused a lookup by its own rules — nothing there, an
+ * ambiguous match, an index out of range — as opposed to the connection to
+ * the page failing.
+ */
+export function isResolverOutcome(error: unknown): boolean {
+  if (error instanceof FrameEntryError) return false
+  return isNotFound(error) || (error instanceof Error && error.message.startsWith('harnessed: '))
+}
+
+/**
+ * Runs a call against the injected resolver until `timeout` runs out, handing
+ * it what is left of that budget.
+ *
+ * The resolver is injected when the frame's current document has none.
+ * Checking inside the call rather than before it keeps the common case to a
+ * single round-trip, and cannot be raced by a navigation landing between a
+ * check and the call. A call that a navigation tore down is asked again of the
+ * next document: a lookup that spans a navigation is waiting for that page.
+ */
+async function withApi<T>(
+  frame: Frame,
+  timeout: number | undefined,
+  call: (options: PageApiOptions) => Promise<T>,
+): Promise<T> {
+  const deadline = Date.now() + timeoutFor(timeout)
+  let injected = false
+  for (;;) {
+    try {
+      return await call(apiOptions(Math.max(0, deadline - Date.now())))
+    } catch (error) {
+      const expired = Date.now() >= deadline
+      if (isMissingApi(error) && !(expired && injected)) {
+        injected = true
+        try {
+          await frame.evaluate(injectSource())
+        } catch (injectError) {
+          if (!isNavigationError(injectError) || frame.detached) throw injectError
+        }
+        continue
+      }
+      // A detached frame never comes back; the caller re-enters from the top.
+      if (!isNavigationError(error) || frame.detached || expired) throw error
+      await sleep(POLL_MS)
+    }
   }
 }
 
@@ -76,7 +140,9 @@ function restate(
   if (!error.message.startsWith('harnessed: ')) return error
   // Every path the page describes starts at the first link inside the frame.
   const head = scope[0] ?? selector
-  error.message = error.message.replace(describeSelector(head), describeScope(prefix, head))
+  // A replacer function, so a `$` in a selector is not read as a replacement pattern.
+  const restated = describeScope(prefix, head)
+  error.message = error.message.replace(describeSelector(head), () => restated)
   return error
 }
 
@@ -104,6 +170,23 @@ function pageCount(
   return api.count(null, scope, selector, options)
 }
 
+/** The page side of a visibility check. Serialised into the page: no closures. */
+function pageVisible(element: Element, name: string): boolean {
+  const api = (globalThis as unknown as Record<string, PageApi | undefined>)[name]
+  if (api === undefined) throw new Error(`${name} is not installed`)
+  return api.visible(element)
+}
+
+/**
+ * Whether an element is visible by the shared layout rule, judged within its
+ * own document — the same rule the in-page drivers use, so `display: contents`
+ * reads from what it contains rather than from a box it does not have. The
+ * element was resolved in its frame, so the resolver is already there.
+ */
+export async function visibleInOwnDocument(element: ElementHandle<Element>): Promise<boolean> {
+  return element.evaluate(pageVisible, PAGE_API_GLOBAL)
+}
+
 /**
  * The single node a strict operation acts on, inside one frame. `wait` waits for
  * it to appear; `now` answers `null` when it is not there yet. Both reject at
@@ -120,14 +203,14 @@ export async function oneIn(
   const method: ApiMethod = lookup === 'wait' ? 'one' : 'oneNow'
   let handle
   try {
-    handle = await withApi(frame, () =>
+    handle = await withApi(frame, timeout, options =>
       frame.evaluateHandle(
         pageOne,
         PAGE_API_GLOBAL,
         method,
         scope.map(encodeSelector),
         encodeSelector(selector),
-        apiOptions(timeout),
+        options,
       ),
     )
   } catch (error) {
@@ -147,13 +230,13 @@ export async function countIn(
   timeout?: number,
 ): Promise<number> {
   try {
-    return await withApi(frame, () =>
+    return await withApi(frame, timeout, options =>
       frame.evaluate(
         pageCount,
         PAGE_API_GLOBAL,
         scope.map(encodeSelector),
         encodeSelector(selector),
-        apiOptions(timeout),
+        options,
       ),
     )
   } catch (error) {
