@@ -9,6 +9,7 @@ export {
   resolveScope,
   resolveScopeNow,
 } from './resolve'
+export { isVisibleInLayout } from './visible'
 export { createPageApi, PAGE_API_GLOBAL } from './page-api'
 export type { PageApi, PageApiOptions } from './page-api'
 export { decodeSelector, encodeSelector } from './wire'

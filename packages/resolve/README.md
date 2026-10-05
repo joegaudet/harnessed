@@ -25,6 +25,11 @@ const total = await countAll(container, scope, selector)
 for a runtime that does its own retrying: "not there yet" is `null`, while
 strictness and frame errors still throw.
 
+A driver running in a real browser answers `isVisible()` with
+`isVisibleInLayout(element, home)` — Playwright's rule: a non-empty box that
+`visibility` does not hide, inside frames that are visible too, crossed up to
+`home`.
+
 ## Remote drivers
 
 A driver whose test code runs in Node while the page runs elsewhere (WebdriverIO,

@@ -2,7 +2,19 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig([
   {
-    entry: ['src/index.ts', 'src/inject.ts'],
+    // Built on its own: in-process drivers load this entry in a real browser, so
+    // nothing Node-only from inject.ts may land in a chunk the two share.
+    entry: ['src/index.ts'],
+    format: ['esm', 'cjs'],
+    target: 'es2022',
+    dts: false,
+    sourcemap: true,
+    clean: false,
+    treeshake: true,
+    external: ['@harnessed-ts/core', '@testing-library/dom'],
+  },
+  {
+    entry: ['src/inject.ts'],
     format: ['esm', 'cjs'],
     target: 'es2022',
     dts: false,
