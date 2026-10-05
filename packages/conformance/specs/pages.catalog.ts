@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict'
+import assert from './assert'
 import { registerDriver } from '@harnessed-ts/core'
 import type { EnvConfig, Query } from '@harnessed-ts/core'
 import { CardsPage } from '../fixture/harnesses/pages/cards.page'

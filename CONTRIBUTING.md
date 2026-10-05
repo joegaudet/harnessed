@@ -50,10 +50,11 @@ pnpm test:dom          # @harnessed-ts/dom, under Vitest + jsdom
 pnpm test:playwright   # @harnessed-ts/playwright, against the fixture served by Vite
 ```
 
-The specs live in `specs/catalog.ts` as plain async functions using
-`node:assert/strict`, because one file cannot use both Vitest's `it` and
-Playwright's `test`. Two thin runners enumerate the catalog and register each entry
-with their own runner.
+The specs live in `specs/catalog.ts` as plain async functions, because one file
+cannot use both Vitest's `it` and Playwright's `test`. Thin runners enumerate the
+catalog and register each entry with their own runner. They assert through
+`specs/assert.ts` rather than `node:assert`: some runners execute the specs inside
+a browser, where Node's modules do not exist.
 
 **A behaviour change belongs in the catalog, not in a per-driver test.** That is
 what stops the drivers drifting apart — which is the failure this library exists to
