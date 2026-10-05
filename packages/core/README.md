@@ -1,8 +1,8 @@
 # @harnessed-ts/core
 
 The driver-free core: `Query`, `Selector`, `ComponentHarness`, the decorators, the
-driver registry, `configure()`, the matcher implementations, and the Vite plugin
-that lowers standard decorators.
+driver registry, `configure()`, the matcher implementations, and the Vite and
+Babel plugins that lower standard decorators.
 
 Depends on no driver. Install a driver alongside it —
 [`@harnessed-ts/dom`](https://www.npmjs.com/package/@harnessed-ts/dom) or
@@ -17,6 +17,11 @@ Depends on no driver. Install a driver alongside it —
 // vite.config.ts / vitest.config.ts — the transform they need
 import { harnessedDecorators } from '@harnessed-ts/core/vite'
 export default defineConfig({ plugins: [harnessedDecorators(), react()] })
+```
+
+```js
+// babel.config.cjs — an app whose own decorators are legacy (Ember)
+plugins: [require.resolve('@harnessed-ts/core/babel') /* , …the app's plugins */]
 ```
 
 Full guide, the cross-driver guarantees, and the API: the

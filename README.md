@@ -102,6 +102,43 @@ handles decorators already, so its config does not.
 > Omitting either step fails at runtime, not at typecheck: every decorated field
 > becomes a syntax error or silently loses its getter.
 
+**Ember, and any app compiled by Babel with legacy decorators.** Your app's
+`@tracked`, `@service` and `@action` only work with the legacy transform, so it
+cannot switch wholesale. `@harnessed-ts/core/babel` claims harness files only —
+`*.harness.*` and `*.page.*` files, and anything under a `harness/` or
+`harnesses/` directory, matched against the path relative to the Babel root —
+and compiles them with the standard transform before the app's own decorator
+plugins see them. Everything else is left alone. List it first:
+
+```js
+// babel.config.cjs — Embroider + Vite (the Ember 6+ blueprint)
+module.exports = {
+  plugins: [
+    require.resolve('@harnessed-ts/core/babel'),
+    // …the blueprint's plugins, decorator-transforms among them
+  ],
+}
+
+// ember-cli-build.js — classic builds
+const app = new EmberApp(defaults, {
+  babel: { plugins: [require.resolve('@harnessed-ts/core/babel')] },
+})
+```
+
+```bash
+npm i -D @babel/plugin-proposal-decorators @babel/plugin-transform-typescript @babel/plugin-transform-class-static-block
+```
+
+Babel 7.24 or later. If your harnesses live elsewhere, or your app's own
+legacy-decorated files happen to use one of those names, pass
+`[require.resolve('@harnessed-ts/core/babel'), { include: ['tests/pages/'] }]` —
+strings match as substrings of the root-relative path; RegExps work too.
+
+Type-checking needs the same split: an Ember `tsconfig.json` sets
+`experimentalDecorators`, under which `accessor` fields cannot be decorated.
+Give the harness directory its own `tsconfig.json` extending
+`@harnessed-ts/core/tsconfig.json`, and exclude it from the app's.
+
 ## Cross-driver guarantees
 
 Every item below is backed by a spec in `packages/conformance` that runs, unchanged,
