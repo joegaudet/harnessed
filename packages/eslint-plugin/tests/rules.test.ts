@@ -36,6 +36,11 @@ describe('no-page-or-screen-in-harness', () => {
         code: `const x = screen.getByRole('button')`,
       },
       {
+        name: 'a runner query inside waitForReady is the one sanctioned use',
+        filename: '/repo/harness/routes/checkout.route.ts',
+        code: `class R { async waitForReady() { await browser.$('[data-testid="stage"]').waitForExist() } }`,
+      },
+      {
         name: 'elementBy is the supported escape hatch',
         filename: '/repo/harness/components/Grid.harness.ts',
         code: `class H { cell(i) { return this.elementBy({ type: 'testId', testId: 'c' + i }) } }`,
@@ -53,6 +58,24 @@ describe('no-page-or-screen-in-harness', () => {
         filename: '/repo/harness/components/Form.harness.ts',
         code: `class H { async title() { return screen.getByRole('heading').textContent } }`,
         errors: [{ messageId: 'noPage' }],
+      },
+      {
+        name: 'Cypress commands inside a harness',
+        filename: '/repo/harness/components/Form.harness.ts',
+        code: `class H { title() { return cy.get('h1') } }`,
+        errors: [{ messageId: 'noPage', data: { name: 'cy.get' } }],
+      },
+      {
+        name: 'Ember test-helpers queries inside a harness',
+        filename: '/repo/tests/harness/form.harness.ts',
+        code: `import { find } from '@ember/test-helpers'\nclass H { title() { return find('h1') } }`,
+        errors: [{ messageId: 'noPage' }],
+      },
+      {
+        name: 'WebdriverIO and TestCafe queries inside a harness',
+        filename: '/repo/harness/components/Form.harness.ts',
+        code: `import { Selector } from 'testcafe'\nclass H { a() { return browser.$('h1') } b() { return Selector('h1') } }`,
+        errors: [{ messageId: 'noPage' }, { messageId: 'noPage' }],
       },
     ],
   })
@@ -241,8 +264,93 @@ describe('no-raw-locator-in-test', () => {
         filename: '/repo/tests/checkout.test.ts',
         code: `myThing.locator('x')`,
       },
+      {
+        name: 'Cypress: cy.harness is the supported way in',
+        filename: '/repo/cypress/e2e/checkout.cy.ts',
+        code: `cy.harness(CheckoutPage, page => page.pay())`,
+      },
+      {
+        name: 'Ember: a test-helpers action handed an element is a harness concern, not a raw query',
+        filename: '/repo/tests/acceptance/checkout-test.ts',
+        code: `import { click } from '@ember/test-helpers'\nawait click(element)`,
+      },
+      {
+        name: 'Ember: a same-named function from somewhere else',
+        filename: '/repo/tests/acceptance/checkout-test.ts',
+        code: `import { find } from 'lodash'\nfind(items, 'x')`,
+      },
+      {
+        name: 'jQuery $ is not WebdriverIO',
+        filename: '/repo/tests/legacy.test.ts',
+        code: `import $ from 'jquery'\n$('.price')`,
+      },
+      {
+        name: 'TestCafe: Selector from somewhere else',
+        filename: '/repo/tests/x.test.ts',
+        code: `import { Selector } from './selectors'\nSelector('x')`,
+      },
     ],
     invalid: [
+      {
+        name: 'Cypress: cy.get',
+        filename: '/repo/cypress/e2e/checkout.cy.ts',
+        code: `cy.get('[data-testid="pay"]').click()`,
+        errors: [{ messageId: 'raw', data: { subject: 'cy', method: 'get' } }],
+      },
+      {
+        name: 'Cypress: cy.contains and cy.findByRole',
+        filename: '/repo/cypress/e2e/checkout.cy.ts',
+        code: `cy.contains('Pay'); cy.findByRole('button')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'Ember: find and findAll from @ember/test-helpers',
+        filename: '/repo/tests/acceptance/checkout-test.ts',
+        code: `import { find, findAll } from '@ember/test-helpers'\nfind('.price'); findAll('li')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'Ember: a test-helpers action handed a selector string',
+        filename: '/repo/tests/acceptance/checkout-test.ts',
+        code: `import { click as tap, fillIn } from '@ember/test-helpers'\nawait tap('.pay'); await fillIn('#email', 'a')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'Ember: this.element.querySelector and assert.dom on a selector',
+        filename: '/repo/tests/integration/form-test.gts',
+        code: `this.element.querySelector('.x'); assert.dom('.price').hasText('$1')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'WebdriverIO: $ and $$ from @wdio/globals, and browser.$',
+        filename: '/repo/test/specs/checkout.e2e.ts',
+        code: `import { $, $$, browser } from '@wdio/globals'\n$('#pay'); $$('li'); browser.$('x')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'WebdriverIO: the testrunner globals, with no import',
+        filename: '/repo/test/specs/checkout.e2e.ts',
+        code: `await browser.url('/'); await $('#pay').click()`,
+        errors: [{ messageId: 'raw' }],
+      },
+      {
+        name: 'Puppeteer: page.$, page.$$eval and page.waitForSelector',
+        filename: '/repo/tests/checkout.test.ts',
+        code: `await page.$('#pay'); await page.$$eval('li', n => n.length); await page.waitForSelector('.x')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'TestCafe: Selector from testcafe',
+        filename: '/repo/tests/checkout.test.ts',
+        code: `import { Selector } from 'testcafe'\nawait t.click(Selector('#pay'))`,
+        errors: [{ messageId: 'raw', data: { subject: 'testcafe', method: 'Selector' } }],
+      },
+      {
+        name: 'Vitest browser mode: page.getByRole from vitest/browser',
+        filename: '/repo/tests/form.browser.test.tsx',
+        code: `import { page } from 'vitest/browser'\npage.getByRole('button')`,
+        errors: [{ messageId: 'raw' }],
+      },
       {
         name: 'page.getByRole in a test',
         filename: '/repo/e2e/steps/checkout.steps.ts',

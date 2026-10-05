@@ -1,4 +1,5 @@
 import type { Rule } from 'eslint'
+import { collectImports, rawQueryOf } from '../runner-queries'
 import { dirOptionSchema, harnessDirsOf, inAnyDir, insideMethodNamed } from '../shared'
 
 /**
@@ -14,7 +15,7 @@ const rule: Rule.RuleModule = {
     type: 'problem',
     docs: {
       description:
-        'Disallow `page` and `screen` inside a harness; use a decorated field, a child harness, or elementBy().',
+        "Disallow `page`, `screen`, and any runner's own DOM queries (cy.get, find, $, Selector…) inside a harness; use a decorated field, a child harness, or elementBy().",
       recommended: true,
     },
     schema: [dirOptionSchema],
@@ -31,7 +32,19 @@ const rule: Rule.RuleModule = {
       context.report({ node, messageId: 'noPage', data: { name } })
     }
 
+    const sourceText = context.sourceCode.getText()
+    let imports: ReturnType<typeof collectImports> = new Map()
+
     return {
+      Program(node) {
+        imports = collectImports(node as unknown as Rule.Node)
+      },
+      // A runner's own query: cy.get(…), find(…), browser.$(…), Selector(…).
+      CallExpression(node) {
+        const query = rawQueryOf(node as unknown as Rule.Node, imports, sourceText)
+        if (query === undefined) return
+        report(node as unknown as Rule.Node, query.call)
+      },
       // this.page.…
       MemberExpression(node) {
         const asNode = node as unknown as Rule.Node & typeof node

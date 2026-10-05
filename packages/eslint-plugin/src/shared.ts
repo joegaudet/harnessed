@@ -9,7 +9,9 @@ export interface HarnessRuleOptions {
 }
 
 const DEFAULT_HARNESS_DIRS = ['harness']
-const DEFAULT_TEST_DIRS = ['tests', 'e2e', '__tests__']
+// The runners' own conventions: `tests/` (Ember, Vitest), `test/` (WebdriverIO,
+// TestCafe), `cypress/` and `e2e/` (Cypress, Playwright).
+const DEFAULT_TEST_DIRS = ['tests', 'test', 'e2e', 'cypress', '__tests__']
 
 function normalise(filename: string): string {
   return filename.replaceAll('\\', '/')

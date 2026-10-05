@@ -1,4 +1,5 @@
 import type { Rule } from 'eslint'
+import { collectImports, rawQueryOf } from '../runner-queries'
 import { dirOptionSchema, inAnyDir, testDirsOf } from '../shared'
 
 const LOCATOR_METHODS = new Set([
@@ -18,6 +19,12 @@ const LOCATOR_METHODS = new Set([
   'queryByTestId',
   'queryByText',
   'locator',
+  // Puppeteer
+  '$',
+  '$$',
+  '$eval',
+  '$$eval',
+  'waitForSelector',
 ])
 
 const SUBJECTS = new Set(['page', 'screen'])
@@ -33,7 +40,8 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Disallow raw page/screen locators in tests when a harness should be used.',
+      description:
+        "Disallow a runner's raw DOM queries in tests — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe — when a harness should be used.",
       recommended: true,
     },
     schema: [dirOptionSchema],
@@ -43,7 +51,23 @@ const rule: Rule.RuleModule = {
   },
   create(context) {
     if (!inAnyDir(context.filename, testDirsOf(context))) return {}
+    const sourceText = context.sourceCode.getText()
+    let imports: ReturnType<typeof collectImports> = new Map()
     return {
+      Program(node) {
+        imports = collectImports(node as unknown as Rule.Node)
+      },
+      // Every other runner: cy.get(…), find(…), $(…), Selector(…) and kin.
+      CallExpression(node) {
+        const query = rawQueryOf(node as unknown as Rule.Node, imports, sourceText)
+        if (query === undefined) return
+        context.report({
+          node,
+          messageId: 'raw',
+          data: { subject: query.subject, method: query.method },
+        })
+      },
+      // Playwright, Testing Library, Puppeteer and Vitest browser: page.… / screen.…
       MemberExpression(node) {
         if (node.property.type !== 'Identifier') return
         if (!LOCATOR_METHODS.has(node.property.name)) return
