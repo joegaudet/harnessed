@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "pnpm typecheck && vitest run",
+    "typecheck": "tsc -p ."
   },
   "devDependencies": {
     "@harnessed-ts/conformance": "workspace:^",

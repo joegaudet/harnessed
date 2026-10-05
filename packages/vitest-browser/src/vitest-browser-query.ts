@@ -60,6 +60,19 @@ function locatorFor(element: Element): Locator {
     .harnessedSelector(page.elementLocator(element).selector)
 }
 
+/**
+ * The provider options an action is handed. Every provider action waits for its
+ * element to be actionable, and the Playwright provider's own `actionTimeout`
+ * defaults to none — so without this, an action that can never happen (a click
+ * on a disabled button) hangs until the test itself times out.
+ *
+ * Not an object literal at the call site: the option interfaces are empty until
+ * a provider augments them, and Playwright's is the one that declares `timeout`.
+ */
+function actionOptions(options?: WaitOptions): { timeout: number } {
+  return { timeout: timeoutFor(options?.timeout) }
+}
+
 /** Playwright key names such as `Enter` map onto the user-event `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
   return key.length === 1 ? key : `{${key}}`
@@ -130,36 +143,46 @@ export class VitestBrowserQuery extends Query {
   // --- interactions -------------------------------------------------------
 
   override async click(options?: WaitOptions): Promise<void> {
-    await userEvent.click(target(await this.element(options)))
+    await userEvent.click(target(await this.element(options)), actionOptions(options))
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
     // The provider's fill is Playwright's: it replaces the value, and '' clears.
-    await userEvent.fill(target(await this.element(options)), value)
+    await userEvent.fill(target(await this.element(options)), value, actionOptions(options))
   }
 
   override async clear(options?: WaitOptions): Promise<void> {
-    await userEvent.clear(target(await this.element(options)))
+    // The provider's clear() drops its options, so it could not be given a
+    // timeout; Playwright's clear is fill('') in any case.
+    await userEvent.fill(target(await this.element(options)), '', actionOptions(options))
   }
 
   override async check(options?: WaitOptions): Promise<void> {
     const element = await this.element(options)
-    if (!(element as HTMLInputElement).checked) await userEvent.click(target(element))
+    if (!(element as HTMLInputElement).checked) {
+      await userEvent.click(target(element), actionOptions(options))
+    }
   }
 
   override async uncheck(options?: WaitOptions): Promise<void> {
     const element = await this.element(options)
-    if ((element as HTMLInputElement).checked) await userEvent.click(target(element))
+    if ((element as HTMLInputElement).checked) {
+      await userEvent.click(target(element), actionOptions(options))
+    }
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
     // Playwright's selectOption replaces a multi-select's selection, which is the
     // semantic the shared API promises, so there is nothing to clear first.
-    await userEvent.selectOptions(target(await this.element(options)), value)
+    await userEvent.selectOptions(
+      target(await this.element(options)),
+      value,
+      actionOptions(options),
+    )
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
-    await userEvent.hover(target(await this.element(options)))
+    await userEvent.hover(target(await this.element(options)), actionOptions(options))
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
