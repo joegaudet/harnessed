@@ -1,5 +1,5 @@
 {
-  "name": "testcafe-conformance",
+  "name": "test-app-testcafe",
   "private": true,
   "description": "Runs the @harnessed-ts/conformance catalog under TestCafe with @harnessed-ts/testcafe.",
   "scripts": {

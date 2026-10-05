@@ -11,4 +11,4 @@ jobs:
     with:
       name: testcafe
       # ubuntu-latest ships Google Chrome, which `chrome:headless` launches.
-      test: pnpm --filter testcafe-conformance test
+      test: pnpm --filter test-app-testcafe test
