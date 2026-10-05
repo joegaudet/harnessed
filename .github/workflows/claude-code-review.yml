@@ -7,7 +7,8 @@ name: claude code review
 #
 # Needs the Claude GitHub App installed on the repository, and one repository
 # secret: CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`, billed to a Claude
-# subscription) or ANTHROPIC_API_KEY (billed to the API).
+# subscription) or ANTHROPIC_API_KEY (billed to the API). Without a secret the
+# job is skipped with a notice.
 
 on:
   pull_request:
@@ -32,11 +33,19 @@ jobs:
       pull-requests: write
       issues: read
       id-token: write
+    env:
+      # Secrets cannot appear in an `if`, but a flag derived from them can. Until
+      # one is set, the job passes with a notice instead of failing every PR.
+      HAS_CLAUDE_AUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' || secrets.ANTHROPIC_API_KEY != '' }}
     steps:
-      - uses: actions/checkout@v7
+      - if: env.HAS_CLAUDE_AUTH != 'true'
+        run: echo "::notice::Claude review skipped. Add a CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret to enable it."
+      - if: env.HAS_CLAUDE_AUTH == 'true'
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
-      - uses: anthropics/claude-code-action@v1
+      - if: env.HAS_CLAUDE_AUTH == 'true'
+        uses: anthropics/claude-code-action@v1
         with:
           # Whichever secret is set is used; the other is empty.
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
