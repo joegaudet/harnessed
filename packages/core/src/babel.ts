@@ -120,11 +120,21 @@ const MAY_HAVE_DECORATORS = /\baccessor\s|@[A-Za-z_$(]/
 const TYPESCRIPT = /\.([cm]?ts|tsx|gts)$/
 const JSX = /\.[jt]sx$/
 
+/**
+ * The file's path without the query Vite and Vitest append to module ids
+ * (`?import`, `?v=…`): every check here is about the file, and a query would
+ * hide its extension.
+ */
+function pathOf(filename: string): string {
+  const query = filename.indexOf('?')
+  return query === -1 ? filename : filename.slice(0, query)
+}
+
 /** The path the include patterns see: relative to the Babel root, `/`-separated. */
 function relativePath(options: FileOptions): string | undefined {
   if (options.filename == null) return undefined
   const root = options.root ?? options.cwd ?? process.cwd()
-  return relative(root, options.filename).replace(/\\/g, '/')
+  return relative(root, pathOf(options.filename)).replace(/\\/g, '/')
 }
 
 export default function harnessedBabel(
@@ -157,8 +167,8 @@ export default function harnessedBabel(
           if (filename === undefined || !claims(state.file.opts)) return
           if (!MAY_HAVE_DECORATORS.test(state.file.code)) return
 
-          const typescript = TYPESCRIPT.test(filename)
-          const jsx = JSX.test(filename)
+          const typescript = TYPESCRIPT.test(pathOf(filename))
+          const jsx = JSX.test(pathOf(filename))
           const plugins: unknown[] = []
           // Stripped here, not by the app's transform afterwards: the lowering
           // moves initialisers onto `!` and `declare` fields, which TypeScript

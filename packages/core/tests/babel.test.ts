@@ -182,6 +182,17 @@ describe('@harnessed-ts/core/babel', () => {
     }
   })
 
+  it('sees through a query on the module id, as Vite and Vitest append one', () => {
+    for (const filename of [
+      '/app/tests/harness/login.harness.ts?import',
+      '/app/tests/login.harness.ts?v=3f2a',
+    ]) {
+      const code = compile(realisticHarness, filename)
+      expect(code, filename).not.toMatch(/\baccessor\s+email/)
+      expect(code, filename).not.toMatch(/types-only/)
+    }
+  })
+
   it('matches against the root-relative path: a checkout under harness/ claims nothing', () => {
     // The app's own legacy code, in a repo that happens to live at /home/harness/.
     const root = '/home/harness/my-app'
