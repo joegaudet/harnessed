@@ -25,6 +25,9 @@ on:
         type: string
         default: ''
 
+permissions:
+  contents: read
+
 jobs:
   conformance:
     name: conformance/${{ inputs.name }}
@@ -40,6 +43,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The runners import the built packages, never their sources.
       - run: pnpm build
+      # Inputs are interpolated into the shell. Only caller workflows in this
+      # repository supply them, so that is no wider than editing a workflow.
       - if: inputs.setup != ''
         run: ${{ inputs.setup }}
       - run: ${{ inputs.test }}

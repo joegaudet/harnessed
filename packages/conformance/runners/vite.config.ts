@@ -7,7 +7,7 @@ export default defineConfig({
   // Browsers cannot parse `accessor` fields either.
   plugins: [harnessedDecorators(), react()],
   // FIXTURE_PORT lets several drivers' runners serve the fixture at once.
-  server: { port: Number(process.env.FIXTURE_PORT ?? 5177), strictPort: true },
+  server: { port: Number(process.env.FIXTURE_PORT || 5177), strictPort: true },
   // Every unknown path serves index.html, so /step-two is the app, not a 404.
   appType: 'spa',
 })

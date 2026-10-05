@@ -81,6 +81,11 @@ on:
   pull_request:
   push:
     branches: [main]
+concurrency:
+  group: conformance-<name>-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   run:
     uses: ./.github/workflows/conformance-driver.yml
@@ -89,6 +94,10 @@ jobs:
       setup: pnpm --filter <app> exec <install browsers>
       test: pnpm --filter <app> test
 ```
+
+The check reports as `run / conformance/<name>` — that is the string to mark as
+required. Name the app outside the `@harnessed-ts/` scope (`test-app-<name>`):
+changesets versions that scope as one fixed group.
 
 A browser driver serves the React fixture with
 `FIXTURE_PORT=<port> pnpm --filter conformance serve:fixture`; pick a port no

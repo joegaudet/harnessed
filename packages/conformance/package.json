@@ -7,7 +7,7 @@
     "test": "pnpm test:dom && pnpm test:playwright",
     "test:dom": "vitest run --config runners/vitest.config.ts",
     "test:playwright": "playwright test --config runners/playwright.config.ts",
-    "dev": "vite --config runners/vite.config.ts",
+    "dev": "pnpm serve:fixture",
     "build": "tsup",
     "clean": "rm -rf dist *.tsbuildinfo test-results playwright-report",
     "serve:fixture": "vite --config runners/vite.config.ts"

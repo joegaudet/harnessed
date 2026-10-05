@@ -11,6 +11,8 @@ export default tseslint.config(
       '**/.features-gen/**',
       // Shipped templates, not source: they reference modules a consumer supplies.
       'packages/claude/assets/**',
+      // Each runner's app brings its own tooling and TypeScript project.
+      'test-apps/**',
     ],
   },
   js.configs.recommended,
