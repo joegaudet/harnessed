@@ -12,9 +12,32 @@ allowBuilds:
   # Its postinstall downloads Chrome into every install; the puppeteer test app
   # installs the browser explicitly instead (`install:browser`).
   puppeteer: false
+  # WebdriverIO's Edge and Firefox driver downloaders; the conformance run uses
+  # Chrome, whose driver WebdriverIO fetches at session start instead
+  edgedriver: false
+  geckodriver: false
 minimumReleaseAgeExclude:
   - '@changesets/apply-release-plan@8.1.0'
   - '@changesets/cli@3.0.2'
   - '@changesets/git@4.0.1'
   - '@changesets/read@1.0.1'
   - eslint@10.10.0
+  - '@wdio/config@10.0.0'
+  - '@wdio/logger@10.0.0'
+  - '@wdio/protocols@10.0.0'
+  - '@wdio/repl@10.0.0'
+  - '@wdio/types@10.0.0'
+  - '@wdio/utils@10.0.0'
+  - webdriver@10.0.0
+  - webdriverio@10.0.0
+  - '@wdio/cli@10.0.0'
+  - '@wdio/display-server@10.0.0'
+  - '@wdio/dot-reporter@10.0.0'
+  - '@wdio/globals@10.0.0'
+  - '@wdio/local-runner@10.0.0'
+  - '@wdio/mocha-framework@10.0.0'
+  - '@wdio/reporter@10.0.0'
+  - '@wdio/runner@10.0.0'
+  - '@wdio/session@10.0.0'
+  - '@wdio/spec-reporter@10.0.0'
+  - create-wdio@10.0.0
