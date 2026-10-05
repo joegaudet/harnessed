@@ -1,5 +1,5 @@
 import type { Rule } from 'eslint'
-import { collectImports, rawQueryOf } from '../runner-queries'
+import { isLocatorMethod, queryContextOf, rawQueryOf, type QueryContext } from '../runner-queries'
 import { dirOptionSchema, harnessDirsOf, inAnyDir, insideMethodNamed } from '../shared'
 
 /**
@@ -15,7 +15,7 @@ const rule: Rule.RuleModule = {
     type: 'problem',
     docs: {
       description:
-        "Disallow `page`, `screen`, and any runner's own DOM queries (cy.get, find, $, Selector…) inside a harness; use a decorated field, a child harness, or elementBy().",
+        "Disallow `this.page`, a bare `page`'s queries, `screen`, and any runner's own DOM queries (cy.get, find, $, Selector…) inside a harness; use a decorated field, a child harness, or elementBy().",
       recommended: true,
     },
     schema: [dirOptionSchema],
@@ -32,28 +32,32 @@ const rule: Rule.RuleModule = {
       context.report({ node, messageId: 'noPage', data: { name } })
     }
 
-    const sourceText = context.sourceCode.getText()
-    let imports: ReturnType<typeof collectImports> = new Map()
+    const { sourceCode } = context
+    let queries: QueryContext = { imports: new Map(), wdioGlobals: false }
 
     return {
       Program(node) {
-        imports = collectImports(node as unknown as Rule.Node)
+        queries = queryContextOf(node as unknown as Rule.Node, sourceCode)
       },
       // A runner's own query: cy.get(…), find(…), browser.$(…), Selector(…).
       CallExpression(node) {
-        const query = rawQueryOf(node as unknown as Rule.Node, imports, sourceText)
+        const query = rawQueryOf(node as unknown as Rule.Node, queries, sourceCode)
         if (query === undefined) return
         report(node as unknown as Rule.Node, query.call)
       },
-      // this.page.…
+      // this.page.…, and a bare page's queries: Vitest browser's imported
+      // `page`, jest-puppeteer's global one, page.getByRole / page.$ / …
       MemberExpression(node) {
         const asNode = node as unknown as Rule.Node & typeof node
-        if (
-          node.object.type === 'ThisExpression' &&
-          node.property.type === 'Identifier' &&
-          node.property.name === 'page'
-        ) {
+        if (node.property.type !== 'Identifier') return
+        if (node.object.type === 'ThisExpression' && node.property.name === 'page') {
           report(asNode, 'this.page')
+        } else if (
+          node.object.type === 'Identifier' &&
+          node.object.name === 'page' &&
+          isLocatorMethod(node.property.name)
+        ) {
+          report(asNode, `page.${node.property.name}`)
         }
       },
       // bare `screen.…` from the testing-library global

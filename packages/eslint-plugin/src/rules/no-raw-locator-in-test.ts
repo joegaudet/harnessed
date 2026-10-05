@@ -1,31 +1,12 @@
 import type { Rule } from 'eslint'
-import { collectImports, rawQueryOf } from '../runner-queries'
-import { dirOptionSchema, inAnyDir, testDirsOf } from '../shared'
-
-const LOCATOR_METHODS = new Set([
-  'getByRole',
-  'getByTestId',
-  'getByLabel',
-  'getByLabelText',
-  'getByText',
-  'getByPlaceholder',
-  'getByPlaceholderText',
-  'findByRole',
-  'findByTestId',
-  'findByLabelText',
-  'findByText',
-  'findByPlaceholderText',
-  'queryByRole',
-  'queryByTestId',
-  'queryByText',
-  'locator',
-  // Puppeteer
-  '$',
-  '$$',
-  '$eval',
-  '$$eval',
-  'waitForSelector',
-])
+import { isLocatorMethod, queryContextOf, rawQueryOf, type QueryContext } from '../runner-queries'
+import {
+  dirOptionSchema,
+  harnessDirsOf,
+  inAnyDir,
+  isRunnerSupportFile,
+  testDirsOf,
+} from '../shared'
 
 const SUBJECTS = new Set(['page', 'screen'])
 
@@ -46,31 +27,31 @@ const rule: Rule.RuleModule = {
     },
     schema: [dirOptionSchema],
     messages: {
-      raw: 'Use a harness rather than `{{subject}}.{{method}}(…)`. If the harness cannot answer this, add a public method to it.',
+      raw: 'Use a harness rather than `{{call}}(…)`. If the harness cannot answer this, add a public method to it.',
     },
   },
   create(context) {
     if (!inAnyDir(context.filename, testDirsOf(context))) return {}
-    const sourceText = context.sourceCode.getText()
-    let imports: ReturnType<typeof collectImports> = new Map()
+    // A harness under `tests/harness/` is the harness rule's to police, and its
+    // waitForReady() may legitimately wait on the DOM.
+    if (inAnyDir(context.filename, harnessDirsOf(context))) return {}
+    if (isRunnerSupportFile(context.filename)) return {}
+    const { sourceCode } = context
+    let queries: QueryContext = { imports: new Map(), wdioGlobals: false }
     return {
       Program(node) {
-        imports = collectImports(node as unknown as Rule.Node)
+        queries = queryContextOf(node as unknown as Rule.Node, sourceCode)
       },
       // Every other runner: cy.get(…), find(…), $(…), Selector(…) and kin.
       CallExpression(node) {
-        const query = rawQueryOf(node as unknown as Rule.Node, imports, sourceText)
+        const query = rawQueryOf(node as unknown as Rule.Node, queries, sourceCode)
         if (query === undefined) return
-        context.report({
-          node,
-          messageId: 'raw',
-          data: { subject: query.subject, method: query.method },
-        })
+        context.report({ node, messageId: 'raw', data: { call: query.call } })
       },
       // Playwright, Testing Library, Puppeteer and Vitest browser: page.… / screen.…
       MemberExpression(node) {
         if (node.property.type !== 'Identifier') return
-        if (!LOCATOR_METHODS.has(node.property.name)) return
+        if (!isLocatorMethod(node.property.name)) return
 
         const subject =
           node.object.type === 'Identifier'
@@ -83,7 +64,7 @@ const rule: Rule.RuleModule = {
         context.report({
           node,
           messageId: 'raw',
-          data: { subject, method: node.property.name },
+          data: { call: sourceCode.getText(node) },
         })
       },
     }

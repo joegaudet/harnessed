@@ -45,8 +45,39 @@ describe('no-page-or-screen-in-harness', () => {
         filename: '/repo/harness/components/Grid.harness.ts',
         code: `class H { cell(i) { return this.elementBy({ type: 'testId', testId: 'c' + i }) } }`,
       },
+      {
+        name: 'a bare page query inside waitForReady is the one sanctioned use',
+        filename: '/repo/harness/routes/checkout.route.ts',
+        code: `class R { async waitForReady() { await page.waitForSelector('.stage') } }`,
+      },
+      {
+        name: 'a page method that is not a query',
+        filename: '/repo/harness/routes/checkout.route.ts',
+        code: `class R { async open() { await page.goto('/checkout') } }`,
+      },
     ],
     invalid: [
+      {
+        name: "Vitest browser mode's page inside a harness",
+        filename: '/repo/harness/components/Form.harness.ts',
+        code: `import { page } from 'vitest/browser'\nclass H { title() { return page.getByRole('heading') } }`,
+        errors: [{ messageId: 'noPage', data: { name: 'page.getByRole' } }],
+      },
+      {
+        name: "jest-puppeteer's global page inside a harness",
+        filename: '/repo/harness/components/Form.harness.ts',
+        code: `class H { async title() { await page.$('h1'); return page.$$eval('li', n => n.length) } }`,
+        errors: [
+          { messageId: 'noPage', data: { name: 'page.$' } },
+          { messageId: 'noPage', data: { name: 'page.$$eval' } },
+        ],
+      },
+      {
+        name: 'an aliased WebdriverIO import is reported as written',
+        filename: '/repo/harness/components/Form.harness.ts',
+        code: `import { $ as w$ } from '@wdio/globals'\nclass H { title() { return w$('h1') } }`,
+        errors: [{ messageId: 'noPage', data: { name: 'w$' } }],
+      },
       {
         name: 'this.page in an ordinary method',
         filename: '/repo/harness/routes/checkout.route.ts',
@@ -289,13 +320,124 @@ describe('no-raw-locator-in-test', () => {
         filename: '/repo/tests/x.test.ts',
         code: `import { Selector } from './selectors'\nSelector('x')`,
       },
+      {
+        name: "a harness under tests/harness/ is the harness rule's business, and its waitForReady may wait",
+        filename: '/repo/tests/harness/x.page.ts',
+        code: `import { waitFor } from '@ember/test-helpers'\nclass X { async waitForReady() { await waitFor('[data-test-checkout]') } }`,
+      },
+      {
+        name: 'Cypress: cy.get on an alias reads the alias, not the DOM',
+        filename: '/repo/cypress/e2e/checkout.cy.ts',
+        code: `cy.get('@order').its('total')`,
+      },
+      {
+        name: 'Cypress: support files are plumbing, not tests',
+        filename: '/repo/cypress/support/commands.ts',
+        code: `Cypress.Commands.add('pay', () => cy.get('[data-testid="pay"]').click())`,
+      },
+      {
+        name: 'a local $ is not WebdriverIO, even beside a browser',
+        filename: '/repo/test/scrape.test.ts',
+        code: `import puppeteer from 'puppeteer'\nimport cheerio from 'cheerio'\nconst browser = await puppeteer.launch()\nconst $ = cheerio.load(html)\n$('.price'); await browser.close()`,
+      },
+      {
+        name: 'a CommonJS jQuery $ is not WebdriverIO',
+        filename: '/repo/test/legacy.test.ts',
+        code: `const $ = require('jquery')\nawait browser.url('/'); $('.price')`,
+      },
+      {
+        name: "jQuery's $ inside jest-puppeteer's page.evaluate is not WebdriverIO",
+        filename: '/repo/tests/checkout.test.ts',
+        code: `const tab = await browser.newPage(); await page.goto('/'); await page.evaluate(() => $('.price').text())`,
+      },
+      {
+        name: 'a comment mentioning browser.url does not make the file WebdriverIO',
+        filename: '/repo/tests/checkout.test.ts',
+        code: `// open it with browser.url first\n$('.price')`,
+      },
+      {
+        name: 'Puppeteer: page methods that are not queries',
+        filename: '/repo/tests/checkout.test.ts',
+        code: `await page.goto('/'); await page.click('#pay'); await page.evaluate(() => 1)`,
+      },
+      {
+        name: 'Vitest browser mode: page methods that are not queries',
+        filename: '/repo/tests/form.browser.test.tsx',
+        code: `import { page } from 'vitest/browser'\nawait page.viewport(400, 800); await page.screenshot()`,
+      },
     ],
     invalid: [
       {
         name: 'Cypress: cy.get',
         filename: '/repo/cypress/e2e/checkout.cy.ts',
         code: `cy.get('[data-testid="pay"]').click()`,
-        errors: [{ messageId: 'raw', data: { subject: 'cy', method: 'get' } }],
+        errors: [{ messageId: 'raw', data: { call: 'cy.get' } }],
+      },
+      {
+        name: 'Cypress: a component spec under the cypress/ default directory',
+        filename: '/repo/cypress/component/Form.cy.tsx',
+        code: `cy.get('form')`,
+        errors: [{ messageId: 'raw', data: { call: 'cy.get' } }],
+      },
+      {
+        name: 'Cypress: cy.findAllByRole',
+        filename: '/repo/cypress/e2e/checkout.cy.ts',
+        code: `cy.findAllByRole('row')`,
+        errors: [{ messageId: 'raw', data: { call: 'cy.findAllByRole' } }],
+      },
+      {
+        name: 'Testing Library: the All, query and display-value variants',
+        filename: '/repo/tests/components/Form.test.tsx',
+        code: `screen.getAllByRole('row'); screen.queryAllByText('x'); screen.findAllByTestId('y'); screen.queryByLabelText('Email'); screen.getByDisplayValue('a')`,
+        errors: [
+          { messageId: 'raw', data: { call: 'screen.getAllByRole' } },
+          { messageId: 'raw', data: { call: 'screen.queryAllByText' } },
+          { messageId: 'raw', data: { call: 'screen.findAllByTestId' } },
+          { messageId: 'raw', data: { call: 'screen.queryByLabelText' } },
+          { messageId: 'raw', data: { call: 'screen.getByDisplayValue' } },
+        ],
+      },
+      {
+        name: 'Playwright: page.getByAltText and page.getByTitle',
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: `page.getByAltText('logo'); page.getByTitle('Close')`,
+        errors: [
+          { messageId: 'raw', data: { call: 'page.getByAltText' } },
+          { messageId: 'raw', data: { call: 'page.getByTitle' } },
+        ],
+      },
+      {
+        name: 'Ember: messages name the call as written',
+        filename: '/repo/tests/acceptance/checkout-test.ts',
+        code: `import { find, click as tap } from '@ember/test-helpers'\nfind('.price'); tap('.pay')`,
+        errors: [
+          { messageId: 'raw', data: { call: 'find' } },
+          { messageId: 'raw', data: { call: 'tap' } },
+        ],
+      },
+      {
+        name: 'Ember: this.element.querySelectorAll',
+        filename: '/repo/tests/integration/form-test.gts',
+        code: `this.element.querySelectorAll('li')`,
+        errors: [{ messageId: 'raw', data: { call: 'this.element.querySelectorAll' } }],
+      },
+      {
+        name: 'qunit-dom: the message names assert.dom',
+        filename: '/repo/tests/integration/form-test.gts',
+        code: `assert.dom('.price').exists()`,
+        errors: [{ messageId: 'raw', data: { call: 'assert.dom' } }],
+      },
+      {
+        name: 'WebdriverIO: $$ from the testrunner globals, reported as written',
+        filename: '/repo/test/specs/checkout.e2e.ts',
+        code: `await browser.url('/'); await $$('li')`,
+        errors: [{ messageId: 'raw', data: { call: '$$' } }],
+      },
+      {
+        name: 'WebdriverIO: an aliased import',
+        filename: '/repo/test/specs/checkout.e2e.ts',
+        code: `import { $ as w$ } from 'webdriverio'\nw$('#pay')`,
+        errors: [{ messageId: 'raw', data: { call: 'w$' } }],
       },
       {
         name: 'Cypress: cy.contains and cy.findByRole',
@@ -343,7 +485,7 @@ describe('no-raw-locator-in-test', () => {
         name: 'TestCafe: Selector from testcafe',
         filename: '/repo/tests/checkout.test.ts',
         code: `import { Selector } from 'testcafe'\nawait t.click(Selector('#pay'))`,
-        errors: [{ messageId: 'raw', data: { subject: 'testcafe', method: 'Selector' } }],
+        errors: [{ messageId: 'raw', data: { call: 'Selector' } }],
       },
       {
         name: 'Vitest browser mode: page.getByRole from vitest/browser',
