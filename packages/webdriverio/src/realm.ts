@@ -60,18 +60,19 @@ const preloaded = new WeakSet<WebdriverIO.Browser>()
  *
  * Under BiDi the session also registers the resolver as a preload script, once:
  * every document opened afterwards — frames included — starts with it, and
- * navigation stops costing an injection at all.
+ * navigation stops costing an injection at all. Registering takes 300ms or
+ * more, so it is started and never awaited: no query waits on it. Until it
+ * lands — and in any document it misses — the injection below still happens.
  */
 async function inject(site: Site): Promise<void> {
   const { browser } = site
   const source = injectSource()
   if (browser.isBidi && !preloaded.has(browser)) {
     preloaded.add(browser)
-    try {
-      await browser.scriptAddPreloadScript({ functionDeclaration: `() => {\n${source}\n}` })
-    } catch {
-      // Only an optimisation: without it, each document is injected on first use.
-    }
+    // Only an optimisation: without it, each document is injected on first use.
+    browser
+      .scriptAddPreloadScript({ functionDeclaration: `() => {\n${source}\n}` })
+      .catch(() => undefined)
   }
   if (site.context === undefined) await browser.executeScript(source, [])
   else await site.context.execute(source)

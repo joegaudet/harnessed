@@ -1,19 +1,11 @@
-import { pageSpecs, specs, urlSpecs, viewSearch } from '@harnessed-ts/conformance'
-import type { ConformanceCtx, View } from '@harnessed-ts/conformance'
+import { pageSpecs, specs, urlSpecs } from '@harnessed-ts/conformance'
+import type { ConformanceCtx } from '@harnessed-ts/conformance'
 import { wdio } from '@harnessed-ts/webdriverio'
 import { browser } from '@wdio/globals'
+import { show } from './stage'
 
 function context(): ConformanceCtx {
-  return {
-    async show(view: View) {
-      await browser.url(`/${viewSearch(view)}`)
-      // The fixture's stage is the readiness signal both reference runners wait on.
-      await browser.waitUntil(() =>
-        browser.execute(() => document.querySelector('[data-testid="stage"]') !== null),
-      )
-      return wdio(browser)
-    },
-  }
+  return { show }
 }
 
 describe('conformance: webdriverio driver', () => {

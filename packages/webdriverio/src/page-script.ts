@@ -148,6 +148,11 @@ export async function pageScript(
           element,
           multiple: element.multiple,
           selected: [...(element.selectedOptions ?? [])].map(option => option.value),
+          // What each option can be chosen by: its value, or the label it shows.
+          options: [...(element.options ?? [])].map(option => ({
+            value: option.value,
+            label: option.label.trim(),
+          })),
         }
         break
       }

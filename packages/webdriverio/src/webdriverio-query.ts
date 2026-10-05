@@ -19,6 +19,13 @@ import type { Site } from './realm'
 /** How often a wait re-asks the page. Each ask is one WebDriver round-trip. */
 const POLL_MS = 50
 
+/**
+ * How `isVisible` asks WebDriver. A transparent node is still laid out, takes
+ * clicks and is visible to Playwright and the other layout drivers, so opacity
+ * does not count; WebdriverIO's default would call `opacity: 0` hidden.
+ */
+const DISPLAYED = { opacityProperty: false } as const
+
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 /**
@@ -32,6 +39,37 @@ function isTransient(error: unknown): boolean {
   return /stale element|element click intercepted|element not interactable/i.test(
     `${name} ${message}`,
   )
+}
+
+/** An option of a select, as the page reports it: its value and its trimmed label. */
+interface SelectOption {
+  value: string
+  label: string
+}
+
+/**
+ * The values of the options `asked` names. Each string matches an option's
+ * value first and its visible label second, as Playwright's and user-event's
+ * selectOption do; a string that matches neither is an error, not a no-op.
+ */
+function optionValues(
+  asked: readonly string[],
+  options: readonly SelectOption[],
+  scope: readonly Selector[],
+  selector: Selector,
+): string[] {
+  return asked.map(want => {
+    const option =
+      options.find(candidate => candidate.value === want) ??
+      options.find(candidate => candidate.label === want.trim())
+    if (option === undefined) {
+      const choices = options.map(candidate => `"${candidate.label}" (${candidate.value})`)
+      throw new Error(
+        `harnessed: selectOption("${want}") on ${describeScope(scope, selector)} matches no option's value or label. Options: ${choices.join(', ')}.`,
+      )
+    }
+    return option.value
+  })
 }
 
 /** An error from the page about the scope, rather than a refusal or a WebDriver failure. */
@@ -141,8 +179,9 @@ export class WebdriverioQuery extends Query {
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
-    const wanted = Array.isArray(value) ? value : [value]
+    const asked = Array.isArray(value) ? value : [value]
     await this.act('select', options, async (element, found) => {
+      const wanted = optionValues(asked, found.options as SelectOption[], this.scope, this.selector)
       if (found.multiple !== true) {
         await element.selectByAttribute('value', wanted[0] ?? '')
         return
@@ -172,6 +211,8 @@ export class WebdriverioQuery extends Query {
   }
 
   override async press(key: string, options?: WaitOptions): Promise<void> {
+    // An unknown key name is refused before anything is focused.
+    const keys = toKeySequence(key)
     // Keys go to the focused element of the document, so focus the target in
     // the same document the keys are sent to.
     await walk(
@@ -180,7 +221,7 @@ export class WebdriverioQuery extends Query {
       { waiting: true, timeout: timeoutFor(options?.timeout) },
       async (site, scope, remaining) => {
         await callPage(site, 'focus', scope, this.selector, remaining())
-        await sendKeys(site, toKeySequence(key))
+        await sendKeys(site, keys)
       },
     )
   }
@@ -202,8 +243,9 @@ export class WebdriverioQuery extends Query {
   /**
    * WebDriver's own visibility check, which looks at layout, applied to the
    * target and to every iframe on the way to it: content in a hidden frame is
-   * hidden. Answers at once, like Playwright's — a target that is not on screen
-   * is not visible — and is strict, like every single-target read.
+   * hidden. Opacity is not part of it — see `DISPLAYED`. Answers at once, like
+   * Playwright's — a target that is not on screen is not visible — and is
+   * strict, like every single-target read.
    */
   override async isVisible(_options?: WaitOptions): Promise<boolean> {
     return this.visibleNow(1)
@@ -219,7 +261,7 @@ export class WebdriverioQuery extends Query {
           timeout: 0,
           // A hidden frame hides everything in it, so there is no need to go in.
           onFrame: async iframe => {
-            if (!(await iframe.isDisplayed())) throw new FrameAbsent()
+            if (!(await iframe.isDisplayed(DISPLAYED))) throw new FrameAbsent()
           },
         },
         async (site, scope) => {
@@ -229,7 +271,7 @@ export class WebdriverioQuery extends Query {
           }
           if (probe.count > 1) throw strictViolation(probe.count, this.scope, this.selector)
           if (probe.element === null) return false
-          return (await wrap(site, probe.element)).isDisplayed()
+          return (await wrap(site, probe.element)).isDisplayed(DISPLAYED)
         },
       )
     } catch (error) {

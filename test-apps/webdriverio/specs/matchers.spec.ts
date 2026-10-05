@@ -1,16 +1,7 @@
 import '@harnessed-ts/webdriverio/matchers'
-import { CardsPage, LoginPage, viewSearch } from '@harnessed-ts/conformance'
-import type { View } from '@harnessed-ts/conformance'
-import { wdio } from '@harnessed-ts/webdriverio'
-import { browser, expect } from '@wdio/globals'
-
-async function show(view: View) {
-  await browser.url(`/${viewSearch(view)}`)
-  await browser.waitUntil(() =>
-    browser.execute(() => document.querySelector('[data-testid="stage"]') !== null),
-  )
-  return wdio(browser)
-}
+import { CardsPage, LoginPage } from '@harnessed-ts/conformance'
+import { expect } from '@wdio/globals'
+import { show } from './stage'
 
 // Matcher *registration* is runner-specific, which is why this is not in the catalog.
 describe('matchers: expect-webdriverio', () => {

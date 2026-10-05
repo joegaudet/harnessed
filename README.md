@@ -708,8 +708,8 @@ run by every driver, so a harness written against one works against yours.
 
 ## Requirements
 
-Node ≥ 22.12, TypeScript ≥ 5.2, and — for `@harnessed-ts/playwright` —
-`@playwright/test` ≥ 1.43. Published as ESM and CJS.
+Node ≥ 22.12 (≥ 22.19 for `@harnessed-ts/webdriverio`, WebdriverIO 10's own floor),
+TypeScript ≥ 5.2, and — for `@harnessed-ts/playwright` — `@playwright/test` ≥ 1.43. Published as ESM and CJS.
 
 ## Contributing
 
