@@ -37,7 +37,8 @@ export function isLocatorMethod(name: string): boolean {
 }
 
 // `cy.find` is not a parent command — `.find` only chains off a subject.
-const CYPRESS_QUERIES = new Set(['get', 'contains'])
+// `cy.xpath` is the cypress-xpath plugin's.
+const CYPRESS_QUERIES = new Set(['get', 'contains', 'xpath'])
 const EMBER_QUERIES = new Set(['find', 'findAll'])
 /** test-helpers actions that also accept a selector string — the raw form. */
 const EMBER_ACTIONS = new Set([
@@ -249,5 +250,80 @@ export function rawQueryOf(
     }
   }
 
+  return undefined
+}
+
+const TESTING_LIBRARY = '@testing-library/'
+
+/** Testing Library's DOM helpers a test may reach for: every member of each is raw. */
+const TESTING_LIBRARY_OBJECTS = new Set(['screen', 'fireEvent'])
+
+/** The DOM's own queries on the global `document`. */
+const DOCUMENT_QUERIES = new Set([
+  'querySelector',
+  'querySelectorAll',
+  'getElementById',
+  'getElementsByClassName',
+  'getElementsByName',
+  'getElementsByTagName',
+])
+
+/**
+ * What a bare name stands for: itself when it is a global the file never
+ * declares, the imported name when it comes from Testing Library (`within as
+ * w` is `within`), and undefined for anything else — a local, or an import from
+ * elsewhere.
+ */
+function testingLibraryName(
+  identifier: Rule.Node & { name: string },
+  context: QueryContext,
+  sourceCode: SourceCode,
+): string | undefined {
+  const variable = variableNamed(sourceCode.getScope(identifier), identifier.name)
+  if (variable === undefined || variable.defs.length === 0) return identifier.name
+  if (variable.defs[0]?.type !== 'ImportBinding') return undefined
+  const binding = context.imports.get(identifier.name)
+  return binding?.source.startsWith(TESTING_LIBRARY) === true ? binding.imported : undefined
+}
+
+function isGlobal(identifier: Rule.Node & { name: string }, sourceCode: SourceCode): boolean {
+  const variable = variableNamed(sourceCode.getScope(identifier), identifier.name)
+  return variable === undefined || variable.defs.length === 0
+}
+
+/**
+ * The DOM helpers a test reaches for when it has no harness to ask, beyond the
+ * queries `rawQueryOf` knows: any member of Testing Library's `screen` (its
+ * `debug()` reads markup too) or `fireEvent`, its `within(…)`, and the global
+ * `document`'s own queries. Resolved through scope, so a test that calls its
+ * page `screen`, or parses a `document` of its own, is left alone.
+ *
+ * Test-side only. Inside a harness, the harness rules already refuse every
+ * Testing Library import and the `document` global.
+ */
+export function rawDomHelperOf(
+  node: Rule.Node,
+  context: QueryContext,
+  sourceCode: SourceCode,
+): RawQuery | undefined {
+  if (node.type === 'CallExpression' && node.callee.type === 'Identifier') {
+    const callee = node.callee as Rule.Node & { name: string }
+    if (testingLibraryName(callee, context, sourceCode) !== 'within') return undefined
+    return { subject: '@testing-library', method: 'within', call: callee.name }
+  }
+
+  if (node.type !== 'MemberExpression' || node.computed) return undefined
+  if (node.object.type !== 'Identifier' || node.property.type !== 'Identifier') return undefined
+  const object = node.object as Rule.Node & { name: string }
+  const method = node.property.name
+  const call = `${object.name}.${method}`
+
+  const helper = testingLibraryName(object, context, sourceCode)
+  if (helper !== undefined && TESTING_LIBRARY_OBJECTS.has(helper)) {
+    return { subject: helper, method, call }
+  }
+  if (object.name === 'document' && DOCUMENT_QUERIES.has(method) && isGlobal(object, sourceCode)) {
+    return { subject: 'document', method, call }
+  }
   return undefined
 }

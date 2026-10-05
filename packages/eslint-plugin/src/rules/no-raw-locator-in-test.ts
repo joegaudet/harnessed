@@ -1,5 +1,11 @@
 import type { Rule } from 'eslint'
-import { isLocatorMethod, queryContextOf, rawQueryOf, type QueryContext } from '../runner-queries'
+import {
+  isLocatorMethod,
+  queryContextOf,
+  rawDomHelperOf,
+  rawQueryOf,
+  type QueryContext,
+} from '../runner-queries'
 import {
   dirOptionSchema,
   harnessDirsOf,
@@ -15,6 +21,10 @@ const SUBJECTS = new Set(['page', 'screen'])
  * hide, and the coupling is invisible until the markup changes and only that one
  * test breaks.
  *
+ * A test constructs an env and its pages and harnesses, then calls only their
+ * public methods, so it survives a new variant of the app with new harnesses
+ * and no new tests.
+ *
  * If the harness cannot answer the question, add a method to it.
  */
 const rule: Rule.RuleModule = {
@@ -22,7 +32,7 @@ const rule: Rule.RuleModule = {
     type: 'suggestion',
     docs: {
       description:
-        "Disallow a runner's raw DOM queries in tests — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe — when a harness should be used.",
+        "Disallow a runner's raw DOM queries and helpers in tests — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe, the DOM — when a harness should be used.",
       recommended: true,
     },
     schema: [dirOptionSchema],
@@ -42,16 +52,18 @@ const rule: Rule.RuleModule = {
       Program(node) {
         queries = queryContextOf(node as unknown as Rule.Node, sourceCode)
       },
-      // Every other runner: cy.get(…), find(…), $(…), Selector(…) and kin.
+      // Every other runner: cy.get(…), find(…), $(…), Selector(…), within(…) and kin.
       CallExpression(node) {
-        const query = rawQueryOf(node as unknown as Rule.Node, queries, sourceCode)
+        const call = node as unknown as Rule.Node
+        const query =
+          rawQueryOf(call, queries, sourceCode) ?? rawDomHelperOf(call, queries, sourceCode)
         if (query === undefined) return
         context.report({ node, messageId: 'raw', data: { call: query.call } })
       },
       // Playwright, Testing Library, Puppeteer and Vitest browser: page.… / screen.…
+      // Then Testing Library's screen.* and fireEvent.*, and document's queries.
       MemberExpression(node) {
         if (node.property.type !== 'Identifier') return
-        if (!isLocatorMethod(node.property.name)) return
 
         const subject =
           node.object.type === 'Identifier'
@@ -59,7 +71,13 @@ const rule: Rule.RuleModule = {
             : node.object.type === 'MemberExpression' && node.object.property.type === 'Identifier'
               ? node.object.property.name
               : ''
-        if (!SUBJECTS.has(subject)) return
+        if (!SUBJECTS.has(subject) || !isLocatorMethod(node.property.name)) {
+          const helper = rawDomHelperOf(node as unknown as Rule.Node, queries, sourceCode)
+          if (helper !== undefined) {
+            context.report({ node, messageId: 'raw', data: { call: helper.call } })
+          }
+          return
+        }
 
         context.report({
           node,

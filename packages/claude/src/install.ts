@@ -68,7 +68,7 @@ function write(path: string, contents: string, result: InstallResult, dryRun: bo
 }
 
 /**
- * Writes the authoring skill, the rules file, and the templates into a repo's
+ * Writes the authoring skill, the rules files, and the templates into a repo's
  * `.claude/`, with the placement table generated from that repo's own layout.
  *
  * Safe to re-run after an upgrade: the shipped law is refreshed, and an existing
@@ -124,8 +124,12 @@ export function install(options: InstallOptions = {}): InstallResult {
     dryRun,
   )
 
-  const rulesTemplate = readFileSync(join(assets, 'rules/harness.md'), 'utf8')
-  write(join(root, '.claude/rules/harness.md'), renderRules(rulesTemplate, context), result, dryRun)
+  // Two rule files because they load for different paths: one while editing a
+  // harness, one while editing a test.
+  for (const name of ['harness.md', 'harness-tests.md']) {
+    const rulesTemplate = readFileSync(join(assets, 'rules', name), 'utf8')
+    write(join(root, '.claude/rules', name), renderRules(rulesTemplate, context), result, dryRun)
+  }
 
   for (const template of ['component-harness-template.ts', 'page-harness-template.ts']) {
     // Through `write` rather than copyFileSync, so dry-run semantics cannot

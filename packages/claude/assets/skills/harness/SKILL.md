@@ -15,6 +15,42 @@ get there. Tests enter through a page.
 
 Architecture and full API: the `@harnessed-ts/core` README.
 
+## Speak in behaviours
+
+Harnesses speak in behaviours, never in the vocabulary of a test runner or the
+DOM. Tests depend only on harness and page public methods, so a new variant of
+the app — a native iOS build, say — needs new harnesses, not new tests.
+
+Before adding or changing a public method, apply **the portability test**:
+if this app were rebuilt natively, would this method's name, parameters and
+return value still make sense unchanged? If not, it belongs inside the harness.
+
+| Instead of                                 | Write                             |
+| ------------------------------------------ | --------------------------------- |
+| `clickSubmit()`, `pressEnter()`            | `submit()`                        |
+| `fillEmailInput(v)`, `typeInto(sel, v)`    | `signIn(email)`                   |
+| `clickCardByTestId('card-medium')`         | `chooseCard('Medium')`            |
+| `errorElement(): Query`, `get errorQuery`  | `errorMessage(): Promise<string>` |
+| `@ByTestId('total') accessor total: Query` | `private accessor` + `total()`    |
+
+- **Methods are named for user intent or the domain**, not for mechanics (click,
+  tap, hover, fill, type, press, scroll, focus, blur, find) or DOM nouns (Button,
+  Input, Field, Div, Element, Locator, Selector, TestId, Css).
+- **Parameters and returns are domain values, or other harnesses and pages** —
+  never a `Query`, a selector, an element, a locator, a key name, or CSS. A
+  `@ChildHarness` may be public: it is a harness.
+- **A harness imports only** `@harnessed-ts/core`, `@harnessed-ts/page`, other
+  harnesses, and the app's own types. Never a runner (`@playwright/test`,
+  `cypress`, `vitest`, `@testing-library/*`, …) or a `@harnessed-ts` driver; no
+  `document`, `window`, `cy`, `browser`, or `$` globals. The one exception is a
+  page's own `waitForReady()`.
+- **Tests never import a driver or runner DOM helper.** A test imports a driver
+  only to build the env, then constructs pages and calls their public methods.
+
+`@harnessed-ts/eslint-plugin` enforces this with `no-runner-import-in-harness`,
+`harness-public-surface`, `behavioural-method-names` (a warning), and
+`no-raw-locator-in-test`.
+
 ## Consumer-side rule
 
 **If a component has a harness, callers must use it.** Never a raw
