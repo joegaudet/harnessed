@@ -1,5 +1,6 @@
 export {
   countAll,
+  resolveAll,
   FrameEntryError,
   queryAll,
   resolveAllNow,

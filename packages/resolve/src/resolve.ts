@@ -195,7 +195,8 @@ export async function countAll(
 // For a driver whose own runtime does the retrying — TestCafe's Selector, a
 // remote driver polling from Node — every lookup has to answer at once. These
 // apply exactly the same strictness, index, and frame rules as the waiting
-// forms above; they just treat "not there yet" as `null` instead of waiting.
+// forms above: anything those reject at once, these throw. The one difference
+// is that "nothing matches yet" is `null` instead of a wait.
 
 /** The scope chain's innermost element now, or `null` if a link is not on screen. */
 export function resolveScopeNow(
@@ -207,7 +208,6 @@ export function resolveScopeNow(
     const path = scope.slice(0, index)
     const matches = queryAll(current, step)
     if (matches.length === 0) return null
-    if (step.nth !== undefined && matches[step.nth] === undefined) return null
     const found = pick(matches, path, step)
     current = step.frame === true ? frameBody(found, path, step) : found
   }
@@ -224,20 +224,43 @@ export function resolveOneNow(
   if (root === null) return null
   const matches = queryAll(root, selector)
   if (matches.length === 0) return null
-  if (selector.nth !== undefined && matches[selector.nth] === undefined) return null
   return pick(matches, scope, selector)
 }
 
-/** Every match now. An absent scope is an empty list, as it is for `countAll`. */
+/**
+ * Every match now, agreeing with `countAll` on every scope it cannot resolve:
+ * an absent or ambiguous scope is an empty list, and only a frame that cannot
+ * be entered throws.
+ */
 export function resolveAllNow(
   container: HTMLElement,
   scope: readonly Selector[],
   selector: Selector,
 ): HTMLElement[] {
-  const root = resolveScopeNow(container, scope)
+  let root: HTMLElement | null
+  try {
+    root = resolveScopeNow(container, scope)
+  } catch (error) {
+    if (error instanceof FrameEntryError) throw error
+    return []
+  }
   if (root === null) return []
   const matches = queryAll(root, selector)
   if (selector.nth === undefined) return matches
   const found = matches[selector.nth]
   return found === undefined ? [] : [found]
+}
+
+/**
+ * Every match for a list operation: the scope waits, the list does not, and
+ * `nth` is ignored — each result is addressed by its own index afterwards. The
+ * one definition of "the list" for in-process and injected drivers alike.
+ */
+export async function resolveAll(
+  container: HTMLElement,
+  scope: readonly Selector[],
+  selector: Selector,
+  timeout?: number,
+): Promise<HTMLElement[]> {
+  return queryAll(await resolveScope(container, scope, timeout), selector)
 }

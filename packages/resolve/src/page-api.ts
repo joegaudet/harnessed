@@ -1,11 +1,11 @@
 import { configure } from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
-import { countAll, resolveAllNow, resolveOne, resolveOneNow, resolveScope } from './resolve'
+import { PAGE_API_GLOBAL } from './global-name'
+import { countAll, resolveAll, resolveAllNow, resolveOne, resolveOneNow } from './resolve'
 import { decodeSelector } from './wire'
 import type { WireSelector } from './wire'
 
-/** Where the injected build installs itself on the page's `window`. */
-export const PAGE_API_GLOBAL = '__harnessedResolve'
+export { PAGE_API_GLOBAL }
 
 /**
  * Settings a remote driver passes on every call. The page has no access to the
@@ -45,7 +45,7 @@ export interface PageApi {
     selector: Wire,
     options: PageApiOptions,
   ): Promise<Element>
-  /** Every match, after waiting for the scope. */
+  /** Every match, after waiting for the scope. `nth` is ignored, as for any list. */
   all(
     root: Element | null,
     scope: Wire[],
@@ -65,8 +65,11 @@ export interface PageApi {
 
 export function createPageApi(document: Document): PageApi {
   const start = (root: Element | null): HTMLElement => (root ?? document.body) as HTMLElement
+  // Only the test-id attribute: every waiting call passes its timeout
+  // explicitly. Note this writes the page's harnessed config, so the API belongs
+  // in a page that runs no harnesses of its own — which is every remote page.
   const apply = (options: PageApiOptions): void =>
-    configure({ testIdAttribute: options.testIdAttribute, defaultTimeout: options.timeout })
+    configure({ testIdAttribute: options.testIdAttribute })
   const decode = (scope: Wire[], selector: Wire): [Selector[], Selector] => [
     scope.map(decodeSelector),
     decodeSelector(selector),
@@ -86,8 +89,7 @@ export function createPageApi(document: Document): PageApi {
     async all(root, scope, selector, options) {
       apply(options)
       const [steps, target] = decode(scope, selector)
-      const within = await resolveScope(start(root), steps, options.timeout)
-      return resolveAllNow(within, [], target)
+      return resolveAll(start(root), steps, target, options.timeout)
     },
     oneNow(root, scope, selector, options) {
       apply(options)

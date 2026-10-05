@@ -92,3 +92,38 @@ describe('selectors over the wire', () => {
     expect(found?.textContent).toBe('Save draft')
   })
 })
+
+describe('the Node-side inject entry', () => {
+  const built = (file: string): string =>
+    readFileSync(new URL(`../dist/${file}`, import.meta.url), 'utf8')
+
+  /** The file and every shared chunk it pulls in, transitively. */
+  const graph = (file: string, seen = new Set<string>()): string[] => {
+    if (seen.has(file)) return []
+    seen.add(file)
+    const code = built(file)
+    const chunks = [...code.matchAll(/["']\.\/(chunk-[\w-]+\.c?js)["']/g)].map(match => match[1]!)
+    return [code, ...chunks.flatMap(chunk => graph(chunk, seen))]
+  }
+
+  it('loads neither the resolver nor Testing Library into the test process', () => {
+    for (const file of ['inject.js', 'inject.cjs']) {
+      for (const code of graph(file)) {
+        expect(code, file).not.toMatch(/@testing-library|@harnessed-ts\/core/)
+      }
+    }
+  })
+
+  it('finds the injectable build from CJS even when a document global exists', async () => {
+    const { createRequire } = await import('node:module')
+    const requireCjs = createRequire(import.meta.url)
+    const saved = (globalThis as Record<string, unknown>).document
+    ;(globalThis as Record<string, unknown>).document = { baseURI: 'http://localhost:3000/' }
+    try {
+      const { injectPath } = requireCjs('../dist/inject.cjs') as { injectPath(): string }
+      expect(injectPath()).toMatch(/dist[/\\]inject\.global\.js$/)
+    } finally {
+      ;(globalThis as Record<string, unknown>).document = saved
+    }
+  })
+})
