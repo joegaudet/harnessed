@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict'
+import assert from './assert'
 import type { EnvConfig } from '@harnessed-ts/core'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
 import { FrameHarness, FramedPanelHarness } from '../fixture/harnesses/FramedPanel.harness'
