@@ -17,6 +17,6 @@ jobs:
     uses: ./.github/workflows/conformance-driver.yml
     with:
       name: ember-exam
-      # Split into three randomised partitions: no harness may lean on state a
-      # test in another partition left behind.
+      # Three partitions, each in random order: a harness that leans on state
+      # an earlier test left behind fails here rather than in a user's suite.
       test: pnpm --filter test-app-ember-classic test:exam

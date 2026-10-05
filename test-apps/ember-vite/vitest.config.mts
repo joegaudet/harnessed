@@ -14,9 +14,16 @@ const environment = require('./config/environment.js') as (env: string) => Recor
  * placeholders for them to fill.
  */
 const HTML_ONLY = new Set(['embroider-content-for', 'embroider-scripts'])
-const classicWithoutHtml = [classicEmberSupport()]
-  .flat(3)
-  .filter(plugin => !HTML_ONLY.has((plugin as { name?: string } | null)?.name ?? ''))
+const classicPlugins = [classicEmberSupport()].flat(3) as Array<{ name?: string } | null>
+const removed = classicPlugins.filter(plugin => HTML_ONLY.has(plugin?.name ?? ''))
+// Plugin names are Embroider internals. Fail loudly if they change, rather
+// than letting a transform that breaks Vitest's page back in silently.
+if (removed.length !== HTML_ONLY.size) {
+  throw new Error(
+    `expected Embroider's ${[...HTML_ONLY].join(' and ')} plugins, found ${removed.length}: update vitest.config.mts`,
+  )
+}
+const classicWithoutHtml = classicPlugins.filter(plugin => !HTML_ONLY.has(plugin?.name ?? ''))
 
 /**
  * The same app under Vitest browser mode: Embroider, and Babel with
@@ -35,7 +42,7 @@ export default defineConfig({
   test: {
     include: ['vitest/**/*.test.{ts,gts}'],
     setupFiles: ['vitest/setup.ts'],
-    // One app boots per test; running them one at a time keeps contexts apart.
+    // ember-vitest's test contexts are module-level state: no test.concurrent.
     maxConcurrency: 1,
     browser: {
       enabled: true,
