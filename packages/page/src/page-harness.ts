@@ -137,6 +137,15 @@ export abstract class PageHarness<Params extends Record<string, string> = Record
     await this.expectReady()
   }
 
+  /**
+   * The URL `goto()` would navigate to, without navigating — every `$name`
+   * substituted and URL-encoded. Needs no driver that can navigate, which is
+   * what a runner that queues its own navigation (Cypress's `cy.visit`) needs.
+   */
+  urlFor(...[params]: GotoArgs<Params>): string {
+    return this.resolvePath(params)
+  }
+
   /** Every occurrence of each `$name` replaced with its URL-encoded value. */
   protected resolvePath(params?: Params): string {
     let resolved = this.requirePath()

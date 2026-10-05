@@ -169,7 +169,8 @@ agreement is the whole reason the abstraction exists.
 9. **A page constructs under every driver.** Only `goto()` and the URL members
    need a driver that can navigate; under one that cannot they fail at call time
    with `the "<driver>" driver cannot navigate`. `goto()` on a page with no `path`
-   fails with `<Page> declares no path` before touching the driver.
+   fails with `<Page> declares no path` before touching the driver. `urlFor()`
+   resolves the URL `goto()` would visit under any driver, navigating or not.
 10. **A frame is a scope boundary, crossed only by `frame()`.** A harness nested
     through a frame reads and drives the frame's document; a scoped query outside
     it never sees in; `{ global: true }` inside it stays in the frame's document;
@@ -311,7 +312,9 @@ extends it and supplies its own host.
 
 Also provides `currentUrl`, `currentPathname`, `currentSearchParams`, and
 `assertPathname()` — which waits, and compares the **pathname**, so it keeps
-matching once the URL carries a query string.
+matching once the URL carries a query string. `urlFor(params)` returns the URL
+`goto()` would visit without visiting it, for a runner that queues its own
+navigation (Cypress's `cy.visit`).
 
 `RouteHarness` in `@harnessed-ts/route` is the old name for this class. It is a
 deprecated re-export for one release.
