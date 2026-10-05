@@ -29,6 +29,9 @@ import { relative } from 'node:path'
  * babel: { plugins: [require.resolve('@harnessed-ts/core/babel')] }
  * ```
  *
+ * It parses the files it claims itself (`parserOverride`), and Babel lets only
+ * one plugin in a pipeline do that; no Ember build pipeline uses another.
+ *
  * Needs, alongside it, Babel 7.24 or later (7.24 introduced the 2023-11
  * decorators version): `@babel/plugin-proposal-decorators`,
  * `@babel/plugin-transform-typescript`, `@babel/plugin-transform-class-static-block`,
@@ -85,10 +88,28 @@ interface PluginState {
   file: { code: string; opts: FileOptions }
 }
 
+type ParserPlugin = string | [string, Record<string, unknown>]
+
+interface ParserOptions {
+  plugins?: ParserPlugin[]
+  sourceFileName?: string
+}
+
 interface BabelPlugin {
   name: string
-  manipulateOptions(options: FileOptions, parserOptions: { plugins: unknown[] }): void
+  manipulateOptions(options: FileOptions, parserOptions: ParserOptions): void
+  parserOverride(
+    code: string,
+    parserOptions: ParserOptions,
+    parse: (code: string, options: ParserOptions) => unknown,
+  ): unknown
   visitor: { Program: { enter(path: ProgramPath, state: PluginState): void } }
+}
+
+const DECORATOR_SYNTAX = new Set(['decorators', 'decorators-legacy', 'decoratorAutoAccessors'])
+
+function pluginName(plugin: ParserPlugin): string {
+  return typeof plugin === 'string' ? plugin : plugin[0]
 }
 
 declare const __filename: string | undefined
@@ -142,6 +163,9 @@ export default function harnessedBabel(
   options: BabelPluginOptions = {},
 ): BabelPlugin {
   const include = options.include ?? DEFAULT_INCLUDE
+  // Filenames claimed in manipulateOptions, where the Babel root is known, for
+  // parserOverride, which only sees the file's name.
+  const claimed = new Set<string>()
   const claims = (fileOptions: FileOptions): boolean => {
     const path = relativePath(fileOptions)
     if (path === undefined) return false
@@ -153,11 +177,25 @@ export default function harnessedBabel(
   return {
     name: 'harnessed:decorators',
 
-    // The app's parser is configured for legacy decorators, which cannot parse
-    // `accessor`. Enabling it for claimed files only gets them as far as the
-    // visitor below; nothing else in the app sees new syntax.
-    manipulateOptions(babelOptions, parserOptions) {
-      if (claims(babelOptions)) parserOptions.plugins.push('decoratorAutoAccessors')
+    manipulateOptions(babelOptions) {
+      if (babelOptions.filename != null && claims(babelOptions)) claimed.add(babelOptions.filename)
+    },
+
+    // The app's parser is configured for legacy decorators, which can parse
+    // neither `accessor` nor a decorator after `export` — the form Vite writes
+    // once it has stripped the types. A claimed file is parsed with standard
+    // decorator syntax instead; the visitor below then compiles it. Nothing
+    // else in the app sees the different parser.
+    parserOverride(code, parserOptions, parse) {
+      const filename = parserOptions.sourceFileName
+      if (filename === undefined || !claimed.has(filename)) return undefined
+      const plugins = (parserOptions.plugins ?? []).filter(
+        plugin => !DECORATOR_SYNTAX.has(pluginName(plugin)),
+      )
+      return parse(code, {
+        ...parserOptions,
+        plugins: [...plugins, ['decorators', {}], 'decoratorAutoAccessors'],
+      })
     },
 
     visitor: {

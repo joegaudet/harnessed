@@ -182,6 +182,27 @@ describe('@harnessed-ts/core/babel', () => {
     }
   })
 
+  it('parses decorators after `export`, the form Vite emits after stripping types', () => {
+    // Vite (oxc) strips TypeScript before Babel runs, and writes class
+    // decorators in the standard position — which a legacy-mode parser rejects.
+    const stripped = `
+      import { Harness, ByLabel, testId } from 'decorators'
+      export @Harness({ host: testId('login-form') }) class LoginForm {
+        @ByLabel('Email') accessor email
+        read() { return String(this.email) }
+        static hostOf() { return LoginForm.host }
+      }
+    `
+    for (const pipeline of Object.values(LEGACY_PIPELINES)) {
+      const code = compile(stripped, '/app/tests/harness/login-form.harness.ts', { pipeline })
+      const { LoginForm } = run(code, { decorators: decoratorsModule }) as {
+        LoginForm: (new () => { read(): string }) & { hostOf(): string }
+      }
+      expect(LoginForm.hostOf()).toBe('testId:login-form')
+      expect(new LoginForm().read()).toBe('query:Email')
+    }
+  })
+
   it('sees through a query on the module id, as Vite and Vitest append one', () => {
     for (const filename of [
       '/app/tests/harness/login.harness.ts?import',
