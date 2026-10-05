@@ -1,7 +1,7 @@
 # @harnessed-ts/chai
 
 Chai assertions for [harnessed](https://github.com/joegaudet/harnessed#readme)
-harnesses: Mocha, ember-mocha, Cypress, WebdriverIO under Mocha — anything that
+harnesses: Mocha, Cypress, WebdriverIO under Mocha — anything that
 asserts through Chai.
 
 ```ts

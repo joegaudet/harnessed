@@ -1,4 +1,4 @@
-import { blur, click, fillIn, focus, getRootElement, select, settled } from '@ember/test-helpers'
+import { click, fillIn, getRootElement, settled } from '@ember/test-helpers'
 import { Query, registerDriver } from '@harnessed-ts/core'
 import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import { checkedFrom, enabledFrom, nth as withNth, timeoutFor } from '@harnessed-ts/core'
@@ -10,9 +10,31 @@ import {
   resolveOne,
 } from '@harnessed-ts/resolve'
 import { waitFor as waitForCondition } from '@testing-library/dom'
+import userEvent from '@testing-library/user-event'
+import type { UserEvent } from '@testing-library/user-event'
 import { EMBER_DRIVER } from './driver-id'
 import type { EmberEnv } from './env'
-import { press } from './keys'
+
+/**
+ * One user-event instance per document, kept so pointer state carries between
+ * calls: hovering B after A has to leave A first.
+ */
+const users = new WeakMap<Document, UserEvent>()
+
+function userFor(element: Element): UserEvent {
+  const document = element.ownerDocument
+  let user = users.get(document)
+  if (user === undefined) {
+    user = userEvent.setup({ document })
+    users.set(document, user)
+  }
+  return user
+}
+
+/** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
+function toKeyboardInput(key: string): string {
+  return key.length === 1 ? key : `{${key}}`
+}
 
 /**
  * Testing Library's `waitFor` retries every throw, but a frame that cannot be
@@ -38,9 +60,15 @@ async function waitUntil(condition: () => Promise<void>, timeout: number): Promi
 
 /**
  * Ember driver. Resolution is the shared resolver, so it agrees with every other
- * in-page driver; interactions go through `@ember/test-helpers`, so each one is
- * dispatched the way an Ember test dispatches it and resolves only once the app
- * has settled — runloop drained, rendering done, test waiters clear.
+ * in-page driver. Every interaction resolves only once the app has settled —
+ * runloop drained, rendering done, test waiters clear.
+ *
+ * Clicks and fills go through `@ember/test-helpers`, the way an Ember test
+ * dispatches them. Keys, hover, focus and selects go through user-event, as in
+ * the dom driver: test-helpers' versions dispatch events without a browser's
+ * default actions (a pressed key never reaches the value), refuse elements a
+ * browser would accept (a disabled control, a non-focusable dialog), and match
+ * options by value only.
  *
  * Each helper is handed the resolved element, never a selector string, so
  * strictness and scope stay this library's rather than `querySelector`'s.
@@ -101,42 +129,44 @@ export class EmberQuery extends Query {
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
-    // Without keepPreviouslySelected, select() replaces a multi-select's
-    // selection — the semantic the shared API promises.
-    await select(await this.element(options), value)
+    const element = (await this.element(options)) as HTMLSelectElement
+    const user = userFor(element)
+    // user-event adds to a multi-select's existing selection; the shared API
+    // replaces it, so clear first — as the dom driver does. user-event matches
+    // a value or a label, and rejects one that matches no option.
+    if (element.multiple) {
+      const selected = [...element.selectedOptions].map(option => option.value)
+      if (selected.length > 0) await user.deselectOptions(element, selected)
+    }
+    await user.selectOptions(element, value)
+    await settled()
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
     const element = await this.element(options)
-    // Dispatched directly: test-helpers' triggerEvent refuses a disabled
-    // control, but a pointer still enters one — Playwright and user-event both
-    // hover it. Constructed from the element's own window, which inside a frame
-    // is the frame's.
-    const view = element.ownerDocument.defaultView ?? window
-    for (const [type, bubbles] of [
-      ['pointerover', true],
-      ['pointerenter', false],
-      ['mouseover', true],
-      ['mouseenter', false],
-    ] as const) {
-      const Event = type.startsWith('pointer') ? view.PointerEvent : view.MouseEvent
-      element.dispatchEvent(new Event(type, { bubbles, cancelable: bubbles, composed: true, view }))
-    }
+    await userFor(element).hover(element)
     await settled()
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
-    await focus(await this.element(options))
+    // The DOM method: a no-op on an element that cannot take focus, where
+    // test-helpers' focus() throws.
+    ;(await this.element(options)).focus()
+    await settled()
   }
 
   override async blur(options?: WaitOptions): Promise<void> {
-    await blur(await this.element(options))
+    ;(await this.element(options)).blur()
+    await settled()
   }
 
   override async press(key: string, options?: WaitOptions): Promise<void> {
     const element = await this.element(options)
-    await focus(element)
-    await press(element, key)
+    // Focus, then press: the key goes to the focused element, as in a browser.
+    // On an element that cannot take focus, that is whatever already had it.
+    element.focus()
+    await userFor(element).keyboard(toKeyboardInput(key))
+    await settled()
   }
 
   // --- observations -------------------------------------------------------

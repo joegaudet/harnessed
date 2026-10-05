@@ -1,3 +1,5 @@
 /dist/
 /node_modules/
 /tmp/
+# Vitest browser mode writes failure screenshots here.
+/.vitest/

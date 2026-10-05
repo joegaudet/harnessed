@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { on } from '@ember/modifier';
 import { registerDestructor } from '@ember/destroyable';
+import type Owner from '@ember/owner';
 
 type LoginStatus = 'idle' | 'submitting' | 'done';
 
@@ -25,7 +26,7 @@ export default class LoginForm extends Component<LoginFormSignature> {
   @tracked status: LoginStatus = 'idle';
   @tracked late = false;
 
-  constructor(owner: unknown, args: LoginFormSignature['Args']) {
+  constructor(owner: Owner, args: LoginFormSignature['Args']) {
     super(owner, args);
     if (!args.lateDuplicates) return;
     // A plain timer, not the runloop's `later`: settled() would wait for that,

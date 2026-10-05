@@ -24,5 +24,7 @@ jobs:
     uses: ./.github/workflows/conformance-driver.yml
     with:
       name: ember-qunit (${{ matrix.build }}, ${{ matrix.ember }})
-      setup: ${{ matrix.ember != 'latest' && format('pnpm --filter test-app-ember-{0} add -D ember-source@~{1}.0', matrix.build, matrix.ember) || '' }}
+      # Pin the leg's ember-source, then print what resolved, so a run shows
+      # which Ember it actually tested.
+      setup: ${{ format('{0}pnpm --filter test-app-ember-{1} list ember-source', matrix.ember != 'latest' && format('pnpm --filter test-app-ember-{0} add -D ember-source@~{1}.0 && ', matrix.build, matrix.ember) || '', matrix.build) }}
       test: pnpm --filter test-app-ember-${{ matrix.build }} test

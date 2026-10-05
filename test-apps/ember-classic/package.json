@@ -6,8 +6,9 @@
   "license": "MIT",
   "scripts": {
     "build": "ember build --environment=test",
-    "test": "ember test",
-    "start": "ember serve"
+    "test": "pnpm check:fixture && ember test",
+    "start": "ember serve",
+    "check:fixture": "diff -r ../ember-vite/app/components/fixture app/components/fixture"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -26,6 +27,7 @@
     "@harnessed-ts/page": "workspace:^",
     "@harnessed-ts/qunit": "workspace:^",
     "@testing-library/dom": "^10.4.1",
+    "@testing-library/user-event": "^14.6.7",
     "@tsconfig/ember": "^3.0.12",
     "@types/qunit": "^2.19.14",
     "@types/rsvp": "^4.0.9",

@@ -1,7 +1,7 @@
 {
   "name": "@harnessed-ts/chai",
   "version": "0.3.0",
-  "description": "Chai assertions for harnesses: `await expect(banner).to.be.absent` under Mocha, ember-mocha, WebdriverIO or Cypress.",
+  "description": "Chai assertions for harnesses: `await expect(banner).to.be.absent` under Mocha, WebdriverIO or Cypress.",
   "keywords": [
     "testing",
     "harness",

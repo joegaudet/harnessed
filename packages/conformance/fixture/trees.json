@@ -4,35 +4,34 @@
     "attrs": {
       "data-testid": "stage"
     },
-    "text": "",
     "children": [
       {
         "tag": "section",
         "attrs": {
           "data-testid": "page-login"
         },
-        "text": "",
         "children": [
           {
             "tag": "form",
             "attrs": {
               "data-testid": "login-form"
             },
-            "text": "",
             "children": [
               {
                 "tag": "h1",
                 "attrs": {},
-                "text": "Sign in",
-                "children": []
+                "children": [
+                  "Sign in"
+                ]
               },
               {
                 "tag": "label",
                 "attrs": {
                   "for": "login-email"
                 },
-                "text": "Email",
-                "children": []
+                "children": [
+                  "Email"
+                ]
               },
               {
                 "tag": "input",
@@ -41,7 +40,6 @@
                   "id": "login-email",
                   "placeholder": "you@example.com"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -49,8 +47,9 @@
                 "attrs": {
                   "for": "login-password"
                 },
-                "text": "Password",
-                "children": []
+                "children": [
+                  "Password"
+                ]
               },
               {
                 "tag": "input",
@@ -58,7 +57,6 @@
                   "id": "login-password",
                   "type": "password"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -66,8 +64,9 @@
                 "attrs": {
                   "for": "login-remember"
                 },
-                "text": "Remember me",
-                "children": []
+                "children": [
+                  "Remember me"
+                ]
               },
               {
                 "tag": "input",
@@ -75,7 +74,6 @@
                   "id": "login-remember",
                   "type": "checkbox"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -83,32 +81,34 @@
                 "attrs": {
                   "for": "login-plan"
                 },
-                "text": "Plan",
-                "children": []
+                "children": [
+                  "Plan"
+                ]
               },
               {
                 "tag": "select",
                 "attrs": {
                   "id": "login-plan"
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "option",
                     "attrs": {
-                      "selected": true,
-                      "value": "free"
+                      "value": "free",
+                      "selected": true
                     },
-                    "text": "Free",
-                    "children": []
+                    "children": [
+                      "Free"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "pro"
                     },
-                    "text": "Pro",
-                    "children": []
+                    "children": [
+                      "Pro"
+                    ]
                   }
                 ]
               },
@@ -117,8 +117,9 @@
                 "attrs": {
                   "for": "login-addons"
                 },
-                "text": "Add-ons",
-                "children": []
+                "children": [
+                  "Add-ons"
+                ]
               },
               {
                 "tag": "select",
@@ -126,32 +127,34 @@
                   "id": "login-addons",
                   "multiple": true
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "option",
                     "attrs": {
-                      "selected": true,
-                      "value": "sms"
+                      "value": "sms",
+                      "selected": true
                     },
-                    "text": "SMS",
-                    "children": []
+                    "children": [
+                      "SMS"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "voice"
                     },
-                    "text": "Voice",
-                    "children": []
+                    "children": [
+                      "Voice"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "fax"
                     },
-                    "text": "Fax",
-                    "children": []
+                    "children": [
+                      "Fax"
+                    ]
                   }
                 ]
               },
@@ -160,15 +163,15 @@
                 "attrs": {
                   "disabled": true
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "label",
                     "attrs": {
                       "for": "login-referral"
                     },
-                    "text": "Referral code",
-                    "children": []
+                    "children": [
+                      "Referral code"
+                    ]
                   },
                   {
                     "tag": "input",
@@ -176,7 +179,6 @@
                       "data-testid": "login-referral",
                       "id": "login-referral"
                     },
-                    "text": "",
                     "children": []
                   }
                 ]
@@ -185,12 +187,13 @@
                 "tag": "button",
                 "attrs": {
                   "data-testid": "login-submit",
-                  "type": "submit",
                   "data-status": "idle",
+                  "type": "submit",
                   "disabled": true
                 },
-                "text": "Sign in",
-                "children": []
+                "children": [
+                  "Sign in"
+                ]
               }
             ]
           }
@@ -203,35 +206,34 @@
     "attrs": {
       "data-testid": "stage"
     },
-    "text": "",
     "children": [
       {
         "tag": "section",
         "attrs": {
           "data-testid": "page-login"
         },
-        "text": "",
         "children": [
           {
             "tag": "form",
             "attrs": {
               "data-testid": "login-form"
             },
-            "text": "",
             "children": [
               {
                 "tag": "h1",
                 "attrs": {},
-                "text": "Sign in",
-                "children": []
+                "children": [
+                  "Sign in"
+                ]
               },
               {
                 "tag": "label",
                 "attrs": {
                   "for": "login-email"
                 },
-                "text": "Email",
-                "children": []
+                "children": [
+                  "Email"
+                ]
               },
               {
                 "tag": "input",
@@ -240,7 +242,6 @@
                   "id": "login-email",
                   "placeholder": "you@example.com"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -248,8 +249,9 @@
                 "attrs": {
                   "for": "login-password"
                 },
-                "text": "Password",
-                "children": []
+                "children": [
+                  "Password"
+                ]
               },
               {
                 "tag": "input",
@@ -257,7 +259,6 @@
                   "id": "login-password",
                   "type": "password"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -265,8 +266,9 @@
                 "attrs": {
                   "for": "login-remember"
                 },
-                "text": "Remember me",
-                "children": []
+                "children": [
+                  "Remember me"
+                ]
               },
               {
                 "tag": "input",
@@ -274,7 +276,6 @@
                   "id": "login-remember",
                   "type": "checkbox"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -282,32 +283,34 @@
                 "attrs": {
                   "for": "login-plan"
                 },
-                "text": "Plan",
-                "children": []
+                "children": [
+                  "Plan"
+                ]
               },
               {
                 "tag": "select",
                 "attrs": {
                   "id": "login-plan"
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "option",
                     "attrs": {
-                      "selected": true,
-                      "value": "free"
+                      "value": "free",
+                      "selected": true
                     },
-                    "text": "Free",
-                    "children": []
+                    "children": [
+                      "Free"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "pro"
                     },
-                    "text": "Pro",
-                    "children": []
+                    "children": [
+                      "Pro"
+                    ]
                   }
                 ]
               },
@@ -316,8 +319,9 @@
                 "attrs": {
                   "for": "login-addons"
                 },
-                "text": "Add-ons",
-                "children": []
+                "children": [
+                  "Add-ons"
+                ]
               },
               {
                 "tag": "select",
@@ -325,32 +329,34 @@
                   "id": "login-addons",
                   "multiple": true
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "option",
                     "attrs": {
-                      "selected": true,
-                      "value": "sms"
+                      "value": "sms",
+                      "selected": true
                     },
-                    "text": "SMS",
-                    "children": []
+                    "children": [
+                      "SMS"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "voice"
                     },
-                    "text": "Voice",
-                    "children": []
+                    "children": [
+                      "Voice"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "fax"
                     },
-                    "text": "Fax",
-                    "children": []
+                    "children": [
+                      "Fax"
+                    ]
                   }
                 ]
               },
@@ -359,15 +365,15 @@
                 "attrs": {
                   "disabled": true
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "label",
                     "attrs": {
                       "for": "login-referral"
                     },
-                    "text": "Referral code",
-                    "children": []
+                    "children": [
+                      "Referral code"
+                    ]
                   },
                   {
                     "tag": "input",
@@ -375,7 +381,6 @@
                       "data-testid": "login-referral",
                       "id": "login-referral"
                     },
-                    "text": "",
                     "children": []
                   }
                 ]
@@ -385,19 +390,21 @@
                 "attrs": {
                   "data-testid": "login-error"
                 },
-                "text": "Bad credentials",
-                "children": []
+                "children": [
+                  "Bad credentials"
+                ]
               },
               {
                 "tag": "button",
                 "attrs": {
                   "data-testid": "login-submit",
-                  "type": "submit",
                   "data-status": "idle",
+                  "type": "submit",
                   "disabled": true
                 },
-                "text": "Sign in",
-                "children": []
+                "children": [
+                  "Sign in"
+                ]
               }
             ]
           }
@@ -410,35 +417,34 @@
     "attrs": {
       "data-testid": "stage"
     },
-    "text": "",
     "children": [
       {
         "tag": "section",
         "attrs": {
           "data-testid": "page-login"
         },
-        "text": "",
         "children": [
           {
             "tag": "form",
             "attrs": {
               "data-testid": "login-form"
             },
-            "text": "",
             "children": [
               {
                 "tag": "h1",
                 "attrs": {},
-                "text": "Sign in",
-                "children": []
+                "children": [
+                  "Sign in"
+                ]
               },
               {
                 "tag": "label",
                 "attrs": {
                   "for": "login-email"
                 },
-                "text": "Email",
-                "children": []
+                "children": [
+                  "Email"
+                ]
               },
               {
                 "tag": "input",
@@ -447,7 +453,6 @@
                   "id": "login-email",
                   "placeholder": "you@example.com"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -455,8 +460,9 @@
                 "attrs": {
                   "for": "login-password"
                 },
-                "text": "Password",
-                "children": []
+                "children": [
+                  "Password"
+                ]
               },
               {
                 "tag": "input",
@@ -464,7 +470,6 @@
                   "id": "login-password",
                   "type": "password"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -472,8 +477,9 @@
                 "attrs": {
                   "for": "login-remember"
                 },
-                "text": "Remember me",
-                "children": []
+                "children": [
+                  "Remember me"
+                ]
               },
               {
                 "tag": "input",
@@ -481,7 +487,6 @@
                   "id": "login-remember",
                   "type": "checkbox"
                 },
-                "text": "",
                 "children": []
               },
               {
@@ -489,32 +494,34 @@
                 "attrs": {
                   "for": "login-plan"
                 },
-                "text": "Plan",
-                "children": []
+                "children": [
+                  "Plan"
+                ]
               },
               {
                 "tag": "select",
                 "attrs": {
                   "id": "login-plan"
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "option",
                     "attrs": {
-                      "selected": true,
-                      "value": "free"
+                      "value": "free",
+                      "selected": true
                     },
-                    "text": "Free",
-                    "children": []
+                    "children": [
+                      "Free"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "pro"
                     },
-                    "text": "Pro",
-                    "children": []
+                    "children": [
+                      "Pro"
+                    ]
                   }
                 ]
               },
@@ -523,8 +530,9 @@
                 "attrs": {
                   "for": "login-addons"
                 },
-                "text": "Add-ons",
-                "children": []
+                "children": [
+                  "Add-ons"
+                ]
               },
               {
                 "tag": "select",
@@ -532,32 +540,34 @@
                   "id": "login-addons",
                   "multiple": true
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "option",
                     "attrs": {
-                      "selected": true,
-                      "value": "sms"
+                      "value": "sms",
+                      "selected": true
                     },
-                    "text": "SMS",
-                    "children": []
+                    "children": [
+                      "SMS"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "voice"
                     },
-                    "text": "Voice",
-                    "children": []
+                    "children": [
+                      "Voice"
+                    ]
                   },
                   {
                     "tag": "option",
                     "attrs": {
                       "value": "fax"
                     },
-                    "text": "Fax",
-                    "children": []
+                    "children": [
+                      "Fax"
+                    ]
                   }
                 ]
               },
@@ -566,15 +576,15 @@
                 "attrs": {
                   "disabled": true
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "label",
                     "attrs": {
                       "for": "login-referral"
                     },
-                    "text": "Referral code",
-                    "children": []
+                    "children": [
+                      "Referral code"
+                    ]
                   },
                   {
                     "tag": "input",
@@ -582,7 +592,6 @@
                       "data-testid": "login-referral",
                       "id": "login-referral"
                     },
-                    "text": "",
                     "children": []
                   }
                 ]
@@ -591,12 +600,13 @@
                 "tag": "button",
                 "attrs": {
                   "data-testid": "login-submit",
-                  "type": "submit",
                   "data-status": "idle",
+                  "type": "submit",
                   "disabled": true
                 },
-                "text": "Sign in",
-                "children": []
+                "children": [
+                  "Sign in"
+                ]
               }
             ]
           }
@@ -609,33 +619,32 @@
     "attrs": {
       "data-testid": "stage"
     },
-    "text": "",
     "children": [
       {
         "tag": "section",
         "attrs": {
           "data-testid": "page-cards"
         },
-        "text": "",
         "children": [
           {
             "tag": "div",
             "attrs": {
               "data-testid": "card-grid"
             },
-            "text": "",
             "children": [
               {
                 "tag": "h1",
                 "attrs": {},
-                "text": "Options",
-                "children": []
+                "children": [
+                  "Options"
+                ]
               },
               {
                 "tag": "h2",
                 "attrs": {},
-                "text": "Pick one",
-                "children": []
+                "children": [
+                  "Pick one"
+                ]
               },
               {
                 "tag": "button",
@@ -644,23 +653,24 @@
                   "type": "button",
                   "aria-pressed": "false"
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "span",
                     "attrs": {
                       "data-testid": "card-label"
                     },
-                    "text": "Small",
-                    "children": []
+                    "children": [
+                      "Small"
+                    ]
                   },
                   {
                     "tag": "small",
                     "attrs": {
                       "data-testid": "card-hint"
                     },
-                    "text": "Under 1000 sq ft",
-                    "children": []
+                    "children": [
+                      "Under 1000 sq ft"
+                    ]
                   }
                 ]
               },
@@ -671,23 +681,24 @@
                   "type": "button",
                   "aria-pressed": "false"
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "span",
                     "attrs": {
                       "data-testid": "card-label"
                     },
-                    "text": "Medium",
-                    "children": []
+                    "children": [
+                      "Medium"
+                    ]
                   },
                   {
                     "tag": "small",
                     "attrs": {
                       "data-testid": "card-hint"
                     },
-                    "text": "1000 to 2500 sq ft",
-                    "children": []
+                    "children": [
+                      "1000 to 2500 sq ft"
+                    ]
                   }
                 ]
               },
@@ -698,15 +709,15 @@
                   "type": "button",
                   "aria-pressed": "false"
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "span",
                     "attrs": {
                       "data-testid": "card-label"
                     },
-                    "text": "Large",
-                    "children": []
+                    "children": [
+                      "Large"
+                    ]
                   }
                 ]
               }
@@ -717,8 +728,9 @@
             "attrs": {
               "data-testid": "card-hint"
             },
-            "text": "decoy outside the grid",
-            "children": []
+            "children": [
+              "decoy outside the grid"
+            ]
           }
         ]
       }
@@ -729,29 +741,27 @@
     "attrs": {
       "data-testid": "stage"
     },
-    "text": "",
     "children": [
       {
         "tag": "section",
         "attrs": {
           "data-testid": "page-dialog"
         },
-        "text": "",
         "children": [
           {
             "tag": "div",
             "attrs": {
               "data-testid": "portal-host"
             },
-            "text": "",
             "children": [
               {
                 "tag": "button",
                 "attrs": {
                   "type": "button"
                 },
-                "text": "Open confirm",
-                "children": []
+                "children": [
+                  "Open confirm"
+                ]
               }
             ]
           }
@@ -764,45 +774,45 @@
     "attrs": {
       "data-testid": "stage"
     },
-    "text": "",
     "children": [
       {
         "tag": "section",
         "attrs": {
           "data-testid": "page-frame"
         },
-        "text": "",
         "children": [
           {
             "tag": "div",
             "attrs": {
               "data-testid": "frame-host"
             },
-            "text": "",
             "children": [
               {
                 "tag": "p",
                 "attrs": {
                   "data-testid": "frame-count"
                 },
-                "text": "decoy outside the frame",
-                "children": []
+                "children": [
+                  "decoy outside the frame"
+                ]
               },
               {
                 "tag": "p",
                 "attrs": {
                   "data-testid": "frame-toast"
                 },
-                "text": "decoy toast outside the frame",
-                "children": []
+                "children": [
+                  "decoy toast outside the frame"
+                ]
               },
               {
                 "tag": "button",
                 "attrs": {
                   "type": "button"
                 },
-                "text": "Hide frame",
-                "children": []
+                "children": [
+                  "Hide frame"
+                ]
               },
               {
                 "tag": "iframe",
@@ -810,40 +820,39 @@
                   "data-testid": "framed",
                   "title": "Framed counter"
                 },
-                "text": "",
                 "children": [
                   {
                     "tag": "div",
                     "attrs": {
                       "data-testid": "counter"
                     },
-                    "text": "",
                     "children": [
                       {
                         "tag": "p",
                         "attrs": {
                           "data-testid": "frame-count"
                         },
-                        "text": "Clicked 0 times",
-                        "children": []
+                        "children": [
+                          "Clicked 0 times"
+                        ]
                       },
                       {
                         "tag": "button",
                         "attrs": {
                           "type": "button"
                         },
-                        "text": "Add one",
-                        "children": []
+                        "children": [
+                          "Add one"
+                        ]
                       },
                       {
                         "tag": "label",
                         "attrs": {},
-                        "text": "Note",
                         "children": [
+                          "Note",
                           {
                             "tag": "input",
                             "attrs": {},
-                            "text": "",
                             "children": []
                           }
                         ]
@@ -855,8 +864,9 @@
                     "attrs": {
                       "data-testid": "frame-toast"
                     },
-                    "text": "Toast inside the frame",
-                    "children": []
+                    "children": [
+                      "Toast inside the frame"
+                    ]
                   }
                 ]
               }
@@ -871,35 +881,34 @@
     "attrs": {
       "data-testid": "stage"
     },
-    "text": "",
     "children": [
       {
         "tag": "section",
         "attrs": {
           "data-testid": "page-wizard"
         },
-        "text": "",
         "children": [
           {
             "tag": "section",
             "attrs": {
               "data-testid": "page-step-one"
             },
-            "text": "",
             "children": [
               {
                 "tag": "h1",
                 "attrs": {},
-                "text": "Step one",
-                "children": []
+                "children": [
+                  "Step one"
+                ]
               },
               {
                 "tag": "button",
                 "attrs": {
                   "type": "button"
                 },
-                "text": "Continue",
-                "children": []
+                "children": [
+                  "Continue"
+                ]
               }
             ]
           }

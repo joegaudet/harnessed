@@ -22,7 +22,7 @@ export { specs } from '../specs/catalog'
 export type { ConformanceCtx, Spec, View } from '../specs/catalog'
 export { pageSpecs, urlSpecs } from '../specs/pages.catalog'
 export type { PageSpec, UrlCtx, UrlSpec } from '../specs/pages.catalog'
-export { viewSearch } from '../specs/views'
+export { viewSearch, VIEWS } from '../specs/views'
 
 // Fixture parity: a port of the fixture to another framework renders each view
 // and compares `fixtureTree(stage)` with the pinned tree of the React original.

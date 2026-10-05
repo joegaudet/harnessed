@@ -14,5 +14,11 @@
       "vite/client",
       "@glint/ember-tsc/types"
     ]
-  }
+  },
+  "exclude": ["tests/harness"],
+  "references": [
+    {
+      "path": "./tests/harness"
+    }
+  ]
 }

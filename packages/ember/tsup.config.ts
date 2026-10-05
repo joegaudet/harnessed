@@ -13,5 +13,6 @@ export default defineConfig({
     '@harnessed-ts/resolve',
     '@ember/test-helpers',
     '@testing-library/dom',
+    '@testing-library/user-event',
   ],
 })

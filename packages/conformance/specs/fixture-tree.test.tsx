@@ -6,7 +6,7 @@ import { App } from '../fixture/App'
 import { fixtureTree } from '../src/fixture-tree'
 import type { FixtureNode } from '../src/fixture-tree'
 import type { View } from './catalog'
-import { viewSearch } from './views'
+import { VIEWS, viewSearch } from './views'
 
 /**
  * Pins what each React view renders to `fixture/trees.json`. A port of the
@@ -18,15 +18,6 @@ import { viewSearch } from './views'
  */
 // A path, not a URL: under the jsdom environment import.meta.url is not file://.
 const FILE = join(import.meta.dirname, '../fixture/trees.json')
-const VIEWS: View[] = [
-  'login',
-  'login-error',
-  'login-late-duplicates',
-  'cards',
-  'dialog',
-  'frame',
-  'wizard',
-]
 
 function treeOf(view: View): FixtureNode {
   window.history.pushState({}, '', `/${viewSearch(view)}`)
