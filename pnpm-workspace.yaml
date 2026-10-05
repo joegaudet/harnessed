@@ -9,6 +9,9 @@ autoInstallPeers: false
 allowBuilds:
   # tsup's bundler; needs its postinstall to fetch the platform binary
   esbuild: true
+  # Its postinstall downloads Chrome into every install; the puppeteer test app
+  # installs the browser explicitly instead (`install:browser`).
+  puppeteer: false
 minimumReleaseAgeExclude:
   - '@changesets/apply-release-plan@8.1.0'
   - '@changesets/cli@3.0.2'

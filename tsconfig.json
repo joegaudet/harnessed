@@ -7,6 +7,7 @@
     { "path": "./packages/dom" },
     { "path": "./packages/vitest-browser" },
     { "path": "./packages/playwright" },
+    { "path": "./packages/puppeteer" },
     { "path": "./packages/page" },
     { "path": "./packages/chai" },
     { "path": "./packages/qunit" },

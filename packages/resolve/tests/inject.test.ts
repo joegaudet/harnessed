@@ -81,6 +81,36 @@ describe('the injectable build', () => {
   })
 })
 
+describe('visible()', () => {
+  /** jsdom lays nothing out, so a case gives the elements it cares about a box. */
+  const withBox = <E extends Element>(element: E): E => {
+    element.getBoundingClientRect = () =>
+      ({ x: 0, y: 0, top: 0, left: 0, right: 10, bottom: 10, width: 10, height: 10 }) as DOMRect
+    return element
+  }
+
+  it('answers by layout: a box is visible, no box is not', () => {
+    const { api, document } = page('<button id="a">A</button><button id="b">B</button>')
+    expect(api.visible(withBox(document.getElementById('a')!))).toBe(true)
+    expect(api.visible(document.getElementById('b')!)).toBe(false)
+  })
+
+  it('reads display: contents from its children, which a box-only check would not', () => {
+    const { api, document } = page('<div id="c" style="display: contents"><span>x</span></div>')
+    const contents = document.getElementById('c')!
+    withBox(contents.querySelector('span')!)
+    expect(api.visible(contents)).toBe(true)
+  })
+
+  it("stops at the element's own document: a driver checks the frames it crossed itself", () => {
+    const { api, document } = page('<iframe></iframe>')
+    // The iframe has no box, so a walk across frames would call this hidden.
+    const inner = document.querySelector('iframe')!.contentDocument!
+    inner.body.innerHTML = '<button>In</button>'
+    expect(api.visible(withBox(inner.querySelector('button')!))).toBe(true)
+  })
+})
+
 describe('selectors over the wire', () => {
   it('round-trips a RegExp through JSON, which a remote driver forces', async () => {
     const { encodeSelector } = await import('../src/wire')
