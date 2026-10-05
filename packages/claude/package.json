@@ -65,7 +65,7 @@
     "@harnessed-ts/config": "workspace:^"
   },
   "devDependencies": {
-    "vitest": "^5.0.0",
-    "@types/node": "^26.4.1"
+    "@types/node": "^26.4.1",
+    "vitest": "^5.0.0"
   }
 }

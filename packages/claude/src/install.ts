@@ -2,10 +2,17 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadConfig } from '@harnessed-ts/config'
-import { detectLayout, detectRunners, detectTestIdAttribute } from './detect'
+import {
+  detectEmberUnderVitest,
+  detectGherkinAdapters,
+  detectLayout,
+  detectRunners,
+  detectTestIdAttribute,
+  toRunners,
+} from './detect'
 import type { Runner } from './detect'
 import type { RenderContext } from './render'
-import { renderConfig, renderRules, renderSkill } from './render'
+import { allExampleFiles, exampleFiles, renderConfig, renderRules, renderSkill } from './render'
 
 export interface InstallOptions {
   /** Repo root. Defaults to the working directory. */
@@ -71,6 +78,10 @@ export function install(options: InstallOptions = {}): InstallResult {
   const root = resolve(options.root ?? process.cwd())
   const dryRun = options.dryRun ?? false
   const assets = assetsDir()
+  // Checked before anything is written: a caller outside the type system can
+  // hand over any string, and an unknown runner has no docs to render.
+  const chosenRunners =
+    options.layout?.runners === undefined ? undefined : toRunners(options.layout.runners)
 
   // An existing config is the repo's own statement of its layout, so it beats
   // detection. Detection only fills what the config leaves unsaid; explicit
@@ -80,6 +91,8 @@ export function install(options: InstallOptions = {}): InstallResult {
     ...detectLayout(root),
     testIdAttribute: detectTestIdAttribute(root),
     runners: detectRunners(root),
+    gherkinAdapters: detectGherkinAdapters(root),
+    emberUnderVitest: detectEmberUnderVitest(root),
     ...definedOnly({
       components: existing?.layout?.components,
       pages: existing?.layout?.pages,
@@ -91,6 +104,7 @@ export function install(options: InstallOptions = {}): InstallResult {
       testIdAttribute: existing?.testIdAttribute,
     }),
     ...options.layout,
+    ...(chosenRunners === undefined ? {} : { runners: chosenRunners }),
   }
 
   const result: InstallResult = {
@@ -125,14 +139,24 @@ export function install(options: InstallOptions = {}): InstallResult {
   }
 
   // A worked test per runner the repo uses: env, page entry, assertion.
-  for (const runner of result.runners) {
-    const example = `${runner}.test-example.ts`
+  const examples = exampleFiles(result.runners, context)
+  for (const example of examples) {
     write(
       join(root, '.claude/skills/harness/examples', example),
       readFileSync(join(assets, 'skills/harness/examples/runners', example), 'utf8'),
       result,
       dryRun,
     )
+  }
+
+  // The example of a runner the repo has since dropped. Left behind, it
+  // documents a runner the skill no longer mentions.
+  const dropped = allExampleFiles().filter(example => !examples.includes(example))
+  for (const stale of dropped) {
+    const path = join(root, '.claude/skills/harness/examples', stale)
+    if (!existsSync(path)) continue
+    if (!dryRun) rmSync(path)
+    result.removed.push(path)
   }
 
   // A template an earlier version wrote and this one renamed. Left behind, it

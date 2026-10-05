@@ -1,5 +1,5 @@
-// Gherkin steps (playwright-bdd shown; @harnessed-ts/gherkin has adapters for
-// cucumber-js, Cypress and Yadda too). Pages live in the scenario's world.
+// Gherkin steps under playwright-bdd. Pages live in the scenario's world, a
+// per-scenario fixture, never in a module-level let.
 import { definePages, pageParameter } from '@harnessed-ts/gherkin'
 import { withWorld } from '@harnessed-ts/gherkin/playwright-bdd'
 import { pw } from '@harnessed-ts/playwright'

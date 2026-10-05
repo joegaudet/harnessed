@@ -41,8 +41,7 @@ Banned:
 
 ## Your runners
 
-How a test in this repo builds the env a harness takes, and asserts. A worked
-example per runner: `examples/<runner>.test-example.ts`.
+How a test in this repo builds the env a harness takes, and asserts.
 
 <!-- BEGIN GENERATED: runners -->
 <!-- END GENERATED: runners -->

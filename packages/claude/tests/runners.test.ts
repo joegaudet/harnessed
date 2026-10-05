@@ -1,27 +1,17 @@
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { detectRunners } from '../src/detect'
 import { install } from '../src/install'
 import { runnersSection } from '../src/render'
+import { pkg, removeRepos, repo } from './repo'
 
 /**
  * The skill tells an agent how to build an env and assert in *this* repo's
  * runners, so it has to know which runners the repo uses: from its
  * dependencies, and from the config files each runner leaves behind.
  */
-function repo(files: Record<string, string>): string {
-  const root = mkdtempSync(join(tmpdir(), 'harnessed-claude-'))
-  for (const [path, contents] of Object.entries(files)) {
-    mkdirSync(join(root, path, '..'), { recursive: true })
-    writeFileSync(join(root, path), contents)
-  }
-  return root
-}
-
-const pkg = (deps: Record<string, string>): string =>
-  JSON.stringify({ name: 'app', devDependencies: deps })
+afterEach(removeRepos)
 
 describe('detectRunners', () => {
   it('reads the runners from devDependencies', () => {

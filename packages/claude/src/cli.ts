@@ -1,93 +1,10 @@
 #!/usr/bin/env node
 import { relative } from 'node:path'
+import { parseArgs, USAGE } from './args'
 import { install } from './install'
-import type { RenderContext } from './render'
-
-const USAGE = `harnessed-claude — install the harness authoring skill and rules
-
-Usage
-  npx @harnessed-ts/claude install [options]
-
-Options
-  --dry-run             Report what would change, write nothing
-  --overwrite-config    Rewrite an existing harnessed.config.ts
-  --components <dir>    Where reusable widgets live
-  --pages <dir>         Where pages live
-  --harnesses <dir>     Where harnesses should be written
-  --widget-harnesses <dir>  Where widget harnesses go (default: detected)
-  --page-harnesses <dir>    Where page harnesses go (default: detected)
-  --test-id-attr <str>  The test-id attribute in use (default: detected)
-  --widget-testid <p>   Widget test-id pattern (default: ui-<kebab>)
-  --page-testid <p>     Page test-id pattern (default: page-<kebab>)
-  -h, --help            Show this
-`
-
-function parse(argv: string[]): {
-  command: string
-  layout: Partial<RenderContext>
-  dryRun: boolean
-  overwriteConfig: boolean
-  help: boolean
-} {
-  const layout: Partial<RenderContext> = {}
-  let dryRun = false
-  let overwriteConfig = false
-  let help = false
-  const positional: string[] = []
-
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index]!
-    const next = (): string => {
-      const value = argv[index + 1]
-      if (value === undefined) throw new Error(`harnessed: ${arg} needs a value`)
-      index += 1
-      return value
-    }
-    switch (arg) {
-      case '--dry-run':
-        dryRun = true
-        break
-      case '--overwrite-config':
-        overwriteConfig = true
-        break
-      case '--components':
-        layout.components = next()
-        break
-      case '--pages':
-        layout.pages = next()
-        break
-      case '--harnesses':
-        layout.harnesses = next()
-        break
-      case '--widget-harnesses':
-        layout.widgetHarnesses = next()
-        break
-      case '--page-harnesses':
-        layout.pageHarnesses = next()
-        break
-      case '--test-id-attr':
-        layout.testIdAttribute = next()
-        break
-      case '--widget-testid':
-        layout.widgetTestId = next()
-        break
-      case '--page-testid':
-        layout.pageTestId = next()
-        break
-      case '-h':
-      case '--help':
-        help = true
-        break
-      default:
-        positional.push(arg)
-    }
-  }
-
-  return { command: positional[0] ?? 'install', layout, dryRun, overwriteConfig, help }
-}
 
 function main(): void {
-  const { command, layout, dryRun, overwriteConfig, help } = parse(process.argv.slice(2))
+  const { command, layout, dryRun, overwriteConfig, help } = parseArgs(process.argv.slice(2))
 
   if (help || command === 'help') {
     process.stdout.write(USAGE)
@@ -108,7 +25,9 @@ function main(): void {
       ...result.written.map(path => `  ${relative(process.cwd(), path)}`),
       ...(result.removed.length > 0
         ? [
-            dryRun ? 'Would remove (superseded):' : 'Removed (superseded):',
+            dryRun
+              ? 'Would remove (superseded or no longer used):'
+              : 'Removed (superseded or no longer used):',
             ...result.removed.map(path => `  ${relative(process.cwd(), path)}`),
           ]
         : []),
@@ -136,4 +55,10 @@ function main(): void {
   )
 }
 
-main()
+try {
+  main()
+} catch (error) {
+  // A bad flag or an unknown runner: say what, not a stack trace.
+  process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
+  process.exitCode = 1
+}
