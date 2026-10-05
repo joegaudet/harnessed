@@ -9,6 +9,7 @@
     { "path": "./packages/page" },
     { "path": "./packages/chai" },
     { "path": "./packages/qunit" },
+    { "path": "./packages/ember" },
     { "path": "./packages/route" },
     { "path": "./packages/eslint-plugin" },
     { "path": "./packages/claude" },

@@ -4,3 +4,5 @@ pnpm-lock.yaml
 coverage/
 test-results/
 playwright-report/
+# Written by specs/fixture-tree.test.tsx; regenerate rather than edit.
+packages/conformance/fixture/trees.json

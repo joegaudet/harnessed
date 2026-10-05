@@ -22,7 +22,19 @@ export { specs } from '../specs/catalog'
 export type { ConformanceCtx, Spec, View } from '../specs/catalog'
 export { pageSpecs, urlSpecs } from '../specs/pages.catalog'
 export type { PageSpec, UrlCtx, UrlSpec } from '../specs/pages.catalog'
-export { viewSearch } from '../specs/views'
+export { viewSearch, VIEWS } from '../specs/views'
+
+// Fixture parity: a port of the fixture to another framework renders each view
+// and compares `fixtureTree(stage)` with the pinned tree of the React original.
+import type { View } from '../specs/catalog'
+import trees from '../fixture/trees.json'
+import type { FixtureNode } from './fixture-tree'
+export { fixtureTree } from './fixture-tree'
+export type { FixtureNode } from './fixture-tree'
+// JSON carries no schema: TypeScript infers each literal's exact shape, which no
+// declared type matches structurally. The file is written by the fixture-tree test
+// from `fixtureTree()` output, so this is the type it holds.
+export const fixtureTrees = trees as unknown as Record<View, FixtureNode>
 
 // The harnesses the specs drive. A driver author needs these to understand what
 // the specs are asking for, and may reuse them directly.
