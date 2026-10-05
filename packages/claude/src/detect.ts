@@ -106,3 +106,81 @@ export function detectLayout(root: string): DetectedLayout {
     pageTestId: 'page-<kebab>',
   }
 }
+
+/** The runners `install` knows how to document. Order is the order they are shown. */
+export type Runner =
+  | 'ember'
+  | 'cypress'
+  | 'webdriverio'
+  | 'testcafe'
+  | 'puppeteer'
+  | 'playwright'
+  | 'vitest-browser'
+  | 'testing-library'
+  | 'gherkin'
+
+interface RunnerSignal {
+  runner: Runner
+  /** A dependency that means the repo uses it. */
+  packages: RegExp
+  /** A file a project using it leaves at its root. */
+  files?: string[]
+}
+
+const RUNNER_SIGNALS: RunnerSignal[] = [
+  {
+    runner: 'ember',
+    packages: /^ember-source$/,
+    files: ['ember-cli-build.js', 'ember-cli-build.mjs'],
+  },
+  {
+    runner: 'cypress',
+    packages: /^cypress$/,
+    files: ['cypress.config.ts', 'cypress.config.js', 'cypress.config.mjs'],
+  },
+  {
+    runner: 'webdriverio',
+    packages: /^(webdriverio|@wdio\/cli)$/,
+    files: ['wdio.conf.ts', 'wdio.conf.js', 'wdio.conf.mjs'],
+  },
+  {
+    runner: 'testcafe',
+    packages: /^testcafe$/,
+    files: ['.testcaferc.json', '.testcaferc.js', '.testcaferc.cjs'],
+  },
+  { runner: 'puppeteer', packages: /^puppeteer(-core)?$/ },
+  { runner: 'playwright', packages: /^@playwright\/test$/ },
+  { runner: 'vitest-browser', packages: /^@vitest\/browser/ },
+  { runner: 'testing-library', packages: /^@testing-library\/(dom|react|vue|svelte)$/ },
+  {
+    runner: 'gherkin',
+    packages:
+      /^(playwright-bdd|@cucumber\/cucumber|@badeball\/cypress-cucumber-preprocessor|ember-cli-yadda)$/,
+  },
+]
+
+/**
+ * The test runners a repo uses, from its dependencies and the config files each
+ * runner leaves behind. The skill documents only these, so an agent working in
+ * an Ember repo is shown `ember()` and `assert.harness`, not Cypress.
+ */
+export function detectRunners(root: string): Runner[] {
+  let dependencies: string[] = []
+  try {
+    const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as Record<
+      string,
+      Record<string, string> | undefined
+    >
+    dependencies = [
+      ...Object.keys(manifest.dependencies ?? {}),
+      ...Object.keys(manifest.devDependencies ?? {}),
+    ]
+  } catch {
+    // No manifest, or an unreadable one: only the config files can tell.
+  }
+  return RUNNER_SIGNALS.filter(
+    ({ packages, files = [] }) =>
+      dependencies.some(name => packages.test(name)) ||
+      files.some(file => existsSync(join(root, file))),
+  ).map(({ runner }) => runner)
+}

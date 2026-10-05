@@ -39,6 +39,14 @@ Banned:
 
 `@harnessed-ts/eslint-plugin` enforces all four.
 
+## Your runners
+
+How a test in this repo builds the env a harness takes, and asserts. A worked
+example per runner: `examples/<runner>.test-example.ts`.
+
+<!-- BEGIN GENERATED: runners -->
+<!-- END GENERATED: runners -->
+
 ## File placement and test-id naming
 
 <!-- BEGIN GENERATED: placement -->

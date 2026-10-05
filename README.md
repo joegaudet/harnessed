@@ -940,7 +940,11 @@ npm i -D @harnessed-ts/claude && npx @harnessed-ts/claude install
 
 It writes `.claude/skills/harness/` and `.claude/rules/harness.md`, generating the
 file-placement table from your repo's actual layout, and creates
-`harnessed.config.ts` if it is missing. Re-running refreshes the docs and leaves
+`harnessed.config.ts` if it is missing. It also detects the test runners the repo
+uses — Ember, Cypress, WebdriverIO, TestCafe, Puppeteer, Playwright, Vitest
+browser mode, Testing Library, Gherkin — from its dependencies and config files,
+and documents only those: how a test builds the env and asserts, with a worked
+example per runner. Re-running refreshes the docs and leaves
 your config alone.
 
 ## Packages

@@ -130,6 +130,7 @@ function main(): void {
       `  test-id attr    ${context.testIdAttribute}`,
       `  widget test id  ${context.widgetTestId}`,
       `  page test id    ${context.pageTestId}`,
+      `  runners         ${result.runners.length > 0 ? result.runners.join(', ') : 'none detected'}`,
       '',
     ].join('\n'),
   )

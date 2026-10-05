@@ -2,7 +2,8 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadConfig } from '@harnessed-ts/config'
-import { detectLayout, detectTestIdAttribute } from './detect'
+import { detectLayout, detectRunners, detectTestIdAttribute } from './detect'
+import type { Runner } from './detect'
 import type { RenderContext } from './render'
 import { renderConfig, renderRules, renderSkill } from './render'
 
@@ -25,6 +26,8 @@ export interface InstallResult {
   removed: string[]
   /** True when an existing config supplied part of the layout above. */
   usedExistingConfig: boolean
+  /** The test runners detected, which the skill and examples cover. */
+  runners: Runner[]
 }
 
 /** Drops keys the config did not set, so they do not overwrite detection with undefined. */
@@ -76,6 +79,7 @@ export function install(options: InstallOptions = {}): InstallResult {
   const context: RenderContext = {
     ...detectLayout(root),
     testIdAttribute: detectTestIdAttribute(root),
+    runners: detectRunners(root),
     ...definedOnly({
       components: existing?.layout?.components,
       pages: existing?.layout?.pages,
@@ -95,6 +99,7 @@ export function install(options: InstallOptions = {}): InstallResult {
     skipped: [],
     removed: [],
     usedExistingConfig: existing !== undefined,
+    runners: context.runners ?? [],
   }
 
   const skillTemplate = readFileSync(join(assets, 'skills/harness/SKILL.md'), 'utf8')
@@ -114,6 +119,17 @@ export function install(options: InstallOptions = {}): InstallResult {
     write(
       join(root, '.claude/skills/harness/examples', template),
       readFileSync(join(assets, 'skills/harness/examples', template), 'utf8'),
+      result,
+      dryRun,
+    )
+  }
+
+  // A worked test per runner the repo uses: env, page entry, assertion.
+  for (const runner of result.runners) {
+    const example = `${runner}.test-example.ts`
+    write(
+      join(root, '.claude/skills/harness/examples', example),
+      readFileSync(join(assets, 'skills/harness/examples/runners', example), 'utf8'),
       result,
       dryRun,
     )
