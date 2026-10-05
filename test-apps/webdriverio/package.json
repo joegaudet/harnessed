@@ -1,5 +1,5 @@
 {
-  "name": "conformance-webdriverio",
+  "name": "test-app-webdriverio",
   "private": true,
   "description": "Runs the @harnessed-ts/conformance catalog under @harnessed-ts/webdriverio, with the WDIO testrunner, Mocha and headless Chrome.",
   "type": "module",
