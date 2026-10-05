@@ -303,6 +303,16 @@ export const specs: Spec[] = [
     },
   },
   {
+    name: "selectOption matches an option's label as well as its value",
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      assert.equal(await form.chosenPlan(), 'free')
+      // `<option value="pro">Pro</option>`: chosen by what the user sees.
+      await form.choosePlan('Pro')
+      assert.equal(await form.chosenPlan(), 'pro')
+    },
+  },
+  {
     name: 'attribute() reads a data attribute that tracks state',
     async run(ctx) {
       const form = new LoginFormHarness(await ctx.show('login'))

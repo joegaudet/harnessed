@@ -1,0 +1,82 @@
+{
+  "name": "@harnessed-ts/webdriverio",
+  "version": "0.3.0",
+  "description": "WebdriverIO driver for @harnessed-ts/core: the shared resolver injected into the page, WebDriver actions, and frames entered with switchFrame.",
+  "keywords": [
+    "testing",
+    "harness",
+    "webdriverio",
+    "webdriver",
+    "page-object",
+    "e2e"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/webdriverio"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./matchers": {
+      "types": "./dist/matchers.d.ts",
+      "import": "./dist/matchers.js",
+      "require": "./dist/matchers.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/resolve": "workspace:^"
+  },
+  "peerDependencies": {
+    "expect-webdriverio": ">=8.0.0-alpha.3",
+    "webdriverio": ">=10"
+  },
+  "peerDependenciesMeta": {
+    "expect-webdriverio": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@wdio/types": "^10.0.0",
+    "expect-webdriverio": "^8.0.0-alpha.3",
+    "webdriverio": "^10.0.0"
+  }
+}
