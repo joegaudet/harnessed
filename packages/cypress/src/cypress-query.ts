@@ -10,7 +10,7 @@ import {
 import {
   countAll,
   FrameEntryError,
-  isVisibleByLayout,
+  isVisibleInLayout,
   resolveAll,
   resolveOne,
 } from '@harnessed-ts/resolve'
@@ -246,7 +246,7 @@ export class CypressQuery extends Query {
    */
   private async visible(options?: WaitOptions): Promise<boolean> {
     try {
-      return isVisibleByLayout(await this.element(options), this.env.document)
+      return isVisibleInLayout(await this.element(options), this.env.document)
     } catch (error) {
       if (error instanceof FrameEntryError) throw error
       // Not on screen at all. Prefer isAbsent() to ask this — it answers without

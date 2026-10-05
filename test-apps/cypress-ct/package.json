@@ -1,5 +1,5 @@
 {
-  "name": "cypress-ct",
+  "name": "test-app-cypress-ct",
   "private": true,
   "description": "Runs the conformance catalog under @harnessed-ts/cypress, as Cypress component tests mounting the React fixture.",
   "type": "module",

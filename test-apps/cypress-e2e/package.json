@@ -1,5 +1,5 @@
 {
-  "name": "cypress-e2e",
+  "name": "test-app-cypress-e2e",
   "private": true,
   "description": "Runs the conformance catalog under @harnessed-ts/cypress, as Cypress e2e specs against the served React fixture.",
   "type": "module",

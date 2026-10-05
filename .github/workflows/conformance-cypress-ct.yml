@@ -9,6 +9,6 @@ jobs:
     with:
       name: cypress-ct
       # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
-      setup: pnpm --filter cypress-ct exec cypress install
-      test: pnpm --filter cypress-ct test
+      setup: pnpm --filter test-app-cypress-ct exec cypress install
+      test: pnpm --filter test-app-cypress-ct test
       artifacts: test-apps/cypress-ct/cypress/screenshots
