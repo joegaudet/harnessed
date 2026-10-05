@@ -21,7 +21,13 @@ export interface HarnessAssertions {
 
 /** The slice of QUnit's `assert` these checks report through. */
 interface PushResult {
-  pushResult(result: { result: boolean; actual: unknown; expected: unknown; message: string }): void
+  pushResult(result: {
+    result: boolean
+    actual: unknown
+    expected: unknown
+    message: string
+    negative?: boolean
+  }): void
 }
 
 /** The slice of the QUnit global `install` needs. */
@@ -38,8 +44,10 @@ function checks(assert: PushResult, subject: Assertable): HarnessAssertions {
     const outcome = await run
     assert.pushResult({
       result: outcome.pass !== negated,
-      actual: outcome.actual,
-      expected: outcome.expected,
+      actual: outcome.observed.actual,
+      expected: outcome.observed.expected,
+      // QUnit then reports "Expected: NOT 0" rather than an equal pair.
+      negative: negated,
       // Core's message describes whichever way the check went, so a failed
       // negation already reads "expected … not to …".
       message: message ?? outcome.message(),

@@ -4,9 +4,13 @@ import type { ScopedHarness } from './scoped-harness'
 export interface MatcherResult {
   pass: boolean
   message: () => string
-  /** What was read. Runners that diff (Vitest, QUnit) show it beside `expected`. */
-  actual?: unknown
-  expected?: unknown
+  /**
+   * What was read and what was wanted, for adapters that report them (QUnit,
+   * Chai). Deliberately not the `actual`/`expected` keys Vitest reads: those make
+   * a failed `.not` print a diff of two equal values, and the message already
+   * says everything a reader needs.
+   */
+  observed: { actual: unknown; expected: unknown }
 }
 
 /** Either a raw target or a harness — a harness asserts against its own host. */
@@ -33,8 +37,7 @@ export const harnessMatchers = {
     const pass = value === 'true'
     return {
       pass,
-      actual: value,
-      expected: 'true',
+      observed: { actual: value, expected: 'true' },
       message: () =>
         pass
           ? 'expected the target not to be selected, but aria-pressed was "true"'
@@ -49,8 +52,7 @@ export const harnessMatchers = {
     const pass = count === 0
     return {
       pass,
-      actual: count,
-      expected: 0,
+      observed: { actual: count, expected: 0 },
       message: () =>
         pass
           ? 'expected the target to be present, but nothing matched'
@@ -68,8 +70,7 @@ export const harnessMatchers = {
     const pass = typeof expected === 'string' ? actual === expected : expected.test(actual)
     return {
       pass,
-      actual,
-      expected,
+      observed: { actual, expected },
       message: () =>
         pass
           ? `expected the target not to have text ${String(expected)}`

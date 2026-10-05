@@ -357,8 +357,8 @@ await expect(banner).to.be.absent // .not.to.be.absent
 await expect(price).to.readAs(/^\$/)
 ```
 
-Every result also carries `actual` and `expected`, so a runner that diffs shows
-what was read.
+A failure under QUnit or Chai also reports what was read beside what was wanted,
+so their reporters show both.
 
 ### Configuration
 

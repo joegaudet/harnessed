@@ -1,5 +1,5 @@
 import { createQuery, testId } from '@harnessed-ts/core'
-import type { Query } from '@harnessed-ts/core'
+import type { Assertable, Query } from '@harnessed-ts/core'
 import { dom } from '@harnessed-ts/dom'
 import userEvent from '@testing-library/user-event'
 import QUnit from 'qunit'
@@ -20,6 +20,7 @@ interface Pushed {
   actual: unknown
   expected: unknown
   message: string
+  negative?: boolean
 }
 
 let pushed: Pushed[]
@@ -66,6 +67,8 @@ describe('@harnessed-ts/qunit', () => {
     await assert.harness(target('missing')).isPresent()
     expect(pushed.map(entry => entry.result)).toEqual([true, false])
     expect(pushed[1]!.message).toMatch(/expected the target to be present/)
+    // Reported as "Expected: NOT 0", not as an equal pair.
+    expect(pushed[1]).toMatchObject({ actual: 0, expected: 0, negative: true })
   })
 
   it('isSelected and isNotSelected read aria-pressed', async () => {
@@ -99,7 +102,9 @@ describe('@harnessed-ts/qunit', () => {
   it('accepts a harness, asserting against its host', async () => {
     show('<p data-testid="banner">Hi</p>')
     const assert = assertion()
-    await assert.harness({ self: target('banner') }).readsAs('Hi')
+    // The structural shape of a harness: core reads only `self`.
+    const harness = { self: target('banner') } as unknown as Assertable
+    await assert.harness(harness).readsAs('Hi')
     expect(pushed[0]!.result).toBe(true)
   })
 })

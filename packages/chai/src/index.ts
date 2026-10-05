@@ -17,7 +17,10 @@ interface ChaiUtils {
 interface ChaiStatic {
   Assertion: {
     addProperty(name: string, getter: (this: ChaiAssertionContext) => unknown): void
-    addMethod(name: string, method: (this: ChaiAssertionContext, ...args: never[]) => unknown): void
+    addMethod(
+      name: string,
+      method: (this: ChaiAssertionContext, expected: string | RegExp) => unknown,
+    ): void
   }
   AssertionError: new (message: string, props?: Record<string, unknown>) => Error
 }
@@ -48,7 +51,15 @@ export function harnessedChai(chai: ChaiStatic, utils: ChaiUtils): void {
     const result = await run(assertion._obj as Assertable)
     // A matcher's message already describes whichever way it went, so a
     // negated assertion that fails reads "expected … not to …" on its own.
-    if (result.pass === negated) throw new chai.AssertionError(result.message())
+    if (result.pass === negated) {
+      // actual/expected let Mocha and Cypress show a diff. A failed negation has
+      // nothing to diff — the values agreed, which was the problem.
+      throw new chai.AssertionError(result.message(), {
+        actual: result.observed.actual,
+        expected: result.observed.expected,
+        showDiff: !negated,
+      })
+    }
   }
 
   chai.Assertion.addProperty('absent', function () {

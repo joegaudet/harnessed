@@ -69,8 +69,9 @@
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "^26.4.1",
     "jsdom": "^30.0.1",
-    "vitest": "^5.0.0",
-    "@types/node": "^26.4.1"
+    "vitest": "^5.0.0"
   }
 }

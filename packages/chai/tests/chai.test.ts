@@ -77,6 +77,26 @@ describe('@harnessed-ts/chai', () => {
     )
   })
 
+  it('carries actual and expected for a reporter to diff, except on a failed negation', async () => {
+    show('<span data-testid="price">$12</span>')
+    const failed = async (run: () => Promise<unknown>): Promise<Record<string, unknown>> => {
+      try {
+        await run()
+      } catch (error) {
+        return error as Record<string, unknown>
+      }
+      throw new Error('expected the assertion to fail')
+    }
+    chai.assert.deepInclude(await failed(() => expect(target('price')).to.readAs('$13')), {
+      actual: '$12',
+      expected: '$13',
+      showDiff: true,
+    })
+    chai.assert.include(await failed(() => expect(target('price')).not.to.readAs('$12')), {
+      showDiff: false,
+    })
+  })
+
   it('accepts a harness as well as a target, asserting against its host', async () => {
     show('<p data-testid="banner">Hi</p>')
     const harness = { self: target('banner') }
