@@ -1,0 +1,27 @@
+{
+  "name": "test-app-gherkin-cypress",
+  "private": true,
+  "description": "Runs the shared harness-world feature under @badeball/cypress-cucumber-preprocessor, driving the served React fixture through @harnessed-ts/cypress.",
+  "type": "module",
+  "scripts": {
+    "serve": "FIXTURE_PORT=5189 pnpm --filter conformance serve:fixture",
+    "cy:run": "cypress run --e2e --browser ${CYPRESS_BROWSER:-electron}",
+    "test": "tsc --noEmit && start-server-and-test serve http-get://localhost:5189 cy:run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^28.0.0",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
+    "@harnessed-ts/conformance": "workspace:*",
+    "@harnessed-ts/core": "workspace:*",
+    "@harnessed-ts/cypress": "workspace:*",
+    "@harnessed-ts/gherkin": "workspace:*",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.4.1",
+    "cypress": "^16.1.1",
+    "esbuild": "^0.28.2",
+    "start-server-and-test": "^3.0.12",
+    "typescript": "^6.0.3"
+  }
+}

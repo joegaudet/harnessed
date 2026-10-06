@@ -1,0 +1,21 @@
+name: conformance-gherkin-playwright-bdd
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-gherkin-playwright-bdd-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: gherkin-playwright-bdd
+      setup: pnpm --filter test-app-gherkin-playwright-bdd exec playwright install --with-deps chromium
+      test: pnpm --filter test-app-gherkin-playwright-bdd test

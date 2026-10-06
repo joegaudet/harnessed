@@ -12,6 +12,7 @@
     { "path": "./packages/cypress" },
     { "path": "./packages/testcafe" },
     { "path": "./packages/page" },
+    { "path": "./packages/gherkin" },
     { "path": "./packages/chai" },
     { "path": "./packages/qunit" },
     { "path": "./packages/ember" },
