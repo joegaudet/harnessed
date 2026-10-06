@@ -23,6 +23,13 @@ describe('StrictModeViolation', () => {
     expect(new Error(wording)).not.toBeInstanceOf(StrictModeViolation)
     expect(null).not.toBeInstanceOf(StrictModeViolation)
   })
+
+  it('leaves a subclass to the prototype chain, so a plain violation is not one of it', () => {
+    class Narrower extends StrictModeViolation {}
+    expect(new Narrower(wording)).toBeInstanceOf(Narrower)
+    expect(new Narrower(wording)).toBeInstanceOf(StrictModeViolation)
+    expect(strictViolation(2, [], testId('card'))).not.toBeInstanceOf(Narrower)
+  })
 })
 
 describe('reviveStrictViolation', () => {

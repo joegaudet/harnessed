@@ -25,7 +25,7 @@ export class ThingPage extends PageHarness<{ token: string }> {
 
   // Required, and never empty. Usually one line against the page's own host.
   protected async waitForReady(): Promise<void> {
-    await this.self.waitForVisible()
+    await this.self.waitFor('visible')
   }
 
   async showsExpiredNotice(): Promise<boolean> {

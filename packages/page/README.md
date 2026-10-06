@@ -14,7 +14,7 @@ class CheckoutPage extends PageHarness<{ token: string }> {
   @ChildHarness(CartHarness) accessor cart!: CartHarness
 
   protected async waitForReady() {
-    await this.self.waitForVisible()
+    await this.self.waitFor('visible')
   }
 
   async placeOrder(): Promise<ConfirmationPage> {

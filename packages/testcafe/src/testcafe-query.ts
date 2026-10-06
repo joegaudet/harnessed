@@ -1,6 +1,6 @@
 import { Selector as TestCafeSelector } from 'testcafe'
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import { checkedFrom, describeScope, enabledFrom, getConfig, timeoutFor } from '@harnessed-ts/core'
 import { encodeSelector, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import type { PageApiOptions } from '@harnessed-ts/resolve/inject'
@@ -355,22 +355,14 @@ export class TestCafeQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitForVisible(options?: WaitOptions): Promise<void> {
-    await this.waitUntil('visible', options)
-  }
-
-  override async waitForHidden(options?: WaitOptions): Promise<void> {
-    await this.waitUntil('hidden', options)
-  }
-
   /** Polls from Node rather than waiting inside the page, as every read here does. */
-  private async waitUntil(op: 'visible' | 'hidden', options?: WaitOptions): Promise<void> {
+  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
     const deadline = Date.now() + timeout
     for (;;) {
-      if (await this.read<boolean>(op, { timeout })) return
+      if (await this.read<boolean>(state, { timeout })) return
       if (Date.now() >= deadline) {
-        throw new Error(`harnessed: ${this.described} did not become ${op} within ${timeout}ms.`)
+        throw new Error(`harnessed: ${this.described} did not become ${state} within ${timeout}ms.`)
       }
       await delay(POLL_MS)
     }

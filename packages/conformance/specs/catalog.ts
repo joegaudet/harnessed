@@ -104,23 +104,23 @@ export const specs: Spec[] = [
     },
   },
   {
-    name: 'guarantee 2: waitForVisible on a target matching several nodes rejects with a strict-mode violation, at once',
+    name: 'guarantee 2: waitFor(visible) on a target matching several nodes rejects with a strict-mode violation, at once',
     async run(ctx) {
       const grid = new CardGridHarness(await ctx.show('cards'))
       const started = Date.now()
       await assert.rejects(() => grid.waitForAmbiguousCard({ timeout: 2000 }), strictOnCards)
       const elapsed = Date.now() - started
-      assert.ok(elapsed < IMMEDIATE_MS, `waitForVisible on duplicates took ${elapsed}ms`)
+      assert.ok(elapsed < IMMEDIATE_MS, `waitFor(visible) on duplicates took ${elapsed}ms`)
     },
   },
   {
-    name: 'guarantee 2: waitForHidden on a target matching several nodes rejects with a strict-mode violation, at once',
+    name: 'guarantee 2: waitFor(hidden) on a target matching several nodes rejects with a strict-mode violation, at once',
     async run(ctx) {
       const grid = new CardGridHarness(await ctx.show('cards'))
       const started = Date.now()
       await assert.rejects(() => grid.waitForAmbiguousCardToHide({ timeout: 2000 }), strictOnCards)
       const elapsed = Date.now() - started
-      assert.ok(elapsed < IMMEDIATE_MS, `waitForHidden on duplicates took ${elapsed}ms`)
+      assert.ok(elapsed < IMMEDIATE_MS, `waitFor(hidden) on duplicates took ${elapsed}ms`)
     },
   },
   {
@@ -131,13 +131,13 @@ export const specs: Spec[] = [
     },
   },
   {
-    name: 'waitForHidden on an index past the last match resolves at once, like an absent target',
+    name: 'waitFor(hidden) on an index past the last match resolves at once, like an absent target',
     async run(ctx) {
       const grid = new CardGridHarness(await ctx.show('cards'))
       const started = Date.now()
       await grid.waitForMissingCardToHide({ timeout: 2000 })
       const elapsed = Date.now() - started
-      assert.ok(elapsed < IMMEDIATE_MS, `waitForHidden past the last match took ${elapsed}ms`)
+      assert.ok(elapsed < IMMEDIATE_MS, `waitFor(hidden) past the last match took ${elapsed}ms`)
     },
   },
 
@@ -251,7 +251,7 @@ export const specs: Spec[] = [
         /<iframe>/,
       )
       const elapsed = Date.now() - started
-      assert.ok(elapsed < IMMEDIATE_MS, `waitForVisible on a non-iframe frame took ${elapsed}ms`)
+      assert.ok(elapsed < IMMEDIATE_MS, `waitFor(visible) on a non-iframe frame took ${elapsed}ms`)
       await assert.rejects(
         () => panel.counterInWrongElement().waitHidden({ timeout: 2000 }),
         /<iframe>/,
@@ -558,7 +558,7 @@ export const specs: Spec[] = [
     },
   },
   {
-    name: 'waitForVisible resolves once a late node is visible',
+    name: 'waitFor(visible) resolves once a late node is visible',
     async run(ctx) {
       const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
       assert.equal(await form.lateCount(), 0)

@@ -1,5 +1,5 @@
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import { checkedFrom, strictViolation, timeoutFor } from '@harnessed-ts/core'
 import type { Locator, Page } from '@playwright/test'
 import { PLAYWRIGHT_DRIVER } from './driver-id'
@@ -139,12 +139,8 @@ export class PlaywrightQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitForVisible(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.waitFor({ state: 'visible', timeout: timeoutFor(options?.timeout) }))
-  }
-
-  override async waitForHidden(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.waitFor({ state: 'hidden', timeout: timeoutFor(options?.timeout) }))
+  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
+    await this.act(l => l.waitFor({ state, timeout: timeoutFor(options?.timeout) }))
   }
 
   override async count(): Promise<number> {

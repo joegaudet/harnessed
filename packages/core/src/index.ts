@@ -32,7 +32,7 @@ export type { Assertable, MatcherResult } from './matchers'
 export { Query } from './query'
 export { ScopedHarness } from './scoped-harness'
 export type { ChildHarnessOptions, ScopedHarnessConstructor } from './scoped-harness'
-export type { WaitOptions } from './query'
+export type { WaitOptions, WaitState } from './query'
 export {
   createQuery,
   navigationFor,

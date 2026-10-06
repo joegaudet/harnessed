@@ -1,5 +1,5 @@
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import { checkedFrom, describeScope, enabledFrom, timeoutFor } from '@harnessed-ts/core'
 import type { ElementHandle, KeyInput, Page } from 'puppeteer'
 import { PUPPETEER_DRIVER } from './driver-id'
@@ -350,15 +350,7 @@ export class PuppeteerQuery extends Query {
    * an in-page wait down with the document it ran in. A poll a navigation tore
    * down answers nothing, and the next poll asks the new document.
    */
-  override async waitForVisible(options?: WaitOptions): Promise<void> {
-    await this.waitUntilVisible(true, options)
-  }
-
-  override async waitForHidden(options?: WaitOptions): Promise<void> {
-    await this.waitUntilVisible(false, options)
-  }
-
-  private async waitUntilVisible(wanted: boolean, options?: WaitOptions): Promise<void> {
+  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
     const deadline = Date.now() + timeout
     for (;;) {
@@ -369,10 +361,10 @@ export class PuppeteerQuery extends Query {
           throw error
         },
       )
-      if (visible === wanted) return
+      if (visible !== undefined && visible === (state === 'visible')) return
       if (Date.now() >= deadline) {
         throw new Error(
-          `harnessed: ${describeScope(this.scope, this.selector)} did not become ${wanted ? 'visible' : 'hidden'} within ${timeout}ms.`,
+          `harnessed: ${describeScope(this.scope, this.selector)} did not become ${state} within ${timeout}ms.`,
         )
       }
       await sleep(POLL_MS)

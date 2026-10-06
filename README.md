@@ -259,12 +259,12 @@ agreement is the whole reason the abstraction exists.
 2. **Single-target operations are strict.** More than one match is a
    `StrictModeViolation` naming the selector, raised at once — never a silent pick
    of the first. That holds for questions and waits too: `isVisible()`,
-   `waitForVisible()` and `waitForHidden()` on duplicates reject with the same
+   `waitFor('visible')` and `waitFor('hidden')` on duplicates reject with the same
    violation rather than answering `false` or waiting out the timeout. It is core's
    class, in the same wording, under every driver — those that resolve inside a
    remote page included — so `instanceof StrictModeViolation` tells ambiguity
    apart from absence. An `nth()` past the last match is not ambiguous: there
-   `isVisible()` answers `false` and `waitForHidden()` resolves, as for an absent
+   `isVisible()` answers `false` and `waitFor('hidden')` resolves, as for an absent
    target.
 3. **`role` selectors honour `level`.** `@ByRole('heading', { level: 1 })` picks the
    `h1` on a screen that also has an `h2`.
@@ -354,13 +354,17 @@ its component has rendered.
 | ------------ | -------------------------------------------------------------------------------------- |
 | Interactions | `click` `fill` `clear` `check` `uncheck` `selectOption` `hover` `focus` `blur` `press` |
 | Observations | `text` `inputValue` `attribute` `isVisible` `isEnabled` `isChecked` `selectedOptions`  |
-| Waiting      | `waitForVisible` `waitForHidden`                                                       |
+| Waiting      | `waitFor(state, { timeout })`                                                          |
 | Lists        | `count` `isAbsent` `nth` `first` `last` `each` `map` `filter` `texts`                  |
 
-Every method takes an optional `{ timeout }`. `waitForVisible()` resolves once
-the target is on screen and visible; `waitForHidden()` once it is hidden or gone —
+Every method takes an optional `{ timeout }`. `waitFor('visible')` resolves once
+the target is on screen and visible; `waitFor('hidden')` once it is hidden or gone —
 absent counts as hidden. Both reject at once on a target that matches more than
-one node (guarantee 2), and otherwise when the timeout runs out.
+one node (guarantee 2) or sits behind a frame that cannot be entered, since
+neither changes by waiting, and otherwise when the timeout runs out. Those two are the
+only states: a state joins `WaitState` only when every driver honours it with the
+same meaning, so a runner's own (Playwright's `attached`, say) never leaks into a
+harness.
 
 ### `ComponentHarness`
 
@@ -396,7 +400,7 @@ class CheckoutPage extends PageHarness<{ token: string }> {
   @ChildHarness(CartHarness) accessor cart!: CartHarness
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitForVisible()
+    await this.self.waitFor('visible')
   }
 
   async placeOrder(): Promise<ConfirmationPage> {
@@ -430,7 +434,7 @@ leaves `path` out, and `goto()` on it is a refusal, not a silent no-op.
 `waitForReady()` runs behind `goto()` and `expectReady()` and must never be empty —
 an empty one satisfies the abstract member and silently removes the wait, so the
 failure lands somewhere unrelated later in the test. The usual body is one line
-against the page's own host: `await this.self.waitForVisible()`. With no
+against the page's own host: `await this.self.waitFor('visible')`. With no
 `{ timeout }` the wait is bounded only by what `waitForReady()` itself waits on;
 an explicit one adds a second clock. `isReady()` is the non-throwing probe; pass
 a short `{ timeout }`.
@@ -1163,7 +1167,7 @@ work; keep a separate check against a deployed environment.
 ## Adding a driver
 
 `@harnessed-ts/core` holds a registry keyed by driver id and never imports a driver.
-A driver supplies an env, 20 `Query` members, and a registration:
+A driver supplies an env, 19 `Query` members, and a registration:
 
 ```ts
 registerDriver('my-driver', (env, scope, selector) => new MyQuery(env, scope, selector))

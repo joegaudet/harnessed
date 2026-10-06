@@ -128,15 +128,18 @@ export function pageCall(
   }
 
   // The single target now, for a yes/no question: `null` when it is not there,
-  // including an index past the last match. Ambiguity and a frame that cannot
-  // be entered still throw — neither is an answer.
+  // including an index past the last match. Everything else the resolver
+  // raises still throws — ambiguity, a frame that cannot be entered, a
+  // selector it refuses — since none of them is an answer.
   const present = (): Element | null => {
     try {
       return resolver.oneNow(null, scope, selector, options)
     } catch (error) {
-      const name = (error as { name?: string } | null)?.name
-      if (name === 'StrictModeViolation' || name === 'FrameEntryError') throw error
-      return null
+      const message = (error as { message?: unknown } | null)?.message
+      if (typeof message === 'string' && /^harnessed: index \d+ is out of range/.test(message)) {
+        return null
+      }
+      throw error
     }
   }
 

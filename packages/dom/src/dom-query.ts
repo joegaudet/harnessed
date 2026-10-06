@@ -1,5 +1,5 @@
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
   enabledFrom,
@@ -215,15 +215,14 @@ export class DomQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitForVisible(options?: WaitOptions): Promise<void> {
+  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
-    await waitUntil(async () => {
-      if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
-    }, timeout)
-  }
-
-  override async waitForHidden(options?: WaitOptions): Promise<void> {
-    const timeout = timeoutFor(options?.timeout)
+    if (state === 'visible') {
+      await waitUntil(async () => {
+        if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
+      }, timeout)
+      return
+    }
     await waitUntil(async () => {
       if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
         throw new Error('still visible')

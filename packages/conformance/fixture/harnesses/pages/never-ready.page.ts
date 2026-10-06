@@ -10,6 +10,6 @@ export class NeverReadyPage extends PageHarness {
 
   protected async waitForReady(): Promise<void> {
     // Bounded, so an abandoned wait does not outlive the spec that started it.
-    await this.elementBy(testId('never-rendered')).waitForVisible({ timeout: 750 })
+    await this.elementBy(testId('never-rendered')).waitFor('visible', { timeout: 750 })
   }
 }

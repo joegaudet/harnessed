@@ -33,9 +33,13 @@ export class StrictModeViolation extends Error {
   /**
    * By brand, not by prototype: Cypress bundles a support file and each spec
    * separately, so one page can hold two copies of core, and a violation one
-   * raises must still be one to the other.
+   * raises must still be one to the other. A subclass inherits this method, so
+   * for one the ordinary prototype check answers instead.
    */
   static override [Symbol.hasInstance](value: unknown): boolean {
+    if (this !== StrictModeViolation) {
+      return Function.prototype[Symbol.hasInstance].call(this, value)
+    }
     return (
       typeof value === 'object' &&
       value !== null &&

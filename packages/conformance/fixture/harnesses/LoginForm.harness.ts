@@ -125,7 +125,7 @@ export class LoginFormHarness extends ComponentHarness {
   }
 
   async waitForLate(): Promise<void> {
-    await this.lateLine.first().waitForVisible()
+    await this.lateLine.first().waitFor('visible')
   }
 
   async lateCount(): Promise<number> {

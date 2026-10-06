@@ -152,11 +152,11 @@ export class CardGridHarness extends ComponentHarness {
   }
 
   async waitForAmbiguousCard(options?: WaitOptions): Promise<void> {
-    await this.elementBy(testId('card')).waitForVisible(options)
+    await this.elementBy(testId('card')).waitFor('visible', options)
   }
 
   async waitForAmbiguousCardToHide(options?: WaitOptions): Promise<void> {
-    await this.elementBy(testId('card')).waitForHidden(options)
+    await this.elementBy(testId('card')).waitFor('hidden', options)
   }
 
   /** Three cards render, so index 5 names nothing — the same answer as absent. */
@@ -165,6 +165,6 @@ export class CardGridHarness extends ComponentHarness {
   }
 
   async waitForMissingCardToHide(options?: WaitOptions): Promise<void> {
-    await this.elementBy(testId('card')).nth(5).waitForHidden(options)
+    await this.elementBy(testId('card')).nth(5).waitFor('hidden', options)
   }
 }

@@ -68,7 +68,7 @@ export abstract class PageHarness<Params extends Record<string, string> = Record
    *
    * ```ts
    * protected async waitForReady(): Promise<void> {
-   *   await this.self.waitForVisible()
+   *   await this.self.waitFor('visible')
    * }
    * ```
    */

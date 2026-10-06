@@ -1,5 +1,5 @@
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
   describeScope,
@@ -288,28 +288,27 @@ export class CypressQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitForVisible(options?: WaitOptions): Promise<void> {
-    this.log('waitForVisible')
+  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
+    this.log('waitFor', state)
     const timeout = timeoutFor(options?.timeout)
-    await waitUntil(
-      async () => {
-        if (!(await this.visible({ timeout }))) throw new Error('not visible yet')
-      },
-      this.env.document.documentElement,
-      timeout,
-    )
-  }
-
-  override async waitForHidden(options?: WaitOptions): Promise<void> {
-    this.log('waitForHidden')
-    const timeout = timeoutFor(options?.timeout)
+    const root = this.env.document.documentElement
+    if (state === 'visible') {
+      await waitUntil(
+        async () => {
+          if (!(await this.visible({ timeout }))) throw new Error('not visible yet')
+        },
+        root,
+        timeout,
+      )
+      return
+    }
     await waitUntil(
       async () => {
         if ((await this.count()) !== 0 && (await this.visible({ timeout }))) {
           throw new Error('still visible')
         }
       },
-      this.env.document.documentElement,
+      root,
       timeout,
     )
   }

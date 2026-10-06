@@ -1,6 +1,6 @@
 import { click, fillIn, getRootElement, settled } from '@ember/test-helpers'
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
   enabledFrom,
@@ -229,24 +229,21 @@ export class EmberQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitForVisible(options?: WaitOptions): Promise<void> {
+  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
-    await waitUntil(async () => {
-      if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
-    }, timeout)
-    // Whatever made it appear may have scheduled more work; hand back a settled
-    // app, as every interaction does.
-    await settled()
-  }
-
-  override async waitForHidden(options?: WaitOptions): Promise<void> {
-    const timeout = timeoutFor(options?.timeout)
-    await waitUntil(async () => {
-      if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
-        throw new Error('still visible')
-      }
-    }, timeout)
-    // Whatever made it go may have scheduled more work, as above.
+    if (state === 'visible') {
+      await waitUntil(async () => {
+        if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
+      }, timeout)
+    } else {
+      await waitUntil(async () => {
+        if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
+          throw new Error('still visible')
+        }
+      }, timeout)
+    }
+    // Whatever made it appear or go may have scheduled more work; hand back a
+    // settled app, as every interaction does.
     await settled()
   }
 
