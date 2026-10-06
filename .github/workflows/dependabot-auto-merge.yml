@@ -9,19 +9,24 @@ permissions:
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    # The PR author alone is not enough: anyone who can push to a Dependabot
+    # branch would rerun this job. Both must be Dependabot.
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.actor == 'dependabot[bot]'
     steps:
       - id: meta
-        uses: dependabot/fetch-metadata@v3
-      # Patch and minor npm bumps only. Majors and action updates still get a
-      # human look. Auto-merge waits for the required checks, so CI is the gate;
-      # the approval is re-given on each push because stale reviews are dismissed.
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+      # Patch and minor npm bumps only, by allowlist, so an unknown update type
+      # is not merged. This only queues the merge: it still needs the required
+      # checks and a maintainer's approval. The workflow never approves its own
+      # merge, so a compromised upstream release cannot reach main — and the
+      # release job behind it — without a human looking.
       - if: >-
           steps.meta.outputs.package-ecosystem == 'npm_and_yarn' &&
-          steps.meta.outputs.update-type != 'version-update:semver-major'
-        run: |
-          gh pr review --approve "$PR_URL"
-          gh pr merge --auto --squash "$PR_URL"
+          (steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+           steps.meta.outputs.update-type == 'version-update:semver-minor')
+        run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
