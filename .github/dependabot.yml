@@ -6,6 +6,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Wait a week after a release before proposing it: a compromised version is
+    # usually caught and pulled within days, and pnpm's minimumReleaseAge is
+    # not re-checked inside Dependabot's own updater.
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
     groups:
       testing-library:
@@ -14,6 +19,9 @@ updates:
         patterns: ['@playwright/*', 'playwright']
       lint:
         patterns: ['eslint', '@eslint/*', 'typescript-eslint', 'prettier']
+      # react-dom throws unless it matches react exactly, so they move together.
+      react:
+        patterns: ['react', 'react-dom', '@types/react', '@types/react-dom']
       build:
         patterns: ['tsup', 'esbuild', 'vite', 'vitest', '@vitejs/*']
 
