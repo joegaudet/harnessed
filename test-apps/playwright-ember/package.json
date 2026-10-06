@@ -1,0 +1,18 @@
+{
+  "name": "test-app-playwright-ember",
+  "private": true,
+  "description": "Runs the conformance catalog under @harnessed-ts/playwright against the Ember port of the fixture, served from test-app-ember-vite.",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm typecheck && playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/playwright": "workspace:^",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "test-app-ember-vite": "workspace:*",
+    "typescript": "^6.0.3"
+  }
+}

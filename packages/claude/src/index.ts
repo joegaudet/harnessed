@@ -1,6 +1,22 @@
 export { install } from './install'
 export type { InstallOptions, InstallResult } from './install'
-export { detectLayout, detectTestIdAttribute } from './detect'
-export type { DetectedLayout } from './detect'
-export { placementTable, renderConfig, renderRules, renderSkill } from './render'
-export type { RenderContext } from './render'
+export {
+  detectEmberUnderVitest,
+  detectGherkinAdapters,
+  detectLayout,
+  detectRunners,
+  detectTestIdAttribute,
+  GHERKIN_ADAPTERS,
+  parseRunners,
+  RUNNERS,
+} from './detect'
+export type { DetectedLayout, GherkinAdapter, Runner } from './detect'
+export {
+  exampleFiles,
+  placementTable,
+  renderConfig,
+  renderRules,
+  renderSkill,
+  runnersSection,
+} from './render'
+export type { RenderContext, RunnerVariants } from './render'

@@ -9,8 +9,12 @@ export default tseslint.config(
       '**/dist/**',
       '**/*.d.ts',
       '**/.features-gen/**',
+      // Agent worktrees: whole separate checkouts that CI never sees.
+      '.claude/**',
       // Shipped templates, not source: they reference modules a consumer supplies.
       'packages/claude/assets/**',
+      // Each runner's app brings its own tooling and TypeScript project.
+      'test-apps/**',
     ],
   },
   js.configs.recommended,
@@ -60,7 +64,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['packages/playwright/src/bdd.ts'],
+    files: ['packages/gherkin/src/playwright-bdd.ts'],
     rules: {
       // Playwright reads a fixture's destructured parameter names to work out its
       // dependencies and rejects a plain parameter, so an empty pattern is the

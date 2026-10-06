@@ -1,0 +1,23 @@
+name: conformance-gherkin-cypress
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-gherkin-cypress-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: gherkin-cypress
+      # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
+      setup: pnpm --filter test-app-gherkin-cypress exec cypress install
+      test: CYPRESS_BROWSER=electron pnpm --filter test-app-gherkin-cypress test
+      artifacts: test-apps/gherkin-cypress/cypress/screenshots

@@ -50,10 +50,11 @@ pnpm test:dom          # @harnessed-ts/dom, under Vitest + jsdom
 pnpm test:playwright   # @harnessed-ts/playwright, against the fixture served by Vite
 ```
 
-The specs live in `specs/catalog.ts` as plain async functions using
-`node:assert/strict`, because one file cannot use both Vitest's `it` and
-Playwright's `test`. Two thin runners enumerate the catalog and register each entry
-with their own runner.
+The specs live in `specs/catalog.ts` as plain async functions, because one file
+cannot use both Vitest's `it` and Playwright's `test`. Thin runners enumerate the
+catalog and register each entry with their own runner. They assert through
+`specs/assert.ts` rather than `node:assert`: some runners execute the specs inside
+a browser, where Node's modules do not exist.
 
 **A behaviour change belongs in the catalog, not in a per-driver test.** That is
 what stops the drivers drifting apart — which is the failure this library exists to
@@ -66,6 +67,43 @@ per-driver too. Both exceptions are deliberate; anything else should be shared.
 
 There is no coverage threshold. A percentage would not catch two drivers disagreeing,
 which is the only bug class that matters here.
+
+## Adding a driver's conformance run
+
+Drivers beyond the two reference ones run the catalog from an app under
+`test-apps/` — see [`test-apps/README.md`](test-apps/README.md). Give the app a
+`test` script and add a caller workflow next to the others:
+
+```yaml
+# .github/workflows/conformance-<name>.yml
+name: conformance-<name>
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: conformance-<name>-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: <name>
+      setup: pnpm --filter <app> exec <install browsers>
+      test: pnpm --filter <app> test
+```
+
+The check reports as `run / conformance/<name>` — that is the string to mark as
+required. Name the app outside the `@harnessed-ts/` scope (`test-app-<name>`):
+changesets versions that scope as one fixed group.
+
+A browser driver serves the React fixture with
+`FIXTURE_PORT=<port> pnpm --filter conformance serve:fixture`, or the Ember port
+of it with `FIXTURE_PORT=<port> pnpm --filter test-app-ember-vite serve:fixture`
+(which builds the app first; concurrent runs take turns building). Pick a port
+no other runner uses, so they can run side by side locally.
 
 ## Adding a guarantee
 

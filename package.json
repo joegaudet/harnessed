@@ -20,17 +20,19 @@
   "scripts": {
     "build": "pnpm run clean && tsc --build --force && pnpm -r --filter './packages/*' run build",
     "typecheck": "tsc --build",
-    "typecheck:packages": "tsc --build packages/core packages/config packages/dom packages/playwright packages/page packages/route packages/eslint-plugin packages/claude",
+    "typecheck:packages": "tsc --build packages/core packages/config packages/resolve packages/dom packages/vitest-browser packages/playwright packages/testcafe packages/cypress packages/webdriverio packages/puppeteer packages/page packages/gherkin packages/ember packages/chai packages/qunit packages/route packages/eslint-plugin packages/claude",
     "lint": "pnpm --filter @harnessed-ts/eslint-plugin build && eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "pnpm --filter @harnessed-ts/eslint-plugin test && pnpm --filter conformance test",
+    "test": "pnpm test:rules && pnpm test:units && pnpm --filter conformance test",
     "test:dom": "pnpm --filter conformance test:dom",
     "test:playwright": "pnpm --filter conformance test:playwright",
     "release": "pnpm build && node scripts/publish.mjs",
     "test:rules": "pnpm --filter @harnessed-ts/eslint-plugin test",
-    "clean": "pnpm -r --filter './packages/*' run clean && rm -rf tsconfig.tsbuildinfo"
+    "clean": "pnpm -r --filter './packages/*' run clean && rm -rf tsconfig.tsbuildinfo",
+    "test:scripts": "node --test scripts/*.test.mjs",
+    "test:units": "pnpm test:scripts && pnpm --filter @harnessed-ts/core --filter @harnessed-ts/resolve --filter @harnessed-ts/chai --filter @harnessed-ts/qunit --filter @harnessed-ts/testcafe --filter @harnessed-ts/gherkin --filter @harnessed-ts/claude test"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",

@@ -1,0 +1,74 @@
+{
+  "name": "@harnessed-ts/chai",
+  "version": "0.3.0",
+  "description": "Chai assertions for harnesses: `await expect(banner).to.be.absent` under Mocha, WebdriverIO or Cypress.",
+  "keywords": [
+    "testing",
+    "harness",
+    "chai",
+    "mocha",
+    "bdd"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/chai"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "chai": ">=4"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@harnessed-ts/dom": "workspace:^",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/chai": "^5.2.3",
+    "chai": "^6.3.0",
+    "jsdom": "^30.1.1",
+    "vitest": "^5.0.3"
+  }
+}

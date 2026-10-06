@@ -1,0 +1,27 @@
+{
+  "name": "test-app-cypress-ct",
+  "private": true,
+  "description": "Runs the conformance catalog under @harnessed-ts/cypress, as Cypress component tests mounting the React fixture.",
+  "type": "module",
+  "scripts": {
+    "cy:run": "cypress run --component --browser ${CYPRESS_BROWSER:-electron}",
+    "test": "tsc --noEmit && pnpm cy:run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:*",
+    "@harnessed-ts/core": "workspace:*",
+    "@harnessed-ts/cypress": "workspace:*",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "cypress": "^16.1.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.2"
+  }
+}

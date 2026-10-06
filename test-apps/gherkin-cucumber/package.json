@@ -1,0 +1,17 @@
+{
+  "name": "test-app-gherkin-cucumber",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "start-server-and-test 'FIXTURE_PORT=5188 pnpm --filter conformance serve:fixture' http://localhost:5188 'cucumber-js'"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "~13.2.1",
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/gherkin": "workspace:^",
+    "@harnessed-ts/playwright": "workspace:^",
+    "playwright": "^1.63.0",
+    "start-server-and-test": "^3.0.12"
+  }
+}

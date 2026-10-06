@@ -1,0 +1,111 @@
+{
+  "name": "@harnessed-ts/gherkin",
+  "version": "0.3.0",
+  "description": "Gherkin support for harnessed: a scenario-scoped world, a typed page registry and a {page} parameter type, with adapters for playwright-bdd, cucumber-js, Cypress cucumber and ember-cli-yadda.",
+  "keywords": [
+    "testing",
+    "harness",
+    "gherkin",
+    "cucumber",
+    "bdd",
+    "playwright-bdd"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/gherkin"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./playwright-bdd": {
+      "types": "./dist/playwright-bdd.d.ts",
+      "import": "./dist/playwright-bdd.js",
+      "require": "./dist/playwright-bdd.cjs"
+    },
+    "./cucumber": {
+      "types": "./dist/cucumber.d.ts",
+      "import": "./dist/cucumber.js",
+      "require": "./dist/cucumber.cjs"
+    },
+    "./cypress": {
+      "types": "./dist/cypress.d.ts",
+      "import": "./dist/cypress.js",
+      "require": "./dist/cypress.cjs"
+    },
+    "./yadda": {
+      "types": "./dist/yadda.d.ts",
+      "import": "./dist/yadda.js",
+      "require": "./dist/yadda.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": ">=20",
+    "@cucumber/cucumber": ">=10",
+    "@playwright/test": ">=1.43",
+    "yadda": ">=3"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "~13.2.1",
+    "@cucumber/cucumber-expressions": "~20.0.0",
+    "@playwright/test": "^1.63.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3",
+    "yadda": "^3.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@playwright/test": {
+      "optional": true
+    },
+    "@cucumber/cucumber": {
+      "optional": true
+    },
+    "@badeball/cypress-cucumber-preprocessor": {
+      "optional": true
+    },
+    "yadda": {
+      "optional": true
+    }
+  }
+}

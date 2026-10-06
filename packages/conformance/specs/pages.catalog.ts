@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict'
+import assert from './assert'
 import { registerDriver } from '@harnessed-ts/core'
 import type { EnvConfig, Query } from '@harnessed-ts/core'
 import { CardsPage } from '../fixture/harnesses/pages/cards.page'
@@ -137,6 +137,21 @@ export const pageSpecs: PageSpec[] = [
     },
   },
   {
+    name: 'guarantee 9: urlFor resolves a page URL without a driver that can navigate',
+    async run() {
+      // Some runners navigate outside the harness — Cypress queues cy.visit —
+      // so they need the URL a goto() would use without the goto().
+      registerDriver('conformance-no-navigation', () => ({}) as Query)
+      const env: EnvConfig = { driver: 'conformance-no-navigation' }
+      const page = new RepeatedParamPage(env)
+      assert.equal(
+        page.urlFor({ token: 'a b&c=d' }),
+        '/step-two?token=a%20b%26c%3Dd&echo=a%20b%26c%3Dd',
+      )
+      assert.throws(() => new StepOnePage(env).urlFor(), /StepOnePage declares no path/)
+    },
+  },
+  {
     name: 'guarantee 9: goto on a page with no path is refused before navigating',
     async run(ctx) {
       const stepOne = new StepOnePage(await ctx.show('wizard'))
@@ -223,6 +238,16 @@ export const urlSpecs: UrlSpec[] = [
       const stepTwo = await wizard.stepOne.continue()
       assert.equal(await stepTwo.heading(), 'Step two')
       assert.equal(await wizard.stepTwo.heading(), 'Step two')
+    },
+  },
+  {
+    name: 'goto navigates to exactly the URL urlFor reports',
+    async run({ env }) {
+      const page = new RepeatedParamPage(env)
+      const expected = page.urlFor({ token: 'a b&c=d' })
+      await page.goto({ token: 'a b&c=d' })
+      const current = new URL(page.currentUrl)
+      assert.equal(current.pathname + current.search, expected)
     },
   },
   {

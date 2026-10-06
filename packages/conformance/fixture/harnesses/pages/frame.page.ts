@@ -10,7 +10,7 @@ export class CounterPage extends PageHarness {
   }
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitForVisible()
+    await this.self.waitFor('visible')
   }
 }
 
@@ -25,6 +25,6 @@ export class FramePage extends PageHarness {
   @ChildHarness(CounterPage, { frame: testId('framed') }) accessor counter!: CounterPage
 
   protected async waitForReady(): Promise<void> {
-    await this.self.waitForVisible()
+    await this.self.waitFor('visible')
   }
 }

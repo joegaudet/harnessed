@@ -1,5 +1,7 @@
 packages:
   - 'packages/*'
+  # Private apps that run the conformance catalog under one driver and runner each.
+  - 'test-apps/*'
 
 # core must not silently resolve a driver it does not declare
 strictPeerDependencies: true
@@ -7,9 +9,53 @@ autoInstallPeers: false
 allowBuilds:
   # tsup's bundler; needs its postinstall to fetch the platform binary
   esbuild: true
+  # Its postinstall downloads Chrome into every install; the puppeteer test app
+  # installs the browser explicitly instead (`install:browser`).
+  puppeteer: false
+  # WebdriverIO's Edge and Firefox driver downloaders; the conformance run uses
+  # Chrome, whose driver WebdriverIO fetches at session start instead
+  edgedriver: false
+  geckodriver: false
+  # Its postinstall downloads a ~500 MB app. Only the Cypress runs need it, and
+  # they fetch it with `cypress install`, so every other install stays light.
+  cypress: false
+  # A postinstall that only prints a funding message; ember-cli-yadda brings it
+  # in through ember-cli-babel 7.
+  core-js: false
 minimumReleaseAgeExclude:
   - '@changesets/apply-release-plan@8.1.0'
   - '@changesets/cli@3.0.2'
   - '@changesets/git@4.0.1'
   - '@changesets/read@1.0.1'
   - eslint@10.10.0
+  - '@wdio/config@10.0.0'
+  - '@wdio/logger@10.0.0'
+  - '@wdio/protocols@10.0.0'
+  - '@wdio/repl@10.0.0'
+  - '@wdio/types@10.0.0'
+  - '@wdio/utils@10.0.0'
+  - webdriver@10.0.0
+  - webdriverio@10.0.0
+  - '@wdio/cli@10.0.0'
+  - '@wdio/display-server@10.0.0'
+  - '@wdio/dot-reporter@10.0.0'
+  - '@wdio/globals@10.0.0'
+  - '@wdio/local-runner@10.0.0'
+  - '@wdio/mocha-framework@10.0.0'
+  - '@wdio/reporter@10.0.0'
+  - '@wdio/runner@10.0.0'
+  - '@wdio/session@10.0.0'
+  - '@wdio/spec-reporter@10.0.0'
+  - create-wdio@10.0.0
+
+overrides:
+  # 13.3.0 is younger than the minimum release age, and the Cypress preprocessor
+  # asks for ^13 — it would resolve there and fail the frozen install. Lift the
+  # pin once 13.3 is old enough to pass the policy, and lift all three copies
+  # together: this override and the `~13.2.1` devDependency in both
+  # packages/gherkin/package.json and test-apps/gherkin-cucumber/package.json.
+  '@cucumber/cucumber': ~13.2.1
+  # ember-cli-yadda 0.7 (its last release, 2022) depends on ember-cli-htmlbars 5,
+  # which finds the template compiler through an ember-source path Ember 7 no
+  # longer has. The addon has no templates; it only needs the dependency to load.
+  'ember-cli-yadda>ember-cli-htmlbars': ^7.0.1

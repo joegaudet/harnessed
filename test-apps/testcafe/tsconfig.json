@@ -1,0 +1,10 @@
+{
+  "$comment": "For the editor and type-aware linting. TestCafe compiles the test file itself, with the options in .testcaferc.cjs.",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "types": ["node"]
+  },
+  "include": ["*.ts", ".testcaferc.cjs"]
+}

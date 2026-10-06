@@ -1,0 +1,919 @@
+{
+  "login": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-login"
+        },
+        "children": [
+          {
+            "tag": "form",
+            "attrs": {
+              "data-testid": "login-form"
+            },
+            "children": [
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "Sign in"
+                ]
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-email"
+                },
+                "children": [
+                  "Email"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "data-testid": "login-email",
+                  "id": "login-email",
+                  "placeholder": "you@example.com"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-password"
+                },
+                "children": [
+                  "Password"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-password",
+                  "type": "password"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-remember"
+                },
+                "children": [
+                  "Remember me"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-remember",
+                  "type": "checkbox"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-plan"
+                },
+                "children": [
+                  "Plan"
+                ]
+              },
+              {
+                "tag": "select",
+                "attrs": {
+                  "id": "login-plan"
+                },
+                "children": [
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "free",
+                      "selected": true
+                    },
+                    "children": [
+                      "Free"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "pro"
+                    },
+                    "children": [
+                      "Pro"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-addons"
+                },
+                "children": [
+                  "Add-ons"
+                ]
+              },
+              {
+                "tag": "select",
+                "attrs": {
+                  "id": "login-addons",
+                  "multiple": true
+                },
+                "children": [
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "sms",
+                      "selected": true
+                    },
+                    "children": [
+                      "SMS"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "voice"
+                    },
+                    "children": [
+                      "Voice"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "fax"
+                    },
+                    "children": [
+                      "Fax"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "fieldset",
+                "attrs": {
+                  "disabled": true
+                },
+                "children": [
+                  {
+                    "tag": "label",
+                    "attrs": {
+                      "for": "login-referral"
+                    },
+                    "children": [
+                      "Referral code"
+                    ]
+                  },
+                  {
+                    "tag": "input",
+                    "attrs": {
+                      "data-testid": "login-referral",
+                      "id": "login-referral"
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "data-testid": "login-submit",
+                  "data-status": "idle",
+                  "type": "submit",
+                  "disabled": true
+                },
+                "children": [
+                  "Sign in"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "login-error": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-login"
+        },
+        "children": [
+          {
+            "tag": "form",
+            "attrs": {
+              "data-testid": "login-form"
+            },
+            "children": [
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "Sign in"
+                ]
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-email"
+                },
+                "children": [
+                  "Email"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "data-testid": "login-email",
+                  "id": "login-email",
+                  "placeholder": "you@example.com"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-password"
+                },
+                "children": [
+                  "Password"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-password",
+                  "type": "password"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-remember"
+                },
+                "children": [
+                  "Remember me"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-remember",
+                  "type": "checkbox"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-plan"
+                },
+                "children": [
+                  "Plan"
+                ]
+              },
+              {
+                "tag": "select",
+                "attrs": {
+                  "id": "login-plan"
+                },
+                "children": [
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "free",
+                      "selected": true
+                    },
+                    "children": [
+                      "Free"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "pro"
+                    },
+                    "children": [
+                      "Pro"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-addons"
+                },
+                "children": [
+                  "Add-ons"
+                ]
+              },
+              {
+                "tag": "select",
+                "attrs": {
+                  "id": "login-addons",
+                  "multiple": true
+                },
+                "children": [
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "sms",
+                      "selected": true
+                    },
+                    "children": [
+                      "SMS"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "voice"
+                    },
+                    "children": [
+                      "Voice"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "fax"
+                    },
+                    "children": [
+                      "Fax"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "fieldset",
+                "attrs": {
+                  "disabled": true
+                },
+                "children": [
+                  {
+                    "tag": "label",
+                    "attrs": {
+                      "for": "login-referral"
+                    },
+                    "children": [
+                      "Referral code"
+                    ]
+                  },
+                  {
+                    "tag": "input",
+                    "attrs": {
+                      "data-testid": "login-referral",
+                      "id": "login-referral"
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "data-testid": "login-error"
+                },
+                "children": [
+                  "Bad credentials"
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "data-testid": "login-submit",
+                  "data-status": "idle",
+                  "type": "submit",
+                  "disabled": true
+                },
+                "children": [
+                  "Sign in"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "login-late-duplicates": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-login"
+        },
+        "children": [
+          {
+            "tag": "form",
+            "attrs": {
+              "data-testid": "login-form"
+            },
+            "children": [
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "Sign in"
+                ]
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-email"
+                },
+                "children": [
+                  "Email"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "data-testid": "login-email",
+                  "id": "login-email",
+                  "placeholder": "you@example.com"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-password"
+                },
+                "children": [
+                  "Password"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-password",
+                  "type": "password"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-remember"
+                },
+                "children": [
+                  "Remember me"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-remember",
+                  "type": "checkbox"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-plan"
+                },
+                "children": [
+                  "Plan"
+                ]
+              },
+              {
+                "tag": "select",
+                "attrs": {
+                  "id": "login-plan"
+                },
+                "children": [
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "free",
+                      "selected": true
+                    },
+                    "children": [
+                      "Free"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "pro"
+                    },
+                    "children": [
+                      "Pro"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-addons"
+                },
+                "children": [
+                  "Add-ons"
+                ]
+              },
+              {
+                "tag": "select",
+                "attrs": {
+                  "id": "login-addons",
+                  "multiple": true
+                },
+                "children": [
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "sms",
+                      "selected": true
+                    },
+                    "children": [
+                      "SMS"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "voice"
+                    },
+                    "children": [
+                      "Voice"
+                    ]
+                  },
+                  {
+                    "tag": "option",
+                    "attrs": {
+                      "value": "fax"
+                    },
+                    "children": [
+                      "Fax"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "fieldset",
+                "attrs": {
+                  "disabled": true
+                },
+                "children": [
+                  {
+                    "tag": "label",
+                    "attrs": {
+                      "for": "login-referral"
+                    },
+                    "children": [
+                      "Referral code"
+                    ]
+                  },
+                  {
+                    "tag": "input",
+                    "attrs": {
+                      "data-testid": "login-referral",
+                      "id": "login-referral"
+                    },
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "data-testid": "login-submit",
+                  "data-status": "idle",
+                  "type": "submit",
+                  "disabled": true
+                },
+                "children": [
+                  "Sign in"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "cards": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-cards"
+        },
+        "children": [
+          {
+            "tag": "div",
+            "attrs": {
+              "data-testid": "card-grid"
+            },
+            "children": [
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "Options"
+                ]
+              },
+              {
+                "tag": "h2",
+                "attrs": {},
+                "children": [
+                  "Pick one"
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "data-testid": "card",
+                  "type": "button",
+                  "aria-pressed": "false"
+                },
+                "children": [
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "data-testid": "card-label"
+                    },
+                    "children": [
+                      "Small"
+                    ]
+                  },
+                  {
+                    "tag": "small",
+                    "attrs": {
+                      "data-testid": "card-hint"
+                    },
+                    "children": [
+                      "Under 1000 sq ft"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "data-testid": "card",
+                  "type": "button",
+                  "aria-pressed": "false"
+                },
+                "children": [
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "data-testid": "card-label"
+                    },
+                    "children": [
+                      "Medium"
+                    ]
+                  },
+                  {
+                    "tag": "small",
+                    "attrs": {
+                      "data-testid": "card-hint"
+                    },
+                    "children": [
+                      "1000 to 2500 sq ft"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "data-testid": "card",
+                  "type": "button",
+                  "aria-pressed": "false"
+                },
+                "children": [
+                  {
+                    "tag": "span",
+                    "attrs": {
+                      "data-testid": "card-label"
+                    },
+                    "children": [
+                      "Large"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "tag": "span",
+            "attrs": {
+              "data-testid": "card-hint"
+            },
+            "children": [
+              "decoy outside the grid"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "dialog": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-dialog"
+        },
+        "children": [
+          {
+            "tag": "div",
+            "attrs": {
+              "data-testid": "portal-host"
+            },
+            "children": [
+              {
+                "tag": "button",
+                "attrs": {
+                  "type": "button"
+                },
+                "children": [
+                  "Open confirm"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "frame": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-frame"
+        },
+        "children": [
+          {
+            "tag": "div",
+            "attrs": {
+              "data-testid": "frame-host"
+            },
+            "children": [
+              {
+                "tag": "p",
+                "attrs": {
+                  "data-testid": "frame-count"
+                },
+                "children": [
+                  "decoy outside the frame"
+                ]
+              },
+              {
+                "tag": "p",
+                "attrs": {
+                  "data-testid": "frame-toast"
+                },
+                "children": [
+                  "decoy toast outside the frame"
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "type": "button"
+                },
+                "children": [
+                  "Hide frame"
+                ]
+              },
+              {
+                "tag": "iframe",
+                "attrs": {
+                  "data-testid": "framed",
+                  "title": "Framed counter"
+                },
+                "children": [
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "data-testid": "counter"
+                    },
+                    "children": [
+                      {
+                        "tag": "p",
+                        "attrs": {
+                          "data-testid": "frame-count"
+                        },
+                        "children": [
+                          "Clicked 0 times"
+                        ]
+                      },
+                      {
+                        "tag": "button",
+                        "attrs": {
+                          "type": "button"
+                        },
+                        "children": [
+                          "Add one"
+                        ]
+                      },
+                      {
+                        "tag": "label",
+                        "attrs": {},
+                        "children": [
+                          "Note",
+                          {
+                            "tag": "input",
+                            "attrs": {},
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "data-testid": "frame-toast"
+                    },
+                    "children": [
+                      "Toast inside the frame"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "wizard": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-wizard"
+        },
+        "children": [
+          {
+            "tag": "section",
+            "attrs": {
+              "data-testid": "page-step-one"
+            },
+            "children": [
+              {
+                "tag": "h1",
+                "attrs": {},
+                "children": [
+                  "Step one"
+                ]
+              },
+              {
+                "tag": "button",
+                "attrs": {
+                  "type": "button"
+                },
+                "children": [
+                  "Continue"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

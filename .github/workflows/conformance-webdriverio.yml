@@ -1,0 +1,16 @@
+name: conformance-webdriverio
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: webdriverio
+      # No setup: WebdriverIO resolves Chrome and a matching chromedriver itself
+      # when the session starts. The run covers both BiDi and Classic.
+      test: pnpm --filter test-app-webdriverio test

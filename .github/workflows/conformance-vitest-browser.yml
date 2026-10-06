@@ -1,0 +1,16 @@
+name: conformance-vitest-browser
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: vitest-browser
+      setup: pnpm --filter test-app-vitest-browser exec playwright install --with-deps chromium
+      test: pnpm --filter test-app-vitest-browser test
+      artifacts: test-apps/vitest-browser/.vitest/attachments

@@ -54,7 +54,8 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed-ts/core": "workspace:^"
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/resolve": "workspace:^"
   },
   "peerDependencies": {
     "@testing-library/dom": ">=10",

@@ -1,0 +1,19 @@
+{
+  "name": "test-app-puppeteer",
+  "private": true,
+  "description": "Runs the @harnessed-ts/conformance catalog under @harnessed-ts/puppeteer, with Vitest as the runner.",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm typecheck && vitest run",
+    "typecheck": "tsc -p .",
+    "install:browser": "puppeteer browsers install chrome"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:*",
+    "@harnessed-ts/core": "workspace:*",
+    "@harnessed-ts/puppeteer": "workspace:*",
+    "@types/node": "^26.6.3",
+    "puppeteer": "^25.12.0",
+    "vitest": "^5.0.3"
+  }
+}

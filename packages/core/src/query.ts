@@ -8,6 +8,17 @@ export interface WaitOptions {
 }
 
 /**
+ * What `waitFor()` can wait for. A state belongs here only if every driver can
+ * honour it with the same meaning, and the conformance catalog pins it under all
+ * of them. A runner's own states — Playwright's `attached` and `detached`, say —
+ * stay out: a harness written against one driver must mean the same under the next.
+ *
+ * - `visible`: the target is on screen and visible.
+ * - `hidden`: the target is hidden or gone — absent counts as hidden.
+ */
+export type WaitState = 'visible' | 'hidden'
+
+/**
  * A query descriptor — a scope chain plus a selector. Not a resolved node: nothing
  * is looked up until a method is called, which is what lets one harness field work
  * before its component has rendered and across drivers that resolve differently.
@@ -15,7 +26,7 @@ export interface WaitOptions {
  * Single-target methods resolve strictly: more than one match is an error, never a
  * silent pick of the first. Multi-target methods work across every match.
  *
- * A driver implements 20 members; everything list-shaped is inherited from here.
+ * A driver implements 19 members; everything list-shaped is inherited from here.
  */
 export abstract class Query {
   constructor(
@@ -45,10 +56,11 @@ export abstract class Query {
   abstract selectedOptions(options?: WaitOptions): Promise<string[]>
 
   // --- waiting ------------------------------------------------------------
-  /** Resolves once the target is on screen and visible. */
-  abstract waitForVisible(options?: WaitOptions): Promise<void>
-  /** Resolves once the target is hidden or gone — absent counts as hidden. */
-  abstract waitForHidden(options?: WaitOptions): Promise<void>
+  /**
+   * Resolves once the target reaches `state`. Rejects at once on a target matching
+   * several nodes, and otherwise when the timeout runs out.
+   */
+  abstract waitFor(state: WaitState, options?: WaitOptions): Promise<void>
 
   /**
    * How many nodes match. Zero is an answer, not a failure: this resolves the

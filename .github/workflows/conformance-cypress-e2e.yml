@@ -1,0 +1,24 @@
+name: conformance-cypress-e2e
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  electron:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: cypress-e2e-electron
+      # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
+      setup: pnpm --filter test-app-cypress-e2e exec cypress install
+      test: CYPRESS_BROWSER=electron pnpm --filter test-app-cypress-e2e test
+      artifacts: test-apps/cypress-e2e/cypress/screenshots
+  chrome:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: cypress-e2e-chrome
+      setup: pnpm --filter test-app-cypress-e2e exec cypress install
+      test: CYPRESS_BROWSER=chrome pnpm --filter test-app-cypress-e2e test
+      artifacts: test-apps/cypress-e2e/cypress/screenshots

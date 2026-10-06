@@ -59,7 +59,8 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed-ts/core": "workspace:^"
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/gherkin": "workspace:^"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.43"

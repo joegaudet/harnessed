@@ -58,7 +58,15 @@ async function findOne(
 
   const immediate = queryAll(root, selector)
   const resolved = immediate.length > 0 ? immediate : await findAll(root, selector, timeout)
+  return pick(resolved, scope, selector)
+}
 
+/** The one node a strict operation takes from a set of matches. */
+function pick(
+  resolved: readonly HTMLElement[],
+  scope: readonly Selector[],
+  selector: Selector,
+): HTMLElement {
   if (selector.nth !== undefined) {
     const found = resolved[selector.nth]
     if (found === undefined) {
@@ -180,4 +188,79 @@ export async function countAll(
   const matches = queryAll(root, selector)
   if (selector.nth === undefined) return matches.length
   return matches[selector.nth] === undefined ? 0 : 1
+}
+
+// --- without waiting ------------------------------------------------------
+//
+// For a driver whose own runtime does the retrying — TestCafe's Selector, a
+// remote driver polling from Node — every lookup has to answer at once. These
+// apply exactly the same strictness, index, and frame rules as the waiting
+// forms above: anything those reject at once, these throw. The one difference
+// is that "nothing matches yet" is `null` instead of a wait.
+
+/** The scope chain's innermost element now, or `null` if a link is not on screen. */
+export function resolveScopeNow(
+  container: HTMLElement,
+  scope: readonly Selector[],
+): HTMLElement | null {
+  let current = container
+  for (const [index, step] of scope.entries()) {
+    const path = scope.slice(0, index)
+    const matches = queryAll(current, step)
+    if (matches.length === 0) return null
+    const found = pick(matches, path, step)
+    current = step.frame === true ? frameBody(found, path, step) : found
+  }
+  return current
+}
+
+/** The single node a strict operation acts on now, or `null` if it is not on screen. */
+export function resolveOneNow(
+  container: HTMLElement,
+  scope: readonly Selector[],
+  selector: Selector,
+): HTMLElement | null {
+  const root = resolveScopeNow(container, scope)
+  if (root === null) return null
+  const matches = queryAll(root, selector)
+  if (matches.length === 0) return null
+  return pick(matches, scope, selector)
+}
+
+/**
+ * Every match now, agreeing with `countAll` on every scope it cannot resolve:
+ * an absent or ambiguous scope is an empty list, and only a frame that cannot
+ * be entered throws.
+ */
+export function resolveAllNow(
+  container: HTMLElement,
+  scope: readonly Selector[],
+  selector: Selector,
+): HTMLElement[] {
+  let root: HTMLElement | null
+  try {
+    root = resolveScopeNow(container, scope)
+  } catch (error) {
+    if (error instanceof FrameEntryError) throw error
+    return []
+  }
+  if (root === null) return []
+  const matches = queryAll(root, selector)
+  if (selector.nth === undefined) return matches
+  const found = matches[selector.nth]
+  return found === undefined ? [] : [found]
+}
+
+/**
+ * Every match for a list operation: the scope waits, the list does not, and
+ * `nth` is ignored — each result is addressed by its own index afterwards. The
+ * one definition of "the list" for in-process and injected drivers alike.
+ */
+export async function resolveAll(
+  container: HTMLElement,
+  scope: readonly Selector[],
+  selector: Selector,
+  timeout?: number,
+): Promise<HTMLElement[]> {
+  return queryAll(await resolveScope(container, scope, timeout), selector)
 }

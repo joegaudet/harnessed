@@ -1,0 +1,21 @@
+name: conformance-ember-vitest
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-ember-vitest-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: ember-vitest
+      setup: pnpm --filter test-app-ember-vite exec playwright install --with-deps chromium
+      test: pnpm --filter test-app-ember-vite test:vitest

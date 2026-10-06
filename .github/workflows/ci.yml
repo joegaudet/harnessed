@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   static:
     name: lint, format, build
@@ -49,6 +52,9 @@ jobs:
       - run: pnpm typecheck:packages
 
   rules:
+    # Branch protection on main requires a check by this exact name; the job
+    # also runs the package unit tests, but renaming it would leave that
+    # required check unreported and every PR into main blocked.
     name: eslint rule tests
     runs-on: ubuntu-latest
     steps:
@@ -63,6 +69,10 @@ jobs:
       # which resolves to its build output.
       - run: pnpm build
       - run: pnpm test:rules
+      # Package unit tests: the Babel plugin through both Ember decorator
+      # pipelines, the injectable resolver from its built file, the chai and
+      # qunit assertion adapters, and the release script's publish plan.
+      - run: pnpm test:units
 
   conformance-dom:
     name: conformance/dom (node ${{ matrix.node }}, tl-dom ${{ matrix.testing-library }})
@@ -100,11 +110,13 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Both packages, not just conformance: the driver's own devDependency is
-      # what its .d.ts resolves `Page` against. Upgrading one side leaves two
-      # playwright-core copies in the store and every Page/TestType becomes a
-      # distinct type, so the conformance build fails before a test runs.
-      - run: pnpm --filter conformance --filter @harnessed-ts/playwright add -D @playwright/test@${{ matrix.playwright }}
+      # Every package that compiles against Playwright, not just conformance:
+      # each one's own devDependency is what its .d.ts resolves `Page` and
+      # `TestType` against (gherkin's for `withWorld`). Upgrading only some
+      # leaves two playwright-core copies in the store and every Page/TestType
+      # becomes a distinct type, so the conformance build fails before a test
+      # runs.
+      - run: pnpm --filter conformance --filter @harnessed-ts/playwright --filter @harnessed-ts/gherkin add -D @playwright/test@${{ matrix.playwright }}
       - run: pnpm build
       - run: pnpm --filter conformance exec playwright install --with-deps chromium
       - run: pnpm test:playwright

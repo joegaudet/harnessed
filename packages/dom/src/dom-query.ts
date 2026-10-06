@@ -1,5 +1,5 @@
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions } from '@harnessed-ts/core'
+import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
   enabledFrom,
@@ -11,7 +11,7 @@ import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
 import type { DomEnv } from './env'
-import { countAll, FrameEntryError, queryAll, resolveOne, resolveScope } from './resolve'
+import { countAll, FrameEntryError, resolveAll, resolveOne } from '@harnessed-ts/resolve'
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
@@ -91,8 +91,7 @@ export class DomQuery extends Query {
    * index resolution the moment its node leaves the document.
    */
   override async all(): Promise<Query[]> {
-    const root = await resolveScope(this.container, this.scope)
-    return queryAll(root, this.selector).map(
+    return (await resolveAll(this.container, this.scope, this.selector)).map(
       (element, index) =>
         new BoundDomQuery(
           this.user,
@@ -216,15 +215,14 @@ export class DomQuery extends Query {
 
   // --- waiting ------------------------------------------------------------
 
-  override async waitForVisible(options?: WaitOptions): Promise<void> {
+  override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
-    await waitUntil(async () => {
-      if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
-    }, timeout)
-  }
-
-  override async waitForHidden(options?: WaitOptions): Promise<void> {
-    const timeout = timeoutFor(options?.timeout)
+    if (state === 'visible') {
+      await waitUntil(async () => {
+        if (!(await this.isVisible({ timeout }))) throw new Error('not visible yet')
+      }, timeout)
+      return
+    }
     await waitUntil(async () => {
       if ((await this.count()) !== 0 && (await this.isVisible({ timeout }))) {
         throw new Error('still visible')

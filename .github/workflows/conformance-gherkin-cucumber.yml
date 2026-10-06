@@ -1,0 +1,21 @@
+name: conformance-gherkin-cucumber
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-gherkin-cucumber-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: gherkin-cucumber
+      setup: pnpm --filter test-app-gherkin-cucumber exec playwright install --with-deps chromium
+      test: pnpm --filter test-app-gherkin-cucumber test

@@ -9,7 +9,7 @@
     "types": ["node"],
     "rootDir": "."
   },
-  "include": ["src", "fixture", "specs", "runners"],
+  "include": ["src", "fixture", "specs", "runners", "fixture/*.json"],
   "references": [
     {
       "path": "../core"

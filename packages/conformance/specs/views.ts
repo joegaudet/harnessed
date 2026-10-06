@@ -22,3 +22,18 @@ export function viewSearch(view: View): string {
       return '?view=wizard'
   }
 }
+
+/**
+ * Every view, checked by the compiler: adding a `View` without listing it here
+ * is a type error, so no view escapes the fixture-parity check.
+ */
+const ALL: Record<View, true> = {
+  login: true,
+  'login-error': true,
+  'login-late-duplicates': true,
+  cards: true,
+  dialog: true,
+  frame: true,
+  wizard: true,
+}
+export const VIEWS = Object.keys(ALL) as View[]

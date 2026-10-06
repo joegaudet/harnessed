@@ -1,24 +1,12 @@
 import type { Rule } from 'eslint'
-import { dirOptionSchema, inAnyDir, testDirsOf } from '../shared'
-
-const LOCATOR_METHODS = new Set([
-  'getByRole',
-  'getByTestId',
-  'getByLabel',
-  'getByLabelText',
-  'getByText',
-  'getByPlaceholder',
-  'getByPlaceholderText',
-  'findByRole',
-  'findByTestId',
-  'findByLabelText',
-  'findByText',
-  'findByPlaceholderText',
-  'queryByRole',
-  'queryByTestId',
-  'queryByText',
-  'locator',
-])
+import { isLocatorMethod, queryContextOf, rawQueryOf, type QueryContext } from '../runner-queries'
+import {
+  dirOptionSchema,
+  harnessDirsOf,
+  inAnyDir,
+  isRunnerSupportFile,
+  testDirsOf,
+} from '../shared'
 
 const SUBJECTS = new Set(['page', 'screen'])
 
@@ -33,20 +21,37 @@ const rule: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Disallow raw page/screen locators in tests when a harness should be used.',
+      description:
+        "Disallow a runner's raw DOM queries in tests — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe — when a harness should be used.",
       recommended: true,
     },
     schema: [dirOptionSchema],
     messages: {
-      raw: 'Use a harness rather than `{{subject}}.{{method}}(…)`. If the harness cannot answer this, add a public method to it.',
+      raw: 'Use a harness rather than `{{call}}(…)`. If the harness cannot answer this, add a public method to it.',
     },
   },
   create(context) {
     if (!inAnyDir(context.filename, testDirsOf(context))) return {}
+    // A harness under `tests/harness/` is the harness rule's to police, and its
+    // waitForReady() may legitimately wait on the DOM.
+    if (inAnyDir(context.filename, harnessDirsOf(context))) return {}
+    if (isRunnerSupportFile(context.filename)) return {}
+    const { sourceCode } = context
+    let queries: QueryContext = { imports: new Map(), wdioGlobals: false }
     return {
+      Program(node) {
+        queries = queryContextOf(node as unknown as Rule.Node, sourceCode)
+      },
+      // Every other runner: cy.get(…), find(…), $(…), Selector(…) and kin.
+      CallExpression(node) {
+        const query = rawQueryOf(node as unknown as Rule.Node, queries, sourceCode)
+        if (query === undefined) return
+        context.report({ node, messageId: 'raw', data: { call: query.call } })
+      },
+      // Playwright, Testing Library, Puppeteer and Vitest browser: page.… / screen.…
       MemberExpression(node) {
         if (node.property.type !== 'Identifier') return
-        if (!LOCATOR_METHODS.has(node.property.name)) return
+        if (!isLocatorMethod(node.property.name)) return
 
         const subject =
           node.object.type === 'Identifier'
@@ -59,7 +64,13 @@ const rule: Rule.RuleModule = {
         context.report({
           node,
           messageId: 'raw',
-          data: { subject, method: node.property.name },
+          // One line, however the chain was wrapped: `page\n  .getByRole` reads as `page.getByRole`.
+          data: {
+            call: sourceCode
+              .getText(node)
+              .replace(/\s*\n\s*/g, '')
+              .replace(/\s+/g, ' '),
+          },
         })
       },
     }
