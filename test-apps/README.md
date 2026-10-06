@@ -20,3 +20,10 @@ Each app:
   with a `FIXTURE_PORT` of its own so runners can work side by side;
 - has a `test` script, and a `.github/workflows/conformance-<name>.yml` that
   calls the reusable `conformance-driver.yml`.
+
+`demos` is the one app that is not a conformance run. It holds the README's
+GIFs: one demo flow, written once against the fixture's harnesses, run under
+React Testing Library, Playwright and Cypress against the React fixture and the
+Ember app in `ember-vite`. Its `test` runs that flow under all five without
+recording (`.github/workflows/demos.yml`); `record` re-records the GIFs into
+`docs/media/`.

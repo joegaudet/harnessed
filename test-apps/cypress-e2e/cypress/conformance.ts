@@ -3,8 +3,11 @@ import type { ConformanceCtx, View } from '@harnessed-ts/conformance'
 import { navigationFor, timeoutFor } from '@harnessed-ts/core'
 import type { CypressEnv, HarnessCommandOptions } from '@harnessed-ts/cypress'
 
-/** Resolves once the fixture has rendered its stage into the AUT document. */
-async function stageRendered(env: CypressEnv): Promise<void> {
+/**
+ * Resolves once the fixture has rendered its stage into the AUT document. The
+ * demos app (test-apps/demos) waits on it too.
+ */
+export async function stageRendered(env: CypressEnv): Promise<void> {
   const deadline = Date.now() + timeoutFor()
   while (env.document.querySelector('[data-testid="stage"]') === null) {
     if (Date.now() > deadline) throw new Error('the fixture never rendered its stage')

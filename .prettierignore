@@ -11,3 +11,5 @@ test-apps/*/tmp/
 **/.features-gen/
 # Agent worktrees: separate checkouts that CI never sees.
 .claude/
+# Raw footage, timelines and frames written by test-apps/demos `record`.
+test-apps/demos/raw/
