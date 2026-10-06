@@ -35,14 +35,14 @@
     "test:units": "pnpm test:scripts && pnpm --filter @harnessed-ts/core --filter @harnessed-ts/resolve --filter @harnessed-ts/chai --filter @harnessed-ts/qunit --filter @harnessed-ts/testcafe --filter @harnessed-ts/gherkin --filter @harnessed-ts/claude test"
   },
   "devDependencies": {
-    "@changesets/cli": "^3.0.2",
+    "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
     "@harnessed-ts/eslint-plugin": "workspace:*",
-    "@types/node": "^26.4.1",
-    "eslint": "^10.10.0",
-    "prettier": "^3.9.6",
+    "@types/node": "^26.6.3",
+    "eslint": "^10.11.0",
+    "prettier": "^3.9.9",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.69.0"
+    "typescript-eslint": "^8.71.0"
   }
 }
