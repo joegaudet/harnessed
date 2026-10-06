@@ -64,7 +64,13 @@ const rule: Rule.RuleModule = {
         context.report({
           node,
           messageId: 'raw',
-          data: { call: sourceCode.getText(node) },
+          // One line, however the chain was wrapped: `page\n  .getByRole` reads as `page.getByRole`.
+          data: {
+            call: sourceCode
+              .getText(node)
+              .replace(/\s*\n\s*/g, '')
+              .replace(/\s+/g, ' '),
+          },
         })
       },
     }

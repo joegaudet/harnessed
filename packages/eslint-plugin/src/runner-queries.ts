@@ -119,16 +119,47 @@ function isString(node: unknown): boolean {
   return (n?.type === 'Literal' && typeof n.value === 'string') || n?.type === 'TemplateLiteral'
 }
 
-/** `cy.get('@order')` reads an alias, not the DOM. */
+/** `cy.get('@order')`, or `` cy.get(`@${name}`) ``, reads an alias, not the DOM. */
 function isAlias(node: unknown): boolean {
-  const n = node as { type?: string; value?: unknown } | undefined
-  return n?.type === 'Literal' && typeof n.value === 'string' && n.value.startsWith('@')
+  const n = node as
+    { type?: string; value?: unknown; quasis?: { value: { cooked?: string | null } }[] } | undefined
+  if (n?.type === 'Literal') return typeof n.value === 'string' && n.value.startsWith('@')
+  if (n?.type === 'TemplateLiteral') return n.quasis?.[0]?.value.cooked?.startsWith('@') === true
+  return false
 }
 
 function variableNamed(scope: Scope.Scope | null, name: string): Scope.Variable | undefined {
   for (let current = scope; current !== null; current = current.upper) {
     const variable = current.set.get(name)
     if (variable !== undefined) return variable
+  }
+  return undefined
+}
+
+/**
+ * What a variable was bound to, when it is destructured from a CommonJS
+ * `require` of a WebdriverIO module: `const { $, $$: all } = require('@wdio/globals')`
+ * binds `all` to `$$`, read like the import it stands for.
+ */
+function requiredBinding(
+  variable: Scope.Variable | undefined,
+): { source: string; imported: string } | undefined {
+  if (variable === undefined) return undefined
+  const def = variable.defs[0]
+  if (def?.type !== 'Variable') return undefined
+  const { id, init } = def.node
+  if (id.type !== 'ObjectPattern' || init?.type !== 'CallExpression') return undefined
+  if (init.callee.type !== 'Identifier' || init.callee.name !== 'require') return undefined
+  const [source] = init.arguments
+  if (source?.type !== 'Literal' || typeof source.value !== 'string') return undefined
+  if (!WDIO_SOURCES.has(source.value)) return undefined
+  for (const property of id.properties) {
+    if (property.type !== 'Property' || property.computed) continue
+    if (property.value.type !== 'Identifier' || property.value.name !== variable.name) continue
+    const { key } = property
+    const imported =
+      key.type === 'Identifier' ? key.name : key.type === 'Literal' ? String(key.value) : undefined
+    return imported === undefined ? undefined : { source: source.value, imported }
   }
   return undefined
 }
@@ -187,7 +218,7 @@ export function rawQueryOf(
     // a global is left alone.
     const variable = variableNamed(sourceCode.getScope(call), callee.name)
     const imported = variable?.defs[0]?.type === 'ImportBinding'
-    const binding = imported ? context.imports.get(callee.name) : undefined
+    const binding = imported ? context.imports.get(callee.name) : requiredBinding(variable)
 
     // Ember: find / findAll, and actions handed a selector string.
     if (binding?.source === '@ember/test-helpers') {

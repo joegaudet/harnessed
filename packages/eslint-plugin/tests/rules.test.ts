@@ -346,6 +346,16 @@ describe('no-raw-locator-in-test', () => {
         code: `const $ = require('jquery')\nawait browser.url('/'); $('.price')`,
       },
       {
+        name: 'a $ destructured from a CommonJS require of anything but WebdriverIO is left alone',
+        filename: '/repo/test/legacy.test.ts',
+        code: `const { $ } = require('./dom')\n$('.price')`,
+      },
+      {
+        name: 'Cypress: cy.get on an alias built in a template literal reads the alias',
+        filename: '/repo/cypress/e2e/checkout.cy.ts',
+        code: "cy.get(`@${alias}`).its('total')",
+      },
+      {
         name: "jQuery's $ inside jest-puppeteer's page.evaluate is not WebdriverIO",
         filename: '/repo/tests/checkout.test.ts',
         code: `const tab = await browser.newPage(); await page.goto('/'); await page.evaluate(() => $('.price').text())`,
@@ -432,6 +442,33 @@ describe('no-raw-locator-in-test', () => {
         filename: '/repo/test/specs/checkout.e2e.ts',
         code: `await browser.url('/'); await $$('li')`,
         errors: [{ messageId: 'raw', data: { call: '$$' } }],
+      },
+      {
+        name: 'WebdriverIO: $ and $$ destructured from a CommonJS require, under any name',
+        filename: '/repo/test/specs/checkout.e2e.ts',
+        code: `const { $, $$: all } = require('@wdio/globals')\n$('#pay'); all('li')`,
+        errors: [
+          { messageId: 'raw', data: { call: '$' } },
+          { messageId: 'raw', data: { call: 'all' } },
+        ],
+      },
+      {
+        name: "WebdriverIO: $ destructured from require('webdriverio')",
+        filename: '/repo/test/specs/checkout.e2e.ts',
+        code: `const { $ } = require('webdriverio')\n$('#pay')`,
+        errors: [{ messageId: 'raw', data: { call: '$' } }],
+      },
+      {
+        name: 'Cypress: cy.get on a template literal that is not an alias',
+        filename: '/repo/cypress/e2e/checkout.cy.ts',
+        code: 'cy.get(`[data-row=${id}]`)',
+        errors: [{ messageId: 'raw', data: { call: 'cy.get' } }],
+      },
+      {
+        name: 'a query chained over several lines is named on one line',
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: `page\n  .getByRole('button')\n  .click()`,
+        errors: [{ messageId: 'raw', data: { call: 'page.getByRole' } }],
       },
       {
         name: 'WebdriverIO: an aliased import',
