@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           run_install: false
       - uses: actions/setup-node@v7
@@ -32,7 +32,7 @@ jobs:
           # Trusted publishing needs node >= 22.14.0; the npm upgrade below
           # needs more than that again, so track the 24 line.
           node-version: 24
-          cache: pnpm
+          # No `cache: pnpm`: unprivileged jobs can write that store, so a publish job never restores it.
           registry-url: https://registry.npmjs.org
 
       # The runner images ship npm 10.x, which predates trusted publishing and
@@ -51,7 +51,7 @@ jobs:
 
       - name: Version PR, or publish if one was merged
         id: changesets
-        uses: changesets/action@v2
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         # changesets/action v2 renamed every input; the v1 names fail the
         # step before it does anything, which is how 0.3.0 first stalled.
         with:

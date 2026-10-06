@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   static:
     name: lint, format, build
@@ -64,8 +67,8 @@ jobs:
       - run: pnpm build
       - run: pnpm test:rules
       # Package unit tests: the Babel plugin through both Ember decorator
-      # pipelines, the injectable resolver from its built file, and the chai and
-      # qunit assertion adapters.
+      # pipelines, the injectable resolver from its built file, the chai and
+      # qunit assertion adapters, and the release script's publish plan.
       - run: pnpm test:units
 
   conformance-dom:

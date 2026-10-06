@@ -31,7 +31,8 @@
     "release": "pnpm build && node scripts/publish.mjs",
     "test:rules": "pnpm --filter @harnessed-ts/eslint-plugin test",
     "clean": "pnpm -r --filter './packages/*' run clean && rm -rf tsconfig.tsbuildinfo",
-    "test:units": "pnpm --filter @harnessed-ts/core --filter @harnessed-ts/resolve --filter @harnessed-ts/chai --filter @harnessed-ts/qunit --filter @harnessed-ts/testcafe --filter @harnessed-ts/gherkin --filter @harnessed-ts/claude test"
+    "test:scripts": "node --test scripts/*.test.mjs",
+    "test:units": "pnpm test:scripts && pnpm --filter @harnessed-ts/core --filter @harnessed-ts/resolve --filter @harnessed-ts/chai --filter @harnessed-ts/qunit --filter @harnessed-ts/testcafe --filter @harnessed-ts/gherkin --filter @harnessed-ts/claude test"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.2",
