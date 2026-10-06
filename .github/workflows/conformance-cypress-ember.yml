@@ -1,0 +1,30 @@
+name: conformance-cypress-ember
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-cypress-ember-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  electron:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: cypress-ember-electron
+      # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
+      setup: pnpm --filter test-app-cypress-ember exec cypress install
+      test: CYPRESS_BROWSER=electron pnpm --filter test-app-cypress-ember test
+      artifacts: test-apps/cypress-ember/cypress/screenshots
+  chrome:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: cypress-ember-chrome
+      setup: pnpm --filter test-app-cypress-ember exec cypress install
+      test: CYPRESS_BROWSER=chrome pnpm --filter test-app-cypress-ember test
+      artifacts: test-apps/cypress-ember/cypress/screenshots

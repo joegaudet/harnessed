@@ -1,0 +1,22 @@
+name: conformance-playwright-ember
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-playwright-ember-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: playwright-ember
+      setup: pnpm --filter test-app-playwright-ember exec playwright install --with-deps chromium
+      test: pnpm --filter test-app-playwright-ember test
+      artifacts: test-apps/playwright-ember/test-results

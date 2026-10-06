@@ -100,8 +100,10 @@ required. Name the app outside the `@harnessed-ts/` scope (`test-app-<name>`):
 changesets versions that scope as one fixed group.
 
 A browser driver serves the React fixture with
-`FIXTURE_PORT=<port> pnpm --filter conformance serve:fixture`; pick a port no
-other runner uses, so they can run side by side locally.
+`FIXTURE_PORT=<port> pnpm --filter conformance serve:fixture`, or the Ember port
+of it with `FIXTURE_PORT=<port> pnpm --filter test-app-ember-vite serve:fixture`
+(which builds the app first; concurrent runs take turns building). Pick a port
+no other runner uses, so they can run side by side locally.
 
 ## Adding a guarantee
 

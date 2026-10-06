@@ -9,11 +9,12 @@
     "./*": "./app/*"
   },
   "scripts": {
-    "build": "vite build --mode development",
-    "test": "pnpm typecheck && vite build --mode development && testem ci --port 0",
+    "build": "node scripts/with-build-lock.mjs vite build --mode development",
+    "test": "pnpm typecheck && node --test \"scripts/*.test.mjs\" && pnpm build && testem ci --port 0",
     "start": "vite",
+    "serve:fixture": "node scripts/serve-fixture.mjs",
     "typecheck": "ember-tsc --build",
-    "test:vitest": "vitest run --config vitest.config.mts"
+    "test:vitest": "node scripts/with-build-lock.mjs vitest run --config vitest.config.mts"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
