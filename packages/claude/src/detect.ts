@@ -106,3 +106,298 @@ export function detectLayout(root: string): DetectedLayout {
     pageTestId: 'page-<kebab>',
   }
 }
+
+/** The runners `install` knows how to document, in the order they are shown. */
+export const RUNNERS = [
+  'ember',
+  'cypress',
+  'webdriverio',
+  'testcafe',
+  'puppeteer',
+  'playwright',
+  'vitest-browser',
+  'testing-library',
+  'gherkin',
+] as const
+
+export type Runner = (typeof RUNNERS)[number]
+
+/** The `@harnessed-ts/gherkin` entry points, one per Gherkin runner. */
+export const GHERKIN_ADAPTERS = ['playwright-bdd', 'cucumber', 'cypress', 'yadda'] as const
+
+export type GherkinAdapter = (typeof GHERKIN_ADAPTERS)[number]
+
+export function isRunner(value: unknown): value is Runner {
+  return RUNNERS.some(runner => runner === value)
+}
+
+/**
+ * Checks runners handed over from outside the type system — a flag, a config,
+ * a JavaScript caller — and names the first one it does not know.
+ */
+export function toRunners(values: unknown): Runner[] {
+  if (!Array.isArray(values)) {
+    throw new Error(
+      `harnessed: runners must be a list, got ${JSON.stringify(values)} (known: ${RUNNERS.join(', ')})`,
+    )
+  }
+  const runners = values.map((value: unknown) => {
+    if (isRunner(value)) return value
+    throw new Error(
+      `harnessed: unknown runner ${JSON.stringify(value)} (known: ${RUNNERS.join(', ')})`,
+    )
+  })
+  // `ember,ember` is one runner: each is documented once.
+  return [...new Set(runners)]
+}
+
+/** `ember, cypress` → `['ember', 'cypress']`; an empty list is no runners. */
+export function parseRunners(list: string): Runner[] {
+  return toRunners(
+    list
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item !== ''),
+  )
+}
+
+interface RunnerSignal {
+  runner: Runner
+  /** A dependency that means the repo uses it. */
+  packages: RegExp
+  /** A file a project using it leaves at its root. */
+  files?: string[]
+}
+
+const RUNNER_SIGNALS: RunnerSignal[] = [
+  {
+    runner: 'ember',
+    packages: /^ember-source$/,
+    files: ['ember-cli-build.js', 'ember-cli-build.mjs'],
+  },
+  {
+    runner: 'cypress',
+    packages: /^cypress$/,
+    files: ['cypress.config.ts', 'cypress.config.js', 'cypress.config.mjs'],
+  },
+  {
+    runner: 'webdriverio',
+    packages: /^(webdriverio|@wdio\/cli)$/,
+    files: ['wdio.conf.ts', 'wdio.conf.js', 'wdio.conf.mjs'],
+  },
+  {
+    runner: 'testcafe',
+    packages: /^testcafe$/,
+    files: ['.testcaferc.json', '.testcaferc.js', '.testcaferc.cjs'],
+  },
+  { runner: 'puppeteer', packages: /^puppeteer(-core)?$/ },
+  { runner: 'playwright', packages: /^@playwright\/test$/ },
+  { runner: 'vitest-browser', packages: /^@vitest\/browser/ },
+  {
+    runner: 'testing-library',
+    packages: /^@testing-library\/(dom|react|vue|svelte|angular|preact|ember)$/,
+  },
+  {
+    runner: 'gherkin',
+    packages:
+      /^(playwright-bdd|@cucumber\/cucumber|@badeball\/cypress-cucumber-preprocessor|ember-cli-yadda)$/,
+  },
+]
+
+/** The package that means a repo runs Gherkin through each adapter. */
+const GHERKIN_SIGNALS: Record<GherkinAdapter, string> = {
+  'playwright-bdd': 'playwright-bdd',
+  cucumber: '@cucumber/cucumber',
+  cypress: '@badeball/cypress-cucumber-preprocessor',
+  yadda: 'ember-cli-yadda',
+}
+
+const MANIFEST_FIELDS = [
+  'dependencies',
+  'devDependencies',
+  'peerDependencies',
+  'optionalDependencies',
+] as const
+
+function readManifest(dir: string): Record<string, unknown> | undefined {
+  try {
+    const manifest: unknown = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'))
+    return typeof manifest === 'object' && manifest !== null
+      ? (manifest as Record<string, unknown>)
+      : undefined
+  } catch {
+    // No manifest, or an unreadable one: only the config files can tell.
+    return undefined
+  }
+}
+
+function dependencyNames(manifest: Record<string, unknown> | undefined): string[] {
+  if (manifest === undefined) return []
+  return MANIFEST_FIELDS.flatMap(field => {
+    const deps = manifest[field]
+    return typeof deps === 'object' && deps !== null ? Object.keys(deps) : []
+  })
+}
+
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every(item => typeof item === 'string')
+
+/** The `packages:` list of a pnpm-workspace.yaml: just enough YAML for that one key. */
+function pnpmWorkspaceGlobs(root: string): string[] | undefined {
+  let text: string
+  try {
+    text = readFileSync(join(root, 'pnpm-workspace.yaml'), 'utf8')
+  } catch {
+    return undefined
+  }
+  const globs: string[] = []
+  let inPackages = false
+  for (const line of text.split(/\r?\n/)) {
+    if (/^packages\s*:/.test(line)) {
+      inPackages = true
+      continue
+    }
+    if (!inPackages || line.trim() === '' || line.trim().startsWith('#')) continue
+    // An item may sit at column 0 as well as indented: YAML allows both.
+    const item = /^\s*-\s*(.+?)\s*$/.exec(line)
+    if (item === null) {
+      // The next top-level key ends the list.
+      if (/^\S/.test(line)) inPackages = false
+      continue
+    }
+    globs.push(item[1]!.replace(/\s+#.*$/, '').replace(/^(['"])(.*)\1$/, '$2'))
+  }
+  return globs
+}
+
+/** The workspace globs a repo declares, from package.json or pnpm-workspace.yaml. */
+function workspaceGlobs(root: string, manifest: Record<string, unknown> | undefined): string[] {
+  const workspaces = manifest?.workspaces
+  const fromManifest = isStringArray(workspaces)
+    ? workspaces
+    : typeof workspaces === 'object' && workspaces !== null
+      ? (workspaces as Record<string, unknown>).packages
+      : undefined
+  return [...(isStringArray(fromManifest) ? fromManifest : []), ...(pnpmWorkspaceGlobs(root) ?? [])]
+}
+
+const MAX_DEPTH = 5
+
+function childDirs(dir: string): string[] {
+  try {
+    return readdirSync(dir, { withFileTypes: true })
+      .filter(
+        entry =>
+          entry.isDirectory() && entry.name !== 'node_modules' && !entry.name.startsWith('.'),
+      )
+      .map(entry => entry.name)
+  } catch {
+    return []
+  }
+}
+
+function segmentPattern(segment: string): RegExp {
+  const escaped = segment.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`^${escaped.replaceAll('*', '[^/]*').replaceAll('?', '[^/]')}$`)
+}
+
+/** The directories under `dir` a workspace glob matches: `*`, `?` and `**`, nothing fancier. */
+function expandGlob(dir: string, segments: string[], depth: number): string[] {
+  if (segments.length === 0) return [dir]
+  if (depth > MAX_DEPTH) return []
+  const [head, ...rest] = segments
+  if (head === '**') {
+    return [
+      ...expandGlob(dir, rest, depth),
+      ...childDirs(dir).flatMap(child => expandGlob(join(dir, child), segments, depth + 1)),
+    ]
+  }
+  if (head === '.' || head === '') return expandGlob(dir, rest, depth)
+  if (!/[*?]/.test(head!)) {
+    const next = join(dir, head!)
+    return existsSync(next) && head !== 'node_modules' ? expandGlob(next, rest, depth + 1) : []
+  }
+  const pattern = segmentPattern(head!)
+  return childDirs(dir)
+    .filter(child => pattern.test(child))
+    .flatMap(child => expandGlob(join(dir, child), rest, depth + 1))
+}
+
+/**
+ * Every directory whose manifest and config files count: the root, plus its
+ * workspace packages. Those come from the `workspaces` field or
+ * pnpm-workspace.yaml when the repo declares them, and otherwise from any
+ * package one or two levels down — a tooling-only root with the app in
+ * `apps/web` is the common monorepo, and its runners live with the app.
+ */
+function packageDirs(root: string, manifest: Record<string, unknown> | undefined): string[] {
+  const globs = workspaceGlobs(root, manifest)
+  const hasManifest = (dir: string): boolean => existsSync(join(dir, 'package.json'))
+  if (globs.length === 0) {
+    const oneDown = childDirs(root).map(child => join(root, child))
+    const twoDown = oneDown.flatMap(dir => childDirs(dir).map(child => join(dir, child)))
+    return [root, ...[...oneDown, ...twoDown].filter(hasManifest)]
+  }
+  const expand = (glob: string): string[] => expandGlob(root, glob.split('/'), 0)
+  const excluded = new Set(
+    globs.filter(glob => glob.startsWith('!')).flatMap(glob => expand(glob.slice(1))),
+  )
+  const included = globs
+    .filter(glob => !glob.startsWith('!'))
+    .flatMap(expand)
+    .filter(dir => !excluded.has(dir) && hasManifest(dir))
+  return [root, ...new Set(included)]
+}
+
+interface RepoEvidence {
+  /** Every package's dependencies, merged. */
+  dependencies: Set<string>
+  /** Each package directory's own dependencies, root included. */
+  packages: Set<string>[]
+  /** Whether any of the repo's package directories holds this file. */
+  hasFile(name: string): boolean
+}
+
+function evidence(root: string): RepoEvidence {
+  const rootManifest = readManifest(root)
+  const dirs = packageDirs(root, rootManifest)
+  const packages = dirs.map(
+    dir => new Set(dependencyNames(dir === root ? rootManifest : readManifest(dir))),
+  )
+  return {
+    dependencies: new Set(packages.flatMap(deps => [...deps])),
+    packages,
+    hasFile: name => dirs.some(dir => existsSync(join(dir, name))),
+  }
+}
+
+/**
+ * The test runners a repo uses, from its dependencies and the config files each
+ * runner leaves behind — at the root and in each workspace package. The skill
+ * documents only these, so an agent working in an Ember repo is shown `ember()`
+ * and `assert.harness`, not Cypress.
+ */
+export function detectRunners(root: string): Runner[] {
+  const { dependencies, hasFile } = evidence(root)
+  return RUNNER_SIGNALS.filter(
+    ({ packages, files = [] }) =>
+      [...dependencies].some(name => packages.test(name)) || files.some(hasFile),
+  ).map(({ runner }) => runner)
+}
+
+/** Which `@harnessed-ts/gherkin` adapters the repo needs, by its Gherkin runners. */
+export function detectGherkinAdapters(root: string): GherkinAdapter[] {
+  const { dependencies } = evidence(root)
+  return GHERKIN_ADAPTERS.filter(adapter => dependencies.has(GHERKIN_SIGNALS[adapter]))
+}
+
+/**
+ * Whether Ember tests here may run under Vitest (`ember-vitest`) rather than
+ * QUnit alone: some one package depends on both `ember-source` and Vitest. A
+ * QUnit-only Ember app beside a Vitest utils package is not that.
+ */
+export function detectEmberUnderVitest(root: string): boolean {
+  return evidence(root).packages.some(
+    deps => deps.has('ember-source') && (deps.has('ember-vitest') || deps.has('vitest')),
+  )
+}

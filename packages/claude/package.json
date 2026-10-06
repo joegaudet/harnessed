@@ -55,12 +55,17 @@
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf dist *.tsbuildinfo"
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "@harnessed-ts/config": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "vitest": "^5.0.0"
   }
 }
