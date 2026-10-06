@@ -204,6 +204,20 @@ function substitute(text: string, context: RenderContext): string {
     .replaceAll('{{WIDGET_EXAMPLE}}', widgetExampleOf(context))
 }
 
+/**
+ * A single-quoted TypeScript string literal holding exactly `value`.
+ *
+ * JSON.stringify does the escaping -- backslashes, control characters, double
+ * quotes -- and the result is turned into the single-quoted form the rest of the
+ * file uses: `\"` needs no escape inside single quotes, and `'` does. Matching
+ * `\"` cannot misfire, because JSON never leaves a bare `"` after an escaped
+ * backslash.
+ */
+function literal(value: string): string {
+  const escaped = JSON.stringify(value).slice(1, -1).replaceAll('\\"', '"').replaceAll("'", "\\'")
+  return `'${escaped}'`
+}
+
 /** The `harnessed.config.ts` the generator writes. */
 export function renderConfig(context: RenderContext): string {
   return `import { defineConfig } from '@harnessed-ts/core'
@@ -216,18 +230,18 @@ export function renderConfig(context: RenderContext): string {
  * options, and re-run \`npx @harnessed-ts/claude install\` after changing it.
  */
 export default defineConfig({
-  testIdAttribute: '${context.testIdAttribute}',
+  testIdAttribute: ${literal(context.testIdAttribute)},
   defaultTimeout: 5000,
   layout: {
-    components: '${context.components}',
-    pages: '${context.pages}',
-    harnesses: '${context.harnesses}',
-    widgetHarnesses: '${context.widgetHarnesses}',
-    pageHarnesses: '${context.pageHarnesses}',
+    components: ${literal(context.components)},
+    pages: ${literal(context.pages)},
+    harnesses: ${literal(context.harnesses)},
+    widgetHarnesses: ${literal(context.widgetHarnesses)},
+    pageHarnesses: ${literal(context.pageHarnesses)},
   },
   testIdPattern: {
-    widget: '${context.widgetTestId}',
-    page: '${context.pageTestId}',
+    widget: ${literal(context.widgetTestId)},
+    page: ${literal(context.pageTestId)},
   },
 })
 `

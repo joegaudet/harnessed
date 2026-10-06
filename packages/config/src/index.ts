@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs'
-import { dirname, join, parse } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import type { HarnessedConfig } from '@harnessed-ts/core'
 import { createJiti } from 'jiti'
 
@@ -49,6 +49,29 @@ export function loadConfig(root: string = process.cwd()): HarnessedConfig | unde
   return config
 }
 
+/** `dir` and every directory above it, nearest first. */
+function ancestors(dir: string): string[] {
+  const dirs = [dir]
+  for (let parent = dirname(dir); parent !== dirs.at(-1); parent = dirname(parent)) {
+    dirs.push(parent)
+  }
+  return dirs
+}
+
+const hasManifest = (dir: string): boolean => existsSync(join(dir, 'package.json'))
+
+/** A git checkout's root, or the root of a pnpm, npm or yarn workspace. */
+function isRepoRoot(dir: string): boolean {
+  if (existsSync(join(dir, '.git')) || existsSync(join(dir, 'pnpm-workspace.yaml'))) return true
+  if (!hasManifest(dir)) return false
+  try {
+    const manifest: unknown = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'))
+    return typeof manifest === 'object' && manifest !== null && 'workspaces' in manifest
+  } catch {
+    return false
+  }
+}
+
 /**
  * The config governing a particular file, found by walking up from it.
  *
@@ -56,17 +79,24 @@ export function loadConfig(root: string = process.cwd()): HarnessedConfig | unde
  * makes this correct for a monorepo, and for an editor or a lint run started from
  * anywhere other than the repo root — `cwd` says where the tool was invoked,
  * which is not a fact about the code being checked.
+ *
+ * The walk stops at the project root, checking that directory itself last.
+ * Loading a config executes it, so a `harnessed.config.ts` above the project — in
+ * a home directory, a shared parent, `/tmp` — must never be picked up. The root is
+ * the nearest git checkout or workspace root (`.git`, `pnpm-workspace.yaml`, or a
+ * `package.json` with `workspaces`), not the nearest `package.json`: in a monorepo
+ * the file's own package has a `package.json`, and the config usually sits at the
+ * workspace root above it. Outside any checkout or workspace, the nearest
+ * `package.json` is the root. With neither, there is no project, and no config.
  */
 export function loadConfigFor(filename: string): HarnessedConfig | undefined {
-  const { root } = parse(filename)
-  let dir = dirname(filename)
-  for (;;) {
+  const dirs = ancestors(dirname(filename))
+  const root = dirs.find(isRepoRoot) ?? dirs.find(hasManifest)
+  if (root === undefined) return undefined
+  for (const dir of dirs.slice(0, dirs.indexOf(root) + 1)) {
     if (findConfig(dir) !== undefined) return loadConfig(dir)
-    if (dir === root) return undefined
-    const parent = dirname(dir)
-    if (parent === dir) return undefined
-    dir = parent
   }
+  return undefined
 }
 
 /** Forgets what was loaded. For tests, and for a long-lived editor process. */
