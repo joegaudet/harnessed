@@ -11,7 +11,7 @@
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/gherkin": "workspace:^",
     "@harnessed-ts/playwright": "workspace:^",
-    "playwright": "^1.62.1",
+    "playwright": "^1.63.0",
     "start-server-and-test": "^3.0.12"
   }
 }

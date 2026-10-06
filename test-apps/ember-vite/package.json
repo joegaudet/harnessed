@@ -60,7 +60,7 @@
     "ember-resolver": "^13.2.0",
     "ember-source": "~7.3.0",
     "ember-vitest": "^0.9.0",
-    "playwright": "^1.62.1",
+    "playwright": "^1.63.0",
     "qunit": "^2.26.0",
     "testem": "^3.21.0",
     "typescript": "^6.0.3",

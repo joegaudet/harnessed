@@ -10,7 +10,7 @@
   "devDependencies": {
     "@harnessed-ts/conformance": "workspace:^",
     "@harnessed-ts/playwright": "workspace:^",
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^26.4.1",
     "test-app-ember-vite": "workspace:*",
     "typescript": "^6.0.3"
