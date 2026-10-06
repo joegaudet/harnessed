@@ -46,6 +46,18 @@ test('reads a lone + as the plus key, and Control++ as Control held over it', as
   assert.equal(await keys.attribute('data-last'), 'true:+')
 })
 
+test("reads ControlOrMeta from the browser's platform, not the runner's", async t => {
+  await setContent(
+    `<input aria-label="Keys" onkeydown="if (!['Meta', 'Control'].includes(event.key)) this.dataset.last = event.ctrlKey + ':' + event.metaKey + ':' + event.key">`,
+  )
+  await ClientFunction(() => {
+    Object.defineProperty(navigator, 'platform', { get: () => 'Linux x86_64' })
+  })()
+  const keys = createQuery(testcafe(t), [], role('textbox', { name: 'Keys' }))
+  await keys.press('ControlOrMeta+KeyA')
+  assert.equal(await keys.attribute('data-last'), 'true:false:a')
+})
+
 test('refuses a key TestCafe cannot press, and presses nothing', async t => {
   await setContent(
     `<input aria-label="Keys" onkeydown="this.dataset.pressed = (this.dataset.pressed || '') + event.key">`,
@@ -103,6 +115,23 @@ test('refuses to fill a wrapper rather than typing into what it contains', async
   const inner = createQuery(testcafe(t), [], role('textbox', { name: 'Inner' }))
   await assert.rejects(wrap.fill('typed'), /fill\(\) needs an <input>.*testId\(wrap\) is a <div>/)
   assert.equal(await inner.inputValue(), '')
+})
+
+test('refuses to fill an input that takes no text, as Playwright does', async t => {
+  await setContent(
+    `<input type="checkbox" aria-label="Agree"><input type="radio" aria-label="One">`,
+  )
+  const agree = createQuery(testcafe(t), [], role('checkbox', { name: 'Agree' }))
+  const one = createQuery(testcafe(t), [], role('radio', { name: 'One' }))
+  await assert.rejects(agree.fill('x'), /fill\(\) needs an <input>.*is a <input type="checkbox">/)
+  await assert.rejects(one.clear(), /clear\(\) needs an <input>.*is a <input type="radio">/)
+})
+
+test('refuses to fill an aria-disabled input', async t => {
+  await setContent(`<input aria-label="Name" aria-disabled="true">`)
+  const name = createQuery(testcafe(t), [], role('textbox', { name: 'Name' }))
+  await assert.rejects(name.fill('typed', { timeout: 300 }), /fill\(\) could not edit .*disabled/)
+  assert.equal(await name.inputValue(), '')
 })
 
 test('refuses to fill a disabled input, even through its fieldset', async t => {
@@ -165,6 +194,29 @@ test('says what a TestCafe action failure means, and keeps its cause', async t =
   })
 })
 
+test('an action spends one deadline, not the timeout and then more', async t => {
+  const ghost = createQuery(testcafe(t), [], testId('ghost'))
+  const hidden = `<button data-testid="ghost" style="visibility: hidden">Ghost</button>`
+  const timedClick = async (): Promise<number> => {
+    const started = Date.now()
+    await assert.rejects(ghost.click({ timeout: 400 }), /it is not visible/)
+    return Date.now() - started
+  }
+  // What a click on a node that is there from the start costs, TestCafe's own
+  // overhead included…
+  await setContent(hidden)
+  const present = await timedClick()
+  // …and a node found late must not be given more time than that.
+  await setContent(`<div id="host"></div>`)
+  await ClientFunction((html: string) => {
+    setTimeout(() => {
+      document.body.innerHTML = html
+    }, 300)
+  })(hidden)
+  const late = await timedClick()
+  assert.ok(late < present + 200, `a late node took ${late}ms, a present one ${present}ms`)
+})
+
 test("refuses the t imported from 'testcafe', which belongs to no one test", async () => {
   assert.throws(
     () => testcafe(sharedController),
@@ -221,4 +273,56 @@ test('a read the caller gave up on does not hold up the next one', async t => {
   const elapsed = Date.now() - started
   assert.ok(elapsed < 2000, `the next read waited ${elapsed}ms behind an abandoned one`)
   await abandoned
+})
+
+test('a count the caller gave up on does not hold up the next read', async t => {
+  await setContent(`<p data-testid="here">here</p>`)
+  const env = testcafe(t)
+  // What `isReady({ timeout })` does: race the count, and stop listening.
+  const abandoned = createQuery(env, [testId('never')], testId('item')).count()
+  await Promise.race([abandoned, delay(100)])
+  const started = Date.now()
+  assert.equal(await createQuery(env, [], testId('here')).text(), 'here')
+  const elapsed = Date.now() - started
+  assert.ok(elapsed < 2000, `the next read waited ${elapsed}ms behind an abandoned count`)
+  assert.equal(await abandoned, 0)
+})
+
+test('a list read the caller gave up on does not hold up the next read', async t => {
+  await setContent(`<p data-testid="here">here</p>`)
+  const env = testcafe(t)
+  const abandoned = createQuery(env, [testId('never')], testId('item')).texts()
+  await Promise.race([abandoned, delay(100)])
+  const started = Date.now()
+  assert.equal(await createQuery(env, [], testId('here')).text(), 'here')
+  const elapsed = Date.now() - started
+  assert.ok(elapsed < 2000, `the next read waited ${elapsed}ms behind an abandoned list read`)
+  assert.deepEqual(await abandoned, [])
+})
+
+test('count() and texts() keep the strict and nth rules for the scope', async t => {
+  await setContent(
+    `<ul data-testid="list"><li data-testid="item">a</li></ul>` +
+      `<ul data-testid="list"><li data-testid="item">b</li><li data-testid="item">c</li></ul>`,
+  )
+  const env = testcafe(t)
+  // An ambiguous scope holds nothing, at once; an indexed one is that one list.
+  const started = Date.now()
+  assert.equal(await createQuery(env, [testId('list')], testId('item')).count(), 0)
+  assert.deepEqual(await createQuery(env, [testId('list')], testId('item')).texts(), [])
+  assert.ok(Date.now() - started < 2000, 'an ambiguous scope was waited on')
+  const second = createQuery(env, [{ ...testId('list'), nth: 1 }], testId('item'))
+  assert.equal(await second.count(), 2)
+  assert.deepEqual(await second.texts(), ['b', 'c'])
+  assert.equal(await second.nth(1).count(), 1)
+  assert.deepEqual(await second.nth(1).texts(), ['c'])
+})
+
+test('count() refuses a frame link on an element that is not an iframe', async t => {
+  await setContent(`<div data-testid="pane"><p data-testid="item">x</p></div>`)
+  const env = testcafe(t)
+  await assert.rejects(
+    createQuery(env, [{ ...testId('pane'), frame: true }], testId('item')).count(),
+    /is marked as a frame but is a <div>/,
+  )
 })

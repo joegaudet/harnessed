@@ -2,7 +2,7 @@ import { ClientFunction } from 'testcafe'
 import { injectSource, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import type { PageApiOptions, WireSelector } from '@harnessed-ts/resolve/inject'
 import { messageOf, toError } from './errors'
-import { currentHref, NOT_INJECTED, pageCall } from './page-functions'
+import { browserPlatform, currentHref, NOT_INJECTED, pageCall } from './page-functions'
 import type { Lookup, PageOp, PageResult } from './page-functions'
 
 /**
@@ -31,6 +31,8 @@ export interface Session {
   ): Promise<PageResult>
   /** Re-read the top-level URL; needs no resolver, so it is safe after a navigation. */
   locate(): Promise<string>
+  /** The browser's `navigator.platform`, read once: it does not change mid-test. */
+  platform(): Promise<string>
   /**
    * Runs an operation that may switch TestCafe into an iframe. Switching is
    * state on the controller, so two such operations must never interleave —
@@ -72,6 +74,8 @@ export function sessionFor(t: TestController): Session {
 
   const call = ClientFunction(pageCall, { boundTestRun: t })
   const href = ClientFunction(currentHref, { boundTestRun: t })
+  const readPlatform = ClientFunction(browserPlatform, { boundTestRun: t })
+  let platform: string | undefined
   let queue: Promise<unknown> = Promise.resolve()
   // A session starts on a page the driver has not seen, so its first call
   // carries the resolver. After that the source is sent only when the page may
@@ -113,6 +117,16 @@ export function sessionFor(t: TestController): Session {
       }
       seen(current)
       return current
+    },
+    async platform() {
+      if (platform === undefined) {
+        try {
+          platform = await readPlatform()
+        } catch (error) {
+          throw toError(error)
+        }
+      }
+      return platform
     },
     navigated() {
       carrySource = true

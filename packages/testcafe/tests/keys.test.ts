@@ -36,10 +36,11 @@ describe('toTestCafeKey', () => {
     expect(toTestCafeKey('Shift+Digit1')).toBe('shift+1')
   })
 
-  it('reads ControlOrMeta as Meta on macOS and Control elsewhere', () => {
-    expect(toTestCafeKey('ControlOrMeta+a', 'darwin')).toBe('meta+a')
-    expect(toTestCafeKey('ControlOrMeta+a', 'linux')).toBe('ctrl+a')
-    expect(toTestCafeKey('ControlOrMeta+a', 'win32')).toBe('ctrl+a')
+  it("reads ControlOrMeta from the browser's navigator.platform: Meta on Apple's, Control elsewhere", () => {
+    expect(toTestCafeKey('ControlOrMeta+a', 'MacIntel')).toBe('meta+a')
+    expect(toTestCafeKey('ControlOrMeta+a', 'iPhone')).toBe('meta+a')
+    expect(toTestCafeKey('ControlOrMeta+a', 'Linux x86_64')).toBe('ctrl+a')
+    expect(toTestCafeKey('ControlOrMeta+a', 'Win32')).toBe('ctrl+a')
   })
 
   it('refuses a key TestCafe cannot press, before anything is sent', () => {

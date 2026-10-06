@@ -738,10 +738,14 @@ is no `/matchers` entry. Documented differences:
   as Playwright does, rather than clicking through a native dropdown.
 - **`fill()` and `clear()`** refuse what TestCafe's `typeText` would get
   silently wrong: an element that is not an `<input>`, `<textarea>` or
-  `[contenteditable]` (rather than typing into whatever it contains), and,
-  once the timeout runs out, a disabled or readonly control.
+  `[contenteditable]` (rather than typing into whatever it contains), an
+  `<input>` that takes no text, such as a checkbox (as Playwright's `fill()`
+  does), and, once the timeout runs out, a disabled, `aria-disabled` or
+  readonly control.
 - **`press()`** takes Playwright's key names and chords. TestCafe has no
   function or numpad keys, so `press('F5')` throws before anything is sent.
+  `ControlOrMeta` follows the browser's `navigator.platform`, not the test
+  runner's.
 - **`isVisible()`** uses the shared layout rule: a non-empty box that
   `visibility` does not hide, and content inside a hidden frame is hidden.
 

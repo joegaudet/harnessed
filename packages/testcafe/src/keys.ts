@@ -64,8 +64,10 @@ function parts(key: string): string[] {
   return plus ? [...split, '+'] : split
 }
 
-function toPart(part: string, platform: string): string | undefined {
-  if (part === 'ControlOrMeta') return platform === 'darwin' ? 'meta' : 'ctrl'
+function toPart(part: string, platform: string | undefined): string | undefined {
+  if (part === 'ControlOrMeta') {
+    return platform !== undefined && /^(?:Mac|iP)/.test(platform) ? 'meta' : 'ctrl'
+  }
   const code = /^(?:Key([A-Z])|Digit(\d))$/.exec(part)
   if (code !== null) return (code[1] ?? code[2]!).toLowerCase()
   const named = NAMES[part]
@@ -76,10 +78,13 @@ function toPart(part: string, platform: string): string | undefined {
 
 /**
  * `Control+Shift+ArrowLeft` → `ctrl+shift+left`, `ControlOrMeta+KeyA` →
- * `meta+a` on macOS. Throws before anything is pressed for a key TestCafe has
- * no way to send, such as a function key.
+ * `meta+a` in a browser on macOS. Throws before anything is pressed for a key
+ * TestCafe has no way to send, such as a function key.
+ *
+ * `platform` is the browser's `navigator.platform`, which only `ControlOrMeta`
+ * reads: the browser may run on another machine than the test runner.
  */
-export function toTestCafeKey(key: string, platform: string = process.platform): string {
+export function toTestCafeKey(key: string, platform?: string): string {
   return parts(key)
     .map(part => {
       const mapped = toPart(part, platform)

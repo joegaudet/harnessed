@@ -17,13 +17,6 @@ import type { Session } from './session'
 const POLL_MS = 50
 
 /**
- * The least TestCafe's own selector is given to find the node actionable. The
- * resolver has already found it by then, so this only matters when that ate
- * the whole timeout: a selector timeout of zero would fail at once instead.
- */
-const ACTIONABLE_MS = 500
-
-/**
  * The last poll of a single-target read waits in the page this long, so that a
  * target never found fails in the resolver's own words.
  */
@@ -58,7 +51,7 @@ function delay(ms: number): Promise<void> {
  * TestCafe runs one command at a time, so nothing here waits inside the page
  * for long: a wait held open there would block every other call until it
  * settled — including after a caller such as `isReady()` has stopped
- * listening. Single-target reads poll from Node instead.
+ * listening. Single-target and list reads poll from Node instead.
  */
 export class TestCafeQuery extends Query {
   constructor(
@@ -86,7 +79,7 @@ export class TestCafeQuery extends Query {
     return { testIdAttribute: getConfig().testIdAttribute, timeout: timeoutFor(timeout) }
   }
 
-  /** One round trip, answered at once or, for `count` and `texts`, once the scope is there. */
+  /** One round trip, answered at once. */
   private async read<T>(op: PageOp, options?: WaitOptions, arg?: unknown): Promise<T> {
     const result = await this.session.read(
       op,
@@ -97,6 +90,32 @@ export class TestCafeQuery extends Query {
       'now',
     )
     return result.value as T
+  }
+
+  /**
+   * A list operation, polled from Node until its scope is there, as every
+   * driver waits for the scope; the list itself answers at once. A scope that
+   * never appears holds nothing, so the deadline answers `empty` rather than
+   * failing.
+   */
+  private async readList<T>(op: 'count' | 'texts', empty: T): Promise<T> {
+    const timeout = timeoutFor()
+    const deadline = Date.now() + timeout
+    const scope = this.scope.map(encodeSelector)
+    const selector = encodeSelector(this.selector)
+    for (;;) {
+      const result = await this.session.read(
+        op,
+        scope,
+        selector,
+        this.pageOptions(timeout),
+        undefined,
+        'now',
+      )
+      if (result.absent !== true) return result.value as T
+      if (Date.now() >= deadline) return empty
+      await delay(POLL_MS)
+    }
   }
 
   /**
@@ -152,7 +171,9 @@ export class TestCafeQuery extends Query {
    * instead retried until the selector times out, and a strict violation never
    * becomes a single match by waiting. `prepare` then refuses what TestCafe
    * would get silently wrong, within the same deadline. After that, TestCafe's
-   * own selector only has to wait for the node to be actionable.
+   * own selectors only have to wait for the node to be actionable — each frame
+   * switch and the action given what is left of that one deadline, so the
+   * whole operation fails within the caller's timeout.
    */
   private act(
     run: (target: ReturnType<typeof TestCafeSelector>, deadline: number) => Promise<unknown>,
@@ -164,15 +185,15 @@ export class TestCafeQuery extends Query {
       const deadline = Date.now() + timeout
       await this.readOne('resolve', { timeout })
       if (prepare !== undefined) await prepare(deadline, timeout)
-      const remaining = Math.max(deadline - Date.now(), ACTIONABLE_MS)
+      const remaining = (): number => Math.max(deadline - Date.now(), 0)
       const frames = this.scope.flatMap((link, index) => (link.frame === true ? [index] : []))
       try {
         for (const index of frames) {
           await this.t.switchToIframe(
-            this.selectorFor(this.scope.slice(0, index), unframed(this.scope[index]!), remaining),
+            this.selectorFor(this.scope.slice(0, index), unframed(this.scope[index]!), remaining()),
           )
         }
-        await run(this.selectorFor(this.scope, this.selector, remaining), deadline)
+        await run(this.selectorFor(this.scope, this.selector, remaining()), deadline)
       } catch (error) {
         throw toError(error, `act on ${this.described}`)
       } finally {
@@ -284,10 +305,12 @@ export class TestCafeQuery extends Query {
   /**
    * Focuses the target first, as Playwright's press does; keys go to the
    * focused node. The key is checked before anything happens, and the focus
-   * spends only what is left of the one timeout.
+   * spends only what is left of the one timeout. `ControlOrMeta` follows the
+   * browser's platform, which may not be the test runner's.
    */
   override async press(key: string, options?: WaitOptions): Promise<void> {
-    const keys = toTestCafeKey(key)
+    const platform = key.includes('ControlOrMeta') ? await this.session.platform() : undefined
+    const keys = toTestCafeKey(key, platform)
     await this.act(async (_target, deadline) => {
       await this.readOne('focus', { timeout: Math.max(deadline - Date.now(), 0) })
       await this.t.pressKey(keys)
@@ -348,12 +371,12 @@ export class TestCafeQuery extends Query {
 
   /** Waits for the scope chain, as every driver does; the count itself answers at once. */
   override async count(): Promise<number> {
-    return this.read<number>('count')
+    return this.readList<number>('count', 0)
   }
 
   /** Every match read in one round trip, once the scope is there; trimmed to match `text()`. */
   override async texts(): Promise<string[]> {
-    return this.read<string[]>('texts')
+    return this.readList<string[]>('texts', [])
   }
 }
 

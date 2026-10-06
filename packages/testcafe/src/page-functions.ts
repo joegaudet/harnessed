@@ -35,7 +35,9 @@ export type PageOp =
  * How a single-target operation looks for its node. `now` answers at once,
  * with `absent` when nothing matches yet, so the driver polls from Node; `wait`
  * waits in the page for `options.timeout`, and is what the last poll uses so
- * that a target never found fails in the resolver's own words.
+ * that a target never found fails in the resolver's own words. `count` and
+ * `texts` never wait in the page: they answer `absent` while their scope is
+ * not on screen, whichever lookup is asked for.
  */
 export type Lookup = 'now' | 'wait'
 
@@ -43,7 +45,7 @@ export type Lookup = 'now' | 'wait'
 export interface PageResult {
   value: unknown
   href: string
-  /** A `now` lookup found nothing to answer about yet. */
+  /** A `now` lookup, or a list's scope, found nothing to answer about yet. */
   absent?: true
 }
 
@@ -134,27 +136,37 @@ export function pageCall(
   const withTarget = (read: (node: Element) => unknown): Promise<PageResult> =>
     target().then(node => (node === null ? { value: null, href, absent: true } : done(read(node))))
 
+  // Every match now, or `null` while a link of the scope is not on screen yet —
+  // the driver polls that, as it does a single target. The last link is looked
+  // up as the element it names, so "absent" is told apart from what
+  // `allNow` folds into an empty list: an ambiguous or out-of-range link, which
+  // holds nothing at once, as `count` says under every driver. A frame that
+  // cannot be entered still throws.
+  const list = (): Element[] | null => {
+    if (scope.length > 0) {
+      const last = Object.assign({}, scope[scope.length - 1], { frame: false })
+      let link: Element | null
+      try {
+        link = resolver.oneNow(null, scope.slice(0, -1), last, options)
+      } catch (error) {
+        if ((error as { name?: string } | null)?.name === 'FrameEntryError') throw error
+        return []
+      }
+      if (link === null) return null
+    }
+    // `nth` picks one match, or none: a list read through `nth()` is that one.
+    return resolver.allNow(null, scope, selector, options)
+  }
+  const withList = (read: (matches: Element[]) => unknown): PageResult => {
+    const matches = list()
+    return matches === null ? { value: null, href, absent: true } : done(read(matches))
+  }
+
   switch (op) {
     case 'count':
-      // The scope waits; the count at the end does not.
-      return resolver.count(null, scope, selector, options).then(done)
-    case 'texts': {
-      // `all` ignores `nth`, as any list does; a list read through `nth()` is
-      // that one match, or none.
-      const index = (selector as { nth?: number }).nth
-      return resolver.all(null, scope, selector, options).then(
-        matches => {
-          const listed = index === undefined ? matches : matches.slice(index, index + 1)
-          return done(listed.map(node => (node.textContent ?? '').trim()))
-        },
-        (error: unknown) => {
-          // A scope that never appeared holds nothing, as `count` says; only a
-          // frame that cannot be entered is an error.
-          if ((error as { name?: string } | null)?.name === 'FrameEntryError') throw error
-          return done([])
-        },
-      )
-    }
+      return withList(matches => matches.length)
+    case 'texts':
+      return withList(matches => matches.map(node => (node.textContent ?? '').trim()))
     case 'visible': {
       const node = resolver.oneNow(null, scope, selector, options)
       return done(node !== null && isVisible(node))
@@ -193,11 +205,22 @@ export function pageCall(
     case 'editable':
       // TestCafe's typeText types into the first editable descendant of a
       // wrapper, and does nothing at all to a disabled or readonly control; both
-      // are refused before it is asked.
+      // are refused before it is asked. So is an <input> that takes no text — a
+      // checkbox, a file — which Playwright's fill refuses too, and a control
+      // `aria-disabled` marks, which `isEnabled()` reads as disabled.
       return withTarget((node): Editable => {
-        const control = node.localName === 'input' || node.localName === 'textarea'
+        const input = node.localName === 'input'
+        const control = input || node.localName === 'textarea'
         if (!control && !(node as HTMLElement).isContentEditable) return `<${node.localName}>`
+        if (input) {
+          const type = (node as HTMLInputElement).type.toLowerCase()
+          // Typed into, or set as a value: the types Playwright's fill takes.
+          const fillable =
+            /^(?:|email|number|password|search|tel|text|url|color|date|time|datetime|datetime-local|month|range|week)$/
+          if (!fillable.test(type)) return `<input type="${type}">`
+        }
         if (control && node.matches(':disabled')) return 'disabled'
+        if (node.getAttribute('aria-disabled') === 'true') return 'disabled'
         if (control && (node as HTMLInputElement).readOnly) return 'readonly'
         return 'ok'
       })
@@ -286,4 +309,9 @@ declare const harnessedTarget: TargetDependency
 /** The current top-level URL, without needing the resolver. */
 export function currentHref(): string {
   return window.location.href
+}
+
+/** The browser's platform, which decides what `ControlOrMeta` presses. */
+export function browserPlatform(): string {
+  return window.navigator.platform
 }
