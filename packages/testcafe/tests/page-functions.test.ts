@@ -1,8 +1,13 @@
+import type { PageApiOptions } from '@harnessed-ts/resolve/inject'
 import { afterEach, describe, expect, it } from 'vitest'
 import { pageCall } from '../src/page-functions'
 import type { PageResult } from '../src/page-functions'
 
 const NAME = '__harnessedTest'
+
+// What the driver sends with every call. A `now` lookup answers at once, so the
+// timeout is never waited on.
+const OPTIONS: PageApiOptions = { testIdAttribute: 'data-testid', timeout: 0 }
 
 /** A window holding a resolver whose `oneNow` fails as given, as the page would. */
 function installResolver(oneNow: () => never): void {
@@ -13,7 +18,16 @@ function installResolver(oneNow: () => never): void {
 }
 
 function ask(op: 'visible' | 'hidden'): PageResult {
-  return pageCall(NAME, null, op, [], { by: 'testId', id: 'card' }, {}, null, 'now') as PageResult
+  return pageCall(
+    NAME,
+    null,
+    op,
+    [],
+    { by: 'testId', id: 'card' },
+    OPTIONS,
+    null,
+    'now',
+  ) as PageResult
 }
 
 afterEach(() => {
