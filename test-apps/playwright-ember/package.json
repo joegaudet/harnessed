@@ -11,7 +11,7 @@
     "@harnessed-ts/conformance": "workspace:^",
     "@harnessed-ts/playwright": "workspace:^",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.3",
     "test-app-ember-vite": "workspace:*",
     "typescript": "^6.0.3"
   }
