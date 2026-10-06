@@ -8,8 +8,8 @@ import {
   countIn,
   disposeAll,
   enterFrames,
+  isAbsence,
   isNavigationError,
-  isNotFound,
   isResolverOutcome,
   oneIn,
   POLL_MS,
@@ -134,7 +134,14 @@ export class PuppeteerQuery extends Query {
 
   /** Whether the target is visible now. Absent is not visible; ambiguity still throws. */
   private async visibleNow(timeout: number): Promise<boolean> {
-    const target = await this.resolve('now', timeout)
+    let target: Target | null
+    try {
+      target = await this.resolve('now', timeout)
+    } catch (error) {
+      // An index past the last match names nothing, as an absent target does.
+      if (!isAbsence(error)) throw error
+      return false
+    }
     if (target === null) return false
     try {
       return await this.visible(target)
@@ -300,9 +307,9 @@ export class PuppeteerQuery extends Query {
     } catch (error) {
       // Only the resolver's own "nothing there" is an answer. A broken
       // connection, an ambiguous match or a frame that cannot be entered is not.
-      if (!isNotFound(error)) throw error
-      // Not on screen at all. Prefer isAbsent() to ask this — it answers without
-      // first waiting out the retry timeout.
+      if (!isAbsence(error)) throw error
+      // Not on screen at all, or an index past the last match. Prefer isAbsent()
+      // to ask this — it answers without first waiting out the retry timeout.
       return false
     }
     try {

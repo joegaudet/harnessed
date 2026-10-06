@@ -133,7 +133,8 @@ outside the testing container are reachable. This mirrors how `dom` treats
   to the resolved **element**, never to a string selector, so strictness and scope are
   ours.
 - Every action ends at `settled()`.
-- `waitFor` uses `waitUntil` with the configured timeout.
+- `waitFor('visible')` and `waitFor('hidden')` retry within the configured timeout, and end at
+  once on a strict violation or a frame that cannot be entered.
 - `count()` does not wait, which keeps guarantee 1.
 
 **Navigation.** `registerNavigation('ember', { goto: visit, currentUrl: currentURL, waitForUrl })`

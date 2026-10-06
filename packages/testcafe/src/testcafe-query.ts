@@ -359,9 +359,8 @@ export class TestCafeQuery extends Query {
   override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
     const timeout = timeoutFor(options?.timeout)
     const deadline = Date.now() + timeout
-    const op: PageOp = state === 'visible' ? 'visible' : 'hidden'
     for (;;) {
-      if (await this.read<boolean>(op, { timeout })) return
+      if (await this.read<boolean>(state, { timeout })) return
       if (Date.now() >= deadline) {
         throw new Error(`harnessed: ${this.described} did not become ${state} within ${timeout}ms.`)
       }

@@ -140,7 +140,7 @@ export class PlaywrightQuery extends Query {
   // --- waiting ------------------------------------------------------------
 
   override async waitFor(state: WaitState, options?: WaitOptions): Promise<void> {
-    await this.locator.waitFor({ state, timeout: timeoutFor(options?.timeout) })
+    await this.act(l => l.waitFor({ state, timeout: timeoutFor(options?.timeout) }))
   }
 
   override async count(): Promise<number> {

@@ -1,3 +1,5 @@
+import { reviveStrictViolation } from '@harnessed-ts/core'
+
 /** A TestCafe error is a plain object; `errMsg` is the page's own error, stringified. */
 interface TestCafeError {
   code?: string
@@ -39,7 +41,8 @@ export function messageOf(error: unknown): string {
  * TestCafe rejects with plain objects. The specs, the page package and any
  * `catch` in a test expect an `Error` whose message is the cause — for an error
  * thrown in the page that is the resolver's own wording, so a strict-mode
- * violation reads the same here as under every other driver.
+ * violation reads the same here as under every other driver, and comes back as
+ * core's `StrictModeViolation`.
  *
  * `context` says what was being attempted, as a verb phrase: `act on testId(x)`.
  */
@@ -47,7 +50,9 @@ export function toError(error: unknown, context?: string): Error {
   if (error instanceof Error) return error
   const { code, errMsg, errStack, reason } = (error ?? {}) as TestCafeError
   if (typeof errMsg === 'string') {
-    return new Error(errMsg.replace(/^[A-Za-z]*Error: /, ''), { cause: error })
+    return reviveStrictViolation(
+      new Error(errMsg.replace(/^[A-Za-z]*Error: /, ''), { cause: error }),
+    )
   }
   // Anything else is TestCafe's own failure, which it renders from a code; say
   // what the code means, and keep the code and the original object so its

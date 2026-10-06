@@ -1,3 +1,4 @@
+import { StrictModeViolation } from '@harnessed-ts/core'
 import { describe, expect, it } from 'vitest'
 import { messageOf, toError } from '../src/errors'
 
@@ -12,6 +13,16 @@ describe('toError', () => {
     const error = toError(raised)
     expect(error.message).toBe('harnessed: strict mode violation — 2 nodes match')
     expect(error.cause).toBe(raised)
+  })
+
+  it("hands back the page's strict-mode violation as core's own class, in the shared wording", () => {
+    const raised = {
+      code: 'E4',
+      errMsg: 'StrictModeViolation: harnessed: strict mode violation — 2 nodes match',
+    }
+    const error = toError(raised)
+    expect(error).toBeInstanceOf(StrictModeViolation)
+    expect(error.message).toBe('harnessed: strict mode violation — 2 nodes match')
   })
 
   it.each([

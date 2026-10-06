@@ -1,4 +1,10 @@
-import { describeScope, describeSelector, getConfig, timeoutFor } from '@harnessed-ts/core'
+import {
+  describeScope,
+  describeSelector,
+  getConfig,
+  reviveStrictViolation,
+  timeoutFor,
+} from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
 import { encodeSelector, injectSource, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import type { PageApi, PageApiOptions, WireSelector } from '@harnessed-ts/resolve/inject'
@@ -74,6 +80,19 @@ export function isNavigationError(error: unknown): boolean {
  */
 export function isNotFound(error: unknown): boolean {
   return error instanceof Error && error.message.startsWith('Unable to find')
+}
+
+/**
+ * Whether a lookup's error is the resolver saying the target is not there:
+ * nothing matched after waiting, or an `nth()` past the last match. A yes/no
+ * question answers either with `false`. Ambiguity, a frame that cannot be
+ * entered and a broken connection are not answers.
+ */
+export function isAbsence(error: unknown): boolean {
+  return (
+    isNotFound(error) ||
+    (error instanceof Error && /^harnessed: index \d+ is out of range/.test(error.message))
+  )
 }
 
 /**
@@ -214,7 +233,7 @@ export async function oneIn(
       ),
     )
   } catch (error) {
-    throw restate(error, prefix, scope, selector)
+    throw restate(reviveStrictViolation(error), prefix, scope, selector)
   }
   const element = handle.asElement()
   if (element === null) await handle.dispose()
@@ -240,7 +259,7 @@ export async function countIn(
       ),
     )
   } catch (error) {
-    throw restate(error, prefix, scope, selector)
+    throw restate(reviveStrictViolation(error), prefix, scope, selector)
   }
 }
 

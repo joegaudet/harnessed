@@ -4,6 +4,7 @@ import {
   checkedFrom,
   describeScope,
   enabledFrom,
+  StrictModeViolation,
   strictViolation,
   timeoutFor,
 } from '@harnessed-ts/core'
@@ -72,9 +73,16 @@ function optionValues(
   })
 }
 
-/** An error from the page about the scope, rather than a refusal or a WebDriver failure. */
+/**
+ * An error from the page about the scope — not there, or not one node — rather
+ * than a refusal or a WebDriver failure.
+ */
 function isScopeMiss(error: unknown): boolean {
-  return error instanceof FrameAbsent || (error instanceof PageError && !isFrameEntryError(error))
+  return (
+    error instanceof FrameAbsent ||
+    error instanceof StrictModeViolation ||
+    (error instanceof PageError && !isFrameEntryError(error))
+  )
 }
 
 /**

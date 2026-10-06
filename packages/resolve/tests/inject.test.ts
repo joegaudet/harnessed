@@ -1,4 +1,10 @@
 import { readFileSync } from 'node:fs'
+import {
+  reviveStrictViolation,
+  StrictModeViolation,
+  strictViolation,
+  testId,
+} from '@harnessed-ts/core'
 import { JSDOM } from 'jsdom'
 import { describe, expect, it } from 'vitest'
 import type { PageApi } from '../src/page-api'
@@ -64,6 +70,21 @@ describe('the injectable build', () => {
     expect(() =>
       api.oneNow(null, [], { type: 'role', role: 'button', options: { name: 'Go' } }, options),
     ).toThrow(/strict mode violation/)
+  })
+
+  it("raises core's StrictModeViolation, recognised from another realm by its brand", () => {
+    const { api } = page('<p data-testid="card">a</p><p data-testid="card">b</p>')
+    let raised: unknown
+    try {
+      api.oneNow(null, [], { type: 'testId', testId: 'card' }, options)
+    } catch (error) {
+      raised = error
+    }
+    // A realm in this engine shares the brand; only a wire loses it, which is
+    // what reviveStrictViolation is for — and it leaves this one as it is.
+    expect(raised).toBeInstanceOf(StrictModeViolation)
+    expect(reviveStrictViolation(raised)).toBe(raised)
+    expect((raised as Error).message).toBe(strictViolation(2, [], testId('card')).message)
   })
 
   it('answers absence at once: count is 0 and oneNow is null', async () => {

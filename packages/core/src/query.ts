@@ -7,6 +7,15 @@ export interface WaitOptions {
   timeout?: number
 }
 
+/**
+ * What `waitFor()` can wait for. A state belongs here only if every driver can
+ * honour it with the same meaning, and the conformance catalog pins it under all
+ * of them. A runner's own states — Playwright's `attached` and `detached`, say —
+ * stay out: a harness written against one driver must mean the same under the next.
+ *
+ * - `visible`: the target is on screen and visible.
+ * - `hidden`: the target is hidden or gone — absent counts as hidden.
+ */
 export type WaitState = 'visible' | 'hidden'
 
 /**
@@ -47,6 +56,10 @@ export abstract class Query {
   abstract selectedOptions(options?: WaitOptions): Promise<string[]>
 
   // --- waiting ------------------------------------------------------------
+  /**
+   * Resolves once the target reaches `state`. Rejects at once on a target matching
+   * several nodes, and otherwise when the timeout runs out.
+   */
   abstract waitFor(state: WaitState, options?: WaitOptions): Promise<void>
 
   /**

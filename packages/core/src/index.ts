@@ -13,7 +13,15 @@ export {
 } from './decorators'
 export type { ElementOptions } from './decorators'
 export type { EnvConfig } from './env'
-export { checkedFrom, emptySet, enabledFrom, indexOutOfRange, strictViolation } from './errors'
+export {
+  checkedFrom,
+  emptySet,
+  enabledFrom,
+  indexOutOfRange,
+  reviveStrictViolation,
+  StrictModeViolation,
+  strictViolation,
+} from './errors'
 export type { HarnessHost } from './harness-host'
 export { findHostMeta, requireHostMeta } from './host-meta'
 export type { HarnessOptions } from './host-meta'

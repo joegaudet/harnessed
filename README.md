@@ -256,8 +256,16 @@ agreement is the whole reason the abstraction exists.
 1. **Absence answers immediately.** `count()` and `isAbsent()` on something that is
    not on screen return straight away. They never wait out a timeout and never
    throw.
-2. **Single-target operations are strict.** More than one match is an error naming
-   the selector, raised at once — never a silent pick of the first.
+2. **Single-target operations are strict.** More than one match is a
+   `StrictModeViolation` naming the selector, raised at once — never a silent pick
+   of the first. That holds for questions and waits too: `isVisible()`,
+   `waitFor('visible')` and `waitFor('hidden')` on duplicates reject with the same
+   violation rather than answering `false` or waiting out the timeout. It is core's
+   class, in the same wording, under every driver — those that resolve inside a
+   remote page included — so `instanceof StrictModeViolation` tells ambiguity
+   apart from absence. An `nth()` past the last match is not ambiguous: there
+   `isVisible()` answers `false` and `waitFor('hidden')` resolves, as for an absent
+   target.
 3. **`role` selectors honour `level`.** `@ByRole('heading', { level: 1 })` picks the
    `h1` on a screen that also has an `h2`.
 4. **`elementBy()` keeps the harness's scope.** A selector computed at call time is
@@ -349,7 +357,14 @@ its component has rendered.
 | Waiting      | `waitFor(state, { timeout })`                                                          |
 | Lists        | `count` `isAbsent` `nth` `first` `last` `each` `map` `filter` `texts`                  |
 
-Every method takes an optional `{ timeout }`.
+Every method takes an optional `{ timeout }`. `waitFor('visible')` resolves once
+the target is on screen and visible; `waitFor('hidden')` once it is hidden or gone —
+absent counts as hidden. Both reject at once on a target that matches more than
+one node (guarantee 2) or sits behind a frame that cannot be entered, since
+neither changes by waiting, and otherwise when the timeout runs out. Those two are the
+only states: a state joins `WaitState` only when every driver honours it with the
+same meaning, so a runner's own (Playwright's `attached`, say) never leaks into a
+harness.
 
 ### `ComponentHarness`
 
@@ -1169,7 +1184,9 @@ Resolving selectors is the part most likely to drift. If your driver can run
 JavaScript in the page, use [`@harnessed-ts/resolve`](packages/resolve/README.md)
 rather than writing your own: it is what the Testing Library driver uses, so role,
 label, strictness and frame semantics come out identical. A driver that resolves
-from Node injects its self-contained build (`@harnessed-ts/resolve/inject`).
+from Node injects its self-contained build (`@harnessed-ts/resolve/inject`), and
+passes what the page throws through core's `reviveStrictViolation()`: a class
+does not survive the trip back, and that restores `StrictModeViolation`.
 
 If your driver can navigate, register that too and a page's `goto()` works
 against it unchanged:
