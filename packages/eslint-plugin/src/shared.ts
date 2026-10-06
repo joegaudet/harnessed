@@ -4,12 +4,27 @@ import type { Rule } from 'eslint'
 export interface HarnessRuleOptions {
   /** Directories treated as harness sources. Defaults to `['harness']`. */
   harnessDirs?: string[]
-  /** Directories treated as test sources. Defaults to `['tests', 'e2e', '__tests__']`. */
+  /**
+   * Directories treated as test sources. Defaults to
+   * `['tests', 'test', 'e2e', 'cypress', '__tests__']`.
+   */
   testDirs?: string[]
 }
 
 const DEFAULT_HARNESS_DIRS = ['harness']
-const DEFAULT_TEST_DIRS = ['tests', 'e2e', '__tests__']
+// The runners' own conventions: `tests/` (Ember, Vitest), `test/` (WebdriverIO,
+// TestCafe), `cypress/` and `e2e/` (Cypress, Playwright).
+const DEFAULT_TEST_DIRS = ['tests', 'test', 'e2e', 'cypress', '__tests__']
+
+/**
+ * Runner plumbing that lives under a test directory but is not a test: Cypress
+ * support files register custom commands, which may query the DOM themselves.
+ */
+const RUNNER_SUPPORT_DIRS = ['cypress/support']
+
+export function isRunnerSupportFile(filename: string): boolean {
+  return inAnyDir(filename, RUNNER_SUPPORT_DIRS)
+}
 
 function normalise(filename: string): string {
   return filename.replaceAll('\\', '/')
