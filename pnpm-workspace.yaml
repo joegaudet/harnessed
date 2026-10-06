@@ -51,7 +51,9 @@ minimumReleaseAgeExclude:
 overrides:
   # 13.3.0 is younger than the minimum release age, and the Cypress preprocessor
   # asks for ^13 — it would resolve there and fail the frozen install. Lift the
-  # pin once 13.3 is old enough to pass the policy.
+  # pin once 13.3 is old enough to pass the policy, and lift all three copies
+  # together: this override and the `~13.2.1` devDependency in both
+  # packages/gherkin/package.json and test-apps/gherkin-cucumber/package.json.
   '@cucumber/cucumber': ~13.2.1
   # ember-cli-yadda 0.7 (its last release, 2022) depends on ember-cli-htmlbars 5,
   # which finds the template compiler through an ember-source path Ember 7 no
