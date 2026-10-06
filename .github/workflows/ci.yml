@@ -52,7 +52,10 @@ jobs:
       - run: pnpm typecheck:packages
 
   rules:
-    name: eslint rules and package unit tests
+    # Branch protection on main requires a check by this exact name; the job
+    # also runs the package unit tests, but renaming it would leave that
+    # required check unreported and every PR into main blocked.
+    name: eslint rule tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
