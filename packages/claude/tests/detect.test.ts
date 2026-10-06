@@ -4,6 +4,7 @@ import {
   detectGherkinAdapters,
   detectRunners,
   parseRunners,
+  toRunners,
 } from '../src/detect'
 import { pkg, removeRepos, repo } from './repo'
 
@@ -74,6 +75,19 @@ describe('detectRunners: monorepos', () => {
     expect(detectRunners(root)).toEqual(['cypress', 'puppeteer'])
   })
 
+  it('reads a pnpm-workspace.yaml whose list items start at column 0', () => {
+    const root = repo({
+      'package.json': pkg({ prettier: '^3.0.0' }),
+      'pnpm-workspace.yaml':
+        "packages:\n- 'apps/*'\n- tools/e2e # the e2e suite\n- '!apps/legacy'\nonlyBuiltDependencies:\n- esbuild\n",
+      'apps/web/package.json': pkg({ cypress: '^16.0.0' }),
+      'apps/legacy/package.json': pkg({ testcafe: '^3.0.0' }),
+      'tools/e2e/package.json': pkg({ puppeteer: '^25.0.0' }),
+      'esbuild/package.json': pkg({ playwright: '^1.0.0' }),
+    })
+    expect(detectRunners(root)).toEqual(['cypress', 'puppeteer'])
+  })
+
   it('without a workspace config, scans packages one and two levels down', () => {
     const root = repo({
       'package.json': pkg({ prettier: '^3.0.0' }),
@@ -114,6 +128,11 @@ describe('parseRunners', () => {
   it('names an unknown runner and lists the known ones', () => {
     expect(() => parseRunners('ember,mocha')).toThrow(/unknown runner "mocha".*known: ember,/)
   })
+
+  it('names each runner once, however often it is given', () => {
+    expect(parseRunners('ember,ember, cypress,ember')).toEqual(['ember', 'cypress'])
+    expect(toRunners(['cypress', 'cypress'])).toEqual(['cypress'])
+  })
 })
 
 describe('detectGherkinAdapters', () => {
@@ -136,16 +155,37 @@ describe('detectGherkinAdapters', () => {
 })
 
 describe('detectEmberUnderVitest', () => {
-  it('is true when the repo has vitest or ember-vitest', () => {
-    expect(detectEmberUnderVitest(repo({ 'package.json': pkg({ 'ember-vitest': '*' }) }))).toBe(
-      true,
-    )
-    expect(detectEmberUnderVitest(repo({ 'package.json': pkg({ vitest: '*' }) }))).toBe(true)
+  it('is true when an Ember package has vitest or ember-vitest', () => {
+    const withVitest = (runner: string) =>
+      repo({ 'package.json': pkg({ 'ember-source': '*', [runner]: '*' }) })
+    expect(detectEmberUnderVitest(withVitest('ember-vitest'))).toBe(true)
+    expect(detectEmberUnderVitest(withVitest('vitest'))).toBe(true)
   })
 
   it('is false for a QUnit-only repo', () => {
-    expect(detectEmberUnderVitest(repo({ 'package.json': pkg({ 'ember-qunit': '*' }) }))).toBe(
-      false,
-    )
+    expect(
+      detectEmberUnderVitest(
+        repo({ 'package.json': pkg({ 'ember-source': '*', 'ember-qunit': '*' }) }),
+      ),
+    ).toBe(false)
+  })
+
+  it('is false for vitest with no Ember beside it', () => {
+    expect(detectEmberUnderVitest(repo({ 'package.json': pkg({ vitest: '*' }) }))).toBe(false)
+  })
+
+  it('needs Ember and Vitest in the same package of a monorepo', () => {
+    const files = {
+      'package.json': pkg({ prettier: '^3.0.0' }),
+      'pnpm-workspace.yaml': "packages:\n  - 'apps/*'\n  - 'packages/*'\n",
+      'apps/web/package.json': pkg({ 'ember-source': '*', 'ember-qunit': '*' }),
+      'packages/utils/package.json': pkg({ vitest: '*' }),
+    }
+    expect(detectEmberUnderVitest(repo(files))).toBe(false)
+    expect(
+      detectEmberUnderVitest(
+        repo({ ...files, 'apps/web/package.json': pkg({ 'ember-source': '*', vitest: '*' }) }),
+      ),
+    ).toBe(true)
   })
 })

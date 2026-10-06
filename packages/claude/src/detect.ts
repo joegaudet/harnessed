@@ -141,12 +141,14 @@ export function toRunners(values: unknown): Runner[] {
       `harnessed: runners must be a list, got ${JSON.stringify(values)} (known: ${RUNNERS.join(', ')})`,
     )
   }
-  return values.map((value: unknown) => {
+  const runners = values.map((value: unknown) => {
     if (isRunner(value)) return value
     throw new Error(
       `harnessed: unknown runner ${JSON.stringify(value)} (known: ${RUNNERS.join(', ')})`,
     )
   })
+  // `ember,ember` is one runner: each is documented once.
+  return [...new Set(runners)]
 }
 
 /** `ember, cypress` → `['ember', 'cypress']`; an empty list is no runners. */
@@ -256,7 +258,8 @@ function pnpmWorkspaceGlobs(root: string): string[] | undefined {
       continue
     }
     if (!inPackages || line.trim() === '' || line.trim().startsWith('#')) continue
-    const item = /^\s+-\s*(.+?)\s*$/.exec(line)
+    // An item may sit at column 0 as well as indented: YAML allows both.
+    const item = /^\s*-\s*(.+?)\s*$/.exec(line)
     if (item === null) {
       // The next top-level key ends the list.
       if (/^\S/.test(line)) inPackages = false
@@ -347,7 +350,10 @@ function packageDirs(root: string, manifest: Record<string, unknown> | undefined
 }
 
 interface RepoEvidence {
+  /** Every package's dependencies, merged. */
   dependencies: Set<string>
+  /** Each package directory's own dependencies, root included. */
+  packages: Set<string>[]
   /** Whether any of the repo's package directories holds this file. */
   hasFile(name: string): boolean
 }
@@ -355,11 +361,12 @@ interface RepoEvidence {
 function evidence(root: string): RepoEvidence {
   const rootManifest = readManifest(root)
   const dirs = packageDirs(root, rootManifest)
-  const dependencies = new Set(
-    dirs.flatMap(dir => dependencyNames(dir === root ? rootManifest : readManifest(dir))),
+  const packages = dirs.map(
+    dir => new Set(dependencyNames(dir === root ? rootManifest : readManifest(dir))),
   )
   return {
-    dependencies,
+    dependencies: new Set(packages.flatMap(deps => [...deps])),
+    packages,
     hasFile: name => dirs.some(dir => existsSync(join(dir, name))),
   }
 }
@@ -384,8 +391,13 @@ export function detectGherkinAdapters(root: string): GherkinAdapter[] {
   return GHERKIN_ADAPTERS.filter(adapter => dependencies.has(GHERKIN_SIGNALS[adapter]))
 }
 
-/** Whether Ember tests here may run under Vitest (`ember-vitest`) rather than QUnit alone. */
+/**
+ * Whether Ember tests here may run under Vitest (`ember-vitest`) rather than
+ * QUnit alone: some one package depends on both `ember-source` and Vitest. A
+ * QUnit-only Ember app beside a Vitest utils package is not that.
+ */
 export function detectEmberUnderVitest(root: string): boolean {
-  const { dependencies } = evidence(root)
-  return dependencies.has('ember-vitest') || dependencies.has('vitest')
+  return evidence(root).packages.some(
+    deps => deps.has('ember-source') && (deps.has('ember-vitest') || deps.has('vitest')),
+  )
 }
