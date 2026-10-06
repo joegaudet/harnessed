@@ -43,14 +43,23 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The runners import the built packages, never their sources.
       - run: pnpm build
-      # Inputs are interpolated into the shell. Only caller workflows in this
-      # repository supply them, so that is no wider than editing a workflow.
+      # The commands reach the shell through the environment, never through
+      # expression interpolation, so an input is only ever data to this script
+      # and cannot rewrite it. `bash -e` matches the default `run:` shell, so a
+      # multi-line command still stops at its first failing line.
       - if: inputs.setup != ''
-        run: ${{ inputs.setup }}
-      - run: ${{ inputs.test }}
+        env:
+          SETUP: ${{ inputs.setup }}
+        run: bash -e -c "$SETUP"
+      - env:
+          TEST: ${{ inputs.test }}
+        run: bash -e -c "$TEST"
       - uses: actions/upload-artifact@v7
         if: failure() && inputs.artifacts != ''
         with:
           name: conformance-${{ inputs.name }}
           path: ${{ inputs.artifacts }}
+          # upload-artifact >= 4.4 drops dotfiles and dot-directories, and
+          # vitest-browser writes its failure screenshots under .vitest/.
+          include-hidden-files: true
           retention-days: 7

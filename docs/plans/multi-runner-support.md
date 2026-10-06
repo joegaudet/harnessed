@@ -336,8 +336,20 @@ one document.
   unfinished drivers.
 - Each PR still adds its changeset.
 - Merging `next` into `main` produces one Version Packages PR, which releases 0.4.0.
-- `bootstrap-publish.yml` handles first-time publication of each **new** package name
-  under OIDC, before the release run.
+- `bootstrap-publish.yml` handles first-time publication of each **new** package name,
+  which OIDC cannot do (npm has no trusted publisher for a name that does not exist
+  yet), with a short-lived `NPM_TOKEN`:
+  - Dispatch it on the Version Packages branch, `changeset-release/main`, before merging
+    the version PR. There every package is already at 0.4.0, so each new name's first
+    published version is 0.4.0. Dispatched from `main`, it would publish 0.3.0 with
+    `workspace:^` resolved to the old core, and that version can never be reused. The
+    run publishes the whole 0.4.0 set, so push the `v0.4.0` tag by hand afterwards;
+    the release run will find nothing left to publish.
+  - Keep `NPM_TOKEN` in the `npm-bootstrap` GitHub Environment, with required reviewers
+    and deployment branches limited to `main` and `changeset-release/*`, not as a
+    repository secret. The workflow refuses any other branch on its own as well.
+  - Afterwards, configure each package's trusted publisher (`release.yml`), revoke the
+    token on npmjs.com and delete it from the environment, then delete the workflow.
 
 ## CI shape
 
