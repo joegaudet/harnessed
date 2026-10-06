@@ -1,0 +1,14 @@
+name: conformance-testcafe
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: testcafe
+      # ubuntu-latest ships Google Chrome, which `chrome:headless` launches.
+      test: pnpm --filter test-app-testcafe test
