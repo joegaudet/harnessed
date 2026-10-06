@@ -28,6 +28,9 @@ const ELEMENT_TYPES = new Set([
   'WebElement',
   'Chainable',
   'JQuery',
+  // WebdriverIO's $() and $$()
+  'ChainablePromiseElement',
+  'ChainablePromiseArray',
 ])
 
 /** `HTMLInputElement`, `SVGPathElement`, and the rest of the DOM's element types. */

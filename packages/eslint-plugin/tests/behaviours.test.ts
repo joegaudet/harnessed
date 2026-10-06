@@ -112,6 +112,18 @@ describe('no-runner-import-in-harness', () => {
         '@harnessed-ts/dom',
         '@harnessed-ts/playwright',
         '@harnessed-ts/playwright/bdd',
+        // Every runner the claude installer detects, and the helpers they bring.
+        '@wdio/globals',
+        'vitest/browser',
+        '@vitest/browser/context',
+        'jest-puppeteer',
+        'ember-qunit',
+        'qunit-dom',
+        'playwright-bdd',
+        '@cucumber/cucumber',
+        '@badeball/cypress-cucumber-preprocessor',
+        'ember-cli-yadda',
+        'yadda',
       ].map(source => ({
         name: `an import from ${source}`,
         filename: HARNESS,
@@ -386,6 +398,9 @@ describe('harness-public-surface', () => {
         'Promise<Locator | null>',
         'Cypress.Chainable<JQuery>',
         'Selector',
+        // WebdriverIO's $() and $$()
+        'ChainablePromiseElement',
+        'ChainablePromiseArray',
       ].map(type => ({
         name: `a public return type of ${type}`,
         filename: HARNESS,

@@ -360,9 +360,17 @@ export const RUNNER_MODULES = [
   'jest-*',
   '@jest/*',
   '@ember/test-helpers',
+  'ember-qunit',
   'qunit',
+  'qunit-*',
   'chai',
   'chai-*',
+  // The Gherkin runners: playwright-bdd, cucumber-js, Cypress cucumber, Yadda.
+  'playwright-bdd',
+  '@cucumber/*',
+  '@badeball/cypress-cucumber-preprocessor',
+  'ember-cli-yadda',
+  'yadda',
 ]
 
 /** The harness API. Everything else under `@harnessed-ts/` is a driver or tooling. */

@@ -83,7 +83,7 @@ function collectImports(program: Rule.Node): Imports {
  * References to `name` as a global the file never declares: unresolved, or
  * resolved to a global from the lint config (which has no definition).
  */
-function globalReferences(globalScope: Scope.Scope, name: string): Scope.Reference[] {
+export function globalReferences(globalScope: Scope.Scope, name: string): Scope.Reference[] {
   const declared = globalScope.set.get(name)
   if (declared !== undefined) return declared.defs.length === 0 ? declared.references : []
   return globalScope.through.filter(reference => reference.identifier.name === name)

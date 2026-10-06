@@ -1,4 +1,5 @@
 import type { Rule, Scope } from 'eslint'
+import { globalReferences } from '../runner-queries'
 import {
   dirOptionSchema,
   enclosingClass,
@@ -138,21 +139,14 @@ const rule: Rule.RuleModule = {
       // definition in the file.
       'Program:exit'(node) {
         const globalScope = context.sourceCode.getScope(node)
-        const seen = new Set<unknown>()
-        const watched = (name: string) => RUNNER_GLOBALS.has(name) || name === 'globalThis'
-        const declared = globalScope.variables
-          .filter(variable => variable.defs.length === 0 && watched(variable.name))
-          .flatMap(variable => variable.references)
-        for (const reference of [...globalScope.through, ...declared]) {
-          const { identifier } = reference
-          if (!watched(identifier.name) || seen.has(identifier)) continue
-          seen.add(identifier)
-          if (identifier.name === 'globalThis') {
-            const property = throughGlobalThis(reference)
-            if (property !== undefined) reportGlobal(property.node, property.name)
-          } else {
-            reportGlobal(identifier as Rule.Node, identifier.name)
+        for (const name of RUNNER_GLOBALS) {
+          for (const { identifier } of globalReferences(globalScope, name)) {
+            reportGlobal(identifier as Rule.Node, name)
           }
+        }
+        for (const reference of globalReferences(globalScope, 'globalThis')) {
+          const property = throughGlobalThis(reference)
+          if (property !== undefined) reportGlobal(property.node, property.name)
         }
       },
     }
