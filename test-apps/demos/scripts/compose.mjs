@@ -6,10 +6,12 @@ import { mkdirSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { chromium } from '@playwright/test'
+import { CYPRESS_WINDOW, MARK_PX, VIEWPORT } from '../src/constants.mjs'
 
 const APP = new URL('..', import.meta.url)
 const REPO = new URL('../../', APP)
-const FPS = 10
+/** The GIF's frame rate. */
+export const FPS = 10
 /** Footage kept before the first step, and after the demo resolves. */
 const LEAD_MS = 600
 const HOLD_MS = 1600
@@ -23,12 +25,6 @@ const LOOKAHEAD_MS = 50
 const PAGE = { width: 960, height: 540 }
 /** The footage box in compose/index.html, less a margin. */
 const BOX = { width: 536, height: 422 }
-/** The app's viewport in every run (src/timeline.ts VIEWPORT). */
-const VIEWPORT = { width: 520, height: 400 }
-/** The Cypress runner's window (cypress.config.ts WINDOW). */
-const CYPRESS_WINDOW = { width: 1000, height: 750 }
-/** The sync mark's corner (cypress/e2e/demo.cy.ts), cropped off the bottom. */
-const MARK_PX = 24
 
 export const ENVIRONMENTS = {
   rtl: {
@@ -107,7 +103,7 @@ function extractFrames(env, footage, from, to) {
   const filters = [`fps=${FPS}`]
   let size = VIEWPORT
   if (env.startsWith('cypress')) {
-    // The whole runner, command log and app, less the sync mark's strip.
+    // The whole runner, command log and app, less the sync mark's strip at the bottom.
     const scale = width / CYPRESS_WINDOW.width
     const cropHeight = Math.round(height - MARK_PX * scale)
     filters.push(`crop=${width}:${cropHeight}:0:0`)

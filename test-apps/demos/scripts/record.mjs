@@ -3,27 +3,43 @@
 //   pnpm --filter test-app-demos record                  all five
 //   pnpm --filter test-app-demos record cypress-ember    just one (or record:<env>)
 //
-// Needs ffmpeg on PATH, Playwright's Chromium, and the Cypress app
-// (`pnpm --filter test-app-demos exec cypress install`). One run at a time.
+// Needs ffmpeg and ffprobe on PATH, Playwright's Chromium
+// (`pnpm --filter test-app-demos exec playwright install chromium`), the Cypress
+// binary (`pnpm --filter test-app-demos exec cypress install`), and the
+// packages built (`pnpm build` at the repo root). One run at a time.
+//
+// Recording all five also writes docs/media/demo.sha256, the hash of the
+// src/demo.ts the GIFs show; rtl/demo.test.ts fails once demo.ts moves on.
+// Recording some of them requires demo.ts to still match that hash.
 import { execFileSync, spawnSync } from 'node:child_process'
 import { readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import { compose, ENVIRONMENTS } from './compose.mjs'
+import { CYPRESS_WINDOW, MARK_COLORS, MARK_PX, PORTS } from '../src/constants.mjs'
+import { DEMO_HASH_FILE, demoHashLine, readDemoHash, writeDemoHash } from '../src/demo-hash.mjs'
+import { compose, ENVIRONMENTS, FPS as GIF_FPS } from './compose.mjs'
 
 const APP = new URL('..', import.meta.url)
-const PORTS = { react: 5271, ember: 5272 }
 /**
- * MARK_COLORS in src/timeline.ts, #00ff00 and #ff00ff, told apart by channel
- * rather than matched exactly: the video's colour management shifts both.
+ * MARK_COLORS, told apart by channel rather than matched exactly: the video's
+ * colour management shifts both.
  */
 const markOf = ([r, g, b]) => {
   if (g > 180 && r < 180 && b < 160) return 'a'
   if (r > 180 && b > 180 && g < 120) return 'b'
   return null
 }
-/** The sync mark's corner (cypress/e2e/demo.cy.ts) in CSS pixels, and how often it is read. */
-const MARK_PX = 24
+const rgbOf = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16))
+if (MARK_COLORS.map(color => markOf(rgbOf(color))).join() !== 'a,b') {
+  throw new Error(`markOf no longer tells MARK_COLORS (${MARK_COLORS.join(', ')}) apart`)
+}
+/** How often the sync mark is read. */
 const SAMPLE_FPS = 50
+/**
+ * The most the spec's clock and the footage's may disagree by: two of the GIF's
+ * frames. Past that, a step would light up in the code panel visibly off its
+ * footage. Recordings so far have measured 110-170 ms.
+ */
+const MAX_DRIFT_MS = (2 * 1000) / GIF_FPS
 
 function run(command, args) {
   const result = spawnSync(command, args, {
@@ -119,8 +135,8 @@ function syncToMarks(env) {
   const footage = fileURLToPath(new URL(`raw/${env}/footage.mp4`, APP))
   const timeline = readTimeline(env)
   const [width, height] = probeSize(footage)
-  // The runner is 1000 CSS pixels wide (cypress.config.ts), whatever the pixel ratio.
-  const scale = width / 1000
+  // The runner is CYPRESS_WINDOW.width CSS pixels wide, whatever the pixel ratio.
+  const scale = width / CYPRESS_WINDOW.width
   const side = Math.round((MARK_PX / 3) * scale)
   const samples = sampleRegion(footage, {
     width: side,
@@ -149,6 +165,12 @@ function syncToMarks(env) {
       Math.abs(step.at - timeline.steps[0].at - (flips[i] - flips[0])),
     ),
   )
+  if (drift > MAX_DRIFT_MS) {
+    throw new Error(
+      `${env}: the spec's clock and the footage disagree by ${drift} ms ` +
+        `(more than ${MAX_DRIFT_MS} ms, two GIF frames); record ${env} again`,
+    )
+  }
   console.log(`${env}: synced ${flips.length} steps to the footage (clock drift ≤ ${drift} ms)`)
   const lastStep = timeline.steps.at(-1).at
   timeline.end = flips.at(-1) + (timeline.end - lastStep)
@@ -192,8 +214,19 @@ for (const env of envs) {
     throw new Error(`unknown environment "${env}"; one of ${Object.keys(CAPTURE).join(', ')}`)
   }
 }
+const all = Object.keys(CAPTURE).every(env => envs.includes(env))
+if (!all && readDemoHash() !== demoHashLine()) {
+  throw new Error(
+    `src/demo.ts no longer matches ${DEMO_HASH_FILE}, so the other GIFs show old code: ` +
+      'record all five (`pnpm --filter test-app-demos record`)',
+  )
+}
 for (const env of envs) {
   rmSync(new URL(`raw/${env}/`, APP), { recursive: true, force: true })
   CAPTURE[env]()
   await compose(env)
+}
+if (all) {
+  writeDemoHash()
+  console.log(`src/demo.ts hash → ${DEMO_HASH_FILE}`)
 }

@@ -88,11 +88,11 @@ A harness queries the DOM, not a framework, so nothing in one is tied to React
 or Ember. What earns a ✓ here is a fixture written in that framework and a
 conformance run against it.
 
-| Framework                   | Status      | Covered by                                                                                                                                                                                                                  |
-| --------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React                       | ✓           | The conformance fixture, `packages/conformance/fixture`, is a React app. Every runner above except Ember's drives it.                                                                                                       |
-| Ember                       | ✓           | A Glimmer copy of that fixture in `test-apps/ember-vite` and `test-apps/ember-classic`, held to the React fixture's markup by a fixture-parity test. ember-qunit, ember-exam and Vitest browser run the catalog against it. |
-| Vue, Svelte, Angular, Solid | coming soon | Harnesses are framework-agnostic, but these have no fixture or conformance run yet.                                                                                                                                         |
+| Framework                   | Status      | Covered by                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React                       | ✓           | The conformance fixture, `packages/conformance/fixture`, is a React app. Every runner above except Ember's drives it.                                                                                                                                                                                                                              |
+| Ember                       | ✓           | A Glimmer copy of that fixture in `test-apps/ember-vite` and `test-apps/ember-classic`, held to the React fixture's markup by a fixture-parity test. ember-qunit, ember-exam and Vitest browser run the catalog against it, and Playwright and Cypress e2e run it against the built app (`test-apps/playwright-ember`, `test-apps/cypress-ember`). |
+| Vue, Svelte, Angular, Solid | coming soon | Harnesses are framework-agnostic, but these have no fixture or conformance run yet.                                                                                                                                                                                                                                                                |
 
 ## See it run
 
@@ -125,9 +125,19 @@ Cypress's own video. The command log lists each harness action.
 
 ![The demo under Cypress against the Ember app, beside demo.ts](docs/media/cypress-ember.gif)
 
-To regenerate the GIFs, run `pnpm --filter test-app-demos record` (it needs
-ffmpeg). CI runs the same demo under all five environments, without recording,
-so it cannot drift from the harnesses it shows.
+To regenerate the GIFs, run `pnpm --filter test-app-demos record`. It needs:
+
+- `ffmpeg` and `ffprobe` on `PATH`;
+- Playwright's Chromium: `pnpm --filter test-app-demos exec playwright install chromium`;
+- the Cypress binary: `pnpm --filter test-app-demos exec cypress install`;
+- the packages built: `pnpm build` at the repo root.
+
+CI runs the same demo under all five environments, without recording, so the
+demo keeps passing against the harnesses it shows. `record` also writes the hash
+of the `demo.ts` it recorded to `docs/media/demo.sha256`, and CI fails when
+`demo.ts` no longer matches it, so the code beside the footage is the code in
+the repo. A change to a harness or the fixture that leaves `demo.ts` alone still
+passes; re-record then if it changes what the footage shows.
 
 ## Install
 

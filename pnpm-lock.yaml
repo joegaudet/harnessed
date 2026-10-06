@@ -600,6 +600,12 @@ importers:
       start-server-and-test:
         specifier: ^3.0.12
         version: 3.0.12(supports-color@11.0.0)
+      test-app-cypress-e2e:
+        specifier: workspace:*
+        version: link:../cypress-e2e
+      test-app-ember-vite:
+        specifier: workspace:*
+        version: link:../ember-vite
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

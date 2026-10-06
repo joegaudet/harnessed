@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "serve:react": "FIXTURE_PORT=5271 pnpm --filter conformance serve:fixture",
-    "serve:ember": "pnpm --filter test-app-ember-vite exec vite --port 5272 --strictPort",
+    "serve:ember": "FIXTURE_PORT=5272 pnpm --filter test-app-ember-vite serve:fixture",
     "typecheck": "tsc -p .",
     "test": "pnpm typecheck && pnpm test:rtl && pnpm test:playwright && pnpm test:cypress",
     "test:rtl": "vitest run",
@@ -39,6 +39,8 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "start-server-and-test": "^3.0.12",
+    "test-app-cypress-e2e": "workspace:*",
+    "test-app-ember-vite": "workspace:*",
     "typescript": "^6.0.3",
     "vitest": "^5.0.0"
   }

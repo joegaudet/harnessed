@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 import { RECORDING } from './src/raw'
-import { EMBER_PORT, REACT_PORT, VIEWPORT } from './src/timeline'
+import { PORTS, VIEWPORT } from './src/constants.mjs'
 
 export default defineConfig({
   testDir: './playwright',
@@ -15,20 +15,20 @@ export default defineConfig({
     launchOptions: { slowMo: RECORDING ? 120 : 0 },
   },
   projects: [
-    { name: 'react', use: { baseURL: `http://localhost:${REACT_PORT}` } },
-    { name: 'ember', use: { baseURL: `http://localhost:${EMBER_PORT}` } },
+    { name: 'react', use: { baseURL: `http://localhost:${PORTS.react}` } },
+    { name: 'ember', use: { baseURL: `http://localhost:${PORTS.ember}` } },
   ],
   webServer: [
     {
       command: 'pnpm serve:react',
-      url: `http://localhost:${REACT_PORT}`,
+      url: `http://localhost:${PORTS.react}`,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
       stdout: 'ignore',
     },
     {
       command: 'pnpm serve:ember',
-      url: `http://localhost:${EMBER_PORT}`,
+      url: `http://localhost:${PORTS.ember}`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'ignore',

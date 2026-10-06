@@ -4,8 +4,9 @@ import { dom } from '@harnessed-ts/dom'
 import { cleanup, render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createElement } from 'react'
-import { afterEach, it } from 'vitest'
+import { afterEach, expect, it } from 'vitest'
 import { demo } from '../src/demo'
+import { DEMO_HASH_FILE, demoHashLine, readDemoHash } from '../src/demo-hash.mjs'
 import { RECORDING, writeJson } from '../src/raw'
 import { sleep, STEP_PAUSE_MS, stepper, TAIL_MS } from '../src/timeline'
 import type { Timeline } from '../src/timeline'
@@ -102,4 +103,15 @@ it('runs the demo under React Testing Library, in jsdom', { timeout: 60_000 }, a
     writeJson('rtl', 'timeline.json', timeline)
     writeJson('rtl', 'snapshots.json', film.snapshots)
   }
+})
+
+// The README's GIFs show demo.ts beside the footage. `record` writes the hash of
+// the demo.ts it recorded; a demo.ts that no longer matches it means the GIFs
+// show code that is not there any more.
+it('the GIFs were recorded from this demo.ts', () => {
+  expect(
+    readDemoHash(),
+    `src/demo.ts changed since the GIFs were recorded (${DEMO_HASH_FILE}): ` +
+      're-record them with `pnpm --filter test-app-demos record`',
+  ).toBe(demoHashLine())
 })

@@ -3,9 +3,10 @@ import { viewSearch } from '@harnessed-ts/conformance'
 import { pw } from '@harnessed-ts/playwright'
 import type { Page } from '@playwright/test'
 import { test } from '@playwright/test'
+import { VIEWPORT } from '../src/constants.mjs'
 import { demo } from '../src/demo'
 import { rawDir, RECORDING, writeJson } from '../src/raw'
-import { sleep, STEP_PAUSE_MS, stepper, TAIL_MS, VIEWPORT } from '../src/timeline'
+import { sleep, STEP_PAUSE_MS, stepper, TAIL_MS } from '../src/timeline'
 import type { EnvId, Timeline } from '../src/timeline'
 
 async function showView(page: Page, view: Parameters<typeof viewSearch>[0]) {
@@ -45,7 +46,9 @@ test('runs the demo under Playwright', async ({ browser, baseURL }, testInfo) =>
         // The video's first frame comes a little after the page opens, by an amount
         // that varies. The first paint is one moment both clocks can see: the
         // browser timestamps it, and it is the footage's first non-blank frame.
-        await page.waitForFunction(() => performance.getEntriesByType('paint').length > 0)
+        await page.waitForFunction(
+          () => performance.getEntriesByName('first-contentful-paint').length > 0,
+        )
         const paint = await page.evaluate(() => {
           const fcp = performance.getEntriesByName('first-contentful-paint')[0]
           return performance.timeOrigin + fcp!.startTime

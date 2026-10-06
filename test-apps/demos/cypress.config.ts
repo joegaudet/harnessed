@@ -1,9 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { defineConfig } from 'cypress'
+import { CYPRESS_WINDOW as WINDOW, VIEWPORT } from './src/constants.mjs'
 
 const RECORDING = process.env.DEMO_RECORD === '1'
-/** The runner's window: room for the command log and the app at full size, no more. */
-const WINDOW = { width: 1000, height: 750 }
 
 export default defineConfig({
   e2e: {
@@ -33,8 +32,8 @@ export default defineConfig({
   },
   expose: { DEMO_RECORD: RECORDING ? '1' : '' },
   // The same viewport as the Playwright runs and the RTL replay.
-  viewportWidth: 520,
-  viewportHeight: 400,
+  viewportWidth: VIEWPORT.width,
+  viewportHeight: VIEWPORT.height,
   video: RECORDING,
   videoCompression: false,
   videosFolder: 'raw/cypress-videos',

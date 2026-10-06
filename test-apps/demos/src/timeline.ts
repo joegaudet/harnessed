@@ -13,23 +13,10 @@ export const ENVS = [
 ] as const
 export type EnvId = (typeof ENVS)[number]
 
-/** Ports of the two servers the browser runs drive; no other app in the repo uses them. */
-export const REACT_PORT = 5271
-export const EMBER_PORT = 5272
-
-/** The app's viewport in every browser run, and the size the RTL replay renders at. */
-export const VIEWPORT = { width: 520, height: 400 }
-
 /** How long what each step left on screen is held before the next one runs. */
 export const STEP_PAUSE_MS = 1400
 /** How long the final state is held once the demo has finished. */
 export const TAIL_MS = 1800
-
-/**
- * The Cypress runs' sync mark: one colour per step, alternating, each held for at
- * least a step's pause. `scripts/record.mjs` tells exactly these two apart.
- */
-export const MARK_COLORS = ['#00ff00', '#ff00ff'] as const
 
 export interface StepMark {
   label: string
