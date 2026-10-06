@@ -1,6 +1,8 @@
 # harnessed
 
-One page-object API that runs under both Testing Library and Playwright.
+One page-object API that runs under every major JavaScript test runner: Testing
+Library, Playwright, Ember, Cypress, WebdriverIO, Vitest browser mode, Puppeteer
+and TestCafe, with Gherkin on top.
 
 A **harness** is a class that lets a test drive a component the way a person would,
 through methods named for what the component _does_. Tests state intent; the
@@ -55,23 +57,54 @@ Inspired by [Angular CDK Component Harnesses][cdk],
 - One harness serves every level of the pyramid — no second set of selectors for
   the browser suite that drifts out of step with the first.
 
+## Support matrix
+
+| Runner                                                 | Package          | Component harnesses    | Pages and `goto()`        | Assertions              | Gherkin                                            | Frames                           | Conformance in CI  |
+| ------------------------------------------------------ | ---------------- | ---------------------- | ------------------------- | ----------------------- | -------------------------------------------------- | -------------------------------- | ------------------ |
+| [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                      | constructs; no navigation | `expect` matchers       | —                                                  | same-origin                      | ✓                  |
+| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                         | `expect` matchers       | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓                  |
+| [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests      | ✓ application tests       | `assert.harness`        | [ember-cli-yadda](#ember-cli-yadda)                | same-origin                      | ✓                  |
+| [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                      | ✓ application tests       | Chai                    | —                                                  | same-origin                      | ✓                  |
+| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`          | Chai                    | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓                  |
+| [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness` | constructs; no navigation | Chai                    | —                                                  | same-origin                      | ✓                  |
+| [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                      | ✓                         | `expect` matchers, Chai | —                                                  | cross-origin                     | ✓ BiDi and Classic |
+| [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                      | constructs; no navigation | `expect` matchers       | —                                                  | same-origin, Playwright provider | ✓                  |
+| [Puppeteer](#using-with-puppeteer)                     | `puppeteer`      | ✓                      | ✓                         | `expect` matchers       | —                                                  | cross-origin                     | ✓                  |
+| [TestCafe](#using-with-testcafe)                       | `testcafe`       | ✓                      | ✓                         | `t.expect`, Chai        | —                                                  | same-origin                      | ✓                  |
+
+Every package is `@harnessed-ts/<name>`. "Conformance" means the shared catalog in
+`packages/conformance` runs, unchanged, under that runner on every pull request —
+see [Cross-driver guarantees](#cross-driver-guarantees). "Constructs; no
+navigation": a page builds and reads under that runner, but `goto()` and the URL
+members are refused, since there is no address bar (`urlFor()` still works).
+`HarnessedWorld`, the cucumber-js adapter, takes any env; CI runs it with
+Playwright.
+
 ## Install
 
 ```bash
 npm i -D @harnessed-ts/core
 
 # plus the driver(s) you use
-npm i -D @harnessed-ts/dom          # Testing Library / jsdom
-npm i -D @harnessed-ts/playwright   # Playwright
-npm i -D @harnessed-ts/page         # page objects: screens composed of harnesses
+npm i -D @harnessed-ts/dom             # Testing Library / jsdom
+npm i -D @harnessed-ts/playwright      # Playwright
+npm i -D @harnessed-ts/ember           # Ember: ember-qunit, ember-exam, Vitest
+npm i -D @harnessed-ts/cypress         # Cypress: e2e and component tests
+npm i -D @harnessed-ts/webdriverio     # WebdriverIO 10
+npm i -D @harnessed-ts/vitest-browser  # Vitest browser mode
+npm i -D @harnessed-ts/puppeteer       # Puppeteer
+npm i -D @harnessed-ts/testcafe        # TestCafe
+npm i -D @harnessed-ts/page            # page objects: screens composed of harnesses
+npm i -D @harnessed-ts/gherkin         # Gherkin: world, page registry, {page}
 
 # plus the assertion style your runner uses, if it is not `expect.extend`-based
 npm i -D @harnessed-ts/qunit        # assert.harness(x) — ember-qunit, QUnit
 npm i -D @harnessed-ts/chai         # expect(x).to.be.absent — Mocha, Cypress
 ```
 
-`@harnessed-ts/core` depends on neither driver. A jsdom-only project never resolves
-Playwright, and vice versa.
+`@harnessed-ts/core` depends on no driver. A jsdom-only project never resolves
+Playwright, and a Cypress project never resolves Puppeteer. Each runner's section
+below lists exactly what it needs.
 
 ### Required setup
 
@@ -197,12 +230,24 @@ agreement is the whole reason the abstraction exists.
 Where the drivers genuinely cannot match, the difference is documented rather than
 papered over:
 
-- **`isVisible()`** is a computed-style check under jsdom, which computes no layout.
-  A node covered by another element, or scrolled out of view, reads as visible
-  there and hidden in a browser. Assert on absence or on state, not on visibility,
-  when you want the same answer from both.
+- **`isVisible()`** is a layout check — a non-empty box that `visibility` does not
+  hide, inside frames that are visible too — under every driver except the dom
+  driver. jsdom computes no layout, so there it is a computed-style check, and a
+  node with no box reads as visible. Assert on absence or on state, not on
+  visibility, when you want the same answer from jsdom and a browser.
+- **Frames** are same-origin only under the dom driver, Ember, Cypress, TestCafe
+  and Vitest browser mode, which resolve inside the page and cannot read a
+  cross-origin document. Playwright, Puppeteer and WebdriverIO enter frames from
+  outside the page, so cross-origin frames work there.
+- **`currentUrl`** is synchronous, so under WebdriverIO and TestCafe, which read the
+  page asynchronously, it is the URL as of the driver's last call. After an
+  in-app navigation, `await page.assertPathname(...)`, which polls, before reading
+  it.
+- **Navigation** needs an address bar: under the dom driver, Vitest browser mode,
+  Cypress component tests and Ember rendering tests a page constructs and reads,
+  but `goto()` and the URL members are refused.
 - **`check()` / `uncheck()`** need a real checkbox or radio under Playwright. For a
-  non-native control, read `aria-checked` — which both drivers prefer when present.
+  non-native control, read `aria-checked` — which every driver prefers when present.
 
 ## API
 
@@ -403,6 +448,68 @@ import config from '../harnessed.config'
 applyConfig(config)
 ```
 
+## Using with Testing Library
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/dom @testing-library/dom @testing-library/user-event
+```
+
+Render with your framework's Testing Library, then build the env from a
+user-event instance. Interactions go through user-event, queries through the
+shared resolver:
+
+```tsx
+import { dom } from '@harnessed-ts/dom'
+import '@harnessed-ts/dom/matchers' // toBeAbsent, toBeSelected, toReadAs
+import userEvent from '@testing-library/user-event'
+
+const { baseElement } = render(<LoginForm />)
+const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+await form.signInAs('ada@example.com', 'hunter2')
+expect(await form.error()).toBeNull()
+```
+
+`container` scopes queries to one render; the default is `document.body`, where
+portals land. Add `harnessedDecorators()` to the Vitest config (see
+[Required setup](#required-setup)). The matchers extend Vitest's `expect`; under
+Jest, `expect.extend(harnessMatchers)` from `@harnessed-ts/core`.
+
+jsdom has no layout and no address bar, so:
+
+- **`isVisible()`** is a computed-style check (see
+  [Cross-driver guarantees](#cross-driver-guarantees)).
+- **Pages construct, but do not navigate.** Render the app, then
+  `await page.expectReady()`; `goto()` and the URL members are refused.
+- **Frames** are entered when they are same-origin.
+
+## Using with Playwright
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/playwright
+```
+
+Build the env from the test's `page`. Playwright's own transform compiles
+decorators, so there is nothing to add to its config:
+
+```ts
+import { pw } from '@harnessed-ts/playwright'
+import '@harnessed-ts/playwright/matchers' // toBeAbsent, toBeSelected, toReadAs
+import { expect, test } from '@playwright/test'
+
+test('checks out', async ({ page }) => {
+  const checkout = new CheckoutPage(pw(page))
+  await checkout.goto({ token: 'abc' }) // resolved against the config's baseURL
+  const confirmation = await checkout.placeOrder()
+  await expect(confirmation.heading).toReadAs('Thanks!')
+})
+```
+
+Queries become Locators, so waiting and strictness are Playwright's own, and
+frames — cross-origin included — are entered with `frameLocator()`.
+`isVisible()` is Playwright's layout check, and answers at once. For a Gherkin
+suite, see [Using with Gherkin](#using-with-gherkin); for a backend-free suite,
+[`createApiStubs`](#extras-in-harnessed-tsplaywright).
+
 ## Using with Ember
 
 ```bash
@@ -453,162 +560,6 @@ Where Ember differs from the other drivers:
 - **The URL members need a router.** `goto()` works in application tests; in a
   rendering test, and before an application test's first visit, `currentUrl` and
   `assertPathname()` refuse at once rather than reading as `/`.
-
-## Using with Vitest browser mode
-
-```bash
-npm i -D @harnessed-ts/core @harnessed-ts/vitest-browser @testing-library/dom
-npm i -D @vitest/browser-playwright vitest-browser-react   # or your provider and renderer
-```
-
-The test runs in the browser beside your components, so harnesses resolve in the
-page with the same resolver as the dom driver, and act through the provider's
-`userEvent`: Playwright's click, fill and select, with real events.
-
-```ts
-// vitest.config.ts
-export default defineConfig({
-  plugins: [harnessedDecorators(), react()],
-  test: {
-    browser: { enabled: true, provider: playwright(), instances: [{ browser: 'chromium' }] },
-  },
-})
-```
-
-```tsx
-import { vitestBrowser } from '@harnessed-ts/vitest-browser'
-import '@harnessed-ts/vitest-browser/matchers'
-import { render } from 'vitest-browser-react'
-
-await render(<LoginForm />)
-const form = new LoginFormHarness(vitestBrowser())
-await form.signInAs('ada@example.com', 'hunter2')
-expect(await form.error()).toBeNull()
-```
-
-`vitestBrowser({ container })` scopes queries to one tree; the default,
-`document.body`, is where portals land.
-
-Differences from the dom driver:
-
-- **`isVisible()`** is Playwright's layout check: a non-empty box that `visibility`
-  does not hide. `opacity: 0` reads as visible here and hidden under jsdom.
-- **Actions wait for actionability**, as Playwright's do: clicking a disabled or
-  hidden element waits, then fails, rather than acting at once.
-- **Frames need the Playwright provider.** A framed element is reached through
-  `page.frameLocator()`, which only that provider implements.
-- **No navigation.** This is component testing, like the dom driver: a page's
-  `goto()` and URL members are refused; `urlFor()` still works.
-- The driver adds one locator method, `harnessedSelector`, through
-  `locators.extend`, to chain into frames. It is not meant for tests.
-
-### Using with Puppeteer
-
-```bash
-npm i -D @harnessed-ts/core @harnessed-ts/puppeteer puppeteer
-```
-
-Puppeteer has no test runner, so pick one — Vitest or Jest. Under Vitest, add
-`harnessedDecorators()` to the Vitest config (see [Required setup](#required-setup))
-and register the matchers from a setup file:
-
-```ts
-// vitest.setup.ts
-import '@harnessed-ts/puppeteer/matchers'
-// Jest: import { harnessMatchers } from '@harnessed-ts/core'; expect.extend(harnessMatchers)
-```
-
-Build the env from a Puppeteer `Page`. `baseURL` is what a page's relative `path`
-resolves against in `goto()` — Puppeteer, unlike Playwright, has none of its own:
-
-```ts
-import { puppeteer } from '@harnessed-ts/puppeteer'
-import { launch } from 'puppeteer'
-
-const browser = await launch()
-const page = await browser.newPage()
-const env = puppeteer(page, { baseURL: 'http://localhost:3000' })
-
-const login = new LoginPage(env)
-await login.goto()
-await login.form.fillIn({ email: 'ada@example.com' })
-await expect(login.form.errorQuery).toBeAbsent()
-```
-
-The driver injects `@harnessed-ts/resolve` into each document it queries, so
-roles, labels and strictness resolve exactly as they do under the dom driver, and
-acts through `ElementHandle`s, so clicks and keys are real browser input.
-
-Differences worth knowing:
-
-- **Frames, cross-origin included.** Each `frame()` link is resolved in the
-  document around it and entered with `contentFrame()`, so the driver reaches
-  frames that no in-page resolver can.
-- **`isVisible()` uses real layout**, by the same rule as Playwright's: a node
-  with an empty box, `visibility: hidden`, or inside a hidden frame reads as
-  hidden, and a `display: contents` node is as visible as what it contains. Like
-  the dom driver, it waits for the target first; ask `isAbsent()` when you mean
-  "not on screen".
-- **`fill()` replaces** the value, as Playwright's does: it selects what is there
-  and inserts the new text as one input event, and `fill('')` clears. It waits,
-  within the timeout, for the target to be editable and focused, and rejects a
-  disabled or readonly target rather than typing into whatever had focus.
-- **Navigation mid-lookup** is retried in the next document until the timeout,
-  so a query that spans a full-page load waits for it.
-- **`press()`** takes Playwright's key names and chords (`Shift+ArrowLeft`).
-- **`selectOption()`** matches an option's value, then its label, and replaces a
-  multi-select's selection.
-
-### Using with WebdriverIO
-
-```bash
-npm i -D @harnessed-ts/core @harnessed-ts/webdriverio   # WebdriverIO 10
-```
-
-Build the env from the testrunner's `browser` and hand it to any harness or
-page. Register the matchers once, from a spec or the config's `before` hook:
-
-```ts
-import { wdio } from '@harnessed-ts/webdriverio'
-import '@harnessed-ts/webdriverio/matchers' // toBeAbsent, toBeSelected, toReadAs
-import { browser, expect } from '@wdio/globals'
-
-it('signs in', async () => {
-  const login = new LoginPage(wdio(browser))
-  await login.goto() // browser.url(), resolved against baseUrl
-  await login.form.fillIn({ email: 'ada@example.com', password: 'hopper' })
-  await expect(login.form.errorQuery).toBeAbsent()
-})
-```
-
-On a harness or a query, `toBeSelected` is harnessed's (`aria-pressed`); on a
-WebdriverIO element it is still expect-webdriverio's own (`isSelected`).
-
-Under Mocha you can assert in Chai's style instead: `chai.use(harnessedChai)`
-from `@harnessed-ts/chai`, then `await expect(banner).to.be.absent`.
-
-The shared resolver is injected into each document on first use (under BiDi it
-is also registered as a preload script, so later documents start with it), and
-`testIdAttribute` travels with every call. Differences from the other drivers:
-
-- **Frames** are entered through WebDriver — a frame's own browsing context under
-  BiDi, `switchFrame` under Classic, switched back afterwards — so cross-origin
-  frames work. An error raised inside a frame names the scope chain from that
-  frame inward.
-- **`isVisible()`** is WebDriver's `isDisplayed()`, a layout check, applied to the
-  target and to every iframe on the way to it. Like Playwright's, it answers at
-  once rather than waiting for the target.
-- **`currentUrl`** is the top-level URL as of the driver's last round-trip:
-  `goto()`, `assertPathname()`, or any query. After an in-app navigation,
-  `await page.assertPathname(...)` before reading it.
-- **`fill()` and `clear()`** select the existing value and delete it by keyboard,
-  so a controlled input sees the edit. Date, time, colour and range inputs are set
-  directly, as WebdriverIO does.
-- **`press()`** takes Playwright's key names and `+` chords (`'Shift+Tab'`,
-  `'ControlOrMeta+a'`). Bindings are the platform's: `Control+a` does not select
-  all on macOS.
-- **Waits** run inside the page, so a `timeout` above the session's script
-  timeout (30s by default) needs `browser.setTimeout({ script })`.
 
 ## Using with Cypress
 
@@ -674,12 +625,170 @@ it('signs in', () => {
   CDP input cannot operate a native `<select>` popup.
 - **`press` under `realEvents`** takes single characters and the named keys
   (Enter, Tab, arrows and so on), not chords.
-- **`isVisible()`** is a layout check, as under Playwright: a non-empty box and
-  not `visibility: hidden`. An `opacity: 0` node counts as visible.
+- **`isVisible()`** uses the shared layout rule, as under Playwright: a
+  non-empty box that `visibility` does not hide, with a `display: contents`
+  node judged by what it contains, and content inside a hidden frame hidden.
+  An `opacity: 0` node counts as visible.
 - **Frames** are entered when they are same-origin only, as under the dom
   driver.
 
-### Using with TestCafe
+## Using with WebdriverIO
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/webdriverio   # WebdriverIO 10
+```
+
+Build the env from the testrunner's `browser` and hand it to any harness or
+page. Register the matchers once, from a spec or the config's `before` hook:
+
+```ts
+import { wdio } from '@harnessed-ts/webdriverio'
+import '@harnessed-ts/webdriverio/matchers' // toBeAbsent, toBeSelected, toReadAs
+import { browser, expect } from '@wdio/globals'
+
+it('signs in', async () => {
+  const login = new LoginPage(wdio(browser))
+  await login.goto() // browser.url(), resolved against baseUrl
+  await login.form.fillIn({ email: 'ada@example.com', password: 'hopper' })
+  await expect(login.form.errorQuery).toBeAbsent()
+})
+```
+
+On a harness or a query, `toBeSelected` is harnessed's (`aria-pressed`); on a
+WebdriverIO element it is still expect-webdriverio's own (`isSelected`).
+
+Under Mocha you can assert in Chai's style instead: `chai.use(harnessedChai)`
+from `@harnessed-ts/chai`, then `await expect(banner).to.be.absent`.
+
+The shared resolver is injected into each document on first use (under BiDi it
+is also registered as a preload script, so later documents start with it), and
+`testIdAttribute` travels with every call. Differences from the other drivers:
+
+- **Frames** are entered through WebDriver — a frame's own browsing context under
+  BiDi, `switchFrame` under Classic, switched back afterwards — so cross-origin
+  frames work. An error raised inside a frame names the scope chain from that
+  frame inward.
+- **`isVisible()`** is WebDriver's `isDisplayed()`, a layout check, applied to the
+  target and to every iframe on the way to it. Like Playwright's, it answers at
+  once rather than waiting for the target.
+- **`currentUrl`** is the top-level URL as of the driver's last round-trip:
+  `goto()`, `assertPathname()`, or any query. After an in-app navigation,
+  `await page.assertPathname(...)` before reading it.
+- **`fill()` and `clear()`** select the existing value and delete it by keyboard,
+  so a controlled input sees the edit. Date, time, colour and range inputs are set
+  directly, as WebdriverIO does.
+- **`press()`** takes Playwright's key names and `+` chords (`'Shift+Tab'`,
+  `'ControlOrMeta+a'`). Bindings are the platform's: `Control+a` does not select
+  all on macOS.
+- **Waits** run inside the page, so a `timeout` above the session's script
+  timeout (30s by default) needs `browser.setTimeout({ script })`.
+
+## Using with Vitest browser mode
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/vitest-browser @testing-library/dom
+npm i -D @vitest/browser-playwright vitest-browser-react   # or your provider and renderer
+```
+
+The test runs in the browser beside your components, so harnesses resolve in the
+page with the same resolver as the dom driver, and act through the provider's
+`userEvent`: Playwright's click, fill and select, with real events.
+
+```ts
+// vitest.config.ts
+export default defineConfig({
+  plugins: [harnessedDecorators(), react()],
+  test: {
+    browser: { enabled: true, provider: playwright(), instances: [{ browser: 'chromium' }] },
+  },
+})
+```
+
+```tsx
+import { vitestBrowser } from '@harnessed-ts/vitest-browser'
+import '@harnessed-ts/vitest-browser/matchers'
+import { render } from 'vitest-browser-react'
+
+await render(<LoginForm />)
+const form = new LoginFormHarness(vitestBrowser())
+await form.signInAs('ada@example.com', 'hunter2')
+expect(await form.error()).toBeNull()
+```
+
+`vitestBrowser({ container })` scopes queries to one tree; the default,
+`document.body`, is where portals land.
+
+Differences from the dom driver:
+
+- **`isVisible()`** is Playwright's layout check: a non-empty box that `visibility`
+  does not hide. `opacity: 0` reads as visible here and hidden under jsdom.
+- **Actions wait for actionability**, as Playwright's do: clicking a disabled or
+  hidden element waits, then fails, rather than acting at once.
+- **Frames need the Playwright provider.** A framed element is reached through
+  `page.frameLocator()`, which only that provider implements.
+- **No navigation.** This is component testing, like the dom driver: a page's
+  `goto()` and URL members are refused; `urlFor()` still works.
+- The driver adds one locator method, `harnessedSelector`, through
+  `locators.extend`, to chain into frames. It is not meant for tests.
+
+## Using with Puppeteer
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/puppeteer puppeteer
+```
+
+Puppeteer has no test runner, so pick one — Vitest or Jest. Under Vitest, add
+`harnessedDecorators()` to the Vitest config (see [Required setup](#required-setup))
+and register the matchers from a setup file:
+
+```ts
+// vitest.setup.ts
+import '@harnessed-ts/puppeteer/matchers'
+// Jest: import { harnessMatchers } from '@harnessed-ts/core'; expect.extend(harnessMatchers)
+```
+
+Build the env from a Puppeteer `Page`. `baseURL` is what a page's relative `path`
+resolves against in `goto()` — Puppeteer, unlike Playwright, has none of its own:
+
+```ts
+import { puppeteer } from '@harnessed-ts/puppeteer'
+import { launch } from 'puppeteer'
+
+const browser = await launch()
+const page = await browser.newPage()
+const env = puppeteer(page, { baseURL: 'http://localhost:3000' })
+
+const login = new LoginPage(env)
+await login.goto()
+await login.form.fillIn({ email: 'ada@example.com' })
+await expect(login.form.errorQuery).toBeAbsent()
+```
+
+The driver injects `@harnessed-ts/resolve` into each document it queries, so
+roles, labels and strictness resolve exactly as they do under the dom driver, and
+acts through `ElementHandle`s, so clicks and keys are real browser input.
+
+Differences worth knowing:
+
+- **Frames, cross-origin included.** Each `frame()` link is resolved in the
+  document around it and entered with `contentFrame()`, so the driver reaches
+  frames that no in-page resolver can.
+- **`isVisible()` uses real layout**, by the same rule as Playwright's: a node
+  with an empty box, `visibility: hidden`, or inside a hidden frame reads as
+  hidden, and a `display: contents` node is as visible as what it contains. Like
+  the dom driver, it waits for the target first; ask `isAbsent()` when you mean
+  "not on screen".
+- **`fill()` replaces** the value, as Playwright's does: it selects what is there
+  and inserts the new text as one input event, and `fill('')` clears. It waits,
+  within the timeout, for the target to be editable and focused, and rejects a
+  disabled or readonly target rather than typing into whatever had focus.
+- **Navigation mid-lookup** is retried in the next document until the timeout,
+  so a query that spans a full-page load waits for it.
+- **`press()`** takes Playwright's key names and chords (`Shift+ArrowLeft`).
+- **`selectOption()`** matches an option's value, then its label, and replaces a
+  multi-select's selection.
+
+## Using with TestCafe
 
 ```bash
 npm i -D @harnessed-ts/core @harnessed-ts/testcafe testcafe typescript
@@ -1022,8 +1131,23 @@ run by every driver, so a harness written against one works against yours.
 
 ## Requirements
 
-Node ≥ 22.12 (≥ 22.19 for `@harnessed-ts/webdriverio`, WebdriverIO 10's own floor),
-TypeScript ≥ 5.2, and — for `@harnessed-ts/playwright` — `@playwright/test` ≥ 1.43. Published as ESM and CJS.
+Node ≥ 22.12 (≥ 22.19 for `@harnessed-ts/webdriverio`, WebdriverIO 10's own floor)
+and TypeScript ≥ 5.2. Published as ESM and CJS. Each driver's runner is a peer
+dependency, with these floors:
+
+| Package                        | Peer floor                                                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `@harnessed-ts/dom`            | `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14                                                   |
+| `@harnessed-ts/playwright`     | `@playwright/test` ≥ 1.43                                                                                         |
+| `@harnessed-ts/ember`          | `@ember/test-helpers` ≥ 5 (Ember 5.12 and later), `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14 |
+| `@harnessed-ts/cypress`        | `cypress` ≥ 13, `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14                                   |
+| `@harnessed-ts/webdriverio`    | `webdriverio` ≥ 10                                                                                                |
+| `@harnessed-ts/vitest-browser` | `vitest` ≥ 4, `@testing-library/dom` ≥ 10                                                                         |
+| `@harnessed-ts/puppeteer`      | `puppeteer` ≥ 24                                                                                                  |
+| `@harnessed-ts/testcafe`       | `testcafe` ≥ 3                                                                                                    |
+| `@harnessed-ts/gherkin`        | the adapter's runner: `@cucumber/cucumber` ≥ 10, `yadda` ≥ 3, …                                                   |
+| `@harnessed-ts/core/babel`     | Babel ≥ 7.24 < 8, with the decorator and TypeScript plugins                                                       |
+| `@harnessed-ts/qunit`, `chai`  | `qunit` ≥ 2.19, `chai` ≥ 4                                                                                        |
 
 ## Contributing
 
