@@ -1,0 +1,60 @@
+name: claude code review
+
+# Claude reviews each pull request once, when it is opened or marked ready, and
+# posts its findings as inline comments. The code-review plugin skips drafts and
+# any PR Claude has already commented on, so pushing to a reviewed PR does not
+# re-review it.
+#
+# Needs the Claude GitHub App installed on the repository, and one repository
+# secret: CLAUDE_CODE_OAUTH_TOKEN (from `claude setup-token`, billed to a Claude
+# subscription) or ANTHROPIC_API_KEY (billed to the API). Without a secret the
+# job is skipped with a notice.
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+concurrency:
+  group: claude-code-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: claude review
+    # Forks and Dependabot get no repository secrets, so the action could not
+    # authenticate; skip them rather than fail. Drafts are not ready for review.
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    # Claude acts with this job's token, not the Claude App's: without
+    # `github_token` the action trades OIDC for an App token that can push. It
+    # reads PR comments, which anyone can write, so it gets no more than it needs.
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+    env:
+      # Secrets cannot appear in an `if`, but a flag derived from them can. Until
+      # one is set, the job passes with a notice instead of failing every PR.
+      HAS_CLAUDE_AUTH: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' || secrets.ANTHROPIC_API_KEY != '' }}
+    steps:
+      - if: env.HAS_CLAUDE_AUTH != 'true'
+        run: echo "::notice::Claude review skipped. Add a CLAUDE_CODE_OAUTH_TOKEN or ANTHROPIC_API_KEY repository secret to enable it."
+      - if: env.HAS_CLAUDE_AUTH == 'true'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+      - if: env.HAS_CLAUDE_AUTH == 'true'
+        uses: anthropics/claude-code-action@86d88e619d8e6caf07b5c3944dd14f441c533718 # v1.0.243
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Whichever secret is set is used; the other is empty.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          plugin_marketplaces: https://github.com/anthropics/claude-code.git
+          plugins: code-review@claude-code-plugins
+          prompt: /code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}
+          claude_args: >-
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(gh issue view:*)"
