@@ -9,7 +9,6 @@ import noRunnerImportInHarness from '../src/rules/no-runner-import-in-harness'
 // Harnesses speak in behaviours, never in the vocabulary of a test runner or the
 // DOM. These rules are what keeps a test portable to a new variant of the app: a
 // native build needs new harnesses, not new tests.
-RuleTester.afterAll = () => {}
 RuleTester.describe = describe
 RuleTester.it = it
 
