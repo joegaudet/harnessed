@@ -18,7 +18,7 @@ package before running the suites.
 ```bash
 pnpm lint
 pnpm format:check
-pnpm typecheck        # tsc --build across every package
+pnpm typecheck        # tsc --build across every package, then tests + tooling
 pnpm build
 pnpm test             # rule tests, package unit tests, then both conformance drivers
 ```

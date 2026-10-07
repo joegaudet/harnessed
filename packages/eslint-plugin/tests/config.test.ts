@@ -135,7 +135,6 @@ describe('the walk up stops at the project root', () => {
  * config file the docs generator reads.
  */
 describe('rules honour the configured harness directory', () => {
-  RuleTester.afterAll = () => {}
   RuleTester.describe = describe
   RuleTester.it = it
 

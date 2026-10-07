@@ -1,5 +1,5 @@
 {
-  "$comment": "Not part of the solution build. Exists so type-aware linting has a project for the build-tooling and test files that the publishable tsconfigs deliberately exclude.",
+  "$comment": "Not part of the solution build. Covers the build-tooling and test files that the publishable tsconfigs deliberately exclude: type-aware linting uses it as their project, and `pnpm typecheck:tools` typechecks them.",
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
@@ -14,6 +14,17 @@
     "packages/*/vitest.config.ts",
     "packages/*/tests/**/*.ts",
     "packages/conformance/runners/**/*.ts",
+    // The release scripts and their node:test suites (scripts/*.test.mjs), here
+    // so type-aware linting has a project for them. Without checkJs, tsc parses
+    // the .js/.mjs files but does not typecheck them.
     "scripts/*.mjs"
   ]
+  // Deliberately left out, each because something else already typechecks it or
+  // it cannot be:
+  // - packages/conformance/{specs,fixture}: its own tsconfig includes them, so
+  //   `tsc --build` covers them.
+  // - packages/claude/assets: shipped templates that import modules the consumer
+  //   supplies; they do not resolve inside this repo.
+  // - test-apps/*: each app has its own tsconfig and runs its own typecheck as
+  //   part of its test script, against its runner's toolchain.
 }
