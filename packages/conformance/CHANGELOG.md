@@ -1,5 +1,48 @@
 # @harnessed-ts/conformance
 
+## 0.4.0
+
+### Minor Changes
+
+- 9666a3d: New `@harnessed-ts/ember` driver: queries resolve through `@harnessed-ts/resolve`, interactions go through `@ember/test-helpers` and settle after each one, and a page's `goto()` drives the router in application tests. It passes the whole conformance catalog under ember-qunit, on classic and Embroider + Vite builds, Ember 5.12 to latest.
+
+  `@harnessed-ts/conformance` exports `fixtureTree()` and `fixtureTrees` so a port of the fixture to another framework can prove it renders the same markup as the React original.
+
+- 9666a3d: `PageHarness.urlFor(params)` returns the URL `goto()` would navigate to — params substituted at every occurrence and URL-encoded — without navigating, and under any driver. A runner that queues its own navigation (Cypress's `cy.visit`) needs the URL without the `goto()`. Covered by two new conformance specs: `urlFor` under a driver that cannot navigate, and `goto` landing on exactly the URL `urlFor` reports.
+- 1823546: `isVisible()`, `waitFor('visible')` and `waitFor('hidden')` on a target matching
+  several nodes now reject with the shared strict-mode violation, at once, under
+  every driver. The dom, Ember, Vitest browser mode and Cypress drivers answered
+  `false` from `isVisible()`, waited out the timeout in `waitFor('visible')`, and —
+  worse — resolved `waitFor('hidden')` at once, passing a wait for three rendered
+  nodes to disappear; Playwright's waits raised its own wording instead of the
+  shared one. An `nth()`
+  past the last match answers `false` from `isVisible()` and counts as hidden, as it
+  does under Playwright — Puppeteer and TestCafe used to reject it as an index out
+  of range.
+
+  Core exports `StrictModeViolation`, the class `strictViolation()` now returns, so a
+  driver can tell ambiguity apart from absence. It is the class a caller catches
+  under every driver: core also exports `reviveStrictViolation()`, which the
+  Puppeteer, WebdriverIO and TestCafe drivers apply to what the page throws, so
+  a violation raised in the page arrives as core's class, worded exactly as an
+  in-process driver words it. `instanceof StrictModeViolation` checks a brand
+  rather than the prototype, so it holds across two copies of core in one page —
+  Cypress bundles the support file and each spec separately.
+
+  `WaitState` now documents the rule it is held to: a state joins only when every
+  driver honours it with the same meaning, so a runner's own states — Playwright's
+  `attached` and `detached` — stay out of the shared interface.
+
+### Patch Changes
+
+- 9666a3d: The exported specs no longer import `node:assert`, so a driver whose runner executes in a browser (Testem, Cypress, Vitest browser mode) can run the catalog unchanged.
+- Updated dependencies [9666a3d]
+- Updated dependencies [9666a3d]
+- Updated dependencies [9666a3d]
+- Updated dependencies [1823546]
+  - @harnessed-ts/core@0.4.0
+  - @harnessed-ts/page@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

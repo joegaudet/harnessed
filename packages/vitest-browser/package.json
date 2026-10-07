@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/vitest-browser",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Vitest browser mode driver for @harnessed-ts/core: in-page resolution, provider-native user events.",
   "keywords": [
     "testing",

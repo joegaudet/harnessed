@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/webdriverio",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "WebdriverIO driver for @harnessed-ts/core: the shared resolver injected into the page, WebDriver actions, and frames entered with switchFrame.",
   "keywords": [
     "testing",

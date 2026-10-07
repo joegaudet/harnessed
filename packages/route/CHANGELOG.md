@@ -1,5 +1,13 @@
 # @harnessed-ts/route
 
+## 0.4.0
+
+### Patch Changes
+
+- Updated dependencies [9666a3d]
+- Updated dependencies [1823546]
+  - @harnessed-ts/page@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

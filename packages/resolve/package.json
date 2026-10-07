@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/resolve",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The shared selector resolver behind the Testing Library-family drivers, plus an injectable build for drivers that resolve inside a remote page.",
   "keywords": [
     "testing",

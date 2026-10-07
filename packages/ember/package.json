@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/ember",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Ember driver for @harnessed-ts/core: interactions through @ember/test-helpers, settled after every one. Rendering and application tests.",
   "keywords": [
     "testing",

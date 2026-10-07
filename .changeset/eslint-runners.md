@@ -1,5 +1,0 @@
----
-'@harnessed-ts/eslint-plugin': minor
----
-
-`no-raw-locator-in-test` and `no-page-or-screen-in-harness` now recognise every supported runner's raw queries: Cypress (`cy.get` — but not `cy.get('@alias')` — `cy.contains`, `cy.findBy*`), Ember (`find`/`findAll`, test-helpers actions given a selector string, `this.element.querySelector`, `assert.dom('…')`), WebdriverIO (`$`/`$$`, imported or the testrunner's globals, `browser.$`), Puppeteer (`page.$`, `page.$$eval`, `page.waitForSelector`), Vitest browser (`page.getBy*` from `vitest/browser`) and TestCafe (`Selector`). Testing Library's `getAllBy*`, `queryAllBy*`, `findAllBy*` and the rest of the `*By*` family are caught too. Bare function names (`find`, `$`, `Selector`) are matched by import source, and resolved through scope, so lodash's `find`, jQuery's `$` or a local `$` are left alone. The harness rule now flags a bare `page`'s queries as well as `this.page`. The default test directories add `test/` and `cypress/` (Cypress's `support/` files excepted), and a harness under a test directory, such as Ember's `tests/harness/`, is left to the harness rule.

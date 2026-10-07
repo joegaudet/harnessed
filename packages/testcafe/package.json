@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/testcafe",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "TestCafe driver for @harnessed-ts/core: harnesses resolve through TestCafe's client functions with the shared resolver.",
   "keywords": [
     "testing",

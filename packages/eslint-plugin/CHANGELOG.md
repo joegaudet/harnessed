@@ -1,5 +1,29 @@
 # @harnessed-ts/eslint-plugin
 
+## 0.4.0
+
+### Minor Changes
+
+- 9666a3d: `no-raw-locator-in-test` and `no-page-or-screen-in-harness` now recognise every supported runner's raw queries: Cypress (`cy.get` — but not `cy.get('@alias')` — `cy.contains`, `cy.findBy*`), Ember (`find`/`findAll`, test-helpers actions given a selector string, `this.element.querySelector`, `assert.dom('…')`), WebdriverIO (`$`/`$$`, imported or the testrunner's globals, `browser.$`), Puppeteer (`page.$`, `page.$$eval`, `page.waitForSelector`), Vitest browser (`page.getBy*` from `vitest/browser`) and TestCafe (`Selector`). Testing Library's `getAllBy*`, `queryAllBy*`, `findAllBy*` and the rest of the `*By*` family are caught too. Bare function names (`find`, `$`, `Selector`) are matched by import source, and resolved through scope, so lodash's `find`, jQuery's `$` or a local `$` are left alone. The harness rule now flags a bare `page`'s queries as well as `this.page`. The default test directories add `test/` and `cypress/` (Cypress's `support/` files excepted), and a harness under a test directory, such as Ember's `tests/harness/`, is left to the harness rule.
+- 3bfda4b: Harnesses speak in behaviours, never in the vocabulary of a test runner or the DOM.
+
+  **eslint-plugin.** Three new rules, all in `recommended` and `strict`:
+
+  - `no-runner-import-in-harness` (error): a harness may not import a runner or a driver — `@playwright/test`, `cypress`, `@testing-library/*`, `vitest`, `webdriverio`, `puppeteer`, `testcafe`, `@ember/test-helpers`, `qunit`, `ember-qunit`, `qunit-dom`, `chai`, the Gherkin runners (`playwright-bdd`, `@cucumber/*`, Cypress cucumber, Yadda), and every `@harnessed-ts` package except `core`, `page`, and `route` — nor use the `document`, `window`, `cy`, `browser`, `$`, or `$$` globals (directly or through `globalThis`) outside a page's `waitForReady()`. `allow` takes exceptions.
+  - `harness-public-surface` (error): element fields (`@ByRole`, `@ByTestId`, `@ByLabel`, `@ByText`, `@ByPlaceholder`) must be private or protected; a public method may not return a `Query`, locator, element, or selector, nor take one in. A `@ChildHarness` may stay public.
+  - `behavioural-method-names` (warn): public harness methods named for a mechanic (`clickSubmit`) or a DOM noun (`submitButton`). Configurable with `verbs`, `nouns`, and `allow`.
+
+  `no-raw-locator-in-test` now also catches any member of Testing Library's `screen` (`screen.debug()` reads markup too) and `fireEvent`, its `within(…)`, the global `document`'s own queries (`querySelector`, `getElementById` and friends), and `cy.xpath`. Like the runner queries it already knew, these are resolved through scope and matched by import source: a local binding named `screen`, `within`, `fireEvent` or `document`, or a `screen` imported from anywhere but `@testing-library/*`, is left alone — though a locator method such as `getByRole` is still caught on any `screen`. `cy.xpath` is a Cypress query to `no-page-or-screen-in-harness` too.
+
+  These can fail a build that passed before: the two new errors are on by default in `recommended`.
+
+  **claude.** The harness rule and skill gain a "Speak in behaviours" section with the portability test, and `install` writes a new `.claude/rules/harness-tests.md`, path-scoped to test files.
+
+### Patch Changes
+
+- Updated dependencies [9666a3d]
+  - @harnessed-ts/config@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

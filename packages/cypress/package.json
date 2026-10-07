@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/cypress",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Cypress driver for @harnessed-ts/core: a cy.harness() bridge that runs harnesses against the app under test, in e2e and component tests.",
   "keywords": [
     "testing",
