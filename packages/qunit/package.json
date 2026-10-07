@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/qunit",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "QUnit assertions for harnesses: `await assert.harness(banner).isAbsent()`, for ember-qunit and any QUnit suite.",
   "keywords": [
     "testing",
