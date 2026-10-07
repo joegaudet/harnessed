@@ -82,9 +82,24 @@ export default tseslint.config(
       'harnessed/no-page-or-screen-in-harness': ['error', { harnessDirs: ['harnesses'] }],
       'harnessed/require-host': ['error', { harnessDirs: ['harnesses'] }],
       'harnessed/require-wait-for-ready': ['error', { harnessDirs: ['harnesses'] }],
+      'harnessed/no-runner-import-in-harness': ['error', { harnessDirs: ['harnesses'] }],
+      'harnessed/harness-public-surface': ['error', { harnessDirs: ['harnesses'] }],
+      // The fixture harnesses exist to exercise every Query member under every
+      // driver, so methods like hoverSubmit() and pressInEmail() name the
+      // mechanic on purpose: renaming them for intent would hide what each spec
+      // proves. The rule flags 7 of the fixture's 89 public members, every one a
+      // deliberate mechanic.
+      'harnessed/behavioural-method-names': 'off',
       // The conformance runners construct harnesses and drive the page directly —
       // that is their job, and there is no harness to route through.
       'harnessed/no-raw-locator-in-test': 'off',
     },
+  },
+  {
+    // errorQuery and lastMissing hand out a Query on purpose: the matcher specs
+    // assert against a target directly, and last() on an empty set is a
+    // guarantee of its own. A consumer's harness has no such reason.
+    files: ['packages/conformance/fixture/harnesses/LoginForm.harness.ts'],
+    rules: { 'harnessed/harness-public-surface': 'off' },
   },
 )

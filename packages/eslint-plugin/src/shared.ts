@@ -244,6 +244,152 @@ export function expressionName(node: NamedExpression | null | undefined): string
   return undefined
 }
 
+/** The class a node sits in, if any. */
+export function enclosingClass(node: Rule.Node): Rule.Node | undefined {
+  let current = node.parent as Rule.Node | null | undefined
+  while (current) {
+    if (current.type === 'ClassDeclaration' || current.type === 'ClassExpression') return current
+    current = current.parent as Rule.Node | null | undefined
+  }
+  return undefined
+}
+
+/**
+ * True for a page: a direct `PageHarness`/`RouteHarness` subclass, or a subclass
+ * of a page base named by convention (`class CheckoutPage extends AppPage`).
+ */
+export function isPageClass(node: Rule.Node): boolean {
+  const name = superClassName(node)
+  return name !== undefined && classifyConstructed(name) === 'page'
+}
+
+/**
+ * A class member as the typescript-eslint parser shapes it. ESTree's own types
+ * know nothing of `accessibility`, `accessor`, or decorators.
+ */
+export interface ClassMember {
+  type: string
+  key?: { type: string; name?: string; value?: unknown }
+  kind?: string
+  accessibility?: 'public' | 'private' | 'protected'
+  decorators?: Array<{ expression: NamedExpression & { callee?: NamedExpression } }>
+  value?: unknown
+}
+
+interface ClassNode {
+  body: { body: ClassMember[] }
+}
+
+/** The members of a class declaration or expression. */
+export function classMembers(node: Rule.Node): ClassMember[] {
+  return (node as unknown as ClassNode).body.body
+}
+
+/** Field and accessor shapes, including the `abstract` variants. */
+export const FIELD_TYPES = new Set([
+  'PropertyDefinition',
+  'AccessorProperty',
+  'TSAbstractPropertyDefinition',
+  'TSAbstractAccessorProperty',
+])
+
+/** Method shapes, including the `abstract` variant. */
+export const METHOD_TYPES = new Set(['MethodDefinition', 'TSAbstractMethodDefinition'])
+
+/** Callable from outside the class: no `private`/`protected`, and not `#private`. */
+export function isPublicMember(member: ClassMember): boolean {
+  if (member.accessibility === 'private' || member.accessibility === 'protected') return false
+  return member.key?.type !== 'PrivateIdentifier'
+}
+
+/** `foo` for `foo()`, `'foo'()`, or `get foo()`; undefined for a computed key. */
+export function memberName(member: ClassMember): string | undefined {
+  const key = member.key
+  if (key === undefined) return undefined
+  if (key.type === 'Identifier' || key.type === 'PrivateIdentifier') return key.name
+  if (key.type === 'Literal' && typeof key.value === 'string') return key.value
+  return undefined
+}
+
+/** `ByRole` for `@ByRole(…)`, `@ns.ByRole(…)`, or a bare `@ByRole`. */
+export function decoratorNames(member: ClassMember): string[] {
+  return (member.decorators ?? []).flatMap(decorator => {
+    const expression = decorator.expression
+    const name =
+      expression.type === 'CallExpression'
+        ? expressionName(expression.callee)
+        : expressionName(expression)
+    return name === undefined ? [] : [name]
+  })
+}
+
+/** The decorators that declare an element field. `@ChildHarness` declares a harness. */
+export const ELEMENT_DECORATORS = new Set([
+  'ByRole',
+  'ByTestId',
+  'ByLabel',
+  'ByText',
+  'ByPlaceholder',
+])
+
+/**
+ * Runners, drivers, and their DOM helpers. A trailing `*` is a prefix: `@vitest/*`
+ * covers a scope, `chai-*` a family of plugins.
+ *
+ * `@harnessed-ts/*` drivers are not listed here: every harnessed package except
+ * the harness API itself is a driver or tooling, so a driver published tomorrow
+ * is covered without this list knowing its name.
+ */
+export const RUNNER_MODULES = [
+  '@playwright/*',
+  'playwright',
+  'playwright-core',
+  'cypress',
+  'cypress-*',
+  '@cypress/*',
+  '@testing-library/*',
+  'webdriverio',
+  '@wdio/*',
+  'puppeteer',
+  'puppeteer-core',
+  'testcafe',
+  'vitest',
+  'vitest-*',
+  '@vitest/*',
+  'jest',
+  'jest-*',
+  '@jest/*',
+  '@ember/test-helpers',
+  'ember-qunit',
+  'qunit',
+  'qunit-*',
+  'chai',
+  'chai-*',
+  // The Gherkin runners: playwright-bdd, cucumber-js, Cypress cucumber, Yadda.
+  'playwright-bdd',
+  '@cucumber/*',
+  '@badeball/cypress-cucumber-preprocessor',
+  'ember-cli-yadda',
+  'yadda',
+]
+
+/** The harness API. Everything else under `@harnessed-ts/` is a driver or tooling. */
+export const HARNESS_API = ['@harnessed-ts/core', '@harnessed-ts/page', '@harnessed-ts/route']
+
+/** `pattern` names the module or a subpath of it; a trailing `*` makes it a prefix. */
+export function moduleMatches(source: string, pattern: string): boolean {
+  if (pattern.endsWith('*')) return source.startsWith(pattern.slice(0, -1))
+  return source === pattern || source.startsWith(`${pattern}/`)
+}
+
+/** A runner, or a harnessed package that is not the harness API. */
+export function isRunnerModule(source: string): boolean {
+  if (source.startsWith('@harnessed-ts/')) {
+    return !HARNESS_API.some(api => moduleMatches(source, api))
+  }
+  return RUNNER_MODULES.some(pattern => moduleMatches(source, pattern))
+}
+
 /** An abstract class may leave its host to subclasses. */
 export function isAbstract(node: Rule.Node): boolean {
   return (node as Rule.Node & { abstract?: boolean }).abstract === true

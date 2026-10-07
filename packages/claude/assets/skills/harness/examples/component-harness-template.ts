@@ -39,7 +39,7 @@ export class ThingHarness extends ComponentHarness {
     await this.submitBtn.click()
   }
 
-  async fieldValues(): Promise<Required<ThingFormData>> {
+  async enteredDetails(): Promise<Required<ThingFormData>> {
     return { name: await this.nameInput.inputValue(), email: '' }
   }
 

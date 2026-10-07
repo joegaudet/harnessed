@@ -375,8 +375,86 @@ describe('no-raw-locator-in-test', () => {
         filename: '/repo/tests/form.browser.test.tsx',
         code: `import { page } from 'vitest/browser'\nawait page.viewport(400, 800); await page.screenshot()`,
       },
+      {
+        name: 'a test that constructs an env and a page, then calls only its methods',
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: `const checkout = new CheckoutPage(pw(page)); await checkout.goto(); await checkout.placeOrder()`,
+      },
+      {
+        name: 'runner calls that are not queries',
+        filename: '/repo/e2e/checkout.cy.ts',
+        code: `cy.visit('/checkout'); cy.wrap(checkout); browser.url('/x'); await t.wait(10)`,
+      },
+      {
+        name: 'a same-named member on something that is not the runner global',
+        filename: '/repo/tests/checkout.test.ts',
+        code: `myThing.$('x'); world.screen.size; repo.get('x'); selector('x')`,
+      },
+      {
+        // Only Testing Library's screen is the runner's helper. A test that
+        // calls its page "screen" is doing exactly what this rule asks.
+        name: 'a local binding named screen, within, or fireEvent',
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: `const screen = new CheckoutPage(env); await screen.placeOrder()
+        const within = n => n; const fireEvent = { click() {} }; within(1); fireEvent.click()`,
+      },
+      {
+        name: 'a screen imported from somewhere other than Testing Library',
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: `import { screen } from '../harness/screens'\nawait screen.placeOrder()`,
+      },
+      {
+        // Subjects are looked up by identifier, so an Object.prototype key must
+        // not resolve to something that looks like a subject.
+        name: 'an identifier named like an Object.prototype member',
+        filename: '/repo/tests/checkout.test.ts',
+        code: `toString.call(x); constructor.name; world.hasOwnProperty.get`,
+      },
+      {
+        // Resolved through scope, like every other bare name: only the global
+        // document is the DOM.
+        name: 'a local binding named document is not the DOM',
+        filename: '/repo/tests/report.test.ts',
+        code: `const document = parse(html); document.querySelector('.price')`,
+      },
     ],
     invalid: [
+      ...[
+        ['cy', 'get', `cy.get('[data-testid=pay]').click()`],
+        ['cy', 'contains', `cy.contains('Pay').click()`],
+        ['cy', 'findByRole', `cy.findByRole('button')`],
+        ['cy', 'xpath', `cy.xpath('//button')`],
+        ['browser', '$', `await browser.$('#pay').click()`],
+        ['browser', '$$', `const rows = await browser.$$('.row')`],
+        ['page', '$', `await page.$('#pay')`],
+        ['page', '$$', `await page.$$('.row')`],
+        ['page', 'getByTestId', `await page.getByTestId('pay').click()`],
+        ['screen', 'debug', `screen.debug()`],
+        ['screen', 'queryAllByRole', `screen.queryAllByRole('row')`],
+        ['document', 'querySelector', `document.querySelector('.price')`],
+        ['document', 'getElementById', `document.getElementById('price')`],
+      ].map(([subject, method, code]) => ({
+        name: `${subject}.${method} in a test`,
+        filename: '/repo/e2e/checkout.spec.ts',
+        code: code!,
+        errors: [{ messageId: 'raw', data: { call: `${subject}.${method}` } }],
+      })),
+      {
+        name: "Testing Library's screen, imported",
+        filename: '/repo/tests/Form.test.tsx',
+        code: `import { screen } from '@testing-library/react'\nscreen.debug()`,
+        errors: [{ messageId: 'raw', data: { call: 'screen.debug' } }],
+      },
+      {
+        name: 'Testing Library within and fireEvent, global or imported',
+        filename: '/repo/tests/Form.test.tsx',
+        code: `import { fireEvent } from '@testing-library/dom'
+        within(row).getByText('x'); fireEvent.click(button)`,
+        errors: [
+          { messageId: 'raw', data: { call: 'within' } },
+          { messageId: 'raw', data: { call: 'fireEvent.click' } },
+        ],
+      },
       {
         name: 'Cypress: cy.get',
         filename: '/repo/cypress/e2e/checkout.cy.ts',

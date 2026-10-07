@@ -6,8 +6,10 @@ Installs the harness authoring conventions for coding agents.
 npm i -D @harnessed-ts/claude && npx @harnessed-ts/claude install
 ```
 
-Writes `.claude/skills/harness/` (with component and page templates) and `.claude/rules/harness.md`,
-generating the file-placement table from your repo's actual layout, and creates
+Writes `.claude/skills/harness/` (with component and page templates),
+`.claude/rules/harness.md` (loaded while editing a harness), and
+`.claude/rules/harness-tests.md` (loaded while editing a test), generating the
+file-placement table from your repo's actual layout, and creates
 `harnessed.config.ts` if it is missing. The skill documents only the test runners
 the repo uses, detected from the root and its workspace packages; `--runners
 cypress,gherkin` chooses them instead.

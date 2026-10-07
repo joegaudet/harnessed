@@ -160,3 +160,51 @@ describe('install: the skill', () => {
     expect(skill).not.toMatch(/worked example/i)
   })
 })
+
+describe('install: speaking in behaviours', () => {
+  it('writes the harness rule, scoped to the harness directory', () => {
+    const root = repo({ 'package.json': pkg({}) })
+    install({ root, layout: { harnesses: 'lib/harnesses' } })
+    expect(read(join(root, '.claude/rules/harness.md'))).toMatch(
+      /^---\npaths: \['lib\/harnesses\/\*\*'\]/,
+    )
+  })
+
+  it('tells harness authors to speak in behaviours, with the portability test', () => {
+    const root = repo({ 'package.json': pkg({}) })
+    install({ root })
+    const rules = read(join(root, '.claude/rules/harness.md'))
+    expect(rules).toContain('### Speak in behaviours')
+    expect(rules).toContain('if this app were rebuilt natively')
+  })
+
+  it('mirrors the principle in the skill', () => {
+    const root = repo({ 'package.json': pkg({}) })
+    install({ root })
+    const skill = read(join(root, '.claude/skills/harness/SKILL.md'))
+    expect(skill).toContain('## Speak in behaviours')
+    expect(skill).toContain('if this app were rebuilt natively')
+  })
+
+  it('writes a test rule, scoped to the files every runner treats as tests', () => {
+    const root = repo({ 'package.json': pkg({}) })
+    const result = install({ root })
+    const path = join(root, '.claude/rules/harness-tests.md')
+    expect(result.written).toContain(path)
+
+    const rules = read(path)
+    const frontmatter = rules.slice(0, rules.indexOf('\n---', 4))
+    for (const glob of ['**/*.spec.*', '**/*.test.*', '**/*.cy.*', '**/*.steps.*', '**/steps/**']) {
+      expect(frontmatter).toContain(`'${glob}'`)
+    }
+    expect(rules).toContain('only their public methods')
+  })
+
+  it('reports the test rule in a dry run without writing it', () => {
+    const root = repo({ 'package.json': pkg({}) })
+    const result = install({ root, dryRun: true })
+    const path = join(root, '.claude/rules/harness-tests.md')
+    expect(result.written).toContain(path)
+    expect(existsSync(path)).toBe(false)
+  })
+})

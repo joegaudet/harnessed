@@ -20,7 +20,7 @@ pnpm lint
 pnpm format:check
 pnpm typecheck        # tsc --build across every package
 pnpm build
-pnpm test             # rule tests, then both conformance drivers
+pnpm test             # rule tests, package unit tests, then both conformance drivers
 ```
 
 **Before pushing, run the whole thing against a clean clone:**
