@@ -13,3 +13,5 @@ test-apps/*/tmp/
 .claude/
 # Raw footage, timelines and frames written by test-apps/demos `record`.
 test-apps/demos/raw/
+# npm writes these; the examples are installed with npm, not pnpm.
+examples/*/package-lock.json

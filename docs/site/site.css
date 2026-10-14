@@ -1,0 +1,731 @@
+/* Additions on top of Pico; everything else is its defaults. */
+
+/* Brand palette, shared with logo.svg and favicon.svg. */
+:root {
+  --brand-violet: #7c3aed;
+  --brand-amber: #f59e0b;
+  --brand-ink: #0f172a;
+  --brand-ink-light: #f8fafc;
+  --pico-font-family-sans-serif:
+    Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --pico-font-family: var(--pico-font-family-sans-serif);
+}
+
+/* Same selectors as Pico so these win by source order. */
+:root:not([data-theme='dark']),
+[data-theme='light'] {
+  --pico-primary: #7c3aed;
+  --pico-primary-background: #7c3aed;
+  --pico-primary-border: #7c3aed;
+  --pico-primary-underline: rgb(124 58 237 / 0.5);
+  --pico-primary-hover: #6d28d9;
+  --pico-primary-hover-background: #6d28d9;
+  --pico-primary-hover-border: #6d28d9;
+  --pico-primary-hover-underline: #6d28d9;
+  --pico-primary-focus: rgb(124 58 237 / 0.4);
+  --pico-primary-inverse: #fff;
+  --pico-text-selection-color: rgb(124 58 237 / 0.25);
+}
+
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --pico-primary: #a78bfa;
+    --pico-primary-background: #7c3aed;
+    --pico-primary-border: #7c3aed;
+    --pico-primary-underline: rgb(167 139 250 / 0.5);
+    --pico-primary-hover: #c4b5fd;
+    --pico-primary-hover-background: #6d28d9;
+    --pico-primary-hover-border: #6d28d9;
+    --pico-primary-hover-underline: #c4b5fd;
+    --pico-primary-focus: rgb(167 139 250 / 0.4);
+    --pico-primary-inverse: #fff;
+    --pico-text-selection-color: rgb(167 139 250 / 0.3);
+  }
+}
+
+[data-theme='dark'] {
+  --pico-primary: #a78bfa;
+  --pico-primary-background: #7c3aed;
+  --pico-primary-border: #7c3aed;
+  --pico-primary-underline: rgb(167 139 250 / 0.5);
+  --pico-primary-hover: #c4b5fd;
+  --pico-primary-hover-background: #6d28d9;
+  --pico-primary-hover-border: #6d28d9;
+  --pico-primary-hover-underline: #c4b5fd;
+  --pico-primary-focus: rgb(167 139 250 / 0.4);
+  --pico-primary-inverse: #fff;
+  --pico-text-selection-color: rgb(167 139 250 / 0.3);
+}
+
+/* Spacing scale. Every gap on the page comes from these. */
+:root {
+  --space-gutter: clamp(1rem, 4vw, 2rem);
+  --space-section: clamp(4rem, 9vw, 7rem);
+  --space-block: 2.5rem; /* section intro to its content */
+  --space-gap: 1.5rem; /* between cards in a grid */
+  --measure: 42rem; /* readable line length */
+}
+
+/* One fluid content width for nav, hero, sections and footer, replacing Pico's
+   stepped max-widths, which drop the side padding from 576px up. */
+.container {
+  max-width: calc(1200px + 2 * var(--space-gutter));
+  padding-inline: var(--space-gutter);
+}
+
+/* Eyebrow labels above headings */
+.eyebrow {
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pico-primary);
+}
+
+/* Sticky nav */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--pico-background-color);
+  background: color-mix(in srgb, var(--pico-background-color) 80%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.site-nav > .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Keeps the nav on one row at phone width. */
+@media (max-width: 575px) {
+  .site-nav .wide-only {
+    display: none;
+  }
+}
+
+.site-nav a {
+  color: var(--pico-muted-color);
+  font-weight: 500;
+}
+
+.site-nav a:hover {
+  color: var(--pico-color);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Hero band: dark in both schemes. */
+.hero-band {
+  --pico-color: #f8fafc;
+  --pico-h1-color: #f8fafc;
+  --pico-muted-color: #cbd5e1;
+  --pico-primary: #a78bfa;
+  position: relative;
+  isolation: isolate;
+  padding-block: 0;
+  overflow: hidden;
+  background-color: #0b0b14;
+  color: var(--pico-color);
+}
+
+/* Faint grid, faded out towards the edges. */
+.hero-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 75%);
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 75%);
+}
+
+.hero-band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(40rem 28rem at 75% 45%, rgb(124 58 237 / 0.28), transparent 70%);
+}
+
+.hero {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 4rem);
+  align-items: center;
+  padding-block: var(--space-section);
+}
+
+/* Lets the install pill scroll inside its column instead of widening the page. */
+.hero > *,
+.hero-copy > * {
+  min-width: 0;
+}
+
+@media (min-width: 992px) {
+  .hero {
+    grid-template-columns: 1.05fr 1fr;
+  }
+}
+
+.hero h1 {
+  margin-bottom: 1.25rem;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #a78bfa, #fbbf24);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.asterisk {
+  margin-left: 0.05em;
+  color: #fbbf24;
+  text-decoration: none;
+  vertical-align: super;
+  font-size: 0.5em;
+  line-height: 0;
+}
+
+.asterisk:hover {
+  color: #fcd34d;
+}
+
+.fine-print {
+  margin: 1.5rem 0 0;
+  max-width: 34rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #94a3b8;
+}
+
+.hero-sub {
+  max-width: 36rem;
+  margin-bottom: 2rem;
+  font-size: 1.125rem;
+  color: var(--pico-muted-color);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.hero-actions [role='button'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.hero-actions .ghost {
+  --pico-background-color: transparent;
+  --pico-border-color: rgb(255 255 255 / 0.25);
+  --pico-color: #f8fafc;
+}
+
+.hero-actions .ghost:is(:hover, :focus-visible) {
+  --pico-background-color: rgb(255 255 255 / 0.06);
+  --pico-border-color: rgb(255 255 255 / 0.5);
+  --pico-color: #fff;
+}
+
+.install {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 100%;
+  width: fit-content;
+  padding: 0.6rem 1.25rem;
+  overflow-x: auto;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.04);
+  font-family: var(--pico-font-family-monospace);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.install .prompt {
+  color: #64748b;
+  user-select: none;
+}
+
+.install code {
+  padding: 0;
+  background: none;
+  color: #e2e8f0;
+  font-size: inherit;
+}
+
+.install-note {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* Hero illustration: the band is always dark, so colours are fixed. */
+.hero-art {
+  width: 100%;
+  height: auto;
+}
+
+.hero-art .ropes use {
+  fill: none;
+  stroke: rgb(167 139 250 / 0.35);
+  stroke-width: 1;
+}
+
+/* Dashed means not yet supported: on the rope, the node and the legend. */
+.hero-art .ropes .todo {
+  stroke: rgb(148 163 184 / 0.25);
+  stroke-dasharray: 3 4;
+}
+
+.hero-art .ropes .gherkin {
+  stroke: rgb(245 158 11 / 0.5);
+}
+
+.hero-art .pulses use {
+  fill: none;
+  stroke: #c4b5fd;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 12 88;
+  animation: rope-pulse 3.2s linear infinite;
+  animation-delay: calc(var(--i) * -0.3s);
+}
+
+@keyframes rope-pulse {
+  from {
+    stroke-dashoffset: 12;
+  }
+  to {
+    stroke-dashoffset: -88;
+  }
+}
+
+.hero-art :is(.nodes, .legend) rect {
+  fill: #151527;
+  stroke: rgb(255 255 255 / 0.22);
+  stroke-width: 1;
+}
+
+.hero-art :is(.nodes, .legend) rect.todo {
+  fill: transparent;
+  stroke: rgb(148 163 184 / 0.45);
+  stroke-dasharray: 4 3;
+}
+
+.hero-art .nodes .gherkin {
+  fill: rgb(245 158 11 / 0.08);
+  stroke: rgb(245 158 11 / 0.5);
+}
+
+.hero-art .labels text {
+  fill: #e2e8f0;
+  font-family: var(--pico-font-family-sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hero-art .labels .todo {
+  fill: #64748b;
+}
+
+.hero-art .labels .gherkin {
+  fill: #fbbf24;
+  font-size: 12px;
+}
+
+.hero-art .groups text {
+  fill: #a78bfa;
+  font-family: var(--pico-font-family-sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero-art .legend text {
+  fill: #94a3b8;
+  font-family: var(--pico-font-family-sans-serif);
+  font-size: 12px;
+}
+
+.hero-art .card-glow {
+  fill: #7c3aed;
+  opacity: 0.55;
+  filter: url(#card-blur);
+}
+
+.hero-art .card-body {
+  fill: #0f172a;
+  stroke: url(#card-stroke);
+  stroke-width: 1;
+}
+
+.hero-art .card circle {
+  fill: #334155;
+}
+
+.hero-art .card text {
+  fill: #f8fafc;
+  font-family: var(--pico-font-family-monospace);
+  font-size: 14px;
+}
+
+.hero-art .card .muted {
+  fill: #94a3b8;
+}
+
+.hero-art .card .kw {
+  fill: #c4b5fd;
+}
+
+.hero-art .card .fn {
+  fill: #fbbf24;
+}
+
+/* Section rhythm: one gap between sections, never doubled. */
+body > main {
+  padding-block: 0 var(--space-section);
+}
+
+main > section {
+  margin: 0;
+  padding-top: var(--space-section);
+}
+
+main > section > h2 {
+  margin-bottom: 1rem;
+  font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* The intro paragraph under a heading: readable width, then a fixed gap. */
+main > section > h2 + p {
+  max-width: var(--measure);
+  margin-bottom: var(--space-block);
+  font-size: 1.0625rem;
+  color: var(--pico-muted-color);
+}
+
+main > section > h2:not(:has(+ p)) {
+  margin-bottom: var(--space-block);
+}
+
+main > section > h3 {
+  margin-block: var(--space-block) 0.75rem;
+}
+
+main > section p {
+  max-width: var(--measure);
+}
+
+/* Cards in a grid space by the grid gap, not their own margins. */
+.grid {
+  gap: var(--space-gap);
+}
+
+.grid > article,
+.grid > pre,
+.features article {
+  margin: 0;
+}
+
+.grid + * {
+  margin-top: var(--space-gap);
+}
+
+/* Use cases: stacked full width, so their code blocks have room. */
+.use-cases {
+  display: grid;
+  gap: var(--space-gap);
+}
+
+.use-cases > article {
+  margin: 0;
+}
+
+.use-cases pre:last-child,
+.grid > pre {
+  margin-bottom: 0;
+}
+
+#setup-dom {
+  margin-top: 0;
+}
+
+details {
+  margin-bottom: 0.5rem;
+}
+
+/* Features */
+.features {
+  display: grid;
+  gap: var(--space-gap);
+}
+
+@media (min-width: 576px) {
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .features {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.features article {
+  margin: 0;
+  border: 1px solid var(--pico-muted-border-color);
+  box-shadow: none;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.features article:hover {
+  border-color: var(--pico-primary-underline);
+  transform: translateY(-2px);
+}
+
+.features h3 {
+  margin-block: 1rem 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.features p {
+  margin: 0;
+  color: var(--pico-muted-color);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--pico-primary);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .pulses {
+    display: none;
+  }
+
+  .features article {
+    transition: none;
+  }
+
+  .features article:hover {
+    transform: none;
+  }
+}
+
+/* Footer */
+body > footer {
+  border-top: 1px solid var(--pico-muted-border-color);
+  padding-block: 2.5rem;
+  color: var(--pico-muted-color);
+}
+
+body > footer a {
+  color: inherit;
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-gap);
+}
+
+.media-grid img {
+  display: block;
+  width: 100%;
+  border-radius: var(--pico-border-radius);
+}
+
+.media-open {
+  display: block;
+  border-radius: var(--pico-border-radius);
+  cursor: zoom-in;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.media-open:is(:hover, :focus-visible) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgb(124 58 237 / 0.25);
+}
+
+/* Lightbox: a near-fullscreen native <dialog>, so Esc and focus come for free. */
+.lightbox {
+  width: min(96vw, 1600px);
+  max-width: none;
+  height: auto;
+  max-height: 96vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgb(5 5 12 / 0.88);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.lightbox figure {
+  margin: 0;
+}
+
+.lightbox img {
+  display: block;
+  width: 100%;
+  max-height: calc(96vh - 3rem);
+  object-fit: contain;
+  border-radius: 12px;
+  background: #0b0b14;
+}
+
+.lightbox figcaption {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0.25rem 0;
+  color: #e2e8f0;
+}
+
+.lightbox-count {
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.lightbox button {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 999px;
+  background: rgb(15 23 42 / 0.75);
+  color: #f8fafc;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.lightbox button:is(:hover, :focus-visible) {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.lightbox-prev,
+.lightbox-next {
+  top: calc(50% - 1.375rem - 1.5rem);
+}
+
+.lightbox-prev {
+  left: 0.75rem;
+}
+
+.lightbox-next {
+  right: 0.75rem;
+}
+
+.lightbox-close {
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-open {
+    transition: none;
+  }
+
+  .media-open:is(:hover, :focus-visible) {
+    transform: none;
+  }
+}
+
+.embed iframe {
+  width: 100%;
+  height: 32rem;
+  border: 0;
+  border-radius: var(--pico-border-radius);
+}
+
+/* Code blocks: one editor-style surface in both schemes. Pico pads the inner
+   <code> and Prism pads the <pre>; only the <pre> pads here, so indents don't double. */
+pre,
+pre[class*='language-'] {
+  margin: 0 0 var(--pico-typography-spacing-vertical);
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 12px;
+  background: #0d1117;
+  color: #e2e8f0;
+  font-size: clamp(0.75rem, 0.65rem + 0.35vw, 0.875rem);
+  line-height: 1.65;
+  tab-size: 2;
+}
+
+pre > code,
+pre > code[class*='language-'] {
+  display: block;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-family: var(--pico-font-family-monospace);
+  font-size: inherit;
+  line-height: inherit;
+  text-shadow: none;
+  /* Wrap long lines instead of scrolling sideways. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Side-by-side code pairs only once each half is wide enough to read. */
+@media (max-width: 1099px) {
+  .grid:has(> article > pre, > pre) {
+    grid-template-columns: 1fr;
+  }
+}
+
+:root:not([data-theme='dark']) pre {
+  border-color: transparent;
+}
+
+td img {
+  display: block;
+  margin-block: 0.15rem;
+}

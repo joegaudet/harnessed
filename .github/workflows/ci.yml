@@ -77,6 +77,27 @@ jobs:
       # qunit assertion adapters, and the release script's publish plan.
       - run: pnpm test:units
 
+  examples:
+    # The homepage embeds these in StackBlitz, which installs @harnessed-ts/* from
+    # npm. Running them the same way keeps the embeds from rotting.
+    name: examples (${{ matrix.example }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [vitest-dom]
+    defaults:
+      run:
+        working-directory: examples/${{ matrix.example }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npx tsc -p .
+      - run: npm run test:run
+
   conformance-dom:
     name: conformance/dom (node ${{ matrix.node }}, tl-dom ${{ matrix.testing-library }})
     runs-on: ubuntu-latest

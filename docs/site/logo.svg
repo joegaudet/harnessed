@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="t">
+  <title id="t">harnessed</title>
+  <style>
+    .a { stop-color: #7c3aed; }
+    .b { stop-color: #5b21b6; }
+    @media (prefers-color-scheme: dark) {
+      .a { stop-color: #8b5cf6; }
+      .b { stop-color: #7c3aed; }
+    }
+  </style>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop class="a" offset="0"/>
+      <stop class="b" offset="1"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <!-- an "h" whose strap splits into three runners below the buckle -->
+  <g fill="none" stroke="#fff">
+    <path stroke-width="9" d="M21 13V51M21 37A11.25 11.25 0 0 1 43.5 37V41"/>
+    <path stroke-width="2" d="M40 42V51M43.5 42V51M47 42V51"/>
+  </g>
+  <rect x="37.5" y="39" width="12" height="3.5" rx="1.2" fill="#f59e0b"/>
+</svg>

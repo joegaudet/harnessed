@@ -15,6 +15,8 @@ export default tseslint.config(
       'packages/claude/assets/**',
       // Each runner's app brings its own tooling and TypeScript project.
       'test-apps/**',
+      // Standalone StackBlitz projects, installed from npm rather than the workspace.
+      'examples/**',
     ],
   },
   js.configs.recommended,
