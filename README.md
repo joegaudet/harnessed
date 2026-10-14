@@ -1,8 +1,9 @@
 # harnessed
 
-One page-object API that runs under every major JavaScript test runner: Testing
-Library, Playwright, Ember, Cypress, WebdriverIO, Vitest browser mode, Puppeteer
-and TestCafe, with Gherkin on top.
+Test harnesses for components and pages: like page objects, but for components
+too. One API that runs under every major JavaScript test runner: Testing Library,
+Playwright, Ember, Cypress, WebdriverIO, Vitest browser mode, Puppeteer and
+TestCafe, with Gherkin on top.
 
 **Website:** [joegaudet.com/harnessed](https://joegaudet.com/harnessed/)
 
