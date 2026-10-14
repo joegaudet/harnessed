@@ -565,8 +565,115 @@ body > footer a {
 }
 
 .media-grid img {
+  display: block;
   width: 100%;
   border-radius: var(--pico-border-radius);
+}
+
+.media-open {
+  display: block;
+  border-radius: var(--pico-border-radius);
+  cursor: zoom-in;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.media-open:is(:hover, :focus-visible) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgb(124 58 237 / 0.25);
+}
+
+/* Lightbox: a near-fullscreen native <dialog>, so Esc and focus come for free. */
+.lightbox {
+  width: min(96vw, 1600px);
+  max-width: none;
+  height: auto;
+  max-height: 96vh;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgb(5 5 12 / 0.88);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.lightbox figure {
+  margin: 0;
+}
+
+.lightbox img {
+  display: block;
+  width: 100%;
+  max-height: calc(96vh - 3rem);
+  object-fit: contain;
+  border-radius: 12px;
+  background: #0b0b14;
+}
+
+.lightbox figcaption {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0.25rem 0;
+  color: #e2e8f0;
+}
+
+.lightbox-count {
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.lightbox button {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 999px;
+  background: rgb(15 23 42 / 0.75);
+  color: #f8fafc;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.lightbox button:is(:hover, :focus-visible) {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.lightbox-prev,
+.lightbox-next {
+  top: calc(50% - 1.375rem - 1.5rem);
+}
+
+.lightbox-prev {
+  left: 0.75rem;
+}
+
+.lightbox-next {
+  right: 0.75rem;
+}
+
+.lightbox-close {
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-open {
+    transition: none;
+  }
+
+  .media-open:is(:hover, :focus-visible) {
+    transform: none;
+  }
 }
 
 .embed iframe {

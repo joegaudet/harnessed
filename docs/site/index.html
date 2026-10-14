@@ -332,43 +332,48 @@ await expect(form).toBeAbsent()</code></pre>
         </p>
         <div class="media-grid">
           <figure>
-            <img
-              src="media/rtl.gif"
-              alt="The demo under React Testing Library in jsdom, replayed beside demo.ts"
-              loading="lazy"
-            />
+            <a href="media/rtl.gif" class="media-open"
+              ><img
+                src="media/rtl.gif"
+                alt="The demo under React Testing Library in jsdom, replayed beside demo.ts"
+                loading="lazy"
+            /></a>
             <figcaption>Testing Library · React</figcaption>
           </figure>
           <figure>
-            <img
-              src="media/playwright-react.gif"
-              alt="The demo under Playwright against the React app"
-              loading="lazy"
-            />
+            <a href="media/playwright-react.gif" class="media-open"
+              ><img
+                src="media/playwright-react.gif"
+                alt="The demo under Playwright against the React app"
+                loading="lazy"
+            /></a>
             <figcaption>Playwright · React</figcaption>
           </figure>
           <figure>
-            <img
-              src="media/playwright-ember.gif"
-              alt="The demo under Playwright against the Ember app"
-              loading="lazy"
-            />
+            <a href="media/playwright-ember.gif" class="media-open"
+              ><img
+                src="media/playwright-ember.gif"
+                alt="The demo under Playwright against the Ember app"
+                loading="lazy"
+            /></a>
             <figcaption>Playwright · Ember</figcaption>
           </figure>
           <figure>
-            <img
-              src="media/cypress-react.gif"
-              alt="The demo under Cypress against the React app"
-              loading="lazy"
-            />
+            <a href="media/cypress-react.gif" class="media-open"
+              ><img
+                src="media/cypress-react.gif"
+                alt="The demo under Cypress against the React app"
+                loading="lazy"
+            /></a>
             <figcaption>Cypress · React</figcaption>
           </figure>
           <figure>
-            <img
-              src="media/cypress-ember.gif"
-              alt="The demo under Cypress against the Ember app"
-              loading="lazy"
-            />
+            <a href="media/cypress-ember.gif" class="media-open"
+              ><img
+                src="media/cypress-ember.gif"
+                alt="The demo under Cypress against the Ember app"
+                loading="lazy"
+            /></a>
             <figcaption>Cypress · Ember</figcaption>
           </figure>
         </div>
@@ -772,6 +777,20 @@ export default [harnessed.configs.recommended]</code></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-gherkin.min.js"></script>
+
+    <dialog id="lightbox" class="lightbox" aria-label="Demo recordings">
+      <figure>
+        <img alt="" />
+        <figcaption>
+          <span class="lightbox-caption"></span>
+          <span class="lightbox-count" aria-live="polite"></span>
+        </figcaption>
+      </figure>
+      <button type="button" class="lightbox-prev" aria-label="Previous recording">‹</button>
+      <button type="button" class="lightbox-next" aria-label="Next recording">›</button>
+      <button type="button" class="lightbox-close" aria-label="Close">×</button>
+    </dialog>
+
     <script>
       // Booting StackBlitz on page load is heavy; wait for the click.
       document.getElementById('load-stackblitz').addEventListener('click', () => {
@@ -782,6 +801,48 @@ export default [harnessed.configs.recommended]</code></pre>
         frame.loading = 'lazy'
         document.getElementById('stackblitz').replaceChildren(frame)
       })
+
+      // Lightbox carousel over the demo GIFs. Without JS the links open the GIF itself.
+      {
+        const links = [...document.querySelectorAll('.media-open')]
+        const box = document.getElementById('lightbox')
+        const img = box.querySelector('img')
+        const caption = box.querySelector('.lightbox-caption')
+        const count = box.querySelector('.lightbox-count')
+        let index = 0
+
+        const show = i => {
+          index = (i + links.length) % links.length
+          const link = links[index]
+          img.src = link.href
+          img.alt = link.querySelector('img').alt
+          caption.textContent = link.closest('figure').querySelector('figcaption').textContent
+          count.textContent = `${index + 1} / ${links.length}`
+        }
+
+        links.forEach((link, i) =>
+          link.addEventListener('click', e => {
+            e.preventDefault()
+            show(i)
+            box.showModal()
+          }),
+        )
+        box.querySelector('.lightbox-prev').addEventListener('click', () => show(index - 1))
+        box.querySelector('.lightbox-next').addEventListener('click', () => show(index + 1))
+        box.querySelector('.lightbox-close').addEventListener('click', () => box.close())
+        // A click on the backdrop (the dialog itself, not its content) closes it.
+        box.addEventListener('click', e => e.target === box && box.close())
+        box.addEventListener('keydown', e => {
+          if (e.key === 'ArrowLeft') show(index - 1)
+          if (e.key === 'ArrowRight') show(index + 1)
+        })
+        let touchX = null
+        box.addEventListener('touchstart', e => (touchX = e.touches[0].clientX), { passive: true })
+        box.addEventListener('touchend', e => {
+          const dx = e.changedTouches[0].clientX - touchX
+          if (Math.abs(dx) > 40) show(index + (dx < 0 ? 1 : -1))
+        })
+      }
     </script>
   </body>
 </html>
