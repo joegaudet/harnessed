@@ -831,9 +831,11 @@ A story names its harness in `parameters`, and `play` receives it. The harness
 drives the canvas through Storybook's own `userEvent`, so the Interactions panel
 shows each harness method as a step, `LoginFormHarness.signInAs("ada@example.com", "•••")`,
 with its clicks and keystrokes nested under it. Arguments whose parameter name
-looks like a secret are masked; a minified `storybook build` renames parameters
-and classes, so there only secret-looking object keys are masked. The harness matchers work on `storybook/test`'s
-`expect`.
+looks like a secret (`password`, `token`, `apiKey`, `pin`, `otp`, `auth`…) are
+masked; a minified `storybook build` renames parameters and classes, so there
+only secret-looking object keys are masked. Step labels are visible to anyone
+who can open a published Storybook, so keep real credentials out of stories.
+The harness matchers work on `storybook/test`'s `expect`.
 
 ```tsx
 const meta = {

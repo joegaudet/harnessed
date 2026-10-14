@@ -26,8 +26,8 @@ class FormHarness extends ComponentHarness {
     return `${email}/${password}`
   }
 
-  async fillIn(credentials: { email: string; password: string }): Promise<void> {
-    void credentials
+  async fillIn(fields: { email: string; password: string }): Promise<void> {
+    void fields
   }
 
   async nameValue(): Promise<string> {
@@ -158,6 +158,39 @@ describe('stepLabel', () => {
     expect(
       stepLabel('FormHarness', FormHarness.prototype.fillIn, [{ email: 'a@b.c', password: 'x' }]),
     ).toBe('FormHarness.fillIn({"email":"a@b.c","password":"•••"})')
+  })
+
+  it.each([
+    'apiKey',
+    'api_key',
+    'APIKey',
+    'pin',
+    'pinCode',
+    'otp',
+    'credential',
+    'auth',
+    'authHeader',
+    'passcode',
+  ])('redacts an object key named %s', key => {
+    expect(stepLabel('FormHarness', FormHarness.prototype.fillIn, [{ [key]: 'x' }])).toBe(
+      `FormHarness.fillIn({"${key}":"•••"})`,
+    )
+  })
+
+  it.each(['author', 'keyboard', 'monkey', 'typing', 'spinner', 'shopping', 'email', 'name'])(
+    'shows an object key named %s',
+    key => {
+      expect(stepLabel('FormHarness', FormHarness.prototype.fillIn, [{ [key]: 'x' }])).toBe(
+        `FormHarness.fillIn({"${key}":"x"})`,
+      )
+    },
+  )
+
+  it('redacts a positional argument named like an API key', () => {
+    const method = async (id: string, apiKey: string) => `${id}${apiKey}`
+    expect(stepLabel('ApiHarness', method, ['42', 'sk-live'], 'connect')).toBe(
+      'ApiHarness.connect("42", "•••")',
+    )
   })
 
   it('truncates long arguments', () => {

@@ -85,13 +85,14 @@ function encodeValue(key: string, value: unknown): string {
     if (value === undefined) return '!undefined'
     if (value === null) return '!null'
     if (typeof value === 'boolean') return `!${value}`
-    if (typeof value === 'number') return String(value)
+    // NaN, Infinity and exponents (`1e+21`, whose `+` reads back as a space) do not survive.
+    if (typeof value === 'number' && NUMERIC.test(String(value))) return String(value)
     if (typeof value === 'string' && SAFE_STRING.test(value) && !NUMERIC.test(value)) {
       return value.replaceAll(' ', '+')
     }
   }
   throw new Error(
-    `harnessed: arg \`${key}\` = ${JSON.stringify(value)} cannot travel in a Storybook URL — ` +
+    `harnessed: arg \`${key}\` = ${typeof value === 'number' ? value : JSON.stringify(value)} cannot travel in a Storybook URL — ` +
       'Storybook drops anything but letters, digits, spaces, `_`, `-`, numbers and booleans ' +
       '(and reads a numeric string back as a number), so the story would render without it. ' +
       'Fix: add a story with that state in its `args`.',

@@ -3,7 +3,11 @@ import { ScopedHarness } from '@harnessed-ts/core'
 /** Storybook's `context.step`, narrowed to what the proxy needs. */
 export type StepRunner = (label: string, play: () => Promise<void>) => Promise<unknown> | unknown
 
-const SECRET = /pass|secret|token/i
+const SECRET = /pass|secret|token|credential/i
+// Short names match whole words only, so `author`, `keyboard` and `typing` stay visible.
+const SECRET_WORD = /^(key|pin|otp|auth)$/i
+// camelCase, PascalCase acronyms (`APIKey`) and snake/kebab-case word breaks.
+const WORD_BREAK = /[^a-zA-Z0-9]+|(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])/
 const REDACTED = '•••'
 const MAX_ARG = 40
 
@@ -79,9 +83,13 @@ export function stepLabel(
 ): string {
   const params = parameterNames(method)
   const shown = args.map((arg, index) =>
-    SECRET.test(params[index] ?? '') ? JSON.stringify(REDACTED) : formatArg(arg),
+    isSecret(params[index] ?? '') ? JSON.stringify(REDACTED) : formatArg(arg),
   )
   return `${className}.${name}(${shown.join(', ')})`
+}
+
+function isSecret(name: string): boolean {
+  return SECRET.test(name) || name.split(WORD_BREAK).some(word => SECRET_WORD.test(word))
 }
 
 function formatArg(arg: unknown): string {
@@ -91,8 +99,7 @@ function formatArg(arg: unknown): string {
     return JSON.stringify(arg.length > MAX_ARG ? `${arg.slice(0, MAX_ARG)}…` : arg)
   }
   const json =
-    JSON.stringify(arg, (key, value: unknown) => (SECRET.test(key) ? REDACTED : value)) ??
-    String(arg)
+    JSON.stringify(arg, (key, value: unknown) => (isSecret(key) ? REDACTED : value)) ?? String(arg)
   return json.length > MAX_ARG ? `${json.slice(0, MAX_ARG)}…` : json
 }
 

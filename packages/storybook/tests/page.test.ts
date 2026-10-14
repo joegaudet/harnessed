@@ -49,6 +49,24 @@ describe('storyUrl', () => {
     )
   })
 
+  it('passes plain decimal numbers through', () => {
+    expect(storyUrl(stories, 'Default', { args: { count: -2, ratio: 0.5 } })).toBe(
+      '/iframe.html?id=forms-login-form--default&viewMode=story&args=count:-2;ratio:0.5',
+    )
+  })
+
+  it.each([NaN, Infinity, -Infinity, 1e21, 1e-7])(
+    'refuses the number %s, which Storybook cannot read back from the URL',
+    count => {
+      expect(() => storyUrl(stories, 'Default', { args: { count } })).toThrow(
+        new RegExp(
+          `harnessed: arg \`count\` = ${String(count).replace('+', '\\+')} .*Storybook drops`,
+          's',
+        ),
+      )
+    },
+  )
+
   it('refuses an arg name Storybook would drop, whatever its value', () => {
     expect(() => storyUrl(stories, 'Default', { args: { 'a&b': true } })).toThrow(
       /harnessed: arg `a&b`/,
