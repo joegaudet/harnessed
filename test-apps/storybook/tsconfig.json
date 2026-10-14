@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": []
+  },
+  "include": [".storybook", "stories", "tests", "specs", "vitest.config.ts", "playwright.config.ts"]
+}

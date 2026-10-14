@@ -1,5 +1,6 @@
 import type { Rule } from 'eslint'
 import {
+  isDomQuery,
   isLocatorMethod,
   queryContextOf,
   rawDomHelperOf,
@@ -11,10 +12,13 @@ import {
   harnessDirsOf,
   inAnyDir,
   isRunnerSupportFile,
+  isStoriesFile,
   testDirsOf,
 } from '../shared'
 
 const SUBJECTS = new Set(['page', 'screen'])
+/** In a stories file, the play context's `canvas` is Testing Library bound to the story. */
+const STORY_SUBJECTS = new Set([...SUBJECTS, 'canvas'])
 
 /**
  * A raw locator in a test re-couples that test to the DOM the harness exists to
@@ -32,7 +36,7 @@ const rule: Rule.RuleModule = {
     type: 'suggestion',
     docs: {
       description:
-        "Disallow a runner's raw DOM queries and helpers in tests — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe, the DOM — when a harness should be used.",
+        "Disallow a runner's raw DOM queries and helpers in tests and Storybook play functions — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe, Storybook, the DOM — when a harness should be used.",
       recommended: true,
     },
     schema: [dirOptionSchema],
@@ -41,7 +45,8 @@ const rule: Rule.RuleModule = {
     },
   },
   create(context) {
-    if (!inAnyDir(context.filename, testDirsOf(context))) return {}
+    const stories = isStoriesFile(context.filename)
+    if (!stories && !inAnyDir(context.filename, testDirsOf(context))) return {}
     // A harness under `tests/harness/` is the harness rule's to police, and its
     // waitForReady() may legitimately wait on the DOM.
     if (inAnyDir(context.filename, harnessDirsOf(context))) return {}
@@ -71,7 +76,21 @@ const rule: Rule.RuleModule = {
             : node.object.type === 'MemberExpression' && node.object.property.type === 'Identifier'
               ? node.object.property.name
               : ''
-        if (!SUBJECTS.has(subject) || !isLocatorMethod(node.property.name)) {
+        if (
+          stories &&
+          node.object.type === 'Identifier' &&
+          node.object.name === 'canvasElement' &&
+          isDomQuery(node.property.name)
+        ) {
+          context.report({
+            node,
+            messageId: 'raw',
+            data: { call: `canvasElement.${node.property.name}` },
+          })
+          return
+        }
+        const subjects = stories ? STORY_SUBJECTS : SUBJECTS
+        if (!subjects.has(subject) || !isLocatorMethod(node.property.name)) {
           const helper = rawDomHelperOf(node as unknown as Rule.Node, queries, sourceCode)
           if (helper !== undefined) {
             context.report({ node, messageId: 'raw', data: { call: helper.call } })

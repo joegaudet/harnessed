@@ -3,7 +3,7 @@
 Test harnesses for components and pages: like page objects, but for components
 too. One API that runs under every major JavaScript test runner: Testing Library,
 Playwright, Ember, Cypress, WebdriverIO, Vitest browser mode, Puppeteer and
-TestCafe, with Gherkin on top.
+TestCafe, with Gherkin on top, and inside Storybook's play functions.
 
 **Website:** [joegaudet.com/harnessed](https://joegaudet.com/harnessed/)
 
@@ -62,18 +62,19 @@ Inspired by [Angular CDK Component Harnesses][cdk],
 
 ## Support matrix
 
-| Runner                                                 | Package          | Component harnesses    | Pages and `goto()`        | Assertions              | Gherkin                                            | Frames                           | Conformance in CI  |
-| ------------------------------------------------------ | ---------------- | ---------------------- | ------------------------- | ----------------------- | -------------------------------------------------- | -------------------------------- | ------------------ |
-| [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                      | constructs; no navigation | `expect` matchers       | —                                                  | same-origin                      | ✓                  |
-| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                         | `expect` matchers       | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓ React and Ember  |
-| [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests      | ✓ application tests       | `assert.harness`        | [ember-cli-yadda](#ember-cli-yadda)                | same-origin                      | ✓                  |
-| [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                      | ✓ application tests       | Chai                    | —                                                  | same-origin                      | ✓                  |
-| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`          | Chai                    | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓ React and Ember  |
-| [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness` | constructs; no navigation | Chai                    | —                                                  | same-origin                      | ✓                  |
-| [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                      | ✓                         | `expect` matchers, Chai | —                                                  | cross-origin                     | ✓ BiDi and Classic |
-| [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                      | constructs; no navigation | `expect` matchers       | —                                                  | same-origin, Playwright provider | ✓                  |
-| [Puppeteer](#using-with-puppeteer)                     | `puppeteer`      | ✓                      | ✓                         | `expect` matchers       | —                                                  | cross-origin                     | ✓                  |
-| [TestCafe](#using-with-testcafe)                       | `testcafe`       | ✓                      | ✓                         | `t.expect`, Chai        | —                                                  | same-origin                      | ✓                  |
+| Runner                                                 | Package          | Component harnesses    | Pages and `goto()`                            | Assertions                | Gherkin                                            | Frames                           | Conformance in CI  |
+| ------------------------------------------------------ | ---------------- | ---------------------- | --------------------------------------------- | ------------------------- | -------------------------------------------------- | -------------------------------- | ------------------ |
+| [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin                      | ✓                  |
+| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                                             | `expect` matchers         | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓ React and Ember  |
+| [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests      | ✓ application tests                           | `assert.harness`          | [ember-cli-yadda](#ember-cli-yadda)                | same-origin                      | ✓                  |
+| [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                      | ✓ application tests                           | Chai                      | —                                                  | same-origin                      | ✓                  |
+| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`                              | Chai                      | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓ React and Ember  |
+| [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness` | constructs; no navigation                     | Chai                      | —                                                  | same-origin                      | ✓                  |
+| [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                      | ✓                                             | `expect` matchers, Chai   | —                                                  | cross-origin                     | ✓ BiDi and Classic |
+| [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin, Playwright provider | ✓                  |
+| [Puppeteer](#using-with-puppeteer)                     | `puppeteer`      | ✓                      | ✓                                             | `expect` matchers         | —                                                  | cross-origin                     | ✓                  |
+| [TestCafe](#using-with-testcafe)                       | `testcafe`       | ✓                      | ✓                                             | `t.expect`, Chai          | —                                                  | same-origin                      | ✓                  |
+| [Storybook](#using-with-storybook)                     | `storybook`      | ✓ in `play()`          | ✓ `StoryPage`, from any runner that navigates | `storybook/test` `expect` | —                                                  | same-origin                      | ✓ React            |
 
 Every package is `@harnessed-ts/<name>`. "Conformance" means the shared catalog in
 `packages/conformance` runs, unchanged, under that runner on every pull request —
@@ -83,7 +84,10 @@ Vite and served as an app in a real browser. "Constructs; no
 navigation": a page builds and reads under that runner, but `goto()` and the URL
 members are refused, since there is no address bar (`urlFor()` still works).
 `HarnessedWorld`, the cucumber-js adapter, takes any env; CI runs it with
-Playwright.
+Playwright. Storybook runs it three ways: as portable stories, through
+`StoryPage` under Playwright, and the stories' own play functions through its
+Vitest addon. Its Ember support is webpack-only and the Vitest addon needs Vite,
+so Storybook has no Ember run.
 
 ### UI frameworks
 
@@ -808,6 +812,78 @@ Differences from the dom driver:
 - The driver adds one locator method, `harnessedSelector`, through
   `locators.extend`, to chain into frames. It is not meant for tests.
 
+## Using with Storybook
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/storybook @testing-library/dom @testing-library/user-event
+```
+
+Storybook 9 or later. One line in the preview puts a harness in every play
+function:
+
+```ts
+// .storybook/preview.ts
+import { harnessed } from '@harnessed-ts/storybook'
+export default { ...harnessed() } satisfies Preview
+```
+
+A story names its harness in `parameters`, and `play` receives it. The harness
+drives the canvas through Storybook's own `userEvent`, so the Interactions panel
+shows each harness method as a step, `LoginFormHarness.signInAs("ada@example.com", "•••")`,
+with its clicks and keystrokes nested under it. Arguments whose parameter name
+looks like a secret are masked; a minified `storybook build` renames parameters
+and classes, so there only secret-looking object keys are masked. The harness matchers work on `storybook/test`'s
+`expect`.
+
+```tsx
+const meta = {
+  title: 'Forms/Login Form',
+  component: LoginForm,
+  parameters: { harness: LoginFormHarness },
+} satisfies Meta<typeof LoginForm>
+export default meta
+
+type Story = WithHarness<StoryObj<typeof meta>, LoginFormHarness>
+
+export const WrongPassword: Story = {
+  play: async ({ harness }) => {
+    await harness.signInAs('ada@example.com', 'guess')
+    await expect(await harness.error()).toBe('Wrong password')
+  },
+}
+```
+
+Storybook's Vitest addon runs those play functions as tests, and portable
+stories (`composeStories`) run them anywhere else, with no extra setup.
+
+**Stories as fixtures.** `StoryPage` (`@harnessed-ts/storybook/page`) opens a
+story by URL from any runner that can navigate (Playwright, WebdriverIO,
+Puppeteer and the rest), so a browser suite reuses the stories instead of
+building its own test pages:
+
+```ts
+import { StoryPage } from '@harnessed-ts/storybook/page'
+import * as LoginStories from './LoginForm.stories'
+
+const story = await StoryPage.goto(pw(page), LoginStories, 'WrongPassword', { play: false })
+const form = story.harness(LoginFormHarness)
+```
+
+- The story id comes from the imported module: the meta's `title` (or `id`) and
+  the export name, as Storybook derives it. A meta with neither is refused.
+- **`play`** runs by default, as it does in Storybook, and `goto` waits until it
+  has finished. `play: false` opens the story before it plays. A play function
+  that throws fails `goto` with its own error.
+- **`args` and `globals`** are typed from the story and encoded in Storybook's
+  URL syntax. Storybook only applies an arg that has an argType, and only plain
+  values (letters, digits, spaces, `_`, `-`, numbers, booleans). Anything else is
+  refused here rather than silently dropped there.
+
+The ESLint plugin treats `*.stories.*` files as tests: `canvas.getBy*`, `within`
+from `storybook/test`, and `canvasElement.querySelector` are flagged in favour of
+the harness. Ember is not supported, since `@storybook/ember` builds only with
+webpack.
+
 ## Using with Puppeteer
 
 ```bash
@@ -1144,25 +1220,26 @@ config alone.
 
 ## Packages
 
-| Package                        | What                                                                                                                                                 |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@harnessed-ts/core`           | `Query`, `Selector`, `ComponentHarness`, the decorators, the driver registry, `configure()`, the Vite plugin, matcher implementations                |
-| `@harnessed-ts/dom`            | Testing Library driver + matchers. No React dependency                                                                                               |
-| `@harnessed-ts/resolve`        | the shared selector resolver, plus an injectable build for remote drivers. A driver author's dependency                                              |
-| `@harnessed-ts/playwright`     | Playwright driver + matchers, `createApiStubs`, and the deprecated `withWorld`                                                                       |
-| `@harnessed-ts/ember`          | Ember driver over `@ember/test-helpers`: rendering and application tests                                                                             |
-| `@harnessed-ts/vitest-browser` | Vitest browser mode driver + matchers: in-page resolution, provider-native events                                                                    |
-| `@harnessed-ts/puppeteer`      | Puppeteer driver + matchers over the injected resolver; cross-origin frames                                                                          |
-| `@harnessed-ts/webdriverio`    | WebdriverIO driver + matchers over the injected resolver; BiDi and Classic, cross-origin frames                                                      |
-| `@harnessed-ts/cypress`        | Cypress driver: the `cy.harness` bridge and `cy.visitPage`, e2e and component testing                                                                |
-| `@harnessed-ts/testcafe`       | TestCafe driver over the injected resolver                                                                                                           |
-| `@harnessed-ts/gherkin`        | Gherkin: a scenario-scoped world, a typed page registry and `{page}`; adapters for playwright-bdd, cucumber-js, Cypress cucumber and ember-cli-yadda |
-| `@harnessed-ts/qunit`          | `assert.harness(x)` checks for QUnit and ember-qunit                                                                                                 |
-| `@harnessed-ts/chai`           | `expect(x).to.be.absent` and friends for Chai: Mocha, Cypress, WebdriverIO                                                                           |
-| `@harnessed-ts/page`           | `PageHarness`                                                                                                                                        |
-| `@harnessed-ts/route`          | deprecated: re-exports `PageHarness` as `RouteHarness` for one release                                                                               |
-| `@harnessed-ts/eslint-plugin`  | the nine rules above                                                                                                                                 |
-| `@harnessed-ts/claude`         | authoring skill, rules, templates, and the install CLI                                                                                               |
+| Package                        | What                                                                                                                                                             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@harnessed-ts/core`           | `Query`, `Selector`, `ComponentHarness`, the decorators, the driver registry, `configure()`, the Vite plugin, matcher implementations                            |
+| `@harnessed-ts/dom`            | Testing Library driver + matchers. No React dependency                                                                                                           |
+| `@harnessed-ts/resolve`        | the shared selector resolver, plus an injectable build for remote drivers. A driver author's dependency                                                          |
+| `@harnessed-ts/playwright`     | Playwright driver + matchers, `createApiStubs`, and the deprecated `withWorld`                                                                                   |
+| `@harnessed-ts/ember`          | Ember driver over `@ember/test-helpers`: rendering and application tests                                                                                         |
+| `@harnessed-ts/vitest-browser` | Vitest browser mode driver + matchers: in-page resolution, provider-native events                                                                                |
+| `@harnessed-ts/puppeteer`      | Puppeteer driver + matchers over the injected resolver; cross-origin frames                                                                                      |
+| `@harnessed-ts/webdriverio`    | WebdriverIO driver + matchers over the injected resolver; BiDi and Classic, cross-origin frames                                                                  |
+| `@harnessed-ts/cypress`        | Cypress driver: the `cy.harness` bridge and `cy.visitPage`, e2e and component testing                                                                            |
+| `@harnessed-ts/testcafe`       | TestCafe driver over the injected resolver                                                                                                                       |
+| `@harnessed-ts/storybook`      | `harnessed()` for Storybook's preview: a harness in every play function, each method a step, the matchers on its `expect`; `StoryPage` opens stories as fixtures |
+| `@harnessed-ts/gherkin`        | Gherkin: a scenario-scoped world, a typed page registry and `{page}`; adapters for playwright-bdd, cucumber-js, Cypress cucumber and ember-cli-yadda             |
+| `@harnessed-ts/qunit`          | `assert.harness(x)` checks for QUnit and ember-qunit                                                                                                             |
+| `@harnessed-ts/chai`           | `expect(x).to.be.absent` and friends for Chai: Mocha, Cypress, WebdriverIO                                                                                       |
+| `@harnessed-ts/page`           | `PageHarness`                                                                                                                                                    |
+| `@harnessed-ts/route`          | deprecated: re-exports `PageHarness` as `RouteHarness` for one release                                                                                           |
+| `@harnessed-ts/eslint-plugin`  | the nine rules above                                                                                                                                             |
+| `@harnessed-ts/claude`         | authoring skill, rules, templates, and the install CLI                                                                                                           |
 
 ### Extras in `@harnessed-ts/playwright`
 
