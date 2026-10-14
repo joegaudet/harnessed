@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>harnessed</title>
+    <meta
+      name="description"
+      content="One page-object API for every major JavaScript test runner. Write a component harness once, run it in jsdom or any real browser."
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="stylesheet" href="site.css" />
+  </head>
+  <body>
+    <header class="container">
+      <nav>
+        <ul>
+          <li><strong>harnessed</strong></li>
+        </ul>
+        <ul>
+          <li><a href="#runners">Runners</a></li>
+          <li><a href="#use-cases">Use cases</a></li>
+          <li><a href="#try">Try it</a></li>
+          <li><a href="https://github.com/joegaudet/harnessed">GitHub</a></li>
+        </ul>
+      </nav>
+      <hgroup>
+        <h1>Write a test harness once. Run it under every runner.</h1>
+        <p>
+          One page-object API for Testing Library, Playwright, Cypress, WebdriverIO, Vitest browser
+          mode, Puppeteer, TestCafe and Ember, with Gherkin on top. The same harness class drives a
+          fast jsdom unit test and a real-browser end-to-end test.
+        </p>
+      </hgroup>
+      <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/dom   # plus the driver for your runner</code></pre>
+      <p>
+        <a href="https://github.com/joegaudet/harnessed#readme" role="button">Read the docs</a>
+        <a href="https://www.npmjs.com/org/harnessed-ts" role="button" class="secondary outline"
+          >npm</a
+        >
+      </p>
+    </header>
+
+    <main class="container">
+      <section id="harness">
+        <h2>What a harness is</h2>
+        <p>
+          A class that drives a component the way a person would, through methods named for what the
+          component <em>does</em>. Tests state intent; the harness owns the DOM wiring.
+        </p>
+        <pre><code class="language-typescript">@Harness({ host: testId('login-form') })
+class LoginFormHarness extends ComponentHarness {
+  @ByLabel('Email') private accessor email!: Query
+  @ByLabel('Password') private accessor password!: Query
+  @ByRole('button', { name: /sign in/i }) private accessor submit!: Query
+  @ByTestId('login-error') private accessor errorLine!: Query
+
+  async signInAs(email: string, password: string): Promise&lt;void&gt; {
+    await this.email.fill(email)
+    await this.password.fill(password)
+    await this.submit.click()
+  }
+
+  async error(): Promise&lt;string | null&gt; {
+    if (await this.errorLine.isAbsent()) return null
+    return this.errorLine.text()
+  }
+}</code></pre>
+        <div class="grid">
+          <article>
+            <header>jsdom, via Testing Library</header>
+            <pre><code class="language-tsx">render(&lt;LoginForm /&gt;)
+const form = new LoginFormHarness(dom({ user: userEvent.setup() }))
+await form.signInAs('ada@example.com', 'hunter2')
+expect(await form.error()).toBeNull()</code></pre>
+          </article>
+          <article>
+            <header>A real browser, via Playwright</header>
+            <pre><code class="language-typescript">const form = new LoginFormHarness(pw(page))
+await form.signInAs('ada@example.com', 'hunter2')
+await expect(form).toBeAbsent()</code></pre>
+          </article>
+        </div>
+      </section>
+
+      <section id="see-it-run">
+        <h2>One demo, five environments</h2>
+        <p>
+          The same <code>demo()</code> function and harness classes, recorded under each runner
+          against a React app and its Ember port. CI runs this demo on every pull request.
+        </p>
+        <div class="media-grid">
+          <figure>
+            <img
+              src="media/rtl.gif"
+              alt="The demo under React Testing Library in jsdom, replayed beside demo.ts"
+              loading="lazy"
+            />
+            <figcaption>Testing Library · React</figcaption>
+          </figure>
+          <figure>
+            <img
+              src="media/playwright-react.gif"
+              alt="The demo under Playwright against the React app"
+              loading="lazy"
+            />
+            <figcaption>Playwright · React</figcaption>
+          </figure>
+          <figure>
+            <img
+              src="media/playwright-ember.gif"
+              alt="The demo under Playwright against the Ember app"
+              loading="lazy"
+            />
+            <figcaption>Playwright · Ember</figcaption>
+          </figure>
+          <figure>
+            <img
+              src="media/cypress-react.gif"
+              alt="The demo under Cypress against the React app"
+              loading="lazy"
+            />
+            <figcaption>Cypress · React</figcaption>
+          </figure>
+          <figure>
+            <img
+              src="media/cypress-ember.gif"
+              alt="The demo under Cypress against the Ember app"
+              loading="lazy"
+            />
+            <figcaption>Cypress · Ember</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>Try it live</h2>
+        <p>
+          A harness and its Vitest spec running in jsdom, in your browser. Edit the test or the form
+          and watch it rerun. Browser runners need a real browser binary, which StackBlitz can't
+          launch, so they're shown as code below.
+        </p>
+        <div class="embed" id="stackblitz">
+          <button type="button" id="load-stackblitz">Load the live example</button>
+          <p>
+            <small>
+              Or
+              <a
+                href="https://stackblitz.com/github/joegaudet/harnessed/tree/main/examples/vitest-dom?file=src/LoginForm.test.tsx"
+                >open it in a new StackBlitz tab</a
+              >.
+            </small>
+          </p>
+        </div>
+      </section>
+
+      <section id="runners">
+        <h2>Supported runners</h2>
+        <p>
+          Every package is <code>@harnessed-ts/&lt;name&gt;</code>. Each runner passes the same
+          conformance catalog on every pull request.
+        </p>
+        <div class="overflow-auto">
+          <table class="striped">
+            <thead>
+              <tr>
+                <th scope="col">Runner</th>
+                <th scope="col">Package</th>
+                <th scope="col">Environment</th>
+                <th scope="col">Conformance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><a href="#setup-dom">Testing Library</a></th>
+                <td><code>dom</code></td>
+                <td>jsdom</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/ci.yml/badge.svg?branch=main"
+                    alt="ci status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-playwright">Playwright</a></th>
+                <td><code>playwright</code></td>
+                <td>Real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/ci.yml/badge.svg?branch=main"
+                    alt="ci status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-playwright-ember.yml/badge.svg?branch=main"
+                    alt="Playwright Ember status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-ember">Ember</a> (QUnit, exam, Vitest)</th>
+                <td><code>ember</code></td>
+                <td>Real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-ember-qunit.yml/badge.svg?branch=main"
+                    alt="ember-qunit status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-ember-exam.yml/badge.svg?branch=main"
+                    alt="ember-exam status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-ember-vitest.yml/badge.svg?branch=main"
+                    alt="Ember Vitest status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-cypress">Cypress</a> (e2e and component)</th>
+                <td><code>cypress</code></td>
+                <td>Real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-e2e.yml/badge.svg?branch=main"
+                    alt="Cypress e2e status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ct.yml/badge.svg?branch=main"
+                    alt="Cypress component status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-webdriverio">WebdriverIO</a></th>
+                <td><code>webdriverio</code></td>
+                <td>Real browser (BiDi, Classic)</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-webdriverio.yml/badge.svg?branch=main"
+                    alt="WebdriverIO status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-vitest-browser">Vitest browser mode</a></th>
+                <td><code>vitest-browser</code></td>
+                <td>Real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-vitest-browser.yml/badge.svg?branch=main"
+                    alt="Vitest browser status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-puppeteer">Puppeteer</a></th>
+                <td><code>puppeteer</code></td>
+                <td>Real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-puppeteer.yml/badge.svg?branch=main"
+                    alt="Puppeteer status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-testcafe">TestCafe</a></th>
+                <td><code>testcafe</code></td>
+                <td>Real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-testcafe.yml/badge.svg?branch=main"
+                    alt="TestCafe status"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Setup</h3>
+        <p>
+          Every runner needs <code>@harnessed-ts/core</code> and standard decorators; see
+          <a href="https://github.com/joegaudet/harnessed#required-setup">required setup</a>.
+        </p>
+
+        <details id="setup-dom">
+          <summary>Testing Library (jsdom)</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/dom @testing-library/dom @testing-library/user-event</code></pre>
+          <pre><code class="language-tsx">import { dom } from '@harnessed-ts/dom'
+import '@harnessed-ts/dom/matchers' // toBeAbsent, toBeSelected, toReadAs
+import userEvent from '@testing-library/user-event'
+
+const { baseElement } = render(&lt;LoginForm /&gt;)
+const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+await form.signInAs('ada@example.com', 'hunter2')
+expect(await form.error()).toBeNull()</code></pre>
+        </details>
+
+        <details id="setup-playwright">
+          <summary>Playwright</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/playwright</code></pre>
+          <pre><code class="language-typescript">import { pw } from '@harnessed-ts/playwright'
+import '@harnessed-ts/playwright/matchers'
+import { expect, test } from '@playwright/test'
+
+test('checks out', async ({ page }) =&gt; {
+  const checkout = new CheckoutPage(pw(page))
+  await checkout.goto({ token: 'abc' })
+  const confirmation = await checkout.placeOrder()
+  await expect(confirmation.heading).toReadAs('Thanks!')
+})</code></pre>
+        </details>
+
+        <details id="setup-ember">
+          <summary>Ember (ember-qunit, ember-exam, Vitest)</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/ember @harnessed-ts/qunit
+npm i -D @testing-library/dom @testing-library/user-event</code></pre>
+          <pre><code class="language-typescript">// tests/test-helper.ts
+import { install } from '@harnessed-ts/qunit'
+install(QUnit)
+
+// a rendering test
+await render(&lt;template&gt;&lt;LoginForm /&gt;&lt;/template&gt;)
+const form = new LoginFormHarness(ember())
+await form.signInAs('ada@example.com', 'hunter2')
+await assert.harness(form.error).isAbsent()
+
+// an application test: goto() drives the router
+const checkout = new CheckoutPage(ember())
+await checkout.goto({ token })</code></pre>
+        </details>
+
+        <details id="setup-cypress">
+          <summary>Cypress</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/cypress @harnessed-ts/chai \
+  @testing-library/dom @testing-library/user-event</code></pre>
+          <pre><code class="language-typescript">import '@harnessed-ts/cypress/support'
+import { harnessedChai } from '@harnessed-ts/chai'
+chai.use(harnessedChai)
+
+it('signs in', () =&gt; {
+  cy.visitPage(LoginPage)
+  cy.harness(LoginFormHarness, async form =&gt; {
+    await form.fillIn({ email: 'ada@example.com', password: 'hopper' })
+    await form.submitIt()
+    await expect(form).to.readAs(/Welcome/)
+  })
+})</code></pre>
+        </details>
+
+        <details id="setup-webdriverio">
+          <summary>WebdriverIO</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/webdriverio   # WebdriverIO 10</code></pre>
+          <pre><code class="language-typescript">import { wdio } from '@harnessed-ts/webdriverio'
+import '@harnessed-ts/webdriverio/matchers'
+import { browser, expect } from '@wdio/globals'
+
+it('signs in', async () =&gt; {
+  const login = new LoginPage(wdio(browser))
+  await login.goto()
+  await login.form.fillIn({ email: 'ada@example.com', password: 'hopper' })
+  await expect(login.form.errorQuery).toBeAbsent()
+})</code></pre>
+        </details>
+
+        <details id="setup-vitest-browser">
+          <summary>Vitest browser mode</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/vitest-browser @testing-library/dom
+npm i -D @vitest/browser-playwright vitest-browser-react</code></pre>
+          <pre><code class="language-tsx">import { vitestBrowser } from '@harnessed-ts/vitest-browser'
+import '@harnessed-ts/vitest-browser/matchers'
+import { render } from 'vitest-browser-react'
+
+await render(&lt;LoginForm /&gt;)
+const form = new LoginFormHarness(vitestBrowser())
+await form.signInAs('ada@example.com', 'hunter2')
+expect(await form.error()).toBeNull()</code></pre>
+        </details>
+
+        <details id="setup-puppeteer">
+          <summary>Puppeteer</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/puppeteer puppeteer</code></pre>
+          <pre><code class="language-typescript">import { puppeteer } from '@harnessed-ts/puppeteer'
+import '@harnessed-ts/puppeteer/matchers'
+import { launch } from 'puppeteer'
+
+const page = await (await launch()).newPage()
+const login = new LoginPage(puppeteer(page, { baseURL: 'http://localhost:3000' }))
+await login.goto()
+await login.form.fillIn({ email: 'ada@example.com' })
+await expect(login.form.errorQuery).toBeAbsent()</code></pre>
+        </details>
+
+        <details id="setup-testcafe">
+          <summary>TestCafe</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/testcafe testcafe typescript</code></pre>
+          <pre><code class="language-typescript">import { testcafe } from '@harnessed-ts/testcafe'
+
+fixture('checkout').page('http://localhost:3000/cart')
+
+test('applies a coupon', async t =&gt; {
+  const cart = new CartPage(testcafe(t, { baseUrl: 'http://localhost:3000' }))
+  await cart.coupon.apply('SAVE10')
+  await t.expect(await cart.total.text()).eql('$90.00')
+})</code></pre>
+        </details>
+      </section>
+
+      <section id="use-cases">
+        <h2>Use cases</h2>
+
+        <article>
+          <header><h3>One harness from unit test to end-to-end</h3></header>
+          <p>
+            Write selectors once. The harness that drives a component in a jsdom unit test drives
+            the same component in a real browser, so the end-to-end suite never grows a second set
+            of selectors that drifts out of step with the first.
+          </p>
+          <p>
+            Behaviour is held to the same rules under every driver: absence answers immediately,
+            single-target operations are strict, and scopes don't leak.
+            <a href="https://github.com/joegaudet/harnessed#cross-driver-guarantees"
+              >See the guarantees</a
+            >.
+          </p>
+        </article>
+
+        <article>
+          <header><h3>Page objects</h3></header>
+          <p>
+            <code>@harnessed-ts/page</code> gives one test object per screen: what it's made of, how
+            to know it has arrived, and how to get there by URL. Pages construct under every driver;
+            only <code>goto()</code> needs one with an address bar.
+          </p>
+          <pre><code class="language-typescript">@Harness({ host: testId('page-checkout') })
+class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
+  override get path() {
+    return '/checkout?token=$token'
+  }
+
+  @ChildHarness(CartHarness) accessor cart!: CartHarness
+
+  protected async waitForReady(): Promise&lt;void&gt; {
+    await this.self.waitFor('visible')
+  }
+
+  async placeOrder(): Promise&lt;ConfirmationPage&gt; {
+    await this.cart.checkout()
+    return this.transitionTo(ConfirmationPage)
+  }
+}</code></pre>
+        </article>
+
+        <article>
+          <header><h3>BDD with Gherkin</h3></header>
+          <p>
+            <code>@harnessed-ts/gherkin</code> adds a page registry, a <code>{page}</code> parameter
+            type and a world for playwright-bdd, cucumber-js, Cypress cucumber and ember-cli-yadda.
+            Steps call harness methods, not selectors.
+          </p>
+          <div class="grid">
+            <pre><code class="language-gherkin">Feature: Checkout
+  Scenario: Paying for the cart
+    When I open the checkout page
+    Then the total is "$90.00"</code></pre>
+            <pre><code class="language-typescript">When('I open the {page} page', async ({ page, world }, name) =&gt; {
+  world.checkout = pages.open(name, pw(page))
+  await world.checkout.goto()
+})
+
+Then('the total is {string}', async ({ world }, total) =&gt; {
+  expect(await world.checkout!.total()).toBe(total)
+})</code></pre>
+          </div>
+          <p>
+            <a href="https://github.com/joegaudet/harnessed#using-with-gherkin"
+              >Gherkin setup for each runner</a
+            >
+          </p>
+        </article>
+
+        <article>
+          <header><h3>Tooling</h3></header>
+          <ul>
+            <li>
+              <strong><code>@harnessed-ts/eslint-plugin</code></strong
+              >: keeps selectors out of tests, and keeps harnesses speaking in behaviours rather
+              than runner or DOM vocabulary.
+            </li>
+            <li>
+              <strong><code>@harnessed-ts/chai</code></strong> and
+              <strong><code>@harnessed-ts/qunit</code></strong
+              >: <code>absent</code>, <code>selected</code> and <code>readAs</code> assertions for
+              runners that don't use <code>expect.extend</code>.
+            </li>
+            <li>
+              <strong><code>@harnessed-ts/config</code></strong
+              >: one <code>harnessed.config.ts</code> for shared settings such as the test-id
+              attribute.
+            </li>
+            <li>
+              <strong><code>@harnessed-ts/claude</code></strong
+              >: installs a Claude Code skill that writes harnesses in your project's conventions.
+            </li>
+          </ul>
+          <pre><code class="language-javascript">// eslint.config.js
+import harnessed from '@harnessed-ts/eslint-plugin'
+export default [harnessed.configs.recommended]</code></pre>
+        </article>
+      </section>
+    </main>
+
+    <footer class="container">
+      <small>
+        MIT © Joe Gaudet, Jay Seo ·
+        <a href="https://github.com/joegaudet/harnessed#readme">README</a> ·
+        <a href="https://github.com/joegaudet/harnessed/blob/main/CONTRIBUTING.md">Contributing</a>
+      </small>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-gherkin.min.js"></script>
+    <script>
+      // Booting StackBlitz on page load is heavy; wait for the click.
+      document.getElementById('load-stackblitz').addEventListener('click', () => {
+        const frame = document.createElement('iframe')
+        frame.src =
+          'https://stackblitz.com/github/joegaudet/harnessed/tree/main/examples/vitest-dom?embed=1&file=src/LoginForm.test.tsx&view=both'
+        frame.title = 'Live harnessed example on StackBlitz'
+        frame.loading = 'lazy'
+        document.getElementById('stackblitz').replaceChildren(frame)
+      })
+    </script>
+  </body>
+</html>
