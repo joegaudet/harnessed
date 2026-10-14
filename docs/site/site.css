@@ -587,7 +587,7 @@ pre[class*='language-'] {
   border-radius: 12px;
   background: #0d1117;
   color: #e2e8f0;
-  font-size: 0.8125rem;
+  font-size: clamp(0.75rem, 0.65rem + 0.35vw, 0.875rem);
   line-height: 1.65;
   tab-size: 2;
 }
@@ -602,7 +602,16 @@ pre > code[class*='language-'] {
   font-size: inherit;
   line-height: inherit;
   text-shadow: none;
-  white-space: pre;
+  /* Wrap long lines instead of scrolling sideways. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Side-by-side code pairs only once each half is wide enough to read. */
+@media (max-width: 1099px) {
+  .grid:has(> article > pre, > pre) {
+    grid-template-columns: 1fr;
+  }
 }
 
 :root:not([data-theme='dark']) pre {
