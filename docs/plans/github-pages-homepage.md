@@ -1,6 +1,6 @@
 # GitHub Pages homepage
 
-A single landing page at `https://joegaudet.github.io/harnessed/` that shows what
+A single landing page at `https://joegaudet.com/harnessed/` that shows what
 harnessed is, every supported runner, and the main use cases, with embedded live
 examples.
 
