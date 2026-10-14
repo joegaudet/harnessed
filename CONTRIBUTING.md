@@ -133,7 +133,7 @@ shows updates the site in the same PR**:
 - **The demo GIFs are re-recorded:** nothing to do; the page reads `docs/media/`.
 - **`examples/vitest-dom` drifts from the published API:** bump its
   `@harnessed-ts/*` versions after a release. The `examples` CI job keeps it
-  green, and the site's StackBlitz embed loads it from `main`.
+  green, and the site's StackBlitz link opens it from `main`.
 
 To preview:
 

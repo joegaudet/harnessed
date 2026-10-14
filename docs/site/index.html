@@ -384,22 +384,20 @@ await expect(form).toBeAbsent()</code></pre>
         <p class="eyebrow">Playground</p>
         <h2>Try it live</h2>
         <p>
-          A harness and its Vitest spec running in jsdom, in your browser. Edit the test or the form
-          and watch it rerun. Browser runners need a real browser binary, which StackBlitz can't
-          launch, so they're shown as code below.
+          A harness and its Vitest spec running in jsdom, in your browser on StackBlitz. Edit the
+          test or the form and watch it rerun. Browser runners need a real browser binary, which
+          StackBlitz can't launch, so they're shown as code below.
         </p>
-        <div class="embed" id="stackblitz">
-          <button type="button" id="load-stackblitz">Load the live example</button>
-          <p>
-            <small>
-              Or
-              <a
-                href="https://stackblitz.com/github/joegaudet/harnessed/tree/main/examples/vitest-dom?file=src/LoginForm.test.tsx"
-                >open it in a new StackBlitz tab</a
-              >.
-            </small>
-          </p>
-        </div>
+        <p>
+          <!-- An in-page embed needs COOP/COEP headers, which GitHub Pages can't send. -->
+          <a
+            role="button"
+            href="https://stackblitz.com/github/joegaudet/harnessed/tree/main/examples/vitest-dom?file=src/LoginForm.test.tsx"
+            target="_blank"
+            rel="noopener"
+            >Open the live example on StackBlitz</a
+          >
+        </p>
       </section>
 
       <section id="runners">
@@ -793,16 +791,6 @@ export default [harnessed.configs.recommended]</code></pre>
     </dialog>
 
     <script>
-      // Booting StackBlitz on page load is heavy; wait for the click.
-      document.getElementById('load-stackblitz').addEventListener('click', () => {
-        const frame = document.createElement('iframe')
-        frame.src =
-          'https://stackblitz.com/github/joegaudet/harnessed/tree/main/examples/vitest-dom?embed=1&file=src/LoginForm.test.tsx&view=both'
-        frame.title = 'Live harnessed example on StackBlitz'
-        frame.loading = 'lazy'
-        document.getElementById('stackblitz').replaceChildren(frame)
-      })
-
       // Lightbox carousel over the demo GIFs. Without JS the links open the GIF itself.
       {
         const links = [...document.querySelectorAll('.media-open')]
