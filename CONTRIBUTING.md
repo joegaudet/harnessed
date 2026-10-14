@@ -112,6 +112,35 @@ no other runner uses, so they can run side by side locally.
 3. Make them agree.
 4. Add it to the **Cross-driver guarantees** list in the README.
 
+## The website
+
+[joegaudet.com/harnessed](https://joegaudet.com/harnessed/) is built from
+`docs/site/`: one hand-written `index.html` and `site.css` on Pico.css, no build
+step. `.github/workflows/pages.yml` deploys it on every push to `main` that
+touches `docs/site/` or `docs/media/`.
+
+Nothing generates it from the code, so **a PR that changes anything the site
+shows updates the site in the same PR**:
+
+- **A runner, driver or UI framework is added, removed, or gains or loses
+  conformance:** the hero illustration (solid border means it runs the
+  conformance catalog in CI, dashed means not yet), the runner table and its
+  badge, and the setup `<details>` for that runner.
+- **A public API used in a snippet changes** (`Query`, `ComponentHarness`,
+  `PageHarness`, a driver's env factory, matchers, Gherkin helpers): every
+  snippet on the page that uses it. Search `docs/site/index.html` for the name.
+- **A package is added, renamed or deprecated:** the use cases and tooling list.
+- **The demo GIFs are re-recorded:** nothing to do; the page reads `docs/media/`.
+- **`examples/vitest-dom` drifts from the published API:** bump its
+  `@harnessed-ts/*` versions after a release. The `examples` CI job keeps it
+  green, and the site's StackBlitz embed loads it from `main`.
+
+To preview:
+
+```bash
+mkdir -p /tmp/harnessed-site/media && cp -R docs/site/. /tmp/harnessed-site/ && cp docs/media/*.gif /tmp/harnessed-site/media/ && python3 -m http.server 8765 --directory /tmp/harnessed-site
+```
+
 ## Releasing
 
 Once per repository, configure what a release needs:

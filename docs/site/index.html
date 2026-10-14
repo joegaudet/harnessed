@@ -12,50 +12,277 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css"
-      media="(prefers-color-scheme: light)"
-    />
+    <!-- Code blocks are dark in both schemes, like an editor, so one theme. -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
-      media="(prefers-color-scheme: dark)"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap"
     />
     <link rel="stylesheet" href="site.css" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   </head>
   <body>
-    <header class="container">
-      <nav>
+    <nav class="site-nav">
+      <div class="container">
         <ul>
-          <li><strong>harnessed</strong></li>
+          <li class="brand">
+            <img src="logo.svg" alt="" width="28" height="28" /><strong>harnessed</strong>
+          </li>
         </ul>
         <ul>
           <li><a href="#runners">Runners</a></li>
-          <li><a href="#use-cases">Use cases</a></li>
-          <li><a href="#try">Try it</a></li>
+          <li class="wide-only"><a href="#use-cases">Use cases</a></li>
+          <li class="wide-only"><a href="#try">Try it</a></li>
           <li><a href="https://github.com/joegaudet/harnessed">GitHub</a></li>
         </ul>
-      </nav>
-      <hgroup>
-        <h1>Write a test harness once. Run it under every runner.</h1>
-        <p>
-          One page-object API for Testing Library, Playwright, Cypress, WebdriverIO, Vitest browser
-          mode, Puppeteer, TestCafe and Ember, with Gherkin on top. The same harness class drives a
-          fast jsdom unit test and a real-browser end-to-end test.
-        </p>
-      </hgroup>
-      <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/dom   # plus the driver for your runner</code></pre>
-      <p>
-        <a href="https://github.com/joegaudet/harnessed#readme" role="button">Read the docs</a>
-        <a href="https://www.npmjs.com/org/harnessed-ts" role="button" class="secondary outline"
-          >npm</a
+      </div>
+    </nav>
+
+    <header class="hero-band">
+      <div class="container hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Page objects for every JavaScript test runner</p>
+          <h1>
+            Write the harness once. Run it under
+            <span class="gradient-text">every runner</span
+            ><a href="#fine-print" class="asterisk" aria-label="Fine print">*</a>.
+          </h1>
+          <p class="hero-sub">
+            One page-object API for Testing Library, Playwright, Cypress, WebdriverIO, Vitest
+            browser mode, Puppeteer, TestCafe and Ember, with Gherkin on top. The same class drives
+            a fast jsdom unit test and a real-browser end-to-end test.
+          </p>
+          <div class="hero-actions">
+            <a href="https://github.com/joegaudet/harnessed#install" role="button">Get started</a>
+            <a href="https://github.com/joegaudet/harnessed" role="button" class="ghost">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+                <path
+                  fill="currentColor"
+                  d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                />
+              </svg>
+              GitHub
+            </a>
+          </div>
+          <div class="install">
+            <span class="prompt" aria-hidden="true">$</span>
+            <code>npm i -D @harnessed-ts/core @harnessed-ts/dom</code>
+          </div>
+          <p class="install-note">Then add the driver package for your runner.</p>
+          <p class="fine-print" id="fine-print">
+            * Well, every one with a solid border below. The dashed ones haven't been through the
+            conformance suite yet. Bring snacks.
+          </p>
+        </div>
+
+        <svg
+          class="hero-art"
+          viewBox="0 0 720 534"
+          role="img"
+          aria-labelledby="hero-art-title"
+          xmlns="http://www.w3.org/2000/svg"
         >
-      </p>
+          <title id="hero-art-title">
+            One LoginFormHarness class between UI frameworks and unit and end-to-end test runners.
+            Solid borders are conformance-tested in CI; dashed ones are not yet supported.
+          </title>
+          <defs>
+            <radialGradient id="hero-glow">
+              <stop offset="0" stop-color="#7c3aed" stop-opacity="0.35" />
+              <stop offset="1" stop-color="#7c3aed" stop-opacity="0" />
+            </radialGradient>
+            <linearGradient id="card-stroke" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#a78bfa" />
+              <stop offset="1" stop-color="#7c3aed" stop-opacity="0.4" />
+            </linearGradient>
+            <filter id="card-blur" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="18" />
+            </filter>
+            <path id="rope-0" pathLength="100" d="M150 175 C200 175 200 265 250 265" />
+            <path id="rope-1" pathLength="100" d="M150 211 C200 211 200 265 250 265" />
+            <path id="rope-2" pathLength="100" d="M150 247 C200 247 200 265 250 265" />
+            <path id="rope-3" pathLength="100" d="M150 283 C200 283 200 265 250 265" />
+            <path id="rope-4" pathLength="100" d="M150 319 C200 319 200 265 250 265" />
+            <path id="rope-5" pathLength="100" d="M150 355 C200 355 200 265 250 265" />
+            <path id="rope-6" pathLength="100" d="M470 265 C520 265 520 58 570 58" />
+            <path id="rope-7" pathLength="100" d="M470 265 C520 265 520 94 570 94" />
+            <path id="rope-8" pathLength="100" d="M470 265 C520 265 520 130 570 130" />
+            <path id="rope-9" pathLength="100" d="M470 265 C520 265 520 166 570 166" />
+            <path id="rope-10" pathLength="100" d="M470 265 C520 265 520 202 570 202" />
+            <path id="rope-11" pathLength="100" d="M470 265 C520 265 520 274 570 274" />
+            <path id="rope-12" pathLength="100" d="M470 265 C520 265 520 310 570 310" />
+            <path id="rope-13" pathLength="100" d="M470 265 C520 265 520 346 570 346" />
+            <path id="rope-14" pathLength="100" d="M470 265 C520 265 520 382 570 382" />
+            <path id="rope-15" pathLength="100" d="M470 265 C520 265 520 418 570 418" />
+            <path id="rope-16" pathLength="100" d="M470 265 C520 265 520 454 570 454" />
+            <path id="rope-17" pathLength="100" d="M470 265 C520 265 520 490 570 490" />
+            <path id="rope-g" pathLength="100" d="M360 174 L360 210" />
+          </defs>
+
+          <ellipse cx="360" cy="265" rx="330" ry="267" fill="url(#hero-glow)" />
+
+          <g class="ropes">
+            <use href="#rope-0" />
+            <use href="#rope-1" />
+            <use href="#rope-2" class="todo" />
+            <use href="#rope-3" class="todo" />
+            <use href="#rope-4" class="todo" />
+            <use href="#rope-5" class="todo" />
+            <use href="#rope-6" />
+            <use href="#rope-7" />
+            <use href="#rope-8" />
+            <use href="#rope-9" class="todo" />
+            <use href="#rope-10" class="todo" />
+            <use href="#rope-11" />
+            <use href="#rope-12" />
+            <use href="#rope-13" />
+            <use href="#rope-14" />
+            <use href="#rope-15" />
+            <use href="#rope-16" class="todo" />
+            <use href="#rope-17" class="todo" />
+            <use href="#rope-g" class="gherkin" />
+          </g>
+          <!-- Short bright dashes flow from the frameworks, through the harness, to the runners. -->
+          <g class="pulses">
+            <use href="#rope-0" style="--i: 0" />
+            <use href="#rope-1" style="--i: 1" />
+            <use href="#rope-6" style="--i: 2" />
+            <use href="#rope-7" style="--i: 3" />
+            <use href="#rope-8" style="--i: 4" />
+            <use href="#rope-11" style="--i: 5" />
+            <use href="#rope-12" style="--i: 6" />
+            <use href="#rope-13" style="--i: 7" />
+            <use href="#rope-14" style="--i: 8" />
+            <use href="#rope-15" style="--i: 9" />
+          </g>
+
+          <g class="nodes">
+            <rect x="10" y="161" width="140" height="28" rx="8" />
+            <rect x="10" y="197" width="140" height="28" rx="8" />
+            <rect class="todo" x="10" y="233" width="140" height="28" rx="8" />
+            <rect class="todo" x="10" y="269" width="140" height="28" rx="8" />
+            <rect class="todo" x="10" y="305" width="140" height="28" rx="8" />
+            <rect class="todo" x="10" y="341" width="140" height="28" rx="8" />
+            <rect x="570" y="44" width="140" height="28" rx="8" />
+            <rect x="570" y="80" width="140" height="28" rx="8" />
+            <rect x="570" y="116" width="140" height="28" rx="8" />
+            <rect class="todo" x="570" y="152" width="140" height="28" rx="8" />
+            <rect class="todo" x="570" y="188" width="140" height="28" rx="8" />
+            <rect x="570" y="260" width="140" height="28" rx="8" />
+            <rect x="570" y="296" width="140" height="28" rx="8" />
+            <rect x="570" y="332" width="140" height="28" rx="8" />
+            <rect x="570" y="368" width="140" height="28" rx="8" />
+            <rect x="570" y="404" width="140" height="28" rx="8" />
+            <rect class="todo" x="570" y="440" width="140" height="28" rx="8" />
+            <rect class="todo" x="570" y="476" width="140" height="28" rx="8" />
+            <rect class="gherkin" x="310" y="148" width="100" height="26" rx="13" />
+          </g>
+          <g class="labels" text-anchor="middle" dominant-baseline="central">
+            <text x="80" y="175">React</text>
+            <text x="80" y="211">Ember</text>
+            <text class="todo" x="80" y="247">Vue</text>
+            <text class="todo" x="80" y="283">Svelte</text>
+            <text class="todo" x="80" y="319">Angular</text>
+            <text class="todo" x="80" y="355">Solid</text>
+            <text x="640" y="58">Testing Library</text>
+            <text x="640" y="94">Vitest browser</text>
+            <text x="640" y="130">Ember QUnit</text>
+            <text class="todo" x="640" y="166">Bun test</text>
+            <text class="todo" x="640" y="202">node:test</text>
+            <text x="640" y="274">Playwright</text>
+            <text x="640" y="310">Cypress</text>
+            <text x="640" y="346">WebdriverIO</text>
+            <text x="640" y="382">Puppeteer</text>
+            <text x="640" y="418">TestCafe</text>
+            <text class="todo" x="640" y="454">Nightwatch</text>
+            <text class="todo" x="640" y="490">Detox</text>
+            <text class="gherkin" x="360" y="161">Gherkin</text>
+          </g>
+          <g class="groups">
+            <text x="10" y="147">UI frameworks</text>
+            <text x="570" y="30">Unit</text>
+            <text x="570" y="246">End-to-end</text>
+          </g>
+
+          <g class="legend" dominant-baseline="central">
+            <rect x="10" y="476" width="22" height="14" rx="4" />
+            <text x="42" y="483">Conformance-tested in CI</text>
+            <rect class="todo" x="10" y="500" width="22" height="14" rx="4" />
+            <text x="42" y="507">Not yet</text>
+          </g>
+
+          <g class="card">
+            <rect class="card-glow" x="260" y="220" width="200" height="90" rx="12" />
+            <rect class="card-body" x="250" y="210" width="220" height="110" rx="12" />
+            <circle cx="268" cy="228" r="3.5" />
+            <circle cx="280" cy="228" r="3.5" />
+            <circle cx="292" cy="228" r="3.5" />
+            <text class="muted" x="266" y="260">@Harness({ host })</text>
+            <!-- SVG renders whitespace between tspans as a visible space, so keep these on one line. -->
+            <!-- prettier-ignore -->
+            <text x="266" y="283"><tspan class="kw">class</tspan> LoginFormHarness</text>
+            <!-- prettier-ignore -->
+            <text x="282" y="306"><tspan class="fn">signInAs</tspan>(email, pw)</text>
+          </g>
+        </svg>
+      </div>
     </header>
 
     <main class="container">
+      <section id="features">
+        <p class="eyebrow">Why harnessed</p>
+        <h2>One API across the whole test pyramid</h2>
+        <div class="features">
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m16 18 6-6-6-6" />
+              <path d="m8 6-6 6 6 6" />
+            </svg>
+            <h3>Write once</h3>
+            <p>The same harness class drives jsdom unit tests and real-browser end-to-end tests.</p>
+          </article>
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="5" r="2" />
+              <circle cx="5" cy="19" r="2" />
+              <circle cx="19" cy="19" r="2" />
+              <path d="M12 7v4m0 0-5.6 6.4M12 11l5.6 6.4" />
+            </svg>
+            <h3>Every runner</h3>
+            <p>
+              Testing Library, Playwright, Cypress, WebdriverIO, Vitest, Puppeteer, TestCafe and
+              Ember.
+            </p>
+          </article>
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+            <h3>Strict by default</h3>
+            <p>
+              Ambiguous matches fail loudly, and absence answers immediately, under every driver.
+            </p>
+          </article>
+          <article>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m12 2 10 5-10 5L2 7z" />
+              <path d="m2 12 10 5 10-5" />
+              <path d="m2 17 10 5 10-5" />
+            </svg>
+            <h3>Framework-agnostic</h3>
+            <p>Harnesses query the DOM, not React or Ember.</p>
+          </article>
+        </div>
+      </section>
+
       <section id="harness">
+        <p class="eyebrow">Concepts</p>
         <h2>What a harness is</h2>
         <p>
           A class that drives a component the way a person would, through methods named for what the
@@ -97,6 +324,7 @@ await expect(form).toBeAbsent()</code></pre>
       </section>
 
       <section id="see-it-run">
+        <p class="eyebrow">In action</p>
         <h2>One demo, five environments</h2>
         <p>
           The same <code>demo()</code> function and harness classes, recorded under each runner
@@ -147,6 +375,7 @@ await expect(form).toBeAbsent()</code></pre>
       </section>
 
       <section id="try">
+        <p class="eyebrow">Playground</p>
         <h2>Try it live</h2>
         <p>
           A harness and its Vitest spec running in jsdom, in your browser. Edit the test or the form
@@ -168,6 +397,7 @@ await expect(form).toBeAbsent()</code></pre>
       </section>
 
       <section id="runners">
+        <p class="eyebrow">Compatibility</p>
         <h2>Supported runners</h2>
         <p>
           Every package is <code>@harnessed-ts/&lt;name&gt;</code>. Each runner passes the same
@@ -422,32 +652,34 @@ test('applies a coupon', async t =&gt; {
       </section>
 
       <section id="use-cases">
+        <p class="eyebrow">Patterns</p>
         <h2>Use cases</h2>
 
-        <article>
-          <header><h3>One harness from unit test to end-to-end</h3></header>
-          <p>
-            Write selectors once. The harness that drives a component in a jsdom unit test drives
-            the same component in a real browser, so the end-to-end suite never grows a second set
-            of selectors that drifts out of step with the first.
-          </p>
-          <p>
-            Behaviour is held to the same rules under every driver: absence answers immediately,
-            single-target operations are strict, and scopes don't leak.
-            <a href="https://github.com/joegaudet/harnessed#cross-driver-guarantees"
-              >See the guarantees</a
-            >.
-          </p>
-        </article>
+        <div class="use-cases">
+          <article>
+            <header><h3>One harness from unit test to end-to-end</h3></header>
+            <p>
+              Write selectors once. The harness that drives a component in a jsdom unit test drives
+              the same component in a real browser, so the end-to-end suite never grows a second set
+              of selectors that drifts out of step with the first.
+            </p>
+            <p>
+              Behaviour is held to the same rules under every driver: absence answers immediately,
+              single-target operations are strict, and scopes don't leak.
+              <a href="https://github.com/joegaudet/harnessed#cross-driver-guarantees"
+                >See the guarantees</a
+              >.
+            </p>
+          </article>
 
-        <article>
-          <header><h3>Page objects</h3></header>
-          <p>
-            <code>@harnessed-ts/page</code> gives one test object per screen: what it's made of, how
-            to know it has arrived, and how to get there by URL. Pages construct under every driver;
-            only <code>goto()</code> needs one with an address bar.
-          </p>
-          <pre><code class="language-typescript">@Harness({ host: testId('page-checkout') })
+          <article>
+            <header><h3>Page objects</h3></header>
+            <p>
+              <code>@harnessed-ts/page</code> gives one test object per screen: what it's made of,
+              how to know it has arrived, and how to get there by URL. Pages construct under every
+              driver; only <code>goto()</code> needs one with an address bar.
+            </p>
+            <pre><code class="language-typescript">@Harness({ host: testId('page-checkout') })
 class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
   override get path() {
     return '/checkout?token=$token'
@@ -464,21 +696,21 @@ class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
     return this.transitionTo(ConfirmationPage)
   }
 }</code></pre>
-        </article>
+          </article>
 
-        <article>
-          <header><h3>BDD with Gherkin</h3></header>
-          <p>
-            <code>@harnessed-ts/gherkin</code> adds a page registry, a <code>{page}</code> parameter
-            type and a world for playwright-bdd, cucumber-js, Cypress cucumber and ember-cli-yadda.
-            Steps call harness methods, not selectors.
-          </p>
-          <div class="grid">
-            <pre><code class="language-gherkin">Feature: Checkout
+          <article>
+            <header><h3>BDD with Gherkin</h3></header>
+            <p>
+              <code>@harnessed-ts/gherkin</code> adds a page registry, a
+              <code>{page}</code> parameter type and a world for playwright-bdd, cucumber-js,
+              Cypress cucumber and ember-cli-yadda. Steps call harness methods, not selectors.
+            </p>
+            <div class="grid">
+              <pre><code class="language-gherkin">Feature: Checkout
   Scenario: Paying for the cart
     When I open the checkout page
     Then the total is "$90.00"</code></pre>
-            <pre><code class="language-typescript">When('I open the {page} page', async ({ page, world }, name) =&gt; {
+              <pre><code class="language-typescript">When('I open the {page} page', async ({ page, world }, name) =&gt; {
   world.checkout = pages.open(name, pw(page))
   await world.checkout.goto()
 })
@@ -486,42 +718,43 @@ class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
 Then('the total is {string}', async ({ world }, total) =&gt; {
   expect(await world.checkout!.total()).toBe(total)
 })</code></pre>
-          </div>
-          <p>
-            <a href="https://github.com/joegaudet/harnessed#using-with-gherkin"
-              >Gherkin setup for each runner</a
-            >
-          </p>
-        </article>
+            </div>
+            <p>
+              <a href="https://github.com/joegaudet/harnessed#using-with-gherkin"
+                >Gherkin setup for each runner</a
+              >
+            </p>
+          </article>
 
-        <article>
-          <header><h3>Tooling</h3></header>
-          <ul>
-            <li>
-              <strong><code>@harnessed-ts/eslint-plugin</code></strong
-              >: keeps selectors out of tests, and keeps harnesses speaking in behaviours rather
-              than runner or DOM vocabulary.
-            </li>
-            <li>
-              <strong><code>@harnessed-ts/chai</code></strong> and
-              <strong><code>@harnessed-ts/qunit</code></strong
-              >: <code>absent</code>, <code>selected</code> and <code>readAs</code> assertions for
-              runners that don't use <code>expect.extend</code>.
-            </li>
-            <li>
-              <strong><code>@harnessed-ts/config</code></strong
-              >: one <code>harnessed.config.ts</code> for shared settings such as the test-id
-              attribute.
-            </li>
-            <li>
-              <strong><code>@harnessed-ts/claude</code></strong
-              >: installs a Claude Code skill that writes harnesses in your project's conventions.
-            </li>
-          </ul>
-          <pre><code class="language-javascript">// eslint.config.js
+          <article>
+            <header><h3>Tooling</h3></header>
+            <ul>
+              <li>
+                <strong><code>@harnessed-ts/eslint-plugin</code></strong
+                >: keeps selectors out of tests, and keeps harnesses speaking in behaviours rather
+                than runner or DOM vocabulary.
+              </li>
+              <li>
+                <strong><code>@harnessed-ts/chai</code></strong> and
+                <strong><code>@harnessed-ts/qunit</code></strong
+                >: <code>absent</code>, <code>selected</code> and <code>readAs</code> assertions for
+                runners that don't use <code>expect.extend</code>.
+              </li>
+              <li>
+                <strong><code>@harnessed-ts/config</code></strong
+                >: one <code>harnessed.config.ts</code> for shared settings such as the test-id
+                attribute.
+              </li>
+              <li>
+                <strong><code>@harnessed-ts/claude</code></strong
+                >: installs a Claude Code skill that writes harnesses in your project's conventions.
+              </li>
+            </ul>
+            <pre><code class="language-javascript">// eslint.config.js
 import harnessed from '@harnessed-ts/eslint-plugin'
 export default [harnessed.configs.recommended]</code></pre>
-        </article>
+          </article>
+        </div>
       </section>
     </main>
 

@@ -13,6 +13,13 @@
 If a guarantee changed, the **Cross-driver guarantees** list in the README is
 updated too.
 
+## Website
+
+- [ ] `docs/site/` updated for any change to runners, frameworks, conformance
+      status, packages, or an API shown in a snippet — see **The website** in
+      CONTRIBUTING.md.
+- [ ] Nothing on the site is affected.
+
 ## Checks
 
 - [ ] `pnpm lint && pnpm format:check && pnpm typecheck && pnpm build`
