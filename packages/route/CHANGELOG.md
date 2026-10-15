@@ -1,5 +1,11 @@
 # @harnessed-ts/route
 
+## 0.5.0
+
+### Patch Changes
+
+- @harnessed-ts/page@0.5.0
+
 ## 0.4.0
 
 ### Patch Changes
