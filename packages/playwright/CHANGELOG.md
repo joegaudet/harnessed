@@ -1,5 +1,12 @@
 # @harnessed-ts/playwright
 
+## 0.5.0
+
+### Patch Changes
+
+- @harnessed-ts/core@0.5.0
+  - @harnessed-ts/gherkin@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
