@@ -10,36 +10,30 @@
 # workflow exists to break that circle exactly once, using a short-lived
 # NPM_TOKEN secret.
 #
-# It runs only when a human dispatches it, only from `main` or a
-# `changeset-release/*` branch, and only inside the `npm-bootstrap`
-# environment. It is never triggered by a push, so it cannot publish behind
-# your back.
+# It runs only when a human dispatches it, only on a v* release tag, and only
+# inside the `npm-bootstrap` environment. It is never triggered by a push, so it
+# cannot publish behind your back.
 #
 # Before dispatching (repository settings, done by hand):
-#   1. Settings > Environments > New environment "npm-bootstrap":
+#   1. Settings > Environments > "npm-bootstrap":
 #      - Required reviewers: yourself (the run waits for approval).
 #      - Deployment branches and tags: "Selected branches and tags", adding
-#        `main` and `changeset-release/*`.
-#      - Environment secrets: add NPM_TOKEN (a granular token that can
-#        publish @harnessed-ts/*, with the shortest expiry npm allows).
+#        the tag pattern `v*`.
+#      - Environment secrets: NPM_TOKEN (a granular token that can publish
+#        @harnessed-ts/*, with the shortest expiry npm allows).
 #   2. Remove any repository-level copy, so the token exists only behind the
-#      environment's reviewers and branch rule:
+#      environment's reviewers and tag rule:
 #        gh secret delete NPM_TOKEN --repo joegaudet/harnessed
 #
-# Dispatch it on the Version Packages branch, `changeset-release/main`, after
-# the version PR exists and before merging it:
+# Cut the release as usual (merge the version PR, push the vX.Y.Z tag). The
+# tag's release.yml run fails on the names npm has never seen; dispatch this on
+# the same tag, then re-run that release.yml run -- it finds everything
+# published and creates the GitHub release:
 #
 #   gh workflow run bootstrap-publish.yml --repo joegaudet/harnessed \
-#     --ref changeset-release/main -f confirm=publish
+#     --ref vX.Y.Z -f confirm=publish
 #
-# There every package is already at the release version (0.4.0), so each new
-# name's first published version is 0.4.0 and depends on core@^0.4.0.
-# Dispatched from `main` instead, it would publish them at the old version
-# (0.3.0), with `workspace:^` resolved to the old core -- a version that can
-# never be reused. scripts/publish.mjs publishes everything missing, so this
-# run publishes the whole release, existing names included; the merge then
-# finds nothing left to publish, which means release.yml will not push the
-# v0.4.0 tag or open GitHub releases -- push the tag by hand.
+# scripts/publish.mjs publishes everything missing, existing names included.
 #
 # Afterwards:
 #   1. npmjs.com, per package: Settings > Trusted publisher >
@@ -67,16 +61,11 @@ jobs:
     runs-on: ubuntu-latest
     # A typo here publishes to a public registry permanently -- npm does not
     # let a version number be reused, even after an unpublish. Make the human
-    # say so explicitly.
-    #
-    # And only from main or the Version Packages branch: the environment's
-    # branch rule says the same, but a rule in settings is easy to lose.
-    if: >-
-      inputs.confirm == 'publish' &&
-      (github.ref == 'refs/heads/main' ||
-      startsWith(github.ref, 'refs/heads/changeset-release/'))
+    # say so explicitly, and only on a release tag: the environment's tag rule
+    # says the same, but a rule in settings is easy to lose.
+    if: inputs.confirm == 'publish' && startsWith(github.ref, 'refs/tags/v')
     # NPM_TOKEN lives in this environment, behind required reviewers and a
-    # branch rule, rather than as a repository secret any workflow can read.
+    # tag rule, rather than as a repository secret any workflow can read.
     environment: npm-bootstrap
     permissions:
       contents: read
@@ -86,19 +75,37 @@ jobs:
       # version in the package history.
       id-token: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+      # The same gate release.yml applies to the tag.
+      - name: Check the tag is on main and matches the packages
+        run: |
+          set -euo pipefail
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main ||
+            { echo "::error::$GITHUB_REF_NAME is not on main"; exit 1; }
+          node - "${GITHUB_REF_NAME#v}" <<'JS'
+          const fs = require('node:fs')
+          const want = process.argv[2]
+          const wrong = fs.readdirSync('packages')
+            .map(dir => `packages/${dir}/package.json`)
+            .filter(file => fs.existsSync(file))
+            .map(file => JSON.parse(fs.readFileSync(file, 'utf8')))
+            .filter(pkg => !pkg.private && pkg.version !== want)
+          if (wrong.length) {
+            for (const pkg of wrong) console.log(`::error::${pkg.name} is ${pkg.version}, tag is v${want}`)
+            process.exit(1)
+          }
+          JS
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           run_install: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           # No `cache: pnpm`: unprivileged jobs can write that store, so a publish job never restores it.
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
 
       # scripts/publish.mjs skips anything already on the registry, so a re-run
       # after a partial failure picks up only what is still missing.
