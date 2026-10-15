@@ -143,20 +143,33 @@ mkdir -p /tmp/harnessed-site/media && cp -R docs/site/. /tmp/harnessed-site/ && 
 
 ## Releasing
 
-Once per repository, configure what a release needs:
+A release is cut by pushing a tag. Nothing publishes on merge.
 
-```bash
-bash scripts/setup-release.sh            # or --dry-run first
-```
+1. PRs that change a published package carry a changeset (`pnpm changeset`). While any are
+   pending on `main`, CI keeps a "chore: version packages" PR open with the next version and
+   the changelogs.
+2. Merge that PR.
+3. Tag the merge commit with the new version and push the tag:
 
-It stores the `NPM_TOKEN` secret (read silently, never echoed or passed as an
-argument) and allows Actions to create pull requests. Both have already stopped a
-release here: the first attempt failed opening the changesets version PR and never
-reached npm at all.
+   ```bash
+   git switch main && git pull
+   git tag -a v1.2.3 -m v1.2.3
+   git push origin v1.2.3
+   ```
 
-After that, releases are automatic. Merging to `main` with changesets pending
-opens a "Version Packages" PR; merging _that_ publishes. With none pending, the
-merge publishes the current versions directly.
+`release.yml` checks that the tag is on `main` and matches every public package's version,
+publishes whatever is not already on npm through `scripts/publish.mjs` (OIDC trusted publishing
+with provenance; there is no `NPM_TOKEN`), then creates the GitHub release. If a run fails, re-run
+it: it skips what is already published.
+
+**A brand-new package** cannot publish through OIDC: npm only configures a trusted publisher for
+a name that already exists. Its first release goes out once through `bootstrap-publish.yml` with
+a short-lived token (restore that file from git history if it has been deleted; its header has
+the steps). After that, set `joegaudet/harnessed` / `release.yml` as the package's trusted
+publisher on npmjs.com.
+
+Actions must be allowed to create pull requests (Settings → Actions → General), or the version
+PR cannot open.
 
 ## Changesets
 
@@ -167,7 +180,7 @@ npx changeset
 ```
 
 The packages version in lockstep, so pick the same bump for all of them. Releases
-publish from CI with provenance on merge of the version PR — never from a laptop.
+publish from CI with provenance when a tag is pushed — never from a laptop.
 
 ## Style
 
