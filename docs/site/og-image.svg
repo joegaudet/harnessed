@@ -1,0 +1,25 @@
+<!-- Source for og-image.png (link unfurls need a raster). Regenerate:
+     rsvg-convert -w 1200 -h 630 docs/site/og-image.svg -o docs/site/og-image.png -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect y="606" width="1200" height="24" fill="#7c3aed"/>
+  <g transform="translate(96 150) scale(2.5)">
+    <rect width="64" height="64" rx="14" fill="url(#g)"/>
+    <g fill="none" stroke="#fff">
+      <path stroke-width="9" d="M21 13V51M21 37A11.25 11.25 0 0 1 43.5 37V41"/>
+      <path stroke-width="2" d="M40 42V51M43.5 42V51M47 42V51"/>
+    </g>
+    <rect x="37.5" y="39" width="12" height="3.5" rx="1.2" fill="#f59e0b"/>
+  </g>
+  <g font-family="Inter, system-ui, sans-serif" fill="#f8fafc">
+    <text x="300" y="262" font-size="112" font-weight="800" letter-spacing="-1">harnessed</text>
+    <text x="96" y="420" font-size="44" font-weight="500">Test harnesses for components and pages.</text>
+    <text x="96" y="480" font-size="34" fill="#cbd5e1">Write once, run in jsdom or any real browser.</text>
+  </g>
+</svg>
