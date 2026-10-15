@@ -27,6 +27,7 @@ describe('detectRunners', () => {
         '@vitest/browser-playwright': '5.0.0',
         '@testing-library/dom': '^10.0.0',
         'playwright-bdd': '^9.0.0',
+        storybook: '^10.0.0',
       }),
     })
     expect(detectRunners(root)).toEqual([
@@ -39,7 +40,13 @@ describe('detectRunners', () => {
       'vitest-browser',
       'testing-library',
       'gherkin',
+      'storybook',
     ])
+  })
+
+  it('recognises Storybook by its config directory', () => {
+    const root = repo({ 'package.json': pkg({}), '.storybook/main.ts': '' })
+    expect(detectRunners(root)).toEqual(['storybook'])
   })
 
   it('also recognises a runner by the config file it leaves behind', () => {
@@ -85,5 +92,17 @@ describe('install', () => {
       expect(result.written).toContain(join(root, '.claude/skills/harness/examples', example))
     }
     expect(result.written.some(path => path.includes('webdriverio'))).toBe(false)
+  })
+
+  it('documents Storybook: the preview setup, a harness in play, and StoryPage', () => {
+    const root = repo({ 'package.json': pkg({ storybook: '^10.0.0' }) })
+    const result = install({ root })
+    const skill = readFileSync(join(root, '.claude/skills/harness/SKILL.md'), 'utf8')
+    expect(skill).toMatch(/\.\.\.harnessed\(\)/)
+    expect(skill).toMatch(/parameters: \{ harness:/)
+    expect(skill).toMatch(/StoryPage\.goto/)
+    expect(result.written).toContain(
+      join(root, '.claude/skills/harness/examples', 'storybook.test-example.ts'),
+    )
   })
 })

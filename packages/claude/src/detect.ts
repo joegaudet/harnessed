@@ -118,6 +118,7 @@ export const RUNNERS = [
   'vitest-browser',
   'testing-library',
   'gherkin',
+  'storybook',
 ] as const
 
 export type Runner = (typeof RUNNERS)[number]
@@ -201,6 +202,11 @@ const RUNNER_SIGNALS: RunnerSignal[] = [
     runner: 'gherkin',
     packages:
       /^(playwright-bdd|@cucumber\/cucumber|@badeball\/cypress-cucumber-preprocessor|ember-cli-yadda)$/,
+  },
+  {
+    runner: 'storybook',
+    packages: /^storybook$/,
+    files: ['.storybook/main.ts', '.storybook/main.js', '.storybook/main.mjs'],
   },
 ]
 

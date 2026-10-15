@@ -17,6 +17,7 @@
     { "path": "./packages/qunit" },
     { "path": "./packages/ember" },
     { "path": "./packages/route" },
+    { "path": "./packages/storybook" },
     { "path": "./packages/eslint-plugin" },
     { "path": "./packages/claude" },
     { "path": "./packages/conformance" }

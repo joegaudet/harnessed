@@ -295,6 +295,21 @@ describe('no-raw-locator-in-test', () => {
         code: `myThing.locator('x')`,
       },
       {
+        name: 'Storybook: a play function that drives its harness',
+        filename: '/repo/src/components/LoginForm.stories.tsx',
+        code: `export const Filled = { play: async ({ harness }) => { await harness.fillIn({ email: 'a' }) } }`,
+      },
+      {
+        name: 'Storybook: canvas is only a query subject inside a stories file',
+        filename: '/repo/src/components/chart.ts',
+        code: `canvas.getByRole('img')`,
+      },
+      {
+        name: 'Storybook: a same-named within from somewhere else',
+        filename: '/repo/src/components/LoginForm.stories.tsx',
+        code: `import { within } from './geometry'\nwithin(box, point)`,
+      },
+      {
         name: 'Cypress: cy.harness is the supported way in',
         filename: '/repo/cypress/e2e/checkout.cy.ts',
         code: `cy.harness(CheckoutPage, page => page.pay())`,
@@ -438,6 +453,30 @@ describe('no-raw-locator-in-test', () => {
         code: code!,
         errors: [{ messageId: 'raw', data: { call: `${subject}.${method}` } }],
       })),
+      {
+        name: "Storybook: the play context's canvas queries",
+        filename: '/repo/src/components/LoginForm.stories.tsx',
+        code: `export const Filled = { play: async ({ canvas }) => { await canvas.getByRole('button') } }`,
+        errors: [{ messageId: 'raw', data: { call: 'canvas.getByRole' } }],
+      },
+      {
+        name: 'Storybook: within(canvasElement) from storybook/test',
+        filename: '/repo/src/components/LoginForm.stories.tsx',
+        code: `import { within } from 'storybook/test'\nconst canvas = within(canvasElement)`,
+        errors: [{ messageId: 'raw', data: { call: 'within' } }],
+      },
+      {
+        name: 'Storybook: fireEvent from the pre-9 @storybook/test',
+        filename: '/repo/src/components/LoginForm.stories.ts',
+        code: `import { fireEvent } from '@storybook/test'\nfireEvent.click(button)`,
+        errors: [{ messageId: 'raw', data: { call: 'fireEvent.click' } }],
+      },
+      {
+        name: "Storybook: the canvas element's own DOM queries",
+        filename: '/repo/src/components/LoginForm.stories.tsx',
+        code: `export const Filled = { play: async ({ canvasElement }) => { canvasElement.querySelector('input') } }`,
+        errors: [{ messageId: 'raw', data: { call: 'canvasElement.querySelector' } }],
+      },
       {
         name: "Testing Library's screen, imported",
         filename: '/repo/tests/Form.test.tsx',

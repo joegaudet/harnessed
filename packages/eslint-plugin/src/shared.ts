@@ -26,6 +26,11 @@ export function isRunnerSupportFile(filename: string): boolean {
   return inAnyDir(filename, RUNNER_SUPPORT_DIRS)
 }
 
+/** A Storybook CSF file, whose play functions are tests in all but name. */
+export function isStoriesFile(filename: string): boolean {
+  return /\.stories\.[cm]?[jt]sx?$/.test(filename)
+}
+
 function normalise(filename: string): string {
   return filename.replaceAll('\\', '/')
 }

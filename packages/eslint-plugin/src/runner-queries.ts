@@ -254,6 +254,8 @@ export function rawQueryOf(
 }
 
 const TESTING_LIBRARY = '@testing-library/'
+/** Storybook re-exports Testing Library's helpers from these. */
+const STORYBOOK_TEST = new Set(['storybook/test', '@storybook/test'])
 
 /** Testing Library's DOM helpers a test may reach for: every member of each is raw. */
 const TESTING_LIBRARY_OBJECTS = new Set(['screen', 'fireEvent'])
@@ -283,7 +285,15 @@ function testingLibraryName(
   if (variable === undefined || variable.defs.length === 0) return identifier.name
   if (variable.defs[0]?.type !== 'ImportBinding') return undefined
   const binding = context.imports.get(identifier.name)
-  return binding?.source.startsWith(TESTING_LIBRARY) === true ? binding.imported : undefined
+  if (binding === undefined) return undefined
+  return binding.source.startsWith(TESTING_LIBRARY) || STORYBOOK_TEST.has(binding.source)
+    ? binding.imported
+    : undefined
+}
+
+/** One of the DOM's own element queries: `querySelector` and kin. */
+export function isDomQuery(name: string): boolean {
+  return DOCUMENT_QUERIES.has(name)
 }
 
 function isGlobal(identifier: Rule.Node & { name: string }, sourceCode: SourceCode): boolean {

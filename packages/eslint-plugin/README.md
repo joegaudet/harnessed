@@ -18,7 +18,9 @@ export default [harnessed.configs.recommended] // or .strict
   should be used: `page.locator`/`getBy*`/`$`, Testing Library's `screen.*`,
   `within`, and `fireEvent`, `cy.get`/`cy.contains`/`cy.xpath`, Ember's
   `find` and selector-string actions, WebdriverIO's `$`/`$$`, TestCafe
-  `Selector(…)`, `document.querySelector`
+  `Selector(…)`, `document.querySelector`. Storybook stories files
+  (`*.stories.*`) count as tests wherever they live: `canvas.getBy*`,
+  `within` from `storybook/test`, and `canvasElement.querySelector`
 - `no-runner-import-in-harness` — a harness importing a runner or a driver, or
   using `document`, `window`, `cy`, `browser`, `$`, or `$$`. Only `@harnessed-ts/core`,
   `@harnessed-ts/page`, and `@harnessed-ts/route` are allowed from the harnessed

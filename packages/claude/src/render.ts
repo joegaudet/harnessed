@@ -70,6 +70,12 @@ const RUNNER_DOCS: Record<Runner, RunnerDoc> = {
     env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/dom/matchers`)',
   },
+  storybook: {
+    title: 'Storybook (`@harnessed-ts/storybook`)',
+    env: "spread `...harnessed()` into `.storybook/preview.ts` once; a story names its harness in `parameters: { harness: CheckoutHarness }` and `play: async ({ harness }) => …` receives it, each method logged as a step. From another runner, `await StoryPage.goto(pw(page), CheckoutStories, 'Default')` (`@harnessed-ts/storybook/page`), then `story.harness(CheckoutHarness)`",
+    assert:
+      '`await expect(harness.total).toReadAs(/^\\$/)` with `expect` from `storybook/test` — `harnessed()` registers the matchers',
+  },
   gherkin: {
     title: 'Gherkin (`@harnessed-ts/gherkin`)',
     env: 'keep pages in the scenario world, never a module-level `let`; name them with `definePages` and the `{page}` parameter type',
