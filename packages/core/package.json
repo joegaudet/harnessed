@@ -110,7 +110,7 @@
     "@babel/plugin-transform-react-jsx": "^7.29.7",
     "@babel/plugin-transform-typescript": "^7.29.7",
     "@types/babel__core": "^7.20.5",
-    "@types/node": "^26.6.3",
+    "@types/node": "^26.6.5",
     "decorator-transforms": "^2.4.0",
     "esbuild": "^0.28.2",
     "vitest": "^5.0.3"
