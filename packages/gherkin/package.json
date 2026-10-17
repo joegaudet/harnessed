@@ -87,7 +87,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "~13.2.1",
+    "@cucumber/cucumber": "~13.3.0",
     "@cucumber/cucumber-expressions": "~20.0.0",
     "@playwright/test": "^1.63.0",
     "typescript": "^6.0.3",
