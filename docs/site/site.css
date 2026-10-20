@@ -123,6 +123,13 @@
   gap: 0.5rem;
 }
 
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+}
+
 /* Hero band: dark in both schemes. */
 .hero-band {
   --pico-color: #f8fafc;
@@ -556,6 +563,16 @@ body > footer {
 
 body > footer a {
   color: inherit;
+}
+
+/* The row of sibling projects under the footer's own links. */
+body > footer .family {
+  margin: 0.5rem 0 0;
+}
+
+body > footer [aria-current='page'] {
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .media-grid {
