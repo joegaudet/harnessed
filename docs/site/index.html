@@ -143,10 +143,10 @@
           <g class="ropes">
             <use href="#rope-0" />
             <use href="#rope-1" />
-            <use href="#rope-2" class="todo" />
-            <use href="#rope-3" class="todo" />
+            <use href="#rope-2" />
+            <use href="#rope-3" />
             <use href="#rope-4" class="todo" />
-            <use href="#rope-5" class="todo" />
+            <use href="#rope-5" />
             <use href="#rope-6" />
             <use href="#rope-7" />
             <use href="#rope-8" />
@@ -177,15 +177,18 @@
             <use href="#rope-18" style="--i: 10" />
             <use href="#rope-9" style="--i: 11" />
             <use href="#rope-10" style="--i: 12" />
+            <use href="#rope-2" style="--i: 13" />
+            <use href="#rope-3" style="--i: 14" />
+            <use href="#rope-5" style="--i: 15" />
           </g>
 
           <g class="nodes">
             <rect x="10" y="161" width="140" height="28" rx="8" />
             <rect x="10" y="197" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="233" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="269" width="140" height="28" rx="8" />
+            <rect x="10" y="233" width="140" height="28" rx="8" />
+            <rect x="10" y="269" width="140" height="28" rx="8" />
             <rect class="todo" x="10" y="305" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="341" width="140" height="28" rx="8" />
+            <rect x="10" y="341" width="140" height="28" rx="8" />
             <rect x="570" y="44" width="140" height="28" rx="8" />
             <rect x="570" y="80" width="140" height="28" rx="8" />
             <rect x="570" y="116" width="140" height="28" rx="8" />
@@ -204,10 +207,10 @@
           <g class="labels" text-anchor="middle" dominant-baseline="central">
             <text x="80" y="175">React</text>
             <text x="80" y="211">Ember</text>
-            <text class="todo" x="80" y="247">Vue</text>
-            <text class="todo" x="80" y="283">Svelte</text>
+            <text x="80" y="247">Vue</text>
+            <text x="80" y="283">Svelte</text>
             <text class="todo" x="80" y="319">Angular</text>
-            <text class="todo" x="80" y="355">Solid</text>
+            <text x="80" y="355">Solid</text>
             <text x="640" y="58">Testing Library</text>
             <text x="640" y="94">Vitest browser</text>
             <text x="640" y="130">Ember QUnit</text>
@@ -296,7 +299,7 @@
               <path d="m2 17 10 5 10-5" />
             </svg>
             <h3>Framework-agnostic</h3>
-            <p>Harnesses query the DOM, not React or Ember.</p>
+            <p>Harnesses query the DOM, not React, Ember, Vue, Solid or Svelte.</p>
           </article>
         </div>
       </section>
@@ -440,11 +443,23 @@ await expect(form).toBeAbsent()</code></pre>
               <tr>
                 <th scope="row"><a href="#setup-dom">Testing Library</a></th>
                 <td><code>dom</code></td>
-                <td>jsdom</td>
+                <td>jsdom; React, Vue, Solid, Svelte</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/ci.yml/badge.svg?branch=main"
                     alt="ci status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-vue.yml/badge.svg?branch=main"
+                    alt="Vue status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-solid.yml/badge.svg?branch=main"
+                    alt="Solid status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-svelte.yml/badge.svg?branch=main"
+                    alt="Svelte status"
                   />
                 </td>
               </tr>
@@ -483,6 +498,10 @@ await expect(form).toBeAbsent()</code></pre>
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-playwright-ember.yml/badge.svg?branch=main"
                     alt="Playwright Ember status"
                   />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-playwright-frameworks.yml/badge.svg?branch=main"
+                    alt="Playwright Vue, Solid and Svelte status"
+                  />
                 </td>
               </tr>
               <tr>
@@ -520,6 +539,10 @@ await expect(form).toBeAbsent()</code></pre>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ember.yml/badge.svg?branch=main"
                     alt="Cypress Ember status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ct-frameworks.yml/badge.svg?branch=main"
+                    alt="Cypress component Vue and Svelte status"
                   />
                 </td>
               </tr>

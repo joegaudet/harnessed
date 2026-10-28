@@ -62,25 +62,27 @@ Inspired by [Angular CDK Component Harnesses][cdk],
 
 ## Support matrix
 
-| Runner                                                 | Package          | Component harnesses    | Pages and `goto()`                            | Assertions                | Gherkin                                            | Frames                           | Conformance in CI  |
-| ------------------------------------------------------ | ---------------- | ---------------------- | --------------------------------------------- | ------------------------- | -------------------------------------------------- | -------------------------------- | ------------------ |
-| [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin                      | ✓                  |
-| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                                             | `expect` matchers         | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓ React and Ember  |
-| [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests      | ✓ application tests                           | `assert.harness`          | [ember-cli-yadda](#ember-cli-yadda)                | same-origin                      | ✓                  |
-| [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                      | ✓ application tests                           | Chai                      | —                                                  | same-origin                      | ✓                  |
-| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`                              | Chai                      | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓ React and Ember  |
-| [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness` | constructs; no navigation                     | Chai                      | —                                                  | same-origin                      | ✓                  |
-| [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                      | ✓                                             | `expect` matchers, Chai   | —                                                  | cross-origin                     | ✓ BiDi and Classic |
-| [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin, Playwright provider | ✓                  |
-| [Puppeteer](#using-with-puppeteer)                     | `puppeteer`      | ✓                      | ✓                                             | `expect` matchers         | —                                                  | cross-origin                     | ✓                  |
-| [TestCafe](#using-with-testcafe)                       | `testcafe`       | ✓                      | ✓                                             | `t.expect`, Chai          | —                                                  | same-origin                      | ✓                  |
-| [Storybook](#using-with-storybook)                     | `storybook`      | ✓ in `play()`          | ✓ `StoryPage`, from any runner that navigates | `storybook/test` `expect` | —                                                  | same-origin                      | ✓ React            |
+| Runner                                                 | Package          | Component harnesses    | Pages and `goto()`                            | Assertions                | Gherkin                                            | Frames                           | Conformance in CI                  |
+| ------------------------------------------------------ | ---------------- | ---------------------- | --------------------------------------------- | ------------------------- | -------------------------------------------------- | -------------------------------- | ---------------------------------- |
+| [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin                      | ✓ React, Vue, Solid, Svelte        |
+| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                                             | `expect` matchers         | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓ React, Ember, Vue, Solid, Svelte |
+| [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests      | ✓ application tests                           | `assert.harness`          | [ember-cli-yadda](#ember-cli-yadda)                | same-origin                      | ✓                                  |
+| [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                      | ✓ application tests                           | Chai                      | —                                                  | same-origin                      | ✓                                  |
+| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`                              | Chai                      | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓ React and Ember                  |
+| [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness` | constructs; no navigation                     | Chai                      | —                                                  | same-origin                      | ✓ React, Vue, Svelte               |
+| [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                      | ✓                                             | `expect` matchers, Chai   | —                                                  | cross-origin                     | ✓ BiDi and Classic                 |
+| [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin, Playwright provider | ✓ React, Vue, Solid, Svelte        |
+| [Puppeteer](#using-with-puppeteer)                     | `puppeteer`      | ✓                      | ✓                                             | `expect` matchers         | —                                                  | cross-origin                     | ✓                                  |
+| [TestCafe](#using-with-testcafe)                       | `testcafe`       | ✓                      | ✓                                             | `t.expect`, Chai          | —                                                  | same-origin                      | ✓                                  |
+| [Storybook](#using-with-storybook)                     | `storybook`      | ✓ in `play()`          | ✓ `StoryPage`, from any runner that navigates | `storybook/test` `expect` | —                                                  | same-origin                      | ✓ React                            |
 
 Every package is `@harnessed-ts/<name>`. "Conformance" means the shared catalog in
 `packages/conformance` runs, unchanged, under that runner on every pull request —
-see [Cross-driver guarantees](#cross-driver-guarantees). Playwright and Cypress e2e
-run it twice: against the React fixture, and against its Ember port, built by
-Vite and served as an app in a real browser. "Constructs; no
+see [Cross-driver guarantees](#cross-driver-guarantees). Where a cell names
+frameworks, the catalog runs once per fixture: the React original and its ports,
+each held to the same markup (see [UI frameworks](#ui-frameworks)). Playwright
+and Cypress e2e drive each port built by Vite and served as an app in a real
+browser. "Constructs; no
 navigation": a page builds and reads under that runner, but `goto()` and the URL
 members are refused, since there is no address bar (`urlFor()` still works).
 `HarnessedWorld`, the cucumber-js adapter, takes any env; CI runs it with
@@ -95,11 +97,14 @@ A harness queries the DOM, not a framework, so nothing in one is tied to React
 or Ember. What earns a ✓ here is a fixture written in that framework and a
 conformance run against it.
 
-| Framework                   | Status      | Covered by                                                                                                                                                                                                                                                                                                                                         |
-| --------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React                       | ✓           | The conformance fixture, `packages/conformance/fixture`, is a React app. Every runner above except Ember's drives it.                                                                                                                                                                                                                              |
-| Ember                       | ✓           | A Glimmer copy of that fixture in `test-apps/ember-vite` and `test-apps/ember-classic`, held to the React fixture's markup by a fixture-parity test. ember-qunit, ember-exam and Vitest browser run the catalog against it, and Playwright and Cypress e2e run it against the built app (`test-apps/playwright-ember`, `test-apps/cypress-ember`). |
-| Vue, Svelte, Angular, Solid | coming soon | Harnesses are framework-agnostic, but these have no fixture or conformance run yet.                                                                                                                                                                                                                                                                |
+| Framework | Status      | Covered by                                                                                                                                                                                                                                                                                                                                         |
+| --------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React     | ✓           | The conformance fixture, `packages/conformance/fixture`, is a React app. Every runner above except Ember's drives it.                                                                                                                                                                                                                              |
+| Ember     | ✓           | A Glimmer copy of that fixture in `test-apps/ember-vite` and `test-apps/ember-classic`, held to the React fixture's markup by a fixture-parity test. ember-qunit, ember-exam and Vitest browser run the catalog against it, and Playwright and Cypress e2e run it against the built app (`test-apps/playwright-ember`, `test-apps/cypress-ember`). |
+| Vue       | ✓           | A Vue 3.5 port in `test-apps/vue`, held to the React fixture by the same parity test. Testing Library (`@testing-library/vue`), Vitest browser mode, Cypress component and Playwright (`test-apps/playwright-frameworks`) run the catalog against it. See [Using with Vue](#using-with-vue).                                                       |
+| Solid     | ✓           | A Solid port in `test-apps/solid`: Testing Library (`@solidjs/testing-library`), Vitest browser mode and Playwright. Cypress has no official Solid mount, so no component run. See [Using with Solid](#using-with-solid).                                                                                                                          |
+| Svelte    | ✓           | A Svelte 5 port in `test-apps/svelte`: Testing Library (`@testing-library/svelte`), Vitest browser mode, Cypress component and Playwright. See [Using with Svelte](#using-with-svelte).                                                                                                                                                            |
+| Angular   | coming soon | Harnesses are framework-agnostic, but Angular has no fixture or conformance run yet.                                                                                                                                                                                                                                                               |
 
 ## See it run
 
@@ -696,6 +701,77 @@ in the nearest tsconfig — which an Angular or MobX project sets for its own co
 esbuild first, so harnesses keep the standard protocol whatever the tsconfig
 says. happy-dom computes no layout, so `isVisible()` and `boundingBox()` behave as
 under jsdom. Bun 1.2 or later.
+
+## Using with Vue
+
+Nothing about a harness changes. Render with `@testing-library/vue` and build the
+env as for any Testing Library test:
+
+```ts
+// vite.config.ts / vitest.config.ts: harnessedDecorators() first
+plugins: [harnessedDecorators(), vue()]
+```
+
+```ts
+import { dom } from '@harnessed-ts/dom'
+import userEvent from '@testing-library/user-event'
+import { render } from '@testing-library/vue'
+
+const { baseElement } = render(LoginForm)
+const form = new LoginFormHarness(
+  dom({ user: userEvent.setup(), container: baseElement as HTMLElement }),
+)
+await form.signInAs('ada@example.com', 'hunter2')
+```
+
+`<Teleport to="body">` content is reachable from a `{ global: true }` field. In
+Vitest browser mode, `await render(LoginForm)` from `vitest-browser-vue`, then
+`vitestBrowser({ container: baseElement })`. Vue does not add `px` to numbers in
+a style object, so write `'12px'` where a layout depends on it.
+
+## Using with Solid
+
+```ts
+plugins: [harnessedDecorators(), solid()] // JSX is left for Solid's compiler
+```
+
+```tsx
+import { render } from '@solidjs/testing-library'
+
+const { baseElement } = render(() => <LoginForm />)
+const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+```
+
+Two things to know:
+
+- **`<Portal>` wraps its content in a `<div>`** under `body`. Reach portalled
+  content by role or test id with `{ global: true }`; don't assume
+  `body > [role=dialog]`.
+- **Solid delegates `onClick` to the main document**, so a click inside an iframe
+  never reaches a delegated handler. Use `on:click` for content rendered into a
+  frame.
+
+Vitest browser mode works with `@solidjs/testing-library`'s `render`, in the real
+browser.
+
+## Using with Svelte
+
+```ts
+// vitest.config.ts — svelteTesting() gives jsdom Svelte's browser build
+plugins: [harnessedDecorators(), svelte(), svelteTesting()]
+```
+
+```ts
+import { render } from '@testing-library/svelte'
+
+const { baseElement } = render(LoginForm)
+const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+```
+
+Svelte 5. `harnessedDecorators()` transforms `.ts` and `.tsx` only, so `.svelte`
+files go straight to the Svelte plugin. Content `mount()`ed into
+`document.body` is reachable from a `{ global: true }` field. In Vitest browser
+mode, `await render(LoginForm)` from `vitest-browser-svelte`.
 
 ## Using with Playwright
 
