@@ -113,7 +113,8 @@ export default class LoginForm extends Component<LoginFormSignature> {
       <label for="login-attachments">Attachments</label>
       <input id="login-attachments" type="file" multiple {{on "change" this.onFiles}} />
 
-      <p data-testid="login-uploads">{{this.uploads}}</p>
+      {{! A div, not a <p>: the late paragraph is found by role, and must stay the only one. }}
+      <div data-testid="login-uploads">{{this.uploads}}</div>
 
       {{#if this.late}}
         <p>

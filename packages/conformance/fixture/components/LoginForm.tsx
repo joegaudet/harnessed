@@ -94,7 +94,8 @@ export function LoginForm({ onSubmit, error, lateDuplicates }: LoginFormProps) {
       <label htmlFor="login-attachments">Attachments</label>
       <input id="login-attachments" type="file" multiple onChange={onFiles} />
 
-      <p data-testid="login-uploads">{uploads}</p>
+      {/* A div, not a <p>: the late paragraph is found by role, and must stay the only one. */}
+      <div data-testid="login-uploads">{uploads}</div>
 
       {/* Appears after a beat, as two nodes: a strict violation that cannot be
           seen by a query that only looks once. */}
