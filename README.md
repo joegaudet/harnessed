@@ -300,6 +300,21 @@ agreement is the whole reason the abstraction exists.
     a frame marker on anything but an `<iframe>` rejects; and a page nested in a
     frame refuses its URL members with `<Page> is nested in a frame`. The dom
     driver enters same-origin frames only, and names the frame when it cannot.
+11. **A `data-test-*` test id matches by presence, under the same rules.** With
+    `testIdAttribute: 'data-test-*'`, `testId('x')` finds every element that has
+    `data-test-x`, whatever its value, and never one that only has
+    `data-testid="x"`. Scope, strictness, `{ global: true }`, frames and
+    immediate absence hold exactly as above. An id with anything but letters,
+    digits, `-`, `_`, `.` and `:` (or a `RegExp`) is refused with an error under
+    every driver, never spliced into a selector.
+12. **`boundingBox()` measures against the top-level viewport.** The border box
+    in CSS pixels, offset by every frame crossed — inside each iframe's border
+    and padding. A node that draws no box reads as all zeros. Strict, and on an
+    absent target it waits out the timeout and rejects, as `text()` does.
+13. **`upload()` sets a file input's files and fires `change`.** On the input or
+    its `<label>`, replacing any earlier selection; the page sees each file's
+    name and bytes. Anything but a file input, or several files for an input
+    that is not `multiple`, is refused at once, in one wording.
 
 Where the drivers genuinely cannot match, the difference is documented rather than
 papered over:
@@ -309,6 +324,22 @@ papered over:
   driver. jsdom computes no layout, so there it is a computed-style check, and a
   node with no box reads as visible. Assert on absence or on state, not on
   visibility, when you want the same answer from jsdom and a browser.
+- **`boundingBox()`** under the dom driver is jsdom's `getBoundingClientRect()`:
+  jsdom computes no layout, so every box is all zeros. Assert sizes under a
+  browser driver. Under ember-qunit the app renders inside `#ember-testing`,
+  which ember-qunit draws at half size inside a transformed container: boxes
+  there are what is drawn, so turn that off (`transform: none` on
+  `#ember-testing-container`, and `transform: none; width: 100%; height: 100%`
+  on `#ember-testing`) in a suite that asserts sizes.
+- **`upload()`** hands each `File` over as it is under the dom driver, Ember,
+  Cypress (real events or not), Vitest browser mode and Playwright. Puppeteer,
+  WebdriverIO and TestCafe take only paths, so each file is first written to a
+  temporary directory: its name and bytes arrive, but the browser infers `type`
+  from the extension, `lastModified` is the time of writing, and the browser
+  must share the test's file system (a remote WebDriver grid does not).
+  user-event, behind the in-page drivers, drops files an `accept` attribute
+  rules out; the browser drivers set them anyway. Do not rely on `accept`
+  filtering in a test.
 - **Frames** are same-origin only under the dom driver, Ember, Cypress, TestCafe
   and Vitest browser mode, which resolve inside the page and cannot read a
   cross-origin document. Playwright, Puppeteer and WebdriverIO enter frames from
@@ -330,6 +361,13 @@ papered over:
 `testId('x')`, `role('button', { name: /save/i, level: 2 })`, `label('Email')`,
 `text(/expired/)`, `placeholder('you@example.com')`. Each returns a `Selector`, a
 plain data description of a query.
+
+`testId('x')` matches `data-testid="x"` by default. With
+`configure({ testIdAttribute: 'data-test-*' })` it matches the
+[ember-test-selectors](https://github.com/mainmatter/ember-test-selectors) style
+instead: any element that has the attribute `data-test-x`, whatever its value, so
+`<span data-test-productions-count>` is `testId('productions-count')`. Any prefix
+ending in `*` works the same way (`data-qa-*`).
 
 `frame(selector)` marks an `<iframe>`. Used as a host, the harness's `self` is the
 iframe element and its fields resolve inside the frame's document:
@@ -357,12 +395,18 @@ A query descriptor — a scope chain plus a selector — not a resolved node. No
 is looked up until a method is called, which is why a field can be declared before
 its component has rendered.
 
-| Group        | Members                                                                                |
-| ------------ | -------------------------------------------------------------------------------------- |
-| Interactions | `click` `fill` `clear` `check` `uncheck` `selectOption` `hover` `focus` `blur` `press` |
-| Observations | `text` `inputValue` `attribute` `isVisible` `isEnabled` `isChecked` `selectedOptions`  |
-| Waiting      | `waitFor(state, { timeout })`                                                          |
-| Lists        | `count` `isAbsent` `nth` `first` `last` `each` `map` `filter` `texts`                  |
+| Group        | Members                                                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------- |
+| Interactions | `click` `fill` `clear` `check` `uncheck` `selectOption` `hover` `focus` `blur` `press` `upload`     |
+| Observations | `text` `inputValue` `attribute` `isVisible` `isEnabled` `isChecked` `selectedOptions` `boundingBox` |
+| Waiting      | `waitFor(state, { timeout })`                                                                       |
+| Lists        | `count` `isAbsent` `nth` `first` `last` `each` `map` `filter` `texts`                               |
+
+`upload(files)` takes a `File` or a `File[]`, on an `<input type="file">` or its
+`<label>`, and replaces the selection. `boundingBox()` resolves to
+`{ x, y, width, height }` in CSS pixels, relative to the top-level viewport, so a
+harness can answer a layout question — a page's width at a zoom level — with
+plain numbers. Both are strict single-target operations (guarantees 12 and 13).
 
 Every method takes an optional `{ timeout }`. `waitFor('visible')` resolves once
 the target is on screen and visible; `waitFor('hidden')` once it is hidden or gone —
@@ -516,7 +560,9 @@ One place to declare these, read by everything that needs them.
 `@harnessed-ts/eslint-plugin` and `@harnessed-ts/claude` load the file themselves — the
 linter resolves it by walking up from the file being checked, so a monorepo and an
 editor started anywhere both find the right one. `testIdAttribute` is pushed into
-Testing Library and Playwright for you.
+Testing Library and Playwright for you. It is a plain attribute name, matched by
+value (`data-testid`, `data-test`), or a prefix ending in `*`, matched by presence
+(`data-test-*`, for ember-test-selectors) — see [Selectors](#selectors).
 
 The runtime half is explicit, because your test setup already transforms
 TypeScript and a bundler-free loader has no business running there:
@@ -1190,6 +1236,25 @@ import harnessed from '@harnessed-ts/eslint-plugin'
 export default [harnessed.configs.recommended]
 ```
 
+ESLint 8.57 with a legacy `.eslintrc` works too. The eslintrc configs are
+`legacy-recommended` and `legacy-strict`, and the rules are named under
+`@harnessed-ts/`:
+
+```json
+{
+  "extends": ["plugin:@harnessed-ts/legacy-recommended"]
+}
+```
+
+or one rule at a time:
+
+```json
+{
+  "plugins": ["@harnessed-ts"],
+  "rules": { "@harnessed-ts/no-raw-locator-in-test": "error" }
+}
+```
+
 | Rule                           | Catches                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `no-page-or-screen-in-harness` | a harness reaching for the driver's own query API — `this.page`, a bare `page`'s queries (Puppeteer's `page.$`, Vitest browser's `page.getByRole`), `screen`, `cy.get`, Ember's `find`, WebdriverIO's `$`, TestCafe's `Selector` — which drops the scope chain and leaks the coupling it exists to contain. Exempts a page's `waitForReady()`.                                                                                                                                                                                                                                                                                                      |
@@ -1256,7 +1321,7 @@ work; keep a separate check against a deployed environment.
 ## Adding a driver
 
 `@harnessed-ts/core` holds a registry keyed by driver id and never imports a driver.
-A driver supplies an env, 19 `Query` members, and a registration:
+A driver supplies an env, 21 `Query` members, and a registration:
 
 ```ts
 registerDriver('my-driver', (env, scope, selector) => new MyQuery(env, scope, selector))

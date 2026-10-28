@@ -28,7 +28,15 @@ strictness and frame errors still throw.
 A driver running in a real browser answers `isVisible()` with
 `isVisibleInLayout(element, home)` — Playwright's rule: a non-empty box that
 `visibility` does not hide, inside frames that are visible too, crossed up to
-`home`.
+`home`. It answers `boundingBox()` with `boundingBoxOf(element, home)`, which adds
+each crossed frame's `frameOrigin()`, and finds an upload's input with
+`fileInputOf(element)` — the element, or a `<label>`'s control — before handing
+the result to core's `checkFileTarget()`.
+
+A remote driver asks the same of the page through `box`, `origin` and
+`fileTarget`, and adds the origin of each frame it entered itself.
+`filesOnDisk(files)` from `@harnessed-ts/resolve/inject` writes `File`s to a
+temporary directory for a browser that only takes paths.
 
 ## Remote drivers
 
