@@ -1,0 +1,28 @@
+name: conformance-cypress-ct-frameworks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-cypress-ct-frameworks-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Solid is not here: Cypress ships no Solid mount adapter.
+        framework: [vue, svelte]
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: cypress-ct-frameworks (${{ matrix.framework }})
+      # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
+      setup: pnpm --filter test-app-cypress-ct-frameworks exec cypress install
+      test: CYPRESS_FRAMEWORK=${{ matrix.framework }} pnpm --filter test-app-cypress-ct-frameworks test
+      artifacts: test-apps/cypress-ct-frameworks/cypress/screenshots
