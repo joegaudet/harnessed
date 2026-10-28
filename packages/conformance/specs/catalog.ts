@@ -1,10 +1,11 @@
 import assert from './assert'
-import { StrictModeViolation } from '@harnessed-ts/core'
-import type { EnvConfig } from '@harnessed-ts/core'
+import { configure, getConfig, StrictModeViolation } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig } from '@harnessed-ts/core'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
 import { FrameHarness, FramedPanelHarness } from '../fixture/harnesses/FramedPanel.harness'
 import { LoginFormHarness } from '../fixture/harnesses/LoginForm.harness'
 import { PortalDialogHarness } from '../fixture/harnesses/PortalDialog.harness'
+import { CardsPage } from '../fixture/harnesses/pages/cards.page'
 import { StepOnePage, StepTwoPage } from '../fixture/harnesses/pages/wizard-step.page'
 
 export type View =
@@ -42,6 +43,46 @@ function strictOnCards(error: unknown): boolean {
     /^harnessed: strict mode violation — 3 nodes match .*card-grid.*card/s.test(error.message)
   )
 }
+
+/**
+ * Runs `body` with test ids matched ember-test-selectors style — `testId('x')`
+ * finds `data-test-x` by presence — and restores whatever was configured
+ * before, so no other spec sees the switch.
+ */
+async function withPresenceTestIds(body: () => Promise<void>): Promise<void> {
+  const before = getConfig().testIdAttribute
+  configure({ testIdAttribute: 'data-test-*' })
+  try {
+    await body()
+  } finally {
+    configure({ testIdAttribute: before })
+  }
+}
+
+/**
+ * jsdom computes no layout, so every box there is all zeros — the one documented
+ * difference in `boundingBox()`. Read from the realm the specs run in: only the
+ * dom driver runs them inside jsdom.
+ */
+const NO_LAYOUT = globalThis.navigator?.userAgent?.includes('jsdom') === true
+const NO_BOX: BoundingBox = { x: 0, y: 0, width: 0, height: 0 }
+
+/** Equal within half a pixel: engines disagree in the far decimals of a frame's position. */
+function assertBox(actual: BoundingBox, expected: BoundingBox, what: string): void {
+  if (NO_LAYOUT) {
+    assert.deepEqual(actual, NO_BOX, `${what} under jsdom`)
+    return
+  }
+  for (const key of ['x', 'y', 'width', 'height'] as const) {
+    assert.ok(
+      Math.abs(actual[key] - expected[key]) < 0.5,
+      `${what}: ${key} is ${actual[key]}, expected ${expected[key]}`,
+    )
+  }
+}
+
+/** The frame's border (3px) and padding (4px) lie between its box and its document. */
+const FRAME_INSET = 3 + 4
 
 /**
  * The parity suite. Every spec here is written once and executed by every driver.
@@ -573,6 +614,182 @@ export const specs: Spec[] = [
       await form.fillIn({ email: 'ada@example.com' })
       await form.blurEmail()
       assert.equal((await form.values()).email, 'ada@example.com')
+    },
+  },
+
+  // ---------------------------------------------- presence-style test ids
+  {
+    name: 'data-test-* test ids match by attribute presence, whatever the value, within scope',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      await withPresenceTestIds(async () => {
+        assert.equal(await grid.cardCount(), 3)
+        // `data-test-card-label` carries the label as its value; presence is what matches.
+        assert.deepEqual(await grid.labels(), ['Small', 'Medium', 'Large'])
+        assert.equal(await grid.labelTextAt(1), 'Medium')
+        // A decoy with the same attribute sits outside the grid.
+        assert.equal(await grid.hintCount(), 2)
+        assert.deepEqual(await grid.hints(), ['Under 1000 sq ft', '1000 to 2500 sq ft', null])
+      })
+    },
+  },
+  {
+    name: 'data-test-* test ids are strict, and do not match a data-testid of the same name',
+    async run(ctx) {
+      const env = await ctx.show('cards')
+      const grid = new CardGridHarness(env)
+      await withPresenceTestIds(async () => {
+        await assert.rejects(() => grid.ambiguousCardText(), strictOnCards)
+        // The page section has data-testid="page-cards" and no data-test-page-cards.
+        assert.equal(await new CardsPage(env).isAbsent(), true)
+      })
+    },
+  },
+  {
+    name: 'data-test-* test ids: global escapes the host scope, scoped queries do not',
+    async run(ctx) {
+      const dialog = new PortalDialogHarness(await ctx.show('dialog'))
+      await withPresenceTestIds(async () => {
+        await dialog.open()
+        assert.equal(await dialog.bodyText(), 'Are you sure?')
+        assert.equal(await dialog.scopedBodyCount(), 0)
+      })
+    },
+  },
+  {
+    name: 'data-test-* test ids cross frames only through frame(), and absence answers immediately',
+    async run(ctx) {
+      const panel = new FramedPanelHarness(await ctx.show('frame'))
+      await withPresenceTestIds(async () => {
+        assert.equal(await panel.counter.text(), 'Clicked 0 times')
+        await panel.counter.addOne()
+        assert.equal(await panel.counter.text(), 'Clicked 1 times')
+        assert.deepEqual(await panel.outsideTexts(), ['decoy outside the frame'])
+        assert.deepEqual(await panel.counter.toastTexts(), ['Toast inside the frame'])
+        const started = Date.now()
+        assert.equal(await panel.counter.missingCount(), 0)
+        const elapsed = Date.now() - started
+        assert.ok(elapsed < IMMEDIATE_MS, `count() inside a frame took ${elapsed}ms`)
+      })
+    },
+  },
+  {
+    name: 'a data-test-* test id that is not a plain name is refused, not spliced into a selector',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      await withPresenceTestIds(async () => {
+        for (const id of ['card], *', 'card"', 'card label', '']) {
+          await assert.rejects(() => grid.countOf(id), /not a valid data-test-\* test id/)
+        }
+        // Letters, digits, '-', '_', '.' and ':' are all a name needs.
+        assert.equal(await grid.countOf('card.v2:x_y'), 0)
+      })
+    },
+  },
+
+  // ------------------------------------------------------------ boundingBox
+  {
+    name: 'boundingBox reads a box in CSS pixels, relative to the viewport',
+    async run(ctx) {
+      const panel = new FramedPanelHarness(await ctx.show('frame'))
+      assertBox(await panel.markerBox(), { x: 12, y: 34, width: 56, height: 78 }, 'marker')
+    },
+  },
+  {
+    name: 'boundingBox inside a frame is relative to the top-level viewport',
+    async run(ctx) {
+      const env = await ctx.show('frame')
+      const panel = new FramedPanelHarness(env)
+      // Wait for the framed content before measuring it.
+      assert.equal(await panel.counter.text(), 'Clicked 0 times')
+      const frame = await new FrameHarness(env).box()
+      assertBox(
+        frame,
+        { x: frame.x, y: frame.y, width: 240 + 2 * FRAME_INSET, height: 120 + 2 * FRAME_INSET },
+        'frame',
+      )
+      assertBox(
+        await panel.counter.markerBox(),
+        { x: frame.x + FRAME_INSET + 5, y: frame.y + FRAME_INSET + 6, width: 20, height: 10 },
+        'framed marker',
+      )
+    },
+  },
+  {
+    name: 'boundingBox of a node that renders no box is all zeros',
+    async run(ctx) {
+      const env = await ctx.show('frame')
+      await new FramedPanelHarness(env).hideFrame()
+      assert.deepEqual(await new FrameHarness(env).box(), NO_BOX)
+    },
+  },
+  {
+    name: 'boundingBox on a target matching several nodes rejects with a strict-mode violation',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      await assert.rejects(() => grid.ambiguousCardBox(), strictOnCards)
+    },
+  },
+  {
+    name: 'boundingBox on an absent target rejects once the timeout runs out, like text()',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      const started = Date.now()
+      await assert.rejects(
+        () => grid.missingBox({ timeout: 200 }),
+        (error: unknown) => error instanceof Error && !(error instanceof StrictModeViolation),
+      )
+      const elapsed = Date.now() - started
+      // Absence is not an answer for a single-target read: it waits for the node.
+      assert.ok(elapsed >= 150, `boundingBox on an absent target gave up after ${elapsed}ms`)
+    },
+  },
+
+  // ----------------------------------------------------------------- upload
+  {
+    name: 'upload sets the files on a file input and fires change',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      assert.equal(await form.uploads(), '')
+      await form.attachAvatar(new File(['hello'], 'avatar.png', { type: 'image/png' }))
+      assert.equal(await form.uploads(), 'avatar.png:5')
+    },
+  },
+  {
+    name: 'upload sets several files on a multiple input, replacing what was there',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      await form.attachFiles([new File(['x'], 'old.txt')])
+      await form.attachFiles([new File(['abc'], 'a.txt'), new File(['de'], 'b.csv')])
+      assert.equal(await form.uploads(), 'a.txt:3, b.csv:2')
+    },
+  },
+  {
+    name: 'upload through a label sets the files on the input it labels',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      await form.attachAvatarViaLabel(new File(['hi'], 'me.jpg'))
+      assert.equal(await form.uploads(), 'me.jpg:2')
+    },
+  },
+  {
+    name: 'upload refuses a target that is not a file input, and several files for a single input',
+    async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
+      const file = new File(['x'], 'x.txt')
+      await assert.rejects(() => form.attachToEmail(file), /is not a file input/)
+      await assert.rejects(() => form.attachAvatar([file, file]), /takes one file, not 2/)
+      assert.equal(await form.uploads(), '')
+    },
+  },
+  {
+    name: 'upload on a target matching several nodes rejects with a strict-mode violation',
+    async run(ctx) {
+      const grid = new CardGridHarness(await ctx.show('cards'))
+      await assert.rejects(
+        () => grid.uploadToAmbiguousCard(new File(['x'], 'x.txt')),
+        strictOnCards,
+      )
     },
   },
 ]

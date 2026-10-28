@@ -184,6 +184,48 @@
                 ]
               },
               {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-avatar"
+                },
+                "children": [
+                  "Avatar"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-avatar",
+                  "type": "file"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-attachments"
+                },
+                "children": [
+                  "Attachments"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-attachments",
+                  "type": "file",
+                  "multiple": true
+                },
+                "children": []
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "data-testid": "login-uploads"
+                },
+                "children": []
+              },
+              {
                 "tag": "button",
                 "attrs": {
                   "data-testid": "login-submit",
@@ -384,6 +426,48 @@
                     "children": []
                   }
                 ]
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-avatar"
+                },
+                "children": [
+                  "Avatar"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-avatar",
+                  "type": "file"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-attachments"
+                },
+                "children": [
+                  "Attachments"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-attachments",
+                  "type": "file",
+                  "multiple": true
+                },
+                "children": []
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "data-testid": "login-uploads"
+                },
+                "children": []
               },
               {
                 "tag": "p",
@@ -597,6 +681,48 @@
                 ]
               },
               {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-avatar"
+                },
+                "children": [
+                  "Avatar"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-avatar",
+                  "type": "file"
+                },
+                "children": []
+              },
+              {
+                "tag": "label",
+                "attrs": {
+                  "for": "login-attachments"
+                },
+                "children": [
+                  "Attachments"
+                ]
+              },
+              {
+                "tag": "input",
+                "attrs": {
+                  "id": "login-attachments",
+                  "type": "file",
+                  "multiple": true
+                },
+                "children": []
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "data-testid": "login-uploads"
+                },
+                "children": []
+              },
+              {
                 "tag": "button",
                 "attrs": {
                   "data-testid": "login-submit",
@@ -629,7 +755,8 @@
           {
             "tag": "div",
             "attrs": {
-              "data-testid": "card-grid"
+              "data-testid": "card-grid",
+              "data-test-card-grid": ""
             },
             "children": [
               {
@@ -651,13 +778,15 @@
                 "attrs": {
                   "data-testid": "card",
                   "type": "button",
+                  "data-test-card": "",
                   "aria-pressed": "false"
                 },
                 "children": [
                   {
                     "tag": "span",
                     "attrs": {
-                      "data-testid": "card-label"
+                      "data-testid": "card-label",
+                      "data-test-card-label": "Small"
                     },
                     "children": [
                       "Small"
@@ -666,7 +795,8 @@
                   {
                     "tag": "small",
                     "attrs": {
-                      "data-testid": "card-hint"
+                      "data-testid": "card-hint",
+                      "data-test-card-hint": ""
                     },
                     "children": [
                       "Under 1000 sq ft"
@@ -679,13 +809,15 @@
                 "attrs": {
                   "data-testid": "card",
                   "type": "button",
+                  "data-test-card": "",
                   "aria-pressed": "false"
                 },
                 "children": [
                   {
                     "tag": "span",
                     "attrs": {
-                      "data-testid": "card-label"
+                      "data-testid": "card-label",
+                      "data-test-card-label": "Medium"
                     },
                     "children": [
                       "Medium"
@@ -694,7 +826,8 @@
                   {
                     "tag": "small",
                     "attrs": {
-                      "data-testid": "card-hint"
+                      "data-testid": "card-hint",
+                      "data-test-card-hint": ""
                     },
                     "children": [
                       "1000 to 2500 sq ft"
@@ -707,13 +840,15 @@
                 "attrs": {
                   "data-testid": "card",
                   "type": "button",
+                  "data-test-card": "",
                   "aria-pressed": "false"
                 },
                 "children": [
                   {
                     "tag": "span",
                     "attrs": {
-                      "data-testid": "card-label"
+                      "data-testid": "card-label",
+                      "data-test-card-label": "Large"
                     },
                     "children": [
                       "Large"
@@ -726,7 +861,8 @@
           {
             "tag": "span",
             "attrs": {
-              "data-testid": "card-hint"
+              "data-testid": "card-hint",
+              "data-test-card-hint": ""
             },
             "children": [
               "decoy outside the grid"
@@ -751,7 +887,8 @@
           {
             "tag": "div",
             "attrs": {
-              "data-testid": "portal-host"
+              "data-testid": "portal-host",
+              "data-test-portal-host": ""
             },
             "children": [
               {
@@ -784,13 +921,15 @@
           {
             "tag": "div",
             "attrs": {
-              "data-testid": "frame-host"
+              "data-testid": "frame-host",
+              "data-test-frame-host": ""
             },
             "children": [
               {
                 "tag": "p",
                 "attrs": {
-                  "data-testid": "frame-count"
+                  "data-testid": "frame-count",
+                  "data-test-frame-count": ""
                 },
                 "children": [
                   "decoy outside the frame"
@@ -799,11 +938,19 @@
               {
                 "tag": "p",
                 "attrs": {
-                  "data-testid": "frame-toast"
+                  "data-testid": "frame-toast",
+                  "data-test-frame-toast": ""
                 },
                 "children": [
                   "decoy toast outside the frame"
                 ]
+              },
+              {
+                "tag": "div",
+                "attrs": {
+                  "data-testid": "box"
+                },
+                "children": []
               },
               {
                 "tag": "button",
@@ -818,19 +965,22 @@
                 "tag": "iframe",
                 "attrs": {
                   "data-testid": "framed",
-                  "title": "Framed counter"
+                  "title": "Framed counter",
+                  "data-test-framed": ""
                 },
                 "children": [
                   {
                     "tag": "div",
                     "attrs": {
-                      "data-testid": "counter"
+                      "data-testid": "counter",
+                      "data-test-counter": ""
                     },
                     "children": [
                       {
                         "tag": "p",
                         "attrs": {
-                          "data-testid": "frame-count"
+                          "data-testid": "frame-count",
+                          "data-test-frame-count": ""
                         },
                         "children": [
                           "Clicked 0 times"
@@ -862,11 +1012,19 @@
                   {
                     "tag": "p",
                     "attrs": {
-                      "data-testid": "frame-toast"
+                      "data-testid": "frame-toast",
+                      "data-test-frame-toast": ""
                     },
                     "children": [
                       "Toast inside the frame"
                     ]
+                  },
+                  {
+                    "tag": "div",
+                    "attrs": {
+                      "data-testid": "framed-box"
+                    },
+                    "children": []
                   }
                 ]
               }

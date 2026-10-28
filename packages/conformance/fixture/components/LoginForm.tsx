@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { ChangeEvent } from 'react'
 
 export type LoginStatus = 'idle' | 'submitting' | 'done'
 
@@ -20,6 +21,13 @@ export function LoginForm({ onSubmit, error, lateDuplicates }: LoginFormProps) {
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState<LoginStatus>('idle')
   const [late, setLate] = useState(false)
+  const [uploads, setUploads] = useState('')
+  // What a change listener sees in the input's own `files`: names and sizes, so
+  // the contents are known to have arrived too.
+  const onFiles = (event: ChangeEvent<HTMLInputElement>) =>
+    setUploads(
+      [...(event.currentTarget.files ?? [])].map(file => `${file.name}:${file.size}`).join(', '),
+    )
 
   useEffect(() => {
     if (!lateDuplicates) return
@@ -79,6 +87,15 @@ export function LoginForm({ onSubmit, error, lateDuplicates }: LoginFormProps) {
         <label htmlFor="login-referral">Referral code</label>
         <input id="login-referral" data-testid="login-referral" />
       </fieldset>
+
+      <label htmlFor="login-avatar">Avatar</label>
+      <input id="login-avatar" type="file" onChange={onFiles} />
+
+      <label htmlFor="login-attachments">Attachments</label>
+      <input id="login-attachments" type="file" multiple onChange={onFiles} />
+
+      {/* A div, not a <p>: the late paragraph is found by role, and must stay the only one. */}
+      <div data-testid="login-uploads">{uploads}</div>
 
       {/* Appears after a beat, as two nodes: a strict violation that cannot be
           seen by a query that only looks once. */}

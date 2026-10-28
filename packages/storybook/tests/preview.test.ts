@@ -1,4 +1,12 @@
-import { ByTestId, ComponentHarness, createQuery, Harness, testId } from '@harnessed-ts/core'
+import {
+  ByTestId,
+  ComponentHarness,
+  configure,
+  createQuery,
+  Harness,
+  resetConfig,
+  testId,
+} from '@harnessed-ts/core'
 import type { Query } from '@harnessed-ts/core'
 import { dom } from '@harnessed-ts/dom'
 import userEvent from '@testing-library/user-event'
@@ -71,6 +79,23 @@ describe('harnessed()', () => {
 
     await preview.beforeEach(context)
     expect(await marker().count()).toBe(0)
+  })
+
+  it('marks the story ready under a data-test-* config, where StoryPage looks for it', async () => {
+    configure({ testIdAttribute: 'data-test-*' })
+    try {
+      const preview = harnessed()
+      const context = storyContext()
+      await preview.beforeEach(context)
+      await preview.afterEach(context)
+      // testId() under this config matches only `data-test-harnessed-story-ready`.
+      expect(await marker().count()).toBe(1)
+
+      await preview.beforeEach(context)
+      expect(await marker().count()).toBe(0)
+    } finally {
+      resetConfig()
+    }
   })
 
   it('records a play function that threw on the mark, so a runner can report it', async () => {

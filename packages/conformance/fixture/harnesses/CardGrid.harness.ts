@@ -6,7 +6,7 @@ import {
   Harness,
   testId,
 } from '@harnessed-ts/core'
-import type { Query, WaitOptions } from '@harnessed-ts/core'
+import type { BoundingBox, Query, WaitOptions } from '@harnessed-ts/core'
 
 /** The host is itself the button, so `choose()` acts on `self`. */
 @Harness({ host: testId('card') })
@@ -157,6 +157,24 @@ export class CardGridHarness extends ComponentHarness {
 
   async waitForAmbiguousCardToHide(options?: WaitOptions): Promise<void> {
     await this.elementBy(testId('card')).waitFor('hidden', options)
+  }
+
+  async ambiguousCardBox(): Promise<BoundingBox> {
+    return this.elementBy(testId('card')).boundingBox()
+  }
+
+  async uploadToAmbiguousCard(file: File): Promise<void> {
+    await this.elementBy(testId('card')).upload(file)
+  }
+
+  /** Nothing renders this test id: a single-target read waits, then rejects. */
+  async missingBox(options?: WaitOptions): Promise<BoundingBox> {
+    return this.elementBy(testId('never-rendered')).boundingBox(options)
+  }
+
+  /** How many nodes in the grid carry a test id computed at call time. */
+  async countOf(id: string): Promise<number> {
+    return this.elementBy(testId(id)).count()
   }
 
   /** Three cards render, so index 5 names nothing — the same answer as absent. */

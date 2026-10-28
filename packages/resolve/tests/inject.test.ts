@@ -54,6 +54,32 @@ describe('the injectable build', () => {
     expect(found?.textContent).toBe('hit')
   })
 
+  it('matches a data-test-* test id by presence, whatever its value', async () => {
+    const { api } = page(
+      '<p data-test-x>empty</p><p data-test-x="v">valued</p><p data-testid="x">miss</p>',
+    )
+    const presence = { ...options, testIdAttribute: 'data-test-*' }
+    const all = api.allNow(null, [], { type: 'testId', testId: 'x' }, presence)
+    expect(all.map(node => node.textContent)).toEqual(['empty', 'valued'])
+    // Waiting, too, and in Testing Library's words when nothing turns up.
+    await expect(api.one(null, [], { type: 'testId', testId: 'y' }, presence)).rejects.toThrow(
+      /^Unable to find an element by: \[data-test-y\]/,
+    )
+  })
+
+  it('describes what an upload would land on', () => {
+    const { api, document } = page(
+      '<input type="file" id="f" multiple><label for="f">Files</label><input id="t">' +
+        '<label>Loose</label><div id="d"></div>',
+    )
+    const at = (css: string) => document.querySelector(css)!
+    expect(api.fileTarget(at('#f'))).toEqual({ multiple: true })
+    expect(api.fileTarget(at('label[for="f"]'))).toEqual({ multiple: true })
+    expect(api.fileTarget(at('#t'))).toBe('<input type="text">')
+    expect(api.fileTarget(at('#d'))).toBe('<div>')
+    expect(api.fileTarget(document.querySelectorAll('label')[1]!)).toBe('<label> with no control')
+  })
+
   it('keeps scope: a match outside the root is not found', () => {
     const { api } = page('<section data-testid="a"><b>in</b></section><b>out</b>')
     const all = api.allNow(

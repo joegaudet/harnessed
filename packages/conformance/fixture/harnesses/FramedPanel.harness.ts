@@ -8,7 +8,7 @@ import {
   Harness,
   testId,
 } from '@harnessed-ts/core'
-import type { Query, WaitOptions } from '@harnessed-ts/core'
+import type { BoundingBox, Query, WaitOptions } from '@harnessed-ts/core'
 
 /** The counter, as it would be written with no idea it ends up inside a frame. */
 @Harness({ host: testId('counter') })
@@ -17,6 +17,8 @@ export class CounterHarness extends ComponentHarness {
   @ByRole('button', { name: 'Add one' }) private accessor adder!: Query
   @ByTestId('not-rendered') private accessor missing!: Query
   @ByLabel('Note') private accessor note!: Query
+  /** Fixed in the frame's viewport, outside the counter: reached globally. */
+  @ByTestId('framed-box', { global: true }) private accessor marker!: Query
   /** Portalled outside the host, still inside the frame's document. */
   @ByTestId('frame-toast', { global: true }) private accessor toast!: Query
 
@@ -52,6 +54,10 @@ export class CounterHarness extends ComponentHarness {
     return this.total.isVisible()
   }
 
+  async markerBox(): Promise<BoundingBox> {
+    return this.marker.boundingBox()
+  }
+
   async waitVisible(options?: WaitOptions): Promise<void> {
     await this.total.waitFor('visible', options)
   }
@@ -67,6 +73,11 @@ export class FramedPanelHarness extends ComponentHarness {
   /** Outside the frame: must find only the decoy, never the counter's line. */
   @ByTestId('frame-count') private accessor outside!: Query
   @ByRole('button', { name: 'Hide frame' }) private accessor hider!: Query
+  @ByTestId('box') private accessor marker!: Query
+
+  async markerBox(): Promise<BoundingBox> {
+    return this.marker.boundingBox()
+  }
 
   async outsideTexts(): Promise<string[]> {
     return this.outside.texts()
@@ -96,5 +107,10 @@ export class FrameHarness extends ComponentHarness {
 
   async text(): Promise<string> {
     return this.total.text()
+  }
+
+  /** The iframe element's own box, border and padding included. */
+  async box(): Promise<BoundingBox> {
+    return this.self.boundingBox()
   }
 }

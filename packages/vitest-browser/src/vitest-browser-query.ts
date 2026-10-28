@@ -1,14 +1,17 @@
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
+  checkFileTarget,
   enabledFrom,
   nth as withNth,
   StrictModeViolation,
   timeoutFor,
 } from '@harnessed-ts/core'
 import {
+  boundingBoxOf,
   countAll,
+  fileInputOf,
   FrameEntryError,
   isVisibleInLayout,
   resolveAll,
@@ -208,6 +211,14 @@ export class VitestBrowserQuery extends Query {
     await userEvent.keyboard(toKeyboardInput(key))
   }
 
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    const input = fileInputOf(await this.element(options))
+    checkFileTarget(input, list.length, this.scope, this.selector)
+    // The provider's upload: Playwright's setInputFiles, or WebdriverIO's, with the bytes.
+    await userEvent.upload(target(input), list, actionOptions(options))
+  }
+
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
@@ -258,6 +269,10 @@ export class VitestBrowserQuery extends Query {
   override async selectedOptions(options?: WaitOptions): Promise<string[]> {
     const element = (await this.element(options)) as HTMLSelectElement
     return [...(element.selectedOptions ?? [])].map(option => option.value)
+  }
+
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    return boundingBoxOf(await this.element(options), this.container.ownerDocument)
   }
 
   // --- waiting ------------------------------------------------------------

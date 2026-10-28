@@ -1,4 +1,4 @@
-import { getConfig, reviveStrictViolation } from '@harnessed-ts/core'
+import { checkTestIds, getConfig, reviveStrictViolation } from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
 import { encodeSelector, injectSource, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import { rememberUrl } from './location'
@@ -21,6 +21,8 @@ export interface Site {
   readonly context?: WebdriverIO.BrowsingContext
   /** The top-level document, whose URL is the page's URL. */
   readonly top: boolean
+  /** Where this document's viewport starts in the top-level one, in CSS pixels. */
+  readonly origin: { readonly x: number; readonly y: number }
 }
 
 /** Sends keys to the focused element of the site's document. */
@@ -94,6 +96,7 @@ export async function callPage(
   timeout: number,
   arg: string | null = null,
 ): Promise<unknown> {
+  checkTestIds(scope, selector)
   const args = [
     PAGE_API_GLOBAL,
     op,
@@ -192,7 +195,7 @@ export async function walk<T>(
   const deadline = Date.now() + options.timeout
   const remaining = () => Math.max(0, deadline - Date.now())
   const { hops, rest } = splitAtFrames(scope)
-  let site: Site = { browser, realm: browser, top: true }
+  let site: Site = { browser, realm: browser, top: true, origin: { x: 0, y: 0 } }
   // Under BiDi, the frame context entered last.
   let context: WebdriverIO.BrowsingContext | undefined
   let switched = false
@@ -201,17 +204,20 @@ export async function walk<T>(
       const op = options.waiting ? 'frame' : 'frameNow'
       const found = (await callPage(site, op, hop.scope, hop.link, remaining())) as {
         element: ElementRef | null
+        origin: { x: number; y: number }
       }
       if (found.element === null) throw new FrameAbsent()
       const iframe = await wrap(site, found.element)
       await options.onFrame?.(iframe)
+      // The frame's document starts where its content box does, in the document around it.
+      const origin = { x: site.origin.x + found.origin.x, y: site.origin.y + found.origin.y }
       if (browser.isBidi) {
         context = await (context ?? (await topContext(browser))).frame(iframe)
-        site = { browser, realm: context, context, top: false }
+        site = { browser, realm: context, context, top: false, origin }
       } else {
         await browser.switchFrame(iframe)
         switched = true
-        site = { browser, realm: browser, top: false }
+        site = { browser, realm: browser, top: false, origin }
       }
     }
     return await operation(site, rest, remaining)

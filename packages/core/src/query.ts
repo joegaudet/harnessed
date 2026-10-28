@@ -19,6 +19,20 @@ export interface WaitOptions {
 export type WaitState = 'visible' | 'hidden'
 
 /**
+ * Where a target is drawn: its border box in CSS pixels, relative to the
+ * top-level viewport (the page the driver drives), so a node inside a frame is
+ * offset by where the frame's document sits. A node that renders no box —
+ * `display: none`, or inside it — reads as all zeros, as does every node under
+ * jsdom, which computes no layout.
+ */
+export interface BoundingBox {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+/**
  * A query descriptor — a scope chain plus a selector. Not a resolved node: nothing
  * is looked up until a method is called, which is what lets one harness field work
  * before its component has rendered and across drivers that resolve differently.
@@ -26,7 +40,7 @@ export type WaitState = 'visible' | 'hidden'
  * Single-target methods resolve strictly: more than one match is an error, never a
  * silent pick of the first. Multi-target methods work across every match.
  *
- * A driver implements 19 members; everything list-shaped is inherited from here.
+ * A driver implements 21 members; everything list-shaped is inherited from here.
  */
 export abstract class Query {
   constructor(
@@ -45,6 +59,13 @@ export abstract class Query {
   abstract focus(options?: WaitOptions): Promise<void>
   abstract blur(options?: WaitOptions): Promise<void>
   abstract press(key: string, options?: WaitOptions): Promise<void>
+  /**
+   * Sets the files of an `<input type="file">` — or of the input a `<label>`
+   * is for — and fires `input` and `change`, replacing any earlier selection.
+   * Rejects at once on any other element, and on several files for an input
+   * that is not `multiple`.
+   */
+  abstract upload(files: File | File[], options?: WaitOptions): Promise<void>
 
   // --- observations -------------------------------------------------------
   abstract text(options?: WaitOptions): Promise<string>
@@ -54,6 +75,8 @@ export abstract class Query {
   abstract isEnabled(options?: WaitOptions): Promise<boolean>
   abstract isChecked(options?: WaitOptions): Promise<boolean>
   abstract selectedOptions(options?: WaitOptions): Promise<string[]>
+  /** The target's box in the top-level viewport. See `BoundingBox`. */
+  abstract boundingBox(options?: WaitOptions): Promise<BoundingBox>
 
   // --- waiting ------------------------------------------------------------
   /**

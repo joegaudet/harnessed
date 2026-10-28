@@ -45,7 +45,8 @@ function attributesOf(element: Element): Record<string, string | boolean> {
     if (value !== null) attrs[name] = value
   }
   for (const { name, value } of [...element.attributes]) {
-    if (name.startsWith('aria-')) attrs[name] = value
+    // `data-test-*` are presence-style test ids (ember-test-selectors).
+    if (name.startsWith('aria-') || name.startsWith('data-test-')) attrs[name] = value
   }
   for (const state of STATES) {
     if (state in element && (element as unknown as Record<string, unknown>)[state] === true) {

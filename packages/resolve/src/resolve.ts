@@ -1,12 +1,14 @@
 import {
   describeScope,
+  getConfig,
   indexOutOfRange,
   strictViolation,
+  testIdPresenceSelector,
   testIdSync,
   timeoutFor,
 } from '@harnessed-ts/core'
 import type { Selector } from '@harnessed-ts/core'
-import { configure as configureTestingLibrary, within } from '@testing-library/dom'
+import { buildQueries, configure as configureTestingLibrary, within } from '@testing-library/dom'
 import type { ByRoleMatcher } from '@testing-library/dom'
 
 /** `Selector` keeps `role` a plain string so it stays driver-agnostic; each driver
@@ -17,6 +19,24 @@ const syncTestIdAttribute = testIdSync(testIdAttribute =>
   configureTestingLibrary({ testIdAttribute }),
 )
 
+/** Descendants carrying a presence-style test id: `[data-test-x]`, any value. */
+function queryAllByPresence(container: HTMLElement, css: string): HTMLElement[] {
+  return [...container.querySelectorAll<HTMLElement>(css)]
+}
+
+// Built the way Testing Library builds its own queries, so a presence test id
+// waits, and reports "Unable to find …" when it gives up, exactly as `*ByTestId` does.
+const [, , , findAllByPresence] = buildQueries(
+  queryAllByPresence,
+  (_container, css: string) => `Found multiple elements by: ${css}`,
+  (_container, css: string) => `Unable to find an element by: ${css}`,
+)
+
+/** The presence selector for a test id under a `data-test-*` config, if that is the mode. */
+function presenceOf(selector: Selector & { type: 'testId' }): string | undefined {
+  return testIdPresenceSelector(getConfig().testIdAttribute, selector.testId)
+}
+
 /** Every match for one selector, without waiting. Zero is an answer. */
 export function queryAll(root: HTMLElement, selector: Selector): HTMLElement[] {
   syncTestIdAttribute()
@@ -26,8 +46,12 @@ export function queryAll(root: HTMLElement, selector: Selector): HTMLElement[] {
       return scoped.queryAllByRole(selector.role as RoleName, selector.options)
     case 'label':
       return scoped.queryAllByLabelText(selector.text)
-    case 'testId':
-      return scoped.queryAllByTestId(selector.testId)
+    case 'testId': {
+      const css = presenceOf(selector)
+      return css === undefined
+        ? scoped.queryAllByTestId(selector.testId)
+        : queryAllByPresence(root, css)
+    }
     case 'text':
       return scoped.queryAllByText(selector.text)
     case 'placeholder':
@@ -92,8 +116,12 @@ async function findAll(
       return scoped.findAllByRole(selector.role as RoleName, selector.options, options)
     case 'label':
       return scoped.findAllByLabelText(selector.text, undefined, options)
-    case 'testId':
-      return scoped.findAllByTestId(selector.testId, undefined, options)
+    case 'testId': {
+      const css = presenceOf(selector)
+      return css === undefined
+        ? scoped.findAllByTestId(selector.testId, undefined, options)
+        : findAllByPresence(root, css, undefined, options)
+    }
     case 'text':
       return scoped.findAllByText(selector.text, undefined, options)
     case 'placeholder':

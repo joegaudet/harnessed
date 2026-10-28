@@ -1,5 +1,8 @@
 import { configure } from '@harnessed-ts/core'
-import type { Selector } from '@harnessed-ts/core'
+import type { BoundingBox, FileTarget, Selector } from '@harnessed-ts/core'
+import { boxInOwnDocument, frameOrigin } from './box'
+import type { Point } from './box'
+import { fileInputOf } from './files'
 import { PAGE_API_GLOBAL } from './global-name'
 import { countAll, resolveAll, resolveAllNow, resolveOne, resolveOneNow } from './resolve'
 import { isVisibleInLayout } from './visible'
@@ -69,6 +72,16 @@ export interface PageApi {
    * frame no in-page walk could cross.
    */
   visible(element: Element): boolean
+  /**
+   * The element's box in its own document's viewport, or `null` when it draws
+   * none. A driver that enters frames from outside adds each crossed frame's
+   * `origin` itself.
+   */
+  box(element: Element): BoundingBox | null
+  /** Where an iframe's document is drawn, in the iframe's own document. */
+  origin(iframe: Element): Point
+  /** What an upload would set: the file input's `multiple`, or what the element is instead. */
+  fileTarget(element: Element): FileTarget
 }
 
 export function createPageApi(document: Document): PageApi {
@@ -111,6 +124,12 @@ export function createPageApi(document: Document): PageApi {
     },
     visible(element) {
       return isVisibleInLayout(element, element.ownerDocument)
+    },
+    box: boxInOwnDocument,
+    origin: frameOrigin,
+    fileTarget(element) {
+      const input = fileInputOf(element)
+      return typeof input === 'string' ? input : { multiple: input.multiple }
     },
   }
 }

@@ -254,6 +254,17 @@ describe('harness-public-surface', () => {
         }`,
       },
       {
+        // A box is plain numbers about the target, not the target.
+        name: 'a public method returning what boundingBox() measured',
+        filename: HARNESS,
+        code: `import type { BoundingBox, Query } from '@harnessed-ts/core'
+        class H extends ComponentHarness {
+          @ByTestId('page') private accessor page!: Query
+          async pageBox(): Promise<BoundingBox> { return this.page.boundingBox() }
+          async pageWidth(): Promise<number> { return (await this.page.boundingBox()).width }
+        }`,
+      },
+      {
         name: 'an ES private element field',
         filename: HARNESS,
         code: `class H extends ComponentHarness { @ByLabel('Email') accessor #email!: Query }`,

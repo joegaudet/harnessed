@@ -1,7 +1,8 @@
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
+  checkFileTarget,
   enabledFrom,
   nth as withNth,
   StrictModeViolation,
@@ -11,7 +12,14 @@ import { waitFor as waitForCondition } from '@testing-library/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { DOM_DRIVER } from './driver-id'
 import type { DomEnv } from './env'
-import { countAll, FrameEntryError, resolveAll, resolveOne } from '@harnessed-ts/resolve'
+import {
+  boundingBoxOf,
+  countAll,
+  fileInputOf,
+  FrameEntryError,
+  resolveAll,
+  resolveOne,
+} from '@harnessed-ts/resolve'
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
@@ -161,6 +169,13 @@ export class DomQuery extends Query {
     await this.user.keyboard(toKeyboardInput(key))
   }
 
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    const input = fileInputOf(await this.element(options))
+    checkFileTarget(input, list.length, this.scope, this.selector)
+    await this.user.upload(input, list)
+  }
+
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
@@ -211,6 +226,11 @@ export class DomQuery extends Query {
   override async selectedOptions(options?: WaitOptions): Promise<string[]> {
     const element = (await this.element(options)) as HTMLSelectElement
     return [...(element.selectedOptions ?? [])].map(option => option.value)
+  }
+
+  /** jsdom computes no layout: every box here is all zeros. */
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    return boundingBoxOf(await this.element(options), this.container.ownerDocument)
   }
 
   // --- waiting ------------------------------------------------------------

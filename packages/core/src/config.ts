@@ -5,6 +5,12 @@ export interface RuntimeConfig {
   /**
    * The attribute `testId` selectors match. Both Testing Library and Playwright
    * allow renaming it; a harness should not have to care which.
+   *
+   * A plain name (`data-testid`, the default) matches by value:
+   * `testId('x')` is `[data-testid="x"]`. A prefix ending in `*` matches by
+   * presence, the ember-test-selectors convention: under `'data-test-*'`,
+   * `testId('x')` is any element with a `data-test-x` attribute, whatever its
+   * value. Presence ids may use letters, digits, `-`, `_`, `.` and `:` only.
    */
   testIdAttribute: string
   /** Default milliseconds a driver waits for a target before giving up. */

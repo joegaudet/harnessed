@@ -3,6 +3,7 @@ import {
   ByPlaceholder,
   ByRole,
   ByTestId,
+  ByText,
   ComponentHarness,
   Harness,
   testId,
@@ -33,6 +34,10 @@ export class LoginFormHarness extends ComponentHarness {
   @ByTestId('login-referral') private accessor referral!: Query
   @ByTestId('login-late') private accessor lateLine!: Query
   @ByRole('dialog', { name: 'Confirm', global: true }) private accessor globalDialog!: Query
+  @ByLabel('Avatar') private accessor avatar!: Query
+  @ByText('Avatar') private accessor avatarLabel!: Query
+  @ByLabel('Attachments') private accessor attachments!: Query
+  @ByTestId('login-uploads') private accessor uploadsLine!: Query
 
   async heading(): Promise<string> {
     return this.title.text()
@@ -130,6 +135,30 @@ export class LoginFormHarness extends ComponentHarness {
 
   async lateCount(): Promise<number> {
     return this.lateLine.count()
+  }
+
+  /** A single-file input. */
+  async attachAvatar(files: File | File[]): Promise<void> {
+    await this.avatar.upload(files)
+  }
+
+  /** Through the `<label>`, which hands the files to the input it labels. */
+  async attachAvatarViaLabel(file: File): Promise<void> {
+    await this.avatarLabel.upload(file)
+  }
+
+  async attachFiles(files: File[]): Promise<void> {
+    await this.attachments.upload(files)
+  }
+
+  /** The email field is a text input: there is nothing to attach a file to. */
+  async attachToEmail(file: File): Promise<void> {
+    await this.email.upload(file)
+  }
+
+  /** What the inputs' change listener read from `files`, as `name:size, …`. */
+  async uploads(): Promise<string> {
+    return this.uploadsLine.text()
   }
 
   /** No such node ever exists, so last() is asked about an empty set. */
