@@ -13,13 +13,7 @@ export interface CardProps extends CardSpec {
 /** The host IS the interactive element — exercises `self`. Selection is aria-pressed. */
 export function Card({ label, hint, on, onChoose }: CardProps) {
   return (
-    <button
-      type="button"
-      data-testid="card"
-      data-test-card=""
-      aria-pressed={on}
-      onClick={onChoose}
-    >
+    <button type="button" data-testid="card" data-test-card="" aria-pressed={on} onClick={onChoose}>
       {/* A presence attribute may carry a value; it still matches by name alone. */}
       <span data-testid="card-label" data-test-card-label={label}>
         {label}

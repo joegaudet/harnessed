@@ -48,7 +48,9 @@ export function queryAll(root: HTMLElement, selector: Selector): HTMLElement[] {
       return scoped.queryAllByLabelText(selector.text)
     case 'testId': {
       const css = presenceOf(selector)
-      return css === undefined ? scoped.queryAllByTestId(selector.testId) : queryAllByPresence(root, css)
+      return css === undefined
+        ? scoped.queryAllByTestId(selector.testId)
+        : queryAllByPresence(root, css)
     }
     case 'text':
       return scoped.queryAllByText(selector.text)

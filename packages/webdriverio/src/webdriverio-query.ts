@@ -319,9 +319,13 @@ export class WebdriverioQuery extends Query {
       this.scope,
       { waiting: true, timeout: timeoutFor(options?.timeout) },
       async (site, scope, remaining) => {
-        const box = (await callPage(site, 'box', scope, this.selector, remaining())) as
-          | BoundingBox
-          | null
+        const box = (await callPage(
+          site,
+          'box',
+          scope,
+          this.selector,
+          remaining(),
+        )) as BoundingBox | null
         if (box === null) return { x: 0, y: 0, width: 0, height: 0 }
         return { ...box, x: box.x + site.origin.x, y: box.y + site.origin.y }
       },

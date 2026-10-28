@@ -786,7 +786,10 @@ export const specs: Spec[] = [
     name: 'upload on a target matching several nodes rejects with a strict-mode violation',
     async run(ctx) {
       const grid = new CardGridHarness(await ctx.show('cards'))
-      await assert.rejects(() => grid.uploadToAmbiguousCard(new File(['x'], 'x.txt')), strictOnCards)
+      await assert.rejects(
+        () => grid.uploadToAmbiguousCard(new File(['x'], 'x.txt')),
+        strictOnCards,
+      )
     },
   },
 ]

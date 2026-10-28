@@ -97,11 +97,14 @@ export class PlaywrightQuery extends Query {
       // Playwright's. Serialised into the page: the shared rule, restated.
       const target = await l.evaluate(
         (element: Element): FileTarget => {
-          const control = element.localName === 'label' ? (element as HTMLLabelElement).control : element
+          const control =
+            element.localName === 'label' ? (element as HTMLLabelElement).control : element
           if (control === null) return '<label> with no control'
           if (control.localName !== 'input') return `<${control.localName}>`
           const input = control as HTMLInputElement
-          return input.type === 'file' ? { multiple: input.multiple } : `<input type="${input.type}">`
+          return input.type === 'file'
+            ? { multiple: input.multiple }
+            : `<input type="${input.type}">`
         },
         undefined,
         { timeout },
