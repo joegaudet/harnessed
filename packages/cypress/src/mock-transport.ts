@@ -14,6 +14,17 @@ let live: Dispatcher | undefined
 
 const POST_GLOBAL = '__harnessedWsPost'
 
+/**
+ * Requests this transport aborted, by method and URL, with when. Destroying a
+ * request closes the browser's connection to Cypress's proxy, and Chromium
+ * resends an idempotent request whose reused connection closed before any
+ * response. That resend is the aborted request, not a new one: it is aborted
+ * too rather than dispatched, or a hang() released by reset would come back
+ * as an unhandled request once the handlers are gone.
+ */
+const aborted = new Map<string, number>()
+const RESEND_WINDOW_MS = 1000
+
 function kindOf(resourceType: string): RawRequest['kind'] {
   if (resourceType === 'fetch') return 'fetch'
   if (resourceType === 'xhr') return 'xhr'
@@ -34,6 +45,15 @@ function interceptAll(): void {
   cy.intercept({ url: '**' }, async request => {
     const dispatcher = live
     if (dispatcher === undefined) return
+    const key = `${request.method} ${request.url}`
+    const abortedAt = aborted.get(key)
+    if (abortedAt !== undefined) {
+      aborted.delete(key)
+      if (Date.now() - abortedAt < RESEND_WINDOW_MS) {
+        request.destroy()
+        return
+      }
+    }
     const raw: RawRequest = {
       method: request.method,
       url: request.url,
@@ -49,6 +69,7 @@ function interceptAll(): void {
     const result = await dispatcher.dispatch(raw)
     if (result.kind === 'passthrough') return
     if (result.kind === 'error') {
+      if (result.fault === 'abort') aborted.set(key, Date.now())
       request.destroy()
       return
     }
@@ -91,6 +112,7 @@ export function registerMockHooks(): void {
   if (hooked) return
   hooked = true
   beforeEach(() => {
+    aborted.clear()
     interceptAll()
   })
   // Mocha waits for the returned promise; no cy command is enqueued here.
