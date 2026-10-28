@@ -14,4 +14,8 @@ const renderer = nightwatchPlugin({
 export default defineConfig({
   plugins: [vue(), renderer],
   server: { port: PORT, strictPort: true },
+  // There is no index.html for Vite to crawl, so it would find the framework
+  // only when the first mount asks for it, re-bundle, and reload the renderer
+  // page under that mount. Bundle it up front instead.
+  optimizeDeps: { entries: ['support/Stage.vue'], include: ['vue'] },
 })
