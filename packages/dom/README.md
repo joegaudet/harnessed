@@ -14,6 +14,8 @@ const form = new LoginFormHarness(dom({ user: userEvent.setup() }))
 Pass `container` to scope a harness to one tree — which is what makes two
 instances in a single test, and portals, work without a cleanup race.
 
+**Mocking:** `import { mock } from '@harnessed-ts/dom/mock'` patches `fetch`, XHR and `WebSocket` in jsdom (install `@mswjs/interceptors` alongside); set mocks up before `render`. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).
 

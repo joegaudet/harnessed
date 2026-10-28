@@ -23,6 +23,8 @@ Interactions go through `@testing-library/user-event` bound to the AUT document;
 pass `{ realEvents: true }` for trusted Chrome DevTools Protocol input on
 Chromium-family browsers. Never call `cy` commands inside the callback.
 
+**Mocking:** `import '@harnessed-ts/cypress/mock'` in the support file routes one `cy.intercept` per test to the live mock and adds `cy.mock(api => …)`. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).
 

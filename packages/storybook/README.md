@@ -37,4 +37,6 @@ const story = await StoryPage.goto(pw(page), LoginStories, 'WrongPassword', { pl
 await story.harness(LoginFormHarness).signInAs('ada@example.com', 'hunter2')
 ```
 
+**Mocking:** `harnessed()` from `@harnessed-ts/storybook/mock` installs a story's `parameters.harnessed.mocks` before it renders, and hands `play` the mock. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Storybook 9 or later. See [Using with Storybook](https://github.com/joegaudet/harnessed#using-with-storybook).

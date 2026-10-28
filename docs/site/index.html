@@ -48,6 +48,7 @@
         </ul>
         <ul>
           <li><a href="#runners">Runners</a></li>
+          <li class="wide-only"><a href="#mocking">Mocking</a></li>
           <li class="wide-only"><a href="#use-cases">Use cases</a></li>
           <li class="wide-only"><a href="#try">Try it</a></li>
           <li><a href="https://github.com/joegaudet/harnessed">GitHub</a></li>
@@ -341,6 +342,63 @@ await expect(form).toBeAbsent()</code></pre>
         </div>
       </section>
 
+      <section id="mocking">
+        <p class="eyebrow">Mocking</p>
+        <h2>Mock the API once, under every runner</h2>
+        <p>
+          <code>@harnessed-ts/mock</code> describes the backend a test needs, and each driver
+          intercepts requests its own way — <code>page.route</code> under Playwright,
+          <code>cy.intercept</code> under Cypress, <code>fetch</code> and XHR patched in the page
+          under Testing Library, Ember and Storybook. The same handlers, held to the same
+          conformance catalog, under every runner.
+        </p>
+        <pre><code class="language-typescript">@Api({ base: '/api/users' })
+class UsersApi extends ApiHarness {
+  @Get('/:id')
+  byId({ params }: MockRequest&lt;{ id: string }&gt;) {
+    return params.id === '1' ? json({ name: 'Ada' }) : notFound()
+  }
+}</code></pre>
+        <div class="grid">
+          <article>
+            <header>jsdom, via Testing Library</header>
+            <pre><code class="language-tsx">const api = mock(dom({ user }), { scope: '/api/**' })
+await api.use(UsersApi)
+render(&lt;Profile id="1" /&gt;)
+expect(await profile.name()).toBe('Ada')</code></pre>
+          </article>
+          <article>
+            <header>A real browser, via Playwright</header>
+            <pre><code class="language-typescript">const api = mock(pw(page), { scope: '/api/**' })
+await api.use(UsersApi, { byId: () =&gt; serverError() })
+await profile.goto()
+expect(await profile.error()).toBe('500')</code></pre>
+          </article>
+        </div>
+        <ul>
+          <li>
+            <strong>Builders for every format</strong>: JSON, text, files, forms, problem details,
+            JSON:API, GraphQL, server-sent events and NDJSON streams, network errors and hangs.
+          </li>
+          <li>
+            <strong>Nothing goes unanswered by accident</strong>: a request no mock answers fails
+            the test, naming it. Requests are logged with parsed bodies, and every assertion style
+            can check them.
+          </li>
+          <li>
+            <strong>Mocks that cannot drift</strong>: validate them against an OpenAPI document or a
+            GraphQL schema, type them from openapi-typescript, replay a HAR, or reuse MSW handlers.
+          </li>
+          <li>
+            <strong>WebSockets, state and test data</strong>: mocked sockets, per-test state, and
+            deterministic factories.
+          </li>
+        </ul>
+        <p>
+          <a href="https://github.com/joegaudet/harnessed#mocking-apis">Mocking APIs, in full</a>.
+        </p>
+      </section>
+
       <section id="see-it-run">
         <p class="eyebrow">In action</p>
         <h2>One demo, five environments</h2>
@@ -431,6 +489,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="col">Runner</th>
                 <th scope="col">Package</th>
                 <th scope="col">Environment</th>
+                <th scope="col">Mocking</th>
                 <th scope="col">Conformance</th>
               </tr>
             </thead>
@@ -439,6 +498,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-dom">Testing Library</a></th>
                 <td><code>dom</code></td>
                 <td>jsdom</td>
+                <td>In the page</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/ci.yml/badge.svg?branch=main"
@@ -450,6 +510,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-playwright">Playwright</a></th>
                 <td><code>playwright</code></td>
                 <td>Real browser</td>
+                <td><code>page.route</code></td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/ci.yml/badge.svg?branch=main"
@@ -465,6 +526,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-ember">Ember</a> (QUnit, exam, Vitest)</th>
                 <td><code>ember</code></td>
                 <td>Real browser</td>
+                <td>In the page</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-ember-qunit.yml/badge.svg?branch=main"
@@ -484,6 +546,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-cypress">Cypress</a> (e2e and component)</th>
                 <td><code>cypress</code></td>
                 <td>Real browser</td>
+                <td><code>cy.mock</code></td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-e2e.yml/badge.svg?branch=main"
@@ -499,6 +562,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-webdriverio">WebdriverIO</a></th>
                 <td><code>webdriverio</code></td>
                 <td>Real browser (BiDi, Classic)</td>
+                <td>WebDriver BiDi</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-webdriverio.yml/badge.svg?branch=main"
@@ -510,6 +574,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-vitest-browser">Vitest browser mode</a></th>
                 <td><code>vitest-browser</code></td>
                 <td>Real browser</td>
+                <td>In the page</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-vitest-browser.yml/badge.svg?branch=main"
@@ -521,6 +586,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-puppeteer">Puppeteer</a></th>
                 <td><code>puppeteer</code></td>
                 <td>Real browser</td>
+                <td>Request interception</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-puppeteer.yml/badge.svg?branch=main"
@@ -532,6 +598,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-testcafe">TestCafe</a></th>
                 <td><code>testcafe</code></td>
                 <td>Real browser</td>
+                <td>Request hook; no sockets</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-testcafe.yml/badge.svg?branch=main"
@@ -543,6 +610,7 @@ await expect(form).toBeAbsent()</code></pre>
                 <th scope="row"><a href="#setup-storybook">Storybook</a> (React)</th>
                 <td><code>storybook</code></td>
                 <td>Play functions; stories as fixtures</td>
+                <td>Per story, in <code>parameters</code></td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-storybook.yml/badge.svg?branch=main"
@@ -571,6 +639,9 @@ const { baseElement } = render(&lt;LoginForm /&gt;)
 const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
 await form.signInAs('ada@example.com', 'hunter2')
 expect(await form.error()).toBeNull()</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">import { mock } from '@harnessed-ts/dom/mock' // with @mswjs/interceptors installed
+await mock(dom({ user })).use(UsersApi)</code></pre>
         </details>
 
         <details id="setup-playwright">
@@ -586,6 +657,9 @@ test('checks out', async ({ page }) =&gt; {
   const confirmation = await checkout.placeOrder()
   await expect(confirmation.heading).toReadAs('Thanks!')
 })</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">import { mock } from '@harnessed-ts/playwright/mock'
+await mock(pw(page)).use(UsersApi)</code></pre>
         </details>
 
         <details id="setup-ember">
@@ -605,6 +679,10 @@ await assert.harness(form.error).isAbsent()
 // an application test: goto() drives the router
 const checkout = new CheckoutPage(ember())
 await checkout.goto({ token })</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">import { mock, setupMocks } from '@harnessed-ts/ember/mock'
+setupMocks(hooks)
+await mock(ember()).use(UsersApi)</code></pre>
         </details>
 
         <details id="setup-cypress">
@@ -623,6 +701,11 @@ it('signs in', () =&gt; {
     await expect(form).to.readAs(/Welcome/)
   })
 })</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">// cypress/support/e2e.ts
+import '@harnessed-ts/cypress/mock'
+// in a test
+cy.mock(api =&gt; api.use(UsersApi))</code></pre>
         </details>
 
         <details id="setup-webdriverio">
@@ -638,6 +721,9 @@ it('signs in', async () =&gt; {
   await login.form.fillIn({ email: 'ada@example.com', password: 'hopper' })
   await expect(login.form.errorQuery).toBeAbsent()
 })</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">import { mock } from '@harnessed-ts/webdriverio/mock'
+await mock(wdio(browser)).use(UsersApi)</code></pre>
         </details>
 
         <details id="setup-vitest-browser">
@@ -652,6 +738,9 @@ await render(&lt;LoginForm /&gt;)
 const form = new LoginFormHarness(vitestBrowser())
 await form.signInAs('ada@example.com', 'hunter2')
 expect(await form.error()).toBeNull()</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">import { mock } from '@harnessed-ts/vitest-browser/mock'
+await mock(vitestBrowser()).use(UsersApi)</code></pre>
         </details>
 
         <details id="setup-puppeteer">
@@ -666,6 +755,9 @@ const login = new LoginPage(puppeteer(page, { baseURL: 'http://localhost:3000' }
 await login.goto()
 await login.form.fillIn({ email: 'ada@example.com' })
 await expect(login.form.errorQuery).toBeAbsent()</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">import { mock } from '@harnessed-ts/puppeteer/mock'
+await mock(puppeteer(page)).use(UsersApi)</code></pre>
         </details>
 
         <details id="setup-testcafe">
@@ -680,6 +772,9 @@ test('applies a coupon', async t =&gt; {
   await cart.coupon.apply('SAVE10')
   await t.expect(await cart.total.text()).eql('$90.00')
 })</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">import { mock } from '@harnessed-ts/testcafe/mock'
+await mock(testcafe(t)).use(UsersApi)</code></pre>
         </details>
 
         <details id="setup-storybook">
@@ -702,6 +797,9 @@ export const WrongPassword: WithHarness&lt;StoryObj&lt;typeof meta&gt;, LoginFor
     await expect(await harness.error()).toBe('Wrong password')
   },
 }</code></pre>
+          <p>Mocking the API:</p>
+          <pre><code class="language-typescript">// .storybook/preview.ts: harnessed() from '@harnessed-ts/storybook/mock'
+export const Loaded = { parameters: { harnessed: { mocks: [UsersApi] } } }</code></pre>
         </details>
       </section>
 
@@ -807,15 +905,21 @@ Then('the total is {string}', async ({ world }, total) =&gt; {
             <header><h3>Tooling</h3></header>
             <ul>
               <li>
+                <strong><code>@harnessed-ts/mock</code></strong
+                >: one way to mock the API under every runner — handlers, API harnesses, response
+                builders, factories, and checks of what was requested.
+              </li>
+              <li>
                 <strong><code>@harnessed-ts/eslint-plugin</code></strong
-                >: keeps selectors out of tests, and keeps harnesses speaking in behaviours rather
-                than runner or DOM vocabulary.
+                >: keeps selectors and runner-specific mocks out of tests, and keeps harnesses
+                speaking in behaviours rather than runner or DOM vocabulary.
               </li>
               <li>
                 <strong><code>@harnessed-ts/chai</code></strong> and
                 <strong><code>@harnessed-ts/qunit</code></strong
-                >: <code>absent</code>, <code>selected</code> and <code>readAs</code> assertions for
-                runners that don't use <code>expect.extend</code>.
+                >: <code>absent</code>, <code>selected</code> and <code>readAs</code> assertions,
+                and checks of mocked requests, for runners that don't use
+                <code>expect.extend</code>.
               </li>
               <li>
                 <strong><code>@harnessed-ts/config</code></strong

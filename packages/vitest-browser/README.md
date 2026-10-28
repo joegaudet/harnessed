@@ -18,6 +18,8 @@ Queries start at `document.body` by default, which is where portals land. Pass
 driven through the Playwright provider; component testing has no navigation, so a
 page's `goto()` is refused.
 
+**Mocking:** `import { mock } from '@harnessed-ts/vitest-browser/mock'` patches `fetch`, XHR and `WebSocket` in the page (install `@mswjs/interceptors` alongside). See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).
 

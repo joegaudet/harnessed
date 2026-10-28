@@ -16,6 +16,8 @@ await login.goto()
 
 `baseURL` is what a page's relative `path` resolves against in `goto()`.
 
+**Mocking:** `import { mock } from '@harnessed-ts/puppeteer/mock'` mocks through request interception, with a page shim for WebSockets. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).
 

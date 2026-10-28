@@ -1,6 +1,6 @@
 # Plan: API mocking, per runner and cross-platform
 
-Status: draft · Branch: `claude/modest-wright-ujvwcj` · Base: `main` @ `b9cb567` (0.6.0)
+Status: implemented (see [As built](#as-built)) · Branch: `claude/modest-wright-ujvwcj` · Base: `main` @ `b9cb567` (0.6.0)
 
 ## Goal
 
@@ -415,3 +415,49 @@ conformance catalog is green on every driver that phase touches, and the README 
   by an ember-classic test app that runs Mirage.
 - **Payload size** of round-tripping every in-scope request to Node: measured in
   Phase 2 on the conformance suite; `scope` keeps assets out of it by default.
+
+## As built
+
+Everything above shipped, with these departures — each forced by a runner, and
+each pinned by the catalog rather than left as a footnote alone:
+
+- **WebdriverIO intercepts in the page, not at the network.** Holding requests at
+  a BiDi network intercept pauses the navigation they belong to, and a Classic
+  command waiting on that navigation (the driver's own `execute/sync` polls)
+  then deadlocks the session. A page agent — `@mswjs/interceptors` bundled into
+  one script at build time, `@harnessed-ts/mock/remote-page` — is injected by a
+  BiDi preload script, which runs before the page's own scripts, so the
+  before-navigation guarantee holds, and it streams. There is no in-page fallback
+  for Classic: a Classic session refuses with a readable error, and the Classic
+  conformance run asserts that refusal for every mock spec. HAR recording is
+  Playwright's and Puppeteer's.
+- **TestCafe stages a network failure** by sending the request where nothing
+  listens, since its hook can mock a response but not fail one. It has no
+  WebSocket hook and no channel back from the page, so `api.ws()` refuses there.
+- **Cypress registers one catch-all `cy.intercept` per test** from a `beforeEach`
+  that `@harnessed-ts/cypress/mock` adds, and routes each request to the live
+  mock: a harness runs inside one promise, where no `cy` command can be
+  enqueued. WebSockets go through a shim on `window:before:load`. The Cypress
+  runs could not be executed where this was built (the binary download is
+  blocked there); they typecheck, and CI runs them.
+- **WebSockets without a native hook** (Puppeteer, WebdriverIO, Cypress) share
+  one page shim and bridge (`wsShim`, `WsBridge`), each transport supplying only
+  its two string channels.
+- **`resetMocks()` ends every mock** rather than clearing it: a test that mocks
+  nothing must not be policed by an earlier one's scope. `api.reset()` is the
+  in-test clear. The Glimmer parity test pins the data view with its first
+  request held open (`hang()`), since `render()` awaits settling and React's
+  tree is read in the same tick.
+- **A page's declared mocks under jsdom** are installed with `api.useFor(Page)`
+  before `render`; `goto()` installs them everywhere else. Installing from
+  `expectReady()` would be too late: the requests fire on render.
+- **`delay` specs** assert the reply arrives no sooner than its delay, and the
+  loading state only when the view came back before the reply was due: TestCafe
+  waits for a page's requests before an action returns.
+- **Storybook** mocking comes from `@harnessed-ts/storybook/mock`'s `harnessed()`,
+  so the main entry does not require `@mswjs/interceptors`.
+- **`no-raw-intercept`** is off for driver sources in this repo's own lint config:
+  the drivers are where each runner's interception belongs.
+- **Release:** `@harnessed-ts/mock` has never been published, so its first
+  release needs the one-off `bootstrap-publish.yml` dispatch, then a trusted
+  publisher configured for it on npm.

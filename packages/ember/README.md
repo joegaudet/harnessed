@@ -22,6 +22,8 @@ Works under ember-qunit, ember-exam, and Vitest browser mode (with
 Harness files need `@harnessed-ts/core/babel` in the app's Babel config — Ember's
 own decorators are legacy, harnesses are standard.
 
+**Mocking:** `import { mock, setupMocks } from '@harnessed-ts/ember/mock'` patches `fetch`, XHR and `WebSocket` in the test page (install `@mswjs/interceptors` alongside), on top of Mirage if it is there. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Full guide: the
 [harnessed README](https://github.com/joegaudet/harnessed#using-with-ember).
 
