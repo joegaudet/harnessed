@@ -118,8 +118,10 @@ export function detectLayout(root: string): DetectedLayout {
 /** The runners `install` knows how to document, in the order they are shown. */
 export const RUNNERS = [
   'ember',
+  'angular',
   'cypress',
   'webdriverio',
+  'nightwatch',
   'testcafe',
   'puppeteer',
   'playwright',
@@ -134,7 +136,13 @@ export const RUNNERS = [
 export type Runner = (typeof RUNNERS)[number]
 
 /** The `@harnessed-ts/gherkin` entry points, one per Gherkin runner. */
-export const GHERKIN_ADAPTERS = ['playwright-bdd', 'cucumber', 'cypress', 'yadda'] as const
+export const GHERKIN_ADAPTERS = [
+  'playwright-bdd',
+  'cucumber',
+  'cypress',
+  'yadda',
+  'nightwatch',
+] as const
 
 export type GherkinAdapter = (typeof GHERKIN_ADAPTERS)[number]
 
@@ -188,6 +196,7 @@ const RUNNER_SIGNALS: RunnerSignal[] = [
     packages: /^ember-source$/,
     files: ['ember-cli-build.js', 'ember-cli-build.mjs'],
   },
+  { runner: 'angular', packages: /^@angular\/core$/, files: ['angular.json'] },
   {
     runner: 'cypress',
     packages: /^cypress$/,
@@ -199,6 +208,11 @@ const RUNNER_SIGNALS: RunnerSignal[] = [
     files: ['wdio.conf.ts', 'wdio.conf.js', 'wdio.conf.mjs'],
   },
   {
+    runner: 'nightwatch',
+    packages: /^nightwatch$/,
+    files: ['nightwatch.conf.js', 'nightwatch.conf.cjs', 'nightwatch.conf.ts'],
+  },
+  {
     runner: 'testcafe',
     packages: /^testcafe$/,
     files: ['.testcaferc.json', '.testcaferc.js', '.testcaferc.cjs'],
@@ -208,7 +222,8 @@ const RUNNER_SIGNALS: RunnerSignal[] = [
   { runner: 'vitest-browser', packages: /^@vitest\/browser/ },
   {
     runner: 'testing-library',
-    packages: /^@testing-library\/(dom|react|vue|svelte|angular|preact|ember)$/,
+    packages:
+      /^(@testing-library\/(dom|react|vue|svelte|angular|preact|ember)|@solidjs\/testing-library)$/,
   },
   // Node's own runner is no dependency: a script that runs `node --test` says so.
   { runner: 'node-test', packages: /^$/, scripts: /\bnode\b[^&|;]*\s--test\b/ },
@@ -235,6 +250,8 @@ const GHERKIN_SIGNALS: Record<GherkinAdapter, string> = {
   cucumber: '@cucumber/cucumber',
   cypress: '@badeball/cypress-cucumber-preprocessor',
   yadda: 'ember-cli-yadda',
+  // Nightwatch's Cucumber runner: cucumber-js, driven by Nightwatch.
+  nightwatch: 'nightwatch',
 }
 
 const MANIFEST_FIELDS = [
@@ -423,7 +440,11 @@ export function detectRunners(root: string): Runner[] {
 /** Which `@harnessed-ts/gherkin` adapters the repo needs, by its Gherkin runners. */
 export function detectGherkinAdapters(root: string): GherkinAdapter[] {
   const { dependencies } = evidence(root)
-  return GHERKIN_ADAPTERS.filter(adapter => dependencies.has(GHERKIN_SIGNALS[adapter]))
+  const adapters = GHERKIN_ADAPTERS.filter(adapter => dependencies.has(GHERKIN_SIGNALS[adapter]))
+  // Nightwatch's runner needs cucumber-js, and then it is the cucumber-js in use:
+  // the plain adapter's Playwright-driven example would mislead.
+  if (!dependencies.has('@cucumber/cucumber')) return adapters.filter(a => a !== 'nightwatch')
+  return adapters.includes('nightwatch') ? adapters.filter(a => a !== 'cucumber') : adapters
 }
 
 /**

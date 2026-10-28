@@ -149,6 +149,13 @@ describe('detectGherkinAdapters', () => {
     expect(detectGherkinAdapters(root)).toEqual(['playwright-bdd', 'cucumber', 'cypress', 'yadda'])
   })
 
+  it("takes cucumber-js beside Nightwatch for Nightwatch's Cucumber runner", () => {
+    const both = repo({ 'package.json': pkg({ '@cucumber/cucumber': '*', nightwatch: '*' }) })
+    expect(detectGherkinAdapters(both)).toEqual(['nightwatch'])
+    const nightwatchOnly = repo({ 'package.json': pkg({ nightwatch: '*' }) })
+    expect(detectGherkinAdapters(nightwatchOnly)).toEqual([])
+  })
+
   it('finds only the one in use', () => {
     const root = repo({ 'package.json': pkg({ 'ember-cli-yadda': '*' }) })
     expect(detectGherkinAdapters(root)).toEqual(['yadda'])

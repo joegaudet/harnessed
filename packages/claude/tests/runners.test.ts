@@ -80,6 +80,19 @@ describe('detectRunners', () => {
     expect(detectRunners(root)).toEqual([])
   })
 
+  it('recognises Angular and Nightwatch by their packages and config files', () => {
+    expect(
+      detectRunners(
+        repo({ 'package.json': pkg({ '@angular/core': '^21.0.0', nightwatch: '^3.0.0' }) }),
+      ),
+    ).toEqual(['angular', 'nightwatch'])
+    expect(
+      detectRunners(
+        repo({ 'package.json': pkg({}), 'angular.json': '{}', 'nightwatch.conf.cjs': '' }),
+      ),
+    ).toEqual(['angular', 'nightwatch'])
+  })
+
   it('is empty for a repo with none, rather than guessing', () => {
     expect(detectRunners(repo({ 'package.json': pkg({ react: '^19.0.0' }) }))).toEqual([])
   })
