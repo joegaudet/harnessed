@@ -1,0 +1,13 @@
+{
+  "$comment": "Harnesses, pages, and the tests that use them: standard decorators and `accessor` fields, which experimentalDecorators cannot type. App files they import are checked here too; Angular's decorators type under both modes.",
+  "extends": "@harnessed-ts/core/tsconfig.json",
+  "compilerOptions": {
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": []
+  },
+  "include": ["src/**/*.harness.ts", "src/**/*.page.ts", "tests/**/*.ts"]
+}

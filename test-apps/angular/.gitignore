@@ -1,0 +1,9 @@
+/node_modules/
+# Builds (tmp/dist, tmp/serve-<port>) and the Angular compiler's output dir.
+/tmp/
+# Vitest browser mode writes failure screenshots here.
+/.vitest/
+/test-results/
+/playwright-report/
+/cypress/screenshots/
+/cypress/videos/

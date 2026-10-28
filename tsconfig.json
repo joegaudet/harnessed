@@ -16,6 +16,7 @@
     { "path": "./packages/chai" },
     { "path": "./packages/qunit" },
     { "path": "./packages/ember" },
+    { "path": "./packages/angular" },
     { "path": "./packages/route" },
     { "path": "./packages/storybook" },
     { "path": "./packages/eslint-plugin" },
