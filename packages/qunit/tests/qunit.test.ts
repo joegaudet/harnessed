@@ -108,3 +108,37 @@ describe('@harnessed-ts/qunit', () => {
     expect(pushed[0]!.result).toBe(true)
   })
 })
+
+describe('assert.requests', () => {
+  const calls = [
+    {
+      method: 'POST',
+      url: 'http://x/api/orders',
+      headers: {},
+      body: { sku: 'A1' },
+      params: {},
+      query: {},
+      handler: 'POST /api/orders',
+      status: 201,
+      at: 0,
+    },
+  ]
+
+  it('reports each check through pushResult', async () => {
+    const assert = assertion()
+    await assert.requests(calls).wasRequested()
+    await assert.requests([]).wasNotRequested()
+    await assert.requests(calls).wasRequestedTimes(1)
+    await assert.requests(calls).wasRequestedWith({ body: { sku: 'A1' } })
+    expect(pushed.map(entry => entry.result)).toEqual([true, true, true, true])
+  })
+
+  it('fails with what the requests carried', async () => {
+    const assert = assertion()
+    await assert.requests(calls).wasRequestedWith({ body: { sku: 'B2' } })
+    expect(pushed[0]).toMatchObject({ result: false })
+    expect(pushed[0]!.message).toMatch(
+      /but it got:\n {2}POST http:\/\/x\/api\/orders \{"sku":"A1"\}/,
+    )
+  })
+})

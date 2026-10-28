@@ -4,6 +4,8 @@ import { PUPPETEER_DRIVER } from './driver-id'
 // Side effect: constructing an env is the moment the driver has to be registered,
 // and a bare re-export could be tree-shaken away.
 import './puppeteer-query'
+// And its mock transport, so `mock(puppeteer(page))` works without a second import.
+import './mock-transport'
 
 export { PUPPETEER_DRIVER }
 

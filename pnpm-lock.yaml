@@ -45,6 +45,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      '@harnessed-ts/mock':
+        specifier: workspace:^
+        version: link:../mock
     devDependencies:
       '@harnessed-ts/dom':
         specifier: workspace:^
@@ -198,6 +201,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      '@harnessed-ts/mock':
+        specifier: workspace:^
+        version: link:../mock
       '@harnessed-ts/resolve':
         specifier: workspace:^
         version: link:../resolve
@@ -309,6 +315,9 @@ importers:
       '@mswjs/interceptors':
         specifier: ^0.45.10
         version: 0.45.10(supports-color@11.0.0)
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       graphql:
         specifier: ^17.0.2
         version: 17.0.2
@@ -352,6 +361,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      '@harnessed-ts/mock':
+        specifier: workspace:^
+        version: link:../mock
       '@harnessed-ts/resolve':
         specifier: workspace:^
         version: link:../resolve
@@ -368,6 +380,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      '@harnessed-ts/mock':
+        specifier: workspace:^
+        version: link:../mock
     devDependencies:
       '@harnessed-ts/dom':
         specifier: workspace:^
@@ -452,6 +467,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      '@harnessed-ts/mock':
+        specifier: workspace:^
+        version: link:../mock
       '@harnessed-ts/resolve':
         specifier: workspace:^
         version: link:../resolve
@@ -487,6 +505,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      '@harnessed-ts/mock':
+        specifier: workspace:^
+        version: link:../mock
       '@harnessed-ts/resolve':
         specifier: workspace:^
         version: link:../resolve

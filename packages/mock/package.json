@@ -49,6 +49,11 @@
       "import": "./dist/in-page.js",
       "require": "./dist/in-page.cjs"
     },
+    "./remote-page": {
+      "types": "./dist/remote-page.d.ts",
+      "import": "./dist/remote-page.js",
+      "require": "./dist/remote-page.cjs"
+    },
     "./graphql": {
       "types": "./dist/graphql-schema.d.ts",
       "import": "./dist/graphql-schema.js",
@@ -99,6 +104,7 @@
   },
   "devDependencies": {
     "@mswjs/interceptors": "^0.45.10",
+    "esbuild": "^0.28.2",
     "graphql": "^17.0.2",
     "jsdom": "^30.1.2",
     "msw": "^3.0.3",

@@ -74,5 +74,6 @@ export type {
 } from './types'
 export { compilePattern } from './url-pattern'
 export type { CompiledPattern, PathParams, UrlPattern } from './url-pattern'
+export { WS_DELIVER_GLOBAL, WsBridge, wsShim, wsShimScript } from './ws-bridge'
 export { WsRoute } from './ws'
 export type { WsClientSide, WsConnection, WsConnectionTarget, WsData } from './ws'

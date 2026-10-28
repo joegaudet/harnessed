@@ -4,6 +4,8 @@ import { TESTCAFE_DRIVER } from './driver-id'
 import { assertOwnController } from './session'
 // Side effect: constructing an env is the moment the driver has to be registered.
 import './testcafe-query'
+// And its mock transport, so `mock(testcafe(t))` works without a second import.
+import './mock-transport'
 
 export { TESTCAFE_DRIVER }
 

@@ -71,6 +71,26 @@ function sleep(ms: number): Promise<void> {
 
 const ADA = json({ id: '1', name: 'Ada' })
 
+const DELAY_MS = 600
+
+/**
+ * A delayed reply takes at least its delay to arrive, and while it is in flight
+ * the view shows it loading. Some runners (TestCafe) wait for a page's requests
+ * before an action returns, so the loading state is checked only when the view
+ * came back before the reply was due.
+ */
+async function assertDelayed(ctx: MockCtx, name: string): Promise<void> {
+  const start = Date.now()
+  const data = await screen(ctx)
+  if (Date.now() - start < DELAY_MS - 150) assert.equal(await data.isUserLoading(), true)
+  assert.equal(await data.userName(), name)
+  const elapsed = Date.now() - start
+  assert.ok(
+    elapsed >= DELAY_MS,
+    `the reply arrived after ${elapsed}ms, before its ${DELAY_MS}ms delay`,
+  )
+}
+
 /**
  * Mocking behaviour every driver shares: written once, run by every runner. As
  * with the main catalog there is no per-driver opt-out — where a runner cannot
@@ -127,10 +147,8 @@ export const mockSpecs: MockSpec[] = [
   {
     name: 'mock: a delayed reply is in flight first, then arrives',
     async run(ctx) {
-      await api(ctx).get('/api/users/:id').delay(600).reply(ADA)
-      const data = await screen(ctx)
-      assert.equal(await data.isUserLoading(), true)
-      assert.equal(await data.userName(), 'Ada')
+      await api(ctx).get('/api/users/:id').delay(DELAY_MS).reply(ADA)
+      await assertDelayed(ctx, 'Ada')
     },
   },
   {
@@ -401,10 +419,8 @@ export const mockSpecs: MockSpec[] = [
     async run(ctx) {
       await api(ctx)
         .get('/api/users/:id')
-        .reply(delayed(created({ name: 'Late' }), 500))
-      const data = await screen(ctx)
-      assert.equal(await data.isUserLoading(), true)
-      assert.equal(await data.userName(), 'Late')
+        .reply(delayed(created({ name: 'Late' }), DELAY_MS))
+      await assertDelayed(ctx, 'Late')
     },
   },
 ]

@@ -43,6 +43,11 @@
       "import": "./dist/matchers.js",
       "require": "./dist/matchers.cjs"
     },
+    "./mock": {
+      "types": "./dist/mock.d.ts",
+      "import": "./dist/mock.js",
+      "require": "./dist/mock.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -56,6 +61,7 @@
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^",
     "@harnessed-ts/resolve": "workspace:^"
   },
   "peerDependencies": {
