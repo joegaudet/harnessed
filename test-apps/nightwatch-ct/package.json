@@ -1,12 +1,14 @@
 {
   "name": "test-app-nightwatch-ct",
   "private": true,
-  "description": "Runs the @harnessed-ts/conformance component catalog under @harnessed-ts/nightwatch, as Nightwatch component tests mounting the React fixture through @nightwatch/react.",
+  "description": "Runs the @harnessed-ts/conformance component catalog under @harnessed-ts/nightwatch, as Nightwatch component tests: the React fixture through @nightwatch/react, and its Vue port through @nightwatch/vue.",
   "type": "module",
   "scripts": {
-    "test": "pnpm test:react",
+    "test": "pnpm test:react && pnpm test:vue",
     "test:react": "pnpm typecheck && pnpm ct:react",
     "ct:react": "start-server-and-test 'vite --config vite.react.config.ts' http://localhost:5196/_nightwatch/ 'nightwatch --config nightwatch.conf.cjs --env react'",
+    "test:vue": "pnpm typecheck && pnpm ct:vue",
+    "ct:vue": "start-server-and-test 'vite --config vite.vue.config.ts' http://localhost:5189/_nightwatch/ 'nightwatch --config nightwatch.conf.cjs --env vue'",
     "typecheck": "tsc -p ."
   },
   "devDependencies": {
@@ -14,16 +16,21 @@
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/nightwatch": "workspace:^",
     "@nightwatch/react": "^3.1.2",
+    "@nightwatch/vue": "^3.1.2",
     "@types/node": "^26.6.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-vue": "^4.6.2",
+    "@vue/test-utils": "^2.5.1",
     "nightwatch": "^3.16.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "start-server-and-test": "^3.0.12",
+    "test-app-vue": "workspace:*",
     "typescript": "^6.0.3",
     "vite": "^4.5.14",
-    "vite-plugin-nightwatch": "^0.4.6"
+    "vite-plugin-nightwatch": "^0.4.6",
+    "vue": "^3.5.44"
   }
 }

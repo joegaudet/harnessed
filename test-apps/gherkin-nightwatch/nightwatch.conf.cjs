@@ -24,7 +24,7 @@ module.exports = {
 
   test_settings: {
     default: {
-      launch_url: 'http://localhost:5197',
+      launch_url: 'http://localhost:5199',
     },
 
     chrome: {

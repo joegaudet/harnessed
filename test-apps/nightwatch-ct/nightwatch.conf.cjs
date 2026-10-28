@@ -2,9 +2,9 @@
 // against the conformance fixture mounted by a framework's Nightwatch plugin.
 // One environment per framework, each with its own plugin, Vite config and
 // spec folder: `--env react` mounts the React fixture through
-// @nightwatch/react. A port (Vue, through @nightwatch/vue) is another
-// environment beside it, with its own vite.<framework>.config.ts and
-// <framework>/ folder, and a `test:<framework>` script.
+// @nightwatch/react, and `--env vue` the Vue port (test-apps/vue) through
+// @nightwatch/vue. Each has its own vite.<framework>.config.ts, <framework>/
+// spec folder and `test:<framework>` script.
 //
 // Vite runs outside Nightwatch (start_vite: false; see package.json), on the
 // port given here, so the plugin only checks it is up and points its renderer
@@ -37,6 +37,12 @@ module.exports = {
       src_folders: ['react'],
       plugins: ['@nightwatch/react'],
       vite_dev_server: { start_vite: false, port: 5196 },
+    },
+
+    vue: {
+      src_folders: ['vue'],
+      plugins: ['@nightwatch/vue'],
+      vite_dev_server: { start_vite: false, port: 5189 },
     },
   },
 }

@@ -19,7 +19,7 @@ jobs:
       matrix:
         # One entry per framework fixture: its Nightwatch environment and its
         # test:<framework> script in test-apps/nightwatch-ct.
-        framework: [react]
+        framework: [react, vue]
     uses: ./.github/workflows/conformance-driver.yml
     with:
       name: nightwatch-ct (${{ matrix.framework }})

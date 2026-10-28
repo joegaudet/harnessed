@@ -6,5 +6,5 @@
     "jsx": "react-jsx",
     "types": ["node", "nightwatch"]
   },
-  "include": ["react", "support", "vite.*.config.ts"]
+  "include": ["react", "vue", "support", "vite.*.config.ts", "vue-shim.d.ts"]
 }
