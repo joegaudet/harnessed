@@ -1,0 +1,28 @@
+name: conformance-playwright-frameworks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-playwright-frameworks-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        # One leg per framework port; FRAMEWORK limits the config to that port's
+        # project and web server, so each leg builds and serves only its own app.
+        framework: [vue, solid, svelte, angular]
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: playwright-frameworks (${{ matrix.framework }})
+      setup: pnpm --filter test-app-playwright-frameworks exec playwright install --with-deps chromium
+      test: FRAMEWORK=${{ matrix.framework }} pnpm --filter test-app-playwright-frameworks test
+      artifacts: test-apps/playwright-frameworks/test-results

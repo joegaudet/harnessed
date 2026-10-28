@@ -1,0 +1,4 @@
+# serve:fixture's builds, one per port.
+tmp/
+# Failure screenshots and attachments from browser mode.
+.vitest/

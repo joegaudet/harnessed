@@ -6,7 +6,7 @@ export interface HarnessRuleOptions {
   harnessDirs?: string[]
   /**
    * Directories treated as test sources. Defaults to
-   * `['tests', 'test', 'e2e', 'cypress', '__tests__']`.
+   * `['tests', 'test', 'e2e', 'cypress', 'nightwatch', '__tests__']`.
    */
   testDirs?: string[]
 }
@@ -14,7 +14,7 @@ export interface HarnessRuleOptions {
 const DEFAULT_HARNESS_DIRS = ['harness']
 // The runners' own conventions: `tests/` (Ember, Vitest), `test/` (WebdriverIO,
 // TestCafe), `cypress/` and `e2e/` (Cypress, Playwright).
-const DEFAULT_TEST_DIRS = ['tests', 'test', 'e2e', 'cypress', '__tests__']
+const DEFAULT_TEST_DIRS = ['tests', 'test', 'e2e', 'cypress', 'nightwatch', '__tests__']
 
 /**
  * Runner plumbing that lives under a test directory but is not a test: Cypress

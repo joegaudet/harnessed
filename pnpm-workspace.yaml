@@ -5,6 +5,12 @@ packages:
 
 # core must not silently resolve a driver it does not declare
 strictPeerDependencies: true
+peerDependencyRules:
+  allowedVersions:
+    # ember-cli-dependency-checker brings @babel/eslint-parser, which asks for
+    # eslint 9 or older; nothing here lints through it, and the repo's eslint
+    # is 10. Any install that re-resolves the lockfile reports it otherwise.
+    '@babel/eslint-parser>eslint': '10'
 autoInstallPeers: false
 allowBuilds:
   # tsup's bundler; needs its postinstall to fetch the platform binary
@@ -22,6 +28,15 @@ allowBuilds:
   # A postinstall that only prints a funding message; ember-cli-yadda brings it
   # in through ember-cli-babel 7.
   core-js: false
+  # @angular/build's native helpers (the Analog plugin needs @angular/build).
+  # Each ships prebuilt binaries as optional dependencies; the scripts only
+  # compile from source when no prebuilt one fits.
+  '@parcel/watcher': false
+  lmdb: false
+  msgpackr-extract: false
+  # Nightwatch's inspector: its postinstall builds a Chrome extension that only
+  # `nightwatch --debug` loads. The conformance runs never open it.
+  '@nightwatch/nightwatch-inspector': false
 minimumReleaseAgeExclude:
   - '@changesets/apply-release-plan@8.1.0'
   - '@changesets/cli@3.0.2'
@@ -51,9 +66,10 @@ minimumReleaseAgeExclude:
 overrides:
   # 13.3.0 is younger than the minimum release age, and the Cypress preprocessor
   # asks for ^13 — it would resolve there and fail the frozen install. Lift the
-  # pin once 13.3 is old enough to pass the policy, and lift all three copies
-  # together: this override and the `~13.2.1` devDependency in both
-  # packages/gherkin/package.json and test-apps/gherkin-cucumber/package.json.
+  # pin once 13.3 is old enough to pass the policy, and lift every copy
+  # together: this override and the `~13.2.1` devDependency in
+  # packages/gherkin/package.json, test-apps/gherkin-cucumber/package.json and
+  # test-apps/gherkin-nightwatch/package.json.
   '@cucumber/cucumber': ~13.2.1
   # ember-cli-yadda 0.7 (its last release, 2022) depends on ember-cli-htmlbars 5,
   # which finds the template compiler through an ember-source path Ember 7 no

@@ -48,6 +48,14 @@
       "types": "./dist/babel.d.ts",
       "import": "./dist/babel.js",
       "require": "./dist/babel.cjs"
+    },
+    "./register": {
+      "types": "./dist/register.d.ts",
+      "import": "./dist/register.js"
+    },
+    "./bun": {
+      "types": "./dist/bun.d.ts",
+      "import": "./dist/bun.js"
     }
   },
   "files": [

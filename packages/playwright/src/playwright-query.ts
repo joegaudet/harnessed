@@ -47,52 +47,71 @@ export class PlaywrightQuery extends Query {
     }
   }
 
+  /**
+   * An interaction, which returns only once the page has had a task of its own
+   * after it. Playwright resolves an action when the browser has dispatched its
+   * events, but a framework may render on a later task: zoneless Angular
+   * schedules change detection with `setTimeout` raced against
+   * `requestAnimationFrame`, so a read straight after a click could see the
+   * node it replaced. A zero-delay timer queued now runs after any the action's
+   * handlers queued. The in-page drivers get the same from user-event, which
+   * waits a zero-delay timer after every action.
+   */
+  private async perform(run: (locator: Locator) => Promise<unknown>): Promise<void> {
+    await this.act(run)
+    await this.page
+      .evaluate(() => new Promise<void>(resolve => setTimeout(resolve, 0)))
+      // The action may have started a navigation that replaced the page's
+      // context; then there is nothing left to wait for.
+      .catch(() => undefined)
+  }
+
   // --- interactions -------------------------------------------------------
 
   override async click(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.click({ timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.click({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
-    await this.act(l => l.fill(value, { timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.fill(value, { timeout: timeoutFor(options?.timeout) }))
   }
 
   override async clear(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.clear({ timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.clear({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async check(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.check({ timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.check({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async uncheck(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.uncheck({ timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.uncheck({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
-    await this.act(l => l.selectOption(value, { timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.selectOption(value, { timeout: timeoutFor(options?.timeout) }))
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.hover({ timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.hover({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.focus({ timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.focus({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async blur(options?: WaitOptions): Promise<void> {
-    await this.act(l => l.blur({ timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.blur({ timeout: timeoutFor(options?.timeout) }))
   }
 
   override async press(key: string, options?: WaitOptions): Promise<void> {
-    await this.act(l => l.press(key, { timeout: timeoutFor(options?.timeout) }))
+    await this.perform(l => l.press(key, { timeout: timeoutFor(options?.timeout) }))
   }
 
   override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
     const list = Array.isArray(files) ? files : [files]
     const timeout = timeoutFor(options?.timeout)
-    await this.act(async l => {
+    await this.perform(async l => {
       // Checked first, so a wrong target fails in the shared words rather than
       // Playwright's. Serialised into the page: the shared rule, restated.
       const target = await l.evaluate(

@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/matchers.ts'],
+  entry: ['src/index.ts', 'src/matchers.ts', 'src/matchers-bun.ts'],
   format: ['esm', 'cjs'],
   target: 'es2022',
   dts: false,
@@ -14,5 +14,6 @@ export default defineConfig({
     '@testing-library/dom',
     '@testing-library/user-event',
     'vitest',
+    'bun:test',
   ],
 })

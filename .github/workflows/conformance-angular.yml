@@ -1,0 +1,32 @@
+name: conformance-angular
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-angular-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # The angular driver over the Angular port of the fixture: the parity check
+  # and the catalog under jsdom, then the same tests in Chromium.
+  dom:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: angular-dom
+      test: |
+        pnpm --filter test-app-angular typecheck
+        pnpm --filter test-app-angular test:dom
+
+  vitest-browser:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: angular-vitest-browser
+      setup: pnpm --filter test-app-angular exec playwright install --with-deps chromium
+      test: pnpm --filter test-app-angular test:browser
+      artifacts: test-apps/angular/.vitest/attachments

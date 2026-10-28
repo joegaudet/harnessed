@@ -17,9 +17,24 @@ Each app:
 - serves or mounts the fixture itself. A browser driver points at the React
   fixture served by `pnpm --filter conformance serve:fixture`, or at its Ember
   port built and served by `pnpm --filter test-app-ember-vite serve:fixture`,
+  or its Angular port by `pnpm --filter test-app-angular serve:fixture`,
   with a `FIXTURE_PORT` of its own so runners can work side by side;
 - has a `test` script, and a `.github/workflows/conformance-<name>.yml` that
   calls the reusable `conformance-driver.yml`.
+
+`vue`, `solid`, `svelte` and `angular` are ports of the fixture, as `ember-vite`
+is the Glimmer one. Each holds itself to the React original with `fixtureParity`
+from `@harnessed-ts/conformance`, runs the catalog in-process (`test`: the dom
+driver, or the angular driver for Angular, and the vitest-browser run), and
+builds and serves itself with `FIXTURE_PORT=<port> pnpm --filter test-app-<framework> serve:fixture`
+(Vue 5197, Solid 5192, Svelte 5193, Angular 5194 by default).
+`playwright-frameworks` runs the Playwright reference specs against all four, one
+project and web server per port (`FRAMEWORK=vue` picks one), and
+`cypress-ct-frameworks` mounts the Vue and Svelte ports as Cypress component
+tests (`CYPRESS_FRAMEWORK=vue|svelte`); Angular's component run lives in its own
+app (`test:cypress`), since it builds through the Analog plugin. Solid's
+`<Portal>` mounts into a wrapper `<div>` under `body`, so its dialog is
+`body > div > [role=dialog]`; nothing in the catalog depends on that.
 
 `demos` is the one app that is not a conformance run. It holds the README's
 GIFs: one demo flow, written once against the fixture's harnesses, run under

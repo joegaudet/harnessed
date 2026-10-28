@@ -1,8 +1,7 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
-import { fixtureTree, fixtureTrees, viewSearch, VIEWS } from '@harnessed-ts/conformance';
-import type { View } from '@harnessed-ts/conformance';
+import { fixtureParity } from '@harnessed-ts/conformance';
 import ConformanceApp from 'test-app-ember-vite/components/fixture/conformance-app';
 
 /**
@@ -14,15 +13,16 @@ import ConformanceApp from 'test-app-ember-vite/components/fixture/conformance-a
 module('conformance: Glimmer fixture parity', function (hooks) {
   setupRenderingTest(hooks);
 
-  // VIEWS is checked against the View type, so a new view cannot be skipped.
-  for (const view of VIEWS) {
-    test(`"${view}" renders the same tree as the React fixture`, async function (assert) {
-      const url = `/${viewSearch(view)}`;
+  // One test per view; fixtureParity throws naming the first place the trees part.
+  fixtureParity(
+    (name, body) =>
+      test(name, async function (assert) {
+        await body();
+        assert.ok(true, 'the trees match');
+      }),
+    async (url) => {
       await render(<template><ConformanceApp @url={{url}} /></template>);
-      const stage = document.querySelector('#ember-testing [data-testid="stage"]');
-      assert.ok(fixtureTrees[view], `fixture/trees.json pins "${view}"`)
-      assert.ok(stage, 'the stage rendered');
-      assert.deepEqual(fixtureTree(stage!), fixtureTrees[view]);
-    });
-  }
+      return document.querySelector('#ember-testing [data-testid="stage"]');
+    },
+  );
 });

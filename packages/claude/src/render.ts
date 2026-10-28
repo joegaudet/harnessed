@@ -32,6 +32,12 @@ const RUNNER_DOCS: Record<Runner, RunnerDoc> = {
     assert:
       '`await assert.harness(page.total).readsAs(/^\\$/)` (`install(QUnit)` from `@harnessed-ts/qunit` in tests/test-helper)',
   },
+  angular: {
+    title: 'Angular (`@harnessed-ts/angular`)',
+    env: '`const { fixture } = await render(Checkout)` (`@testing-library/angular/zoneless`) or a TestBed fixture, then `new CheckoutPage(angular({ fixture }))`; every action settles at `whenStable()`, and `goto()` drives the router when one is provided. Harness files take standard decorators: `harnessedDecorators({ include: /\\.(harness|page)\\.ts$/ })` before the Angular plugin, and a tsconfig of their own without `experimentalDecorators`',
+    assert:
+      '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/dom/matchers` in the Vitest setup file)',
+  },
   cypress: {
     title: 'Cypress (`@harnessed-ts/cypress`)',
     env: "`import '@harnessed-ts/cypress/support'` in the support file (`cypress/support/e2e.ts`) registers the commands; then `cy.visitPage(CheckoutPage)` and `cy.harness(CheckoutPage, page => page.pay())` — never `cy.*` inside the callback",
@@ -42,6 +48,12 @@ const RUNNER_DOCS: Record<Runner, RunnerDoc> = {
     title: 'WebdriverIO (`@harnessed-ts/webdriverio`)',
     env: '`new CheckoutPage(wdio(browser))`, then `await page.goto()`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/webdriverio/matchers`)',
+  },
+  nightwatch: {
+    title: 'Nightwatch (`@harnessed-ts/nightwatch`)',
+    env: '`new CheckoutPage(nightwatch(browser))`, then `await checkout.goto()` (resolved against `launch_url`); in a component test, `await browser.mountComponent(…)` first',
+    assert:
+      "`await expect(page.total).to.readAs(/^\\$/)` with Chai's own `expect` (`chai.use(harnessedChai)` from `@harnessed-ts/chai`), not Nightwatch's `expect` global",
   },
   testcafe: {
     title: 'TestCafe (`@harnessed-ts/testcafe`)',
@@ -70,6 +82,17 @@ const RUNNER_DOCS: Record<Runner, RunnerDoc> = {
     env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/dom/matchers`)',
   },
+  'node-test': {
+    title: 'node:test (`@harnessed-ts/dom` on jsdom)',
+    env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`; run with `node --test --import global-jsdom/register --import @harnessed-ts/core/register`, and `afterEach(cleanup)` from `node:test`',
+    assert:
+      '`await expect(page.total).to.readAs(/^\\$/)` with Chai (`chai.use(harnessedChai)` from `@harnessed-ts/chai`) — node:test has no `expect`',
+  },
+  bun: {
+    title: 'Bun test (`@harnessed-ts/dom` on happy-dom)',
+    env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`; `bunfig.toml` preloads happy-dom, `@harnessed-ts/core/bun`, `@harnessed-ts/dom/matchers/bun` and a cleanup file',
+    assert: '`await expect(page.total).toReadAs(/^\\$/)` with `expect` from `bun:test`',
+  },
   storybook: {
     title: 'Storybook (`@harnessed-ts/storybook`)',
     env: "spread `...harnessed()` into `.storybook/preview.ts` once; a story names its harness in `parameters: { harness: CheckoutHarness }` and `play: async ({ harness }) => …` receives it, each method logged as a step. From another runner, `await StoryPage.goto(pw(page), CheckoutStories, 'Default')` (`@harnessed-ts/storybook/page`), then `story.harness(CheckoutHarness)`",
@@ -91,6 +114,8 @@ const GHERKIN_DOCS: Record<GherkinAdapter, string> = {
     "cucumber-js: extend `HarnessedWorld` from `'@harnessed-ts/gherkin/cucumber'`, set `this.env` in a `Before`, open pages with `this.open(name)`",
   cypress:
     "Cypress (`@badeball/cypress-cucumber-preprocessor`): `cypressWorld()` from `'@harnessed-ts/gherkin/cypress'`; run harness calls inside `cy.harnessEnv`",
+  nightwatch:
+    "Nightwatch's Cucumber runner: extend `HarnessedWorld` from `'@harnessed-ts/gherkin/nightwatch'`, register `Before(nightwatchEnv)` so `this.env` is built from Nightwatch's browser, open pages with `this.open(name)`",
   yadda:
     "ember-cli-yadda: `yaddaWorld().steps({ pages, env: () => ember() })` from `'@harnessed-ts/gherkin/yadda'`; the `$page` term is built from the registry (`pageDictionary`)",
 }

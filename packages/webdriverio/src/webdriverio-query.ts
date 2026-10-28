@@ -11,12 +11,12 @@ import {
   timeoutFor,
 } from '@harnessed-ts/core'
 import { filesOnDisk } from '@harnessed-ts/resolve/inject'
+import { isFrameEntryError, PageError } from '@harnessed-ts/resolve/webdriver'
+import type { ElementRef, PageOp } from '@harnessed-ts/resolve/webdriver'
 import { WEBDRIVERIO_DRIVER } from './driver-id'
 import type { WebdriverioEnv } from './env'
 import { toKeySequence } from './keys'
 import { lastUrl, rememberUrl } from './location'
-import { isFrameEntryError, PageError } from './page-script'
-import type { ElementRef, PageOp } from './page-script'
 import { callPage, FrameAbsent, sendKeys, walk, wrap } from './realm'
 import type { Site } from './realm'
 

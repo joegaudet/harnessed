@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { createContext, runInContext } from 'node:vm'
 import {
   reviveStrictViolation,
   StrictModeViolation,
@@ -30,6 +31,22 @@ describe('the injectable build', () => {
   it('has no imports left to resolve', () => {
     expect(source).not.toMatch(/\brequire\(["']/)
     expect(source).not.toMatch(/^\s*import\s/m)
+  })
+
+  it("installs on the page's window when the script's global is a sandbox in front of it", () => {
+    // Firefox runs a WebDriver script in a sandbox whose prototype is the page's
+    // window: `globalThis` there is the sandbox, which the next script does not
+    // share, while `window` is the page's own. The page script looks the API up
+    // on `window`, so that is where it has to be.
+    const dom = new JSDOM('<!doctype html><body><h1>Top</h1></body>')
+    const sandbox = createContext(
+      Object.create(dom.window, {
+        window: { value: dom.window },
+        document: { value: dom.window.document },
+      }) as object,
+    )
+    runInContext(source, sandbox)
+    expect((dom.window as unknown as Record<string, unknown>).__harnessedResolve).toBeDefined()
   })
 
   it('installs its API and resolves by role with level', async () => {

@@ -68,6 +68,40 @@ from `@harnessed-ts/core` so a strict-mode violation is `StrictModeViolation`
 again, worded exactly as an in-process driver words it — that is how a caller
 tells ambiguity apart from absence.
 
+## WebDriver drivers
+
+A WebDriver client (WebdriverIO, selenium-webdriver under Nightwatch) shares more
+than injection: the page script that resolves and reads in one round-trip, and
+the walk that enters each frame of a scope chain from outside the page.
+`@harnessed-ts/resolve/webdriver` holds both, behind a small `WebDriverLike`
+adapter — run the page script in a document, inject the resolver, wrap an
+element, enter a frame, leave frames:
+
+```ts
+import { callPage, classicScript, walk } from '@harnessed-ts/resolve/webdriver'
+import type { WebDriverLike, WebDriverSite } from '@harnessed-ts/resolve/webdriver'
+
+const client: WebDriverLike<WebDriverSite, WebElement> = {
+  top: () => ({ top: true, origin: { x: 0, y: 0 } }),
+  run: (_site, args) => driver.executeScript(classicScript(), ...args),
+  inject: async (_site, source) => void (await driver.executeScript(source)),
+  element: async (_site, ref) => ref as unknown as WebElement,
+  async enterFrame(_site, iframe, origin) {
+    await driver.switchTo().frame(iframe)
+    return { top: false, origin }
+  },
+  leaveFrames: () => driver.switchTo().defaultContent(),
+}
+
+const text = await walk(client, scope, { waiting: true, timeout }, (site, rest, remaining) =>
+  callPage(client, site, 'text', rest, selector, remaining()),
+)
+```
+
+Errors the page raises come back as values, so a strict violation arrives as
+core's `StrictModeViolation` and a frame that cannot be entered as a
+`PageError` (`isFrameEntryError`).
+
 Full guide: the [harnessed README](https://github.com/joegaudet/harnessed#readme).
 
 MIT © Joe Gaudet, Jay Seo

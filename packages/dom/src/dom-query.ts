@@ -21,9 +21,46 @@ import {
   resolveOne,
 } from '@harnessed-ts/resolve'
 
+/**
+ * The values of a select's selected options. Read off `options` rather than
+ * `selectedOptions`: they mean the same, but happy-dom's `selectedOptions` can
+ * go stale after a deselect.
+ */
+function selectedValues(element: HTMLSelectElement): string[] {
+  return [...element.options].filter(option => option.selected).map(option => option.value)
+}
+
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
 function toKeyboardInput(key: string): string {
   return key.length === 1 ? key : `{${key}}`
+}
+
+/**
+ * The iframes, outermost first, that lead from `home` to `doc`. `frameElement`
+ * says it directly where the DOM implements it (browsers, jsdom); happy-dom
+ * leaves it unset, so otherwise the frames under `home` are searched.
+ */
+function framePath(home: Document, doc: Document): HTMLIFrameElement[] {
+  const path: HTMLIFrameElement[] = []
+  let current: Document = doc
+  while (current !== home) {
+    const frame = current.defaultView?.frameElement as HTMLIFrameElement | null | undefined
+    if (frame === null || frame === undefined) return searchFrames(home, doc) ?? []
+    path.unshift(frame)
+    current = frame.ownerDocument
+  }
+  return path
+}
+
+function searchFrames(from: Document, doc: Document): HTMLIFrameElement[] | undefined {
+  for (const frame of from.querySelectorAll('iframe')) {
+    const inner = frame.contentDocument
+    if (inner === null) continue
+    if (inner === doc) return [frame]
+    const deeper = searchFrames(inner, doc)
+    if (deeper !== undefined) return [frame, ...deeper]
+  }
+  return undefined
 }
 
 /** `home` is the env's own document: the walk crosses only frames the scope entered. */
@@ -42,7 +79,9 @@ function isVisibleByStyle(element: HTMLElement, home: Document): boolean {
     // At a frame's root, carry on from the iframe: a hidden frame hides its content.
     current =
       current.parentElement ??
-      (current.ownerDocument === home ? null : (view.frameElement as HTMLElement | null))
+      (current.ownerDocument === home
+        ? null
+        : (framePath(home, current.ownerDocument).at(-1) ?? null))
   }
   return true
 }
@@ -96,6 +135,23 @@ export class DomQuery extends Query {
   }
 
   /**
+   * The element an interaction acts on. Inside a frame, the frames leading to it
+   * are focused first, as a real click into the frame would: user-event types
+   * into its document's active element, which only reaches into a frame through
+   * the focused `<iframe>`, and happy-dom does not focus the frame by itself.
+   */
+  protected async target(options?: WaitOptions): Promise<HTMLElement> {
+    const element = await this.element(options)
+    const home = this.container.ownerDocument
+    if (element.ownerDocument !== home) {
+      for (const frame of framePath(home, element.ownerDocument)) {
+        if (frame.ownerDocument.activeElement !== frame) frame.focus()
+      }
+    }
+    return element
+  }
+
+  /**
    * Every match, resolved in one pass: the scope chain is walked once and the
    * siblings scanned once, where the inherited default re-does both per element —
    * O(N²) in Testing Library queries for a list of N.
@@ -121,12 +177,12 @@ export class DomQuery extends Query {
   // --- interactions -------------------------------------------------------
 
   override async click(options?: WaitOptions): Promise<void> {
-    await this.user.click(await this.element(options))
+    await this.user.click(await this.target(options))
     await this.settle()
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
-    const element = await this.element(options)
+    const element = await this.target(options)
     await this.user.clear(element)
     // user-event throws on an empty string, and clearing is the whole intent
     // anyway — which is also what Playwright's fill('') does.
@@ -135,29 +191,29 @@ export class DomQuery extends Query {
   }
 
   override async clear(options?: WaitOptions): Promise<void> {
-    await this.user.clear(await this.element(options))
+    await this.user.clear(await this.target(options))
     await this.settle()
   }
 
   override async check(options?: WaitOptions): Promise<void> {
-    const element = await this.element(options)
+    const element = await this.target(options)
     if (!(element as HTMLInputElement).checked) await this.user.click(element)
     await this.settle()
   }
 
   override async uncheck(options?: WaitOptions): Promise<void> {
-    const element = await this.element(options)
+    const element = await this.target(options)
     if ((element as HTMLInputElement).checked) await this.user.click(element)
     await this.settle()
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
-    const element = (await this.element(options)) as HTMLSelectElement
+    const element = (await this.target(options)) as HTMLSelectElement
     // user-event adds to a multi-select's existing selection; Playwright replaces
     // it. Replacing is the useful semantic and the one the shared API promises,
     // so clear first.
     if (element.multiple) {
-      const selected = [...element.selectedOptions].map(option => option.value)
+      const selected = selectedValues(element)
       if (selected.length > 0) await this.user.deselectOptions(element, selected)
     }
     await this.user.selectOptions(element, value)
@@ -165,22 +221,22 @@ export class DomQuery extends Query {
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
-    await this.user.hover(await this.element(options))
+    await this.user.hover(await this.target(options))
     await this.settle()
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
-    ;(await this.element(options)).focus()
+    ;(await this.target(options)).focus()
     await this.settle()
   }
 
   override async blur(options?: WaitOptions): Promise<void> {
-    ;(await this.element(options)).blur()
+    ;(await this.target(options)).blur()
     await this.settle()
   }
 
   override async press(key: string, options?: WaitOptions): Promise<void> {
-    const element = await this.element(options)
+    const element = await this.target(options)
     element.focus()
     await this.user.keyboard(toKeyboardInput(key))
     await this.settle()
@@ -188,7 +244,7 @@ export class DomQuery extends Query {
 
   override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
     const list = Array.isArray(files) ? files : [files]
-    const input = fileInputOf(await this.element(options))
+    const input = fileInputOf(await this.target(options))
     checkFileTarget(input, list.length, this.scope, this.selector)
     await this.user.upload(input, list)
     await this.settle()
@@ -243,7 +299,7 @@ export class DomQuery extends Query {
 
   override async selectedOptions(options?: WaitOptions): Promise<string[]> {
     const element = (await this.element(options)) as HTMLSelectElement
-    return [...(element.selectedOptions ?? [])].map(option => option.value)
+    return selectedValues(element)
   }
 
   /** jsdom computes no layout: every box here is all zeros. */

@@ -102,8 +102,20 @@ changesets versions that scope as one fixed group.
 A browser driver serves the React fixture with
 `FIXTURE_PORT=<port> pnpm --filter conformance serve:fixture`, or the Ember port
 of it with `FIXTURE_PORT=<port> pnpm --filter test-app-ember-vite serve:fixture`
-(which builds the app first; concurrent runs take turns building). Pick a port
-no other runner uses, so they can run side by side locally.
+(which builds the app first; concurrent runs take turns building). The Vue,
+Solid, Svelte and Angular ports serve the same way from `test-app-vue`,
+`test-app-solid`, `test-app-svelte` and `test-app-angular`. Pick a port no other
+runner uses, so they can run side by side locally.
+
+## Porting the fixture to another framework
+
+A UI framework is supported when a port of the fixture runs the catalog. The
+port lives in `test-apps/<framework>`, renders every view the way
+`fixture/App.tsx` does (`?view=` and the pathname), and holds itself to the
+React original with `fixtureParity()` from `@harnessed-ts/conformance`, which
+names the first element, attribute or text where its markup parts from
+`fixture/trees.json`. Then run the catalog against it under at least one
+in-process driver and add it to `test-apps/playwright-frameworks`.
 
 ## Adding a guarantee
 

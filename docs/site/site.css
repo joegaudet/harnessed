@@ -722,3 +722,9 @@ td img {
   display: block;
   margin-block: 0.15rem;
 }
+
+/* Pico's classless build has no .overflow-auto, so the runner table's wrapper
+   would grow with the table; it scrolls instead, inside the page. */
+.overflow-auto {
+  overflow-x: auto;
+}

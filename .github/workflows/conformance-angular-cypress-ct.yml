@@ -1,0 +1,23 @@
+name: conformance-angular-cypress-ct
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-angular-cypress-ct-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: angular-cypress-ct
+      # The Cypress app is not fetched by `pnpm install` (see pnpm-workspace.yaml).
+      setup: pnpm --filter test-app-angular exec cypress install
+      test: pnpm --filter test-app-angular test:cypress
+      artifacts: test-apps/angular/cypress/screenshots

@@ -1,0 +1,27 @@
+{
+  "name": "test-app-nightwatch",
+  "private": true,
+  "description": "Runs the @harnessed-ts/conformance catalog under @harnessed-ts/nightwatch, against the served React fixture, with Nightwatch's own runner and its Mocha runner, in Chrome and Firefox.",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm typecheck && pnpm e2e 'pnpm run:nightwatch && pnpm run:mocha'",
+    "test:nightwatch": "pnpm typecheck && pnpm e2e 'pnpm run:nightwatch'",
+    "test:mocha": "pnpm typecheck && pnpm e2e 'pnpm run:mocha'",
+    "e2e": "start-server-and-test 'FIXTURE_PORT=5195 pnpm --filter @harnessed-ts/conformance serve:fixture' http://localhost:5195",
+    "run:nightwatch": "nightwatch --config nightwatch.conf.cjs --env ${NIGHTWATCH_BROWSER:-chrome}",
+    "run:mocha": "nightwatch --config nightwatch.mocha.conf.cjs --env ${NIGHTWATCH_BROWSER:-chrome}",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "@harnessed-ts/chai": "workspace:^",
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/nightwatch": "workspace:^",
+    "@types/chai": "^5.2.3",
+    "@types/node": "^26.6.4",
+    "chai": "^6.3.0",
+    "nightwatch": "^3.16.0",
+    "start-server-and-test": "^3.0.12",
+    "typescript": "^6.0.3"
+  }
+}

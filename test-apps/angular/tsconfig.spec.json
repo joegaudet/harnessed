@@ -1,0 +1,5 @@
+{
+  "$comment": "What the Angular plugin compiles under Vitest: the app plus the tests, which declare small host components of their own. Not type-checked with tsc — the tests import harnesses, which only type-check under standard decorators, so tsconfig.harness.json checks the tests.",
+  "extends": "./tsconfig.app.json",
+  "include": ["src/**/*.ts", "tests/**/*.ts"]
+}
