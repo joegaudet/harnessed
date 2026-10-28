@@ -34,6 +34,9 @@ allowBuilds:
   '@parcel/watcher': false
   lmdb: false
   msgpackr-extract: false
+  # Nightwatch's inspector: its postinstall builds a Chrome extension that only
+  # `nightwatch --debug` loads. The conformance runs never open it.
+  '@nightwatch/nightwatch-inspector': false
 minimumReleaseAgeExclude:
   - '@changesets/apply-release-plan@8.1.0'
   - '@changesets/cli@3.0.2'
