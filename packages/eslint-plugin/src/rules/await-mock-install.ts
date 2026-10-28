@@ -27,12 +27,15 @@ function property(member: Node): string | undefined {
 
 function resolveInit(identifier: Node, scope: Scope.Scope): Node | undefined {
   const name = identifier['name'] as string
-  for (let current: Scope.Scope | null = scope; current !== null; current = current.upper) {
+  let current: Scope.Scope | null = scope
+  while (current !== null) {
     const variable = current.set.get(name)
-    if (variable === undefined) continue
-    const def = variable.defs[0]
-    if (def?.type !== 'Variable') return undefined
-    return (def.node as unknown as Node)['init'] as Node | undefined
+    if (variable !== undefined) {
+      const def = variable.defs[0]
+      if (def?.type !== 'Variable') return undefined
+      return (def.node as unknown as Node)['init'] as Node | undefined
+    }
+    current = current.upper
   }
   return undefined
 }
