@@ -1,4 +1,5 @@
 import { RuleTester } from 'eslint'
+import emberParser from 'ember-eslint-parser'
 import tseslint from 'typescript-eslint'
 import { describe, expect, it } from 'vitest'
 import noComponentHarnessInTest from '../src/rules/no-component-harness-in-test'
@@ -337,6 +338,21 @@ describe('no-raw-locator-in-test', () => {
         code: `import $ from 'jquery'\n$('.price')`,
       },
       {
+        name: 'Nightwatch: a selector command handed an element is not a raw query',
+        filename: '/repo/nightwatch/checkout.ts',
+        code: `await browser.click(element); await browser.url('/')`,
+      },
+      {
+        name: 'a find on something @vue/test-utils did not mount',
+        filename: '/repo/tests/Cart.test.ts',
+        code: `import { mount } from '@vue/test-utils'\nconst items = new Map(); items.get('x'); mount(Cart)`,
+      },
+      {
+        name: 'Angular: a By from somewhere else',
+        filename: '/repo/tests/app.component.spec.ts',
+        code: `import { By } from './by'\nBy.css('x')`,
+      },
+      {
         name: 'TestCafe: Selector from somewhere else',
         filename: '/repo/tests/x.test.ts',
         code: `import { Selector } from './selectors'\nSelector('x')`,
@@ -648,6 +664,24 @@ describe('no-raw-locator-in-test', () => {
         errors: [{ messageId: 'raw', data: { call: 'Selector' } }],
       },
       {
+        name: 'Nightwatch: browser.element, browser.element.find and a selector command',
+        filename: '/repo/nightwatch/checkout.ts',
+        code: `browser.element('#pay'); browser.element.findByRole('button'); await browser.click('#pay')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'Angular: nativeElement.querySelector and By.css',
+        filename: '/repo/tests/app.component.spec.ts',
+        code: `import { By } from '@angular/platform-browser'\nfixture.nativeElement.querySelector('.x'); fixture.debugElement.query(By.css('.y'))`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: '@vue/test-utils: find and get on a mounted wrapper',
+        filename: '/repo/tests/Cart.test.ts',
+        code: `import { mount } from '@vue/test-utils'\nconst wrapper = mount(Cart); wrapper.find('.total'); wrapper.get('button')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
         name: 'Vitest browser mode: page.getByRole from vitest/browser',
         filename: '/repo/tests/form.browser.test.tsx',
         code: `import { page } from 'vitest/browser'\npage.getByRole('button')`,
@@ -664,6 +698,41 @@ describe('no-raw-locator-in-test', () => {
         filename: '/repo/tests/components/Form.test.tsx',
         code: `screen.getByText('Sign in')`,
         errors: [{ messageId: 'raw' }],
+      },
+    ],
+  })
+})
+
+// Ember stories with <template> tags, parsed as an Ember app's ESLint config parses them.
+const emberTester = new RuleTester({
+  languageOptions: {
+    parser: emberParser,
+    parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  },
+})
+
+describe('no-raw-locator-in-test, Ember .gjs and .gts stories', () => {
+  const meta = `import Greeting from './greeting'\nexport default {\n  title: 'Greeting',\n  render: () => <template><Greeting @name="Ada" /></template>,\n}\n`
+  emberTester.run('no-raw-locator-in-test', noRawLocatorInTest, {
+    valid: [
+      {
+        name: 'a .gts play function that drives its harness',
+        filename: '/repo/stories/Greeting.stories.gts',
+        code: `${meta}export const Greeted = { play: async ({ harness }) => { await harness.greet('Ada') } }`,
+      },
+    ],
+    invalid: [
+      {
+        name: "a .gts play function's canvas queries",
+        filename: '/repo/stories/Greeting.stories.gts',
+        code: `${meta}export const Greeted = { play: async ({ canvas }) => { await canvas.getByRole('button') } }`,
+        errors: [{ messageId: 'raw', data: { call: 'canvas.getByRole' } }],
+      },
+      {
+        name: 'a .gjs play function reaching into the canvas element',
+        filename: '/repo/stories/Greeting.stories.gjs',
+        code: `${meta}export const Greeted = { play: async ({ canvasElement }) => { canvasElement.querySelector('input') } }`,
+        errors: [{ messageId: 'raw', data: { call: 'canvasElement.querySelector' } }],
       },
     ],
   })

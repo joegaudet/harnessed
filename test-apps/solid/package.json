@@ -1,0 +1,37 @@
+{
+  "name": "test-app-solid",
+  "private": true,
+  "description": "The Solid port of the conformance fixture, held to the React original by a parity test and run under the dom and vitest-browser drivers; served for test-app-playwright-frameworks.",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm typecheck && pnpm test:dom",
+    "test:dom": "vitest run",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "test:all": "pnpm test && pnpm test:browser",
+    "typecheck": "tsc -p .",
+    "build": "vite build",
+    "serve:fixture": "node scripts/serve-fixture.mjs"
+  },
+  "dependencies": {
+    "solid-js": "^1.9.17"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/dom": "workspace:^",
+    "@harnessed-ts/vitest-browser": "workspace:^",
+    "@solidjs/testing-library": "^0.8.10",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.6.3",
+    "@vitest/browser-playwright": "5.0.3",
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.1.1",
+    "playwright": "^1.63.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.2",
+    "vite-plugin-solid": "^2.11.14",
+    "vitest": "^5.0.3"
+  }
+}

@@ -67,9 +67,10 @@
           </h1>
           <p class="hero-sub">
             Like page objects, but for components too. One harness API for Testing Library,
-            Playwright, Cypress, WebdriverIO, Vitest browser mode, Puppeteer, TestCafe and Ember,
-            with Gherkin on top and Storybook play functions beside. The same class drives a fast
-            jsdom unit test, a story, and a real-browser end-to-end test.
+            node:test, Bun, Playwright, Cypress, WebdriverIO, Nightwatch, Vitest browser mode,
+            Puppeteer, TestCafe, Ember and Angular, over React, Vue, Solid and Svelte alike, with
+            Gherkin on top and Storybook play functions beside. The same class drives a fast jsdom
+            unit test, a story, and a real-browser end-to-end test.
           </p>
           <div class="hero-actions">
             <a href="https://github.com/joegaudet/harnessed#install" role="button">Get started</a>
@@ -144,21 +145,21 @@
           <g class="ropes">
             <use href="#rope-0" />
             <use href="#rope-1" />
-            <use href="#rope-2" class="todo" />
-            <use href="#rope-3" class="todo" />
-            <use href="#rope-4" class="todo" />
-            <use href="#rope-5" class="todo" />
+            <use href="#rope-2" />
+            <use href="#rope-3" />
+            <use href="#rope-4" />
+            <use href="#rope-5" />
             <use href="#rope-6" />
             <use href="#rope-7" />
             <use href="#rope-8" />
-            <use href="#rope-9" class="todo" />
-            <use href="#rope-10" class="todo" />
+            <use href="#rope-9" />
+            <use href="#rope-10" />
             <use href="#rope-11" />
             <use href="#rope-12" />
             <use href="#rope-13" />
             <use href="#rope-14" />
             <use href="#rope-15" />
-            <use href="#rope-16" class="todo" />
+            <use href="#rope-16" />
             <use href="#rope-17" class="todo" />
             <use href="#rope-18" />
             <use href="#rope-g" class="gherkin" />
@@ -176,49 +177,56 @@
             <use href="#rope-14" style="--i: 8" />
             <use href="#rope-15" style="--i: 9" />
             <use href="#rope-18" style="--i: 10" />
+            <use href="#rope-9" style="--i: 11" />
+            <use href="#rope-10" style="--i: 12" />
+            <use href="#rope-2" style="--i: 13" />
+            <use href="#rope-3" style="--i: 14" />
+            <use href="#rope-5" style="--i: 15" />
+            <use href="#rope-4" style="--i: 16" />
+            <use href="#rope-16" style="--i: 17" />
           </g>
 
           <g class="nodes">
             <rect x="10" y="161" width="140" height="28" rx="8" />
             <rect x="10" y="197" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="233" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="269" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="305" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="341" width="140" height="28" rx="8" />
+            <rect x="10" y="233" width="140" height="28" rx="8" />
+            <rect x="10" y="269" width="140" height="28" rx="8" />
+            <rect x="10" y="305" width="140" height="28" rx="8" />
+            <rect x="10" y="341" width="140" height="28" rx="8" />
             <rect x="570" y="44" width="140" height="28" rx="8" />
             <rect x="570" y="80" width="140" height="28" rx="8" />
             <rect x="570" y="116" width="140" height="28" rx="8" />
             <rect x="570" y="152" width="140" height="28" rx="8" />
-            <rect class="todo" x="570" y="188" width="140" height="28" rx="8" />
-            <rect class="todo" x="570" y="224" width="140" height="28" rx="8" />
+            <rect x="570" y="188" width="140" height="28" rx="8" />
+            <rect x="570" y="224" width="140" height="28" rx="8" />
             <rect x="570" y="296" width="140" height="28" rx="8" />
             <rect x="570" y="332" width="140" height="28" rx="8" />
             <rect x="570" y="368" width="140" height="28" rx="8" />
             <rect x="570" y="404" width="140" height="28" rx="8" />
             <rect x="570" y="440" width="140" height="28" rx="8" />
-            <rect class="todo" x="570" y="476" width="140" height="28" rx="8" />
+            <rect x="570" y="476" width="140" height="28" rx="8" />
             <rect class="todo" x="570" y="512" width="140" height="28" rx="8" />
             <rect class="gherkin" x="310" y="148" width="100" height="26" rx="13" />
           </g>
           <g class="labels" text-anchor="middle" dominant-baseline="central">
             <text x="80" y="175">React</text>
             <text x="80" y="211">Ember</text>
-            <text class="todo" x="80" y="247">Vue</text>
-            <text class="todo" x="80" y="283">Svelte</text>
-            <text class="todo" x="80" y="319">Angular</text>
-            <text class="todo" x="80" y="355">Solid</text>
+            <text x="80" y="247">Vue</text>
+            <text x="80" y="283">Svelte</text>
+            <text x="80" y="319">Angular</text>
+            <text x="80" y="355">Solid</text>
             <text x="640" y="58">Testing Library</text>
             <text x="640" y="94">Vitest browser</text>
             <text x="640" y="130">Ember QUnit</text>
             <text x="640" y="166">Storybook</text>
-            <text class="todo" x="640" y="202">Bun test</text>
-            <text class="todo" x="640" y="238">node:test</text>
+            <text x="640" y="202">Bun test</text>
+            <text x="640" y="238">node:test</text>
             <text x="640" y="310">Playwright</text>
             <text x="640" y="346">Cypress</text>
             <text x="640" y="382">WebdriverIO</text>
             <text x="640" y="418">Puppeteer</text>
             <text x="640" y="454">TestCafe</text>
-            <text class="todo" x="640" y="490">Nightwatch</text>
+            <text x="640" y="490">Nightwatch</text>
             <text class="todo" x="640" y="526">Detox</text>
             <text class="gherkin" x="360" y="161">Gherkin</text>
           </g>
@@ -274,8 +282,8 @@
             </svg>
             <h3>Every runner</h3>
             <p>
-              Testing Library, Playwright, Cypress, WebdriverIO, Vitest, Puppeteer, TestCafe and
-              Ember, plus Storybook play functions.
+              Testing Library, node:test, Bun, Playwright, Cypress, WebdriverIO, Nightwatch, Vitest,
+              Puppeteer, TestCafe, Ember and Angular, plus Storybook play functions.
             </p>
           </article>
           <article>
@@ -295,7 +303,7 @@
               <path d="m2 17 10 5 10-5" />
             </svg>
             <h3>Framework-agnostic</h3>
-            <p>Harnesses query the DOM, not React or Ember.</p>
+            <p>Harnesses query the DOM, not React, Ember, Vue, Solid, Svelte or Angular.</p>
           </article>
         </div>
       </section>
@@ -497,12 +505,48 @@ expect(await profile.error()).toBe('500')</code></pre>
               <tr>
                 <th scope="row"><a href="#setup-dom">Testing Library</a></th>
                 <td><code>dom</code></td>
-                <td>jsdom</td>
+                <td>jsdom; React, Vue, Solid, Svelte</td>
                 <td>In the page</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/ci.yml/badge.svg?branch=main"
                     alt="ci status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-vue.yml/badge.svg?branch=main"
+                    alt="Vue status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-solid.yml/badge.svg?branch=main"
+                    alt="Solid status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-svelte.yml/badge.svg?branch=main"
+                    alt="Svelte status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-node-test">node:test</a></th>
+                <td><code>dom</code></td>
+                <td>jsdom</td>
+                <td>In the page (not in CI)</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-node-test.yml/badge.svg?branch=main"
+                    alt="node:test status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-bun-test">Bun test</a></th>
+                <td><code>dom</code></td>
+                <td>happy-dom</td>
+                <td>In the page (not in CI)</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-bun-test.yml/badge.svg?branch=main"
+                    alt="Bun test status"
                   />
                 </td>
               </tr>
@@ -519,6 +563,10 @@ expect(await profile.error()).toBe('500')</code></pre>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-playwright-ember.yml/badge.svg?branch=main"
                     alt="Playwright Ember status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-playwright-frameworks.yml/badge.svg?branch=main"
+                    alt="Playwright Vue, Solid, Svelte and Angular status"
                   />
                 </td>
               </tr>
@@ -543,6 +591,22 @@ expect(await profile.error()).toBe('500')</code></pre>
                 </td>
               </tr>
               <tr>
+                <th scope="row"><a href="#setup-angular">Angular</a> (Vitest, Vitest browser)</th>
+                <td><code>angular</code></td>
+                <td>jsdom or real browser</td>
+                <td>Not yet</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-angular.yml/badge.svg?branch=main"
+                    alt="Angular status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-angular-cypress-ct.yml/badge.svg?branch=main"
+                    alt="Angular Cypress component status"
+                  />
+                </td>
+              </tr>
+              <tr>
                 <th scope="row"><a href="#setup-cypress">Cypress</a> (e2e and component)</th>
                 <td><code>cypress</code></td>
                 <td>Real browser</td>
@@ -555,6 +619,14 @@ expect(await profile.error()).toBe('500')</code></pre>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ct.yml/badge.svg?branch=main"
                     alt="Cypress component status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ember.yml/badge.svg?branch=main"
+                    alt="Cypress Ember status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ct-frameworks.yml/badge.svg?branch=main"
+                    alt="Cypress component Vue and Svelte status"
                   />
                 </td>
               </tr>
@@ -583,6 +655,22 @@ expect(await profile.error()).toBe('500')</code></pre>
                 </td>
               </tr>
               <tr>
+                <th scope="row"><a href="#setup-nightwatch">Nightwatch</a> (e2e and component)</th>
+                <td><code>nightwatch</code></td>
+                <td>Real browser (Nightwatch and Mocha runners)</td>
+                <td>Not yet</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-nightwatch.yml/badge.svg?branch=main"
+                    alt="Nightwatch status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-nightwatch-ct.yml/badge.svg?branch=main"
+                    alt="Nightwatch component status"
+                  />
+                </td>
+              </tr>
+              <tr>
                 <th scope="row"><a href="#setup-puppeteer">Puppeteer</a></th>
                 <td><code>puppeteer</code></td>
                 <td>Real browser</td>
@@ -607,7 +695,7 @@ expect(await profile.error()).toBe('500')</code></pre>
                 </td>
               </tr>
               <tr>
-                <th scope="row"><a href="#setup-storybook">Storybook</a> (React)</th>
+                <th scope="row"><a href="#setup-storybook">Storybook</a> (React and Ember)</th>
                 <td><code>storybook</code></td>
                 <td>Play functions; stories as fixtures</td>
                 <td>Per story, in <code>parameters</code></td>
@@ -615,6 +703,37 @@ expect(await profile.error()).toBe('500')</code></pre>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-storybook.yml/badge.svg?branch=main"
                     alt="Storybook status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-storybook-ember.yml/badge.svg?branch=main"
+                    alt="Storybook Ember status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">
+                  <a href="#use-cases">Gherkin</a> (playwright-bdd, cucumber-js, Cypress cucumber,
+                  Nightwatch)
+                </th>
+                <td><code>gherkin</code></td>
+                <td>Real browser</td>
+                <td><code>world.mocks</code> (not Nightwatch)</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-playwright-bdd.yml/badge.svg?branch=main"
+                    alt="playwright-bdd status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-cucumber.yml/badge.svg?branch=main"
+                    alt="cucumber-js status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-cypress.yml/badge.svg?branch=main"
+                    alt="Cypress cucumber status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-nightwatch.yml/badge.svg?branch=main"
+                    alt="Nightwatch cucumber status"
                   />
                 </td>
               </tr>
@@ -642,6 +761,41 @@ expect(await form.error()).toBeNull()</code></pre>
           <p>Mocking the API:</p>
           <pre><code class="language-typescript">import { mock } from '@harnessed-ts/dom/mock' // with @mswjs/interceptors installed
 await mock(dom({ user })).use(UsersApi)</code></pre>
+        </details>
+
+        <details id="setup-node-test">
+          <summary>node:test (jsdom)</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/dom @harnessed-ts/chai chai esbuild jsdom global-jsdom
+node --test --import global-jsdom/register --import @harnessed-ts/core/register "tests/**/*.test.tsx"</code></pre>
+          <pre><code class="language-tsx">import { harnessedChai } from '@harnessed-ts/chai'
+import * as chai from 'chai'
+import { afterEach, it } from 'node:test'
+
+chai.use(harnessedChai)
+afterEach(cleanup)
+
+it('signs in', async () =&gt; {
+  const { baseElement } = render(&lt;LoginForm /&gt;)
+  const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+  await form.signInAs('ada@example.com', 'hunter2')
+  await chai.expect(form.errorBanner).to.be.absent
+})</code></pre>
+        </details>
+
+        <details id="setup-bun-test">
+          <summary>Bun test (happy-dom)</summary>
+          <pre><code class="language-bash">bun add -d @harnessed-ts/core @harnessed-ts/dom esbuild @happy-dom/global-registrator</code></pre>
+          <pre><code class="language-toml"># bunfig.toml: the DOM, then the decorator loader, then the matchers
+[test]
+preload = ["./happydom.ts", "@harnessed-ts/core/bun", "@harnessed-ts/dom/matchers/bun"]</code></pre>
+          <pre><code class="language-tsx">import { expect, it } from 'bun:test'
+
+it('signs in', async () =&gt; {
+  const { baseElement } = render(&lt;LoginForm /&gt;)
+  const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+  await form.signInAs('ada@example.com', 'hunter2')
+  await expect(form.errorBanner).toBeAbsent()
+})</code></pre>
         </details>
 
         <details id="setup-playwright">
@@ -683,6 +837,20 @@ await checkout.goto({ token })</code></pre>
           <pre><code class="language-typescript">import { mock, setupMocks } from '@harnessed-ts/ember/mock'
 setupMocks(hooks)
 await mock(ember()).use(UsersApi)</code></pre>
+        </details>
+
+        <details id="setup-angular">
+          <summary>Angular (zoneless, Vitest)</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/angular @testing-library/dom @testing-library/user-event</code></pre>
+          <pre><code class="language-typescript">// vite.config.ts, with @analogjs/vite-plugin-angular: harness files get standard decorators
+const HARNESS_FILES = /\.(harness|page)\.ts$/
+plugins: [harnessedDecorators({ include: HARNESS_FILES }), angular({ transformFilter: (_c, id) =&gt; !HARNESS_FILES.test(id) })]
+
+// a test: every action settles at fixture.whenStable()
+import { angular } from '@harnessed-ts/angular'
+const { fixture } = await render(LoginForm)
+const form = new LoginFormHarness(angular({ fixture }))
+await form.signInAs('ada@example.com', 'hunter2')</code></pre>
         </details>
 
         <details id="setup-cypress">
@@ -743,6 +911,19 @@ expect(await form.error()).toBeNull()</code></pre>
 await mock(vitestBrowser()).use(UsersApi)</code></pre>
         </details>
 
+        <details id="setup-nightwatch">
+          <summary>Nightwatch</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/nightwatch @harnessed-ts/chai chai</code></pre>
+          <pre><code class="language-typescript">import { nightwatch } from '@harnessed-ts/nightwatch'
+
+it('signs in', async function () {
+  const login = new LoginPage(nightwatch(browser))
+  await login.goto() // resolved against launch_url
+  await login.form.signInAs('ada@example.com', 'hunter2')
+  await chai.expect(login.form.errorBanner).to.be.absent
+})</code></pre>
+        </details>
+
         <details id="setup-puppeteer">
           <summary>Puppeteer</summary>
           <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/puppeteer puppeteer</code></pre>
@@ -797,6 +978,15 @@ export const WrongPassword: WithHarness&lt;StoryObj&lt;typeof meta&gt;, LoginFor
     await expect(await harness.error()).toBe('Wrong password')
   },
 }</code></pre>
+          <p>
+            Ember stories (Embroider and Vite, Ember 6.8 or later) render through
+            <code>@harnessed-ts/storybook/ember</code> under <code>@storybook/html-vite</code>, and
+            every interaction waits for Ember to settle.
+            <a href="https://github.com/joegaudet/harnessed#ember-stories">Ember setup</a>.
+          </p>
+          <pre><code class="language-typescript">// .storybook/preview.ts
+import { emberRenderer, harnessed } from '@harnessed-ts/storybook/ember'
+export default { ...emberRenderer, ...harnessed() } satisfies Preview</code></pre>
           <p>Mocking the API:</p>
           <pre><code class="language-typescript">// .storybook/preview.ts: harnessed() from '@harnessed-ts/storybook/mock'
 export const Loaded = { parameters: { harnessed: { mocks: [UsersApi] } } }</code></pre>
@@ -856,7 +1046,7 @@ class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
               <code>@harnessed-ts/storybook</code> hands every play function its harness. Each
               harness method shows up as one step in the Interactions panel, with its clicks and
               keystrokes nested underneath, and Storybook's Vitest addon runs the same plays as
-              tests.
+              tests. React and Ember stories alike.
             </p>
             <p>
               The stories double as end-to-end fixtures: <code>StoryPage</code> opens one by URL
@@ -878,7 +1068,8 @@ await story.harness(LoginFormHarness).signInAs('ada@example.com', 'hunter2')</co
             <p>
               <code>@harnessed-ts/gherkin</code> adds a page registry, a
               <code>{page}</code> parameter type and a world for playwright-bdd, cucumber-js,
-              Cypress cucumber and ember-cli-yadda. Steps call harness methods, not selectors.
+              Cypress cucumber, ember-cli-yadda and Nightwatch. Steps call harness methods, not
+              selectors.
             </p>
             <div class="grid">
               <pre><code class="language-gherkin">Feature: Checkout
@@ -953,6 +1144,7 @@ export default [harnessed.configs.recommended]</code></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-gherkin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
 
     <dialog id="lightbox" class="lightbox" aria-label="Demo recordings">
       <figure>

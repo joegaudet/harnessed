@@ -15,5 +15,4 @@ The conformance catalog against stories, three ways:
 `urlSpecs` do not apply: they navigate the fixture app's own routes, and a
 Storybook has none — a story is reached by its id, which `StoryPage` covers.
 
-Ember is not here: `@storybook/ember` builds with webpack only, and the Vitest
-addon needs a Vite build.
+The same catalog against Ember stories is in `test-apps/storybook-ember`.

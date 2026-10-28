@@ -33,6 +33,17 @@ export type StoryHook = (
   env: DomEnv,
 ) => Promise<(() => Promise<void>) | void>
 
+export interface HarnessedOptions {
+  /**
+   * Awaited after every interaction a harness makes, before the next step reads
+   * the canvas. A renderer that updates the DOM asynchronously settles here;
+   * `@harnessed-ts/storybook/ember` passes Ember's.
+   */
+  afterAction?: () => Promise<void>
+  /** Run before each story renders; see `StoryHook`. */
+  hook?: StoryHook
+}
+
 let matchersRegistered = false
 let listening = false
 /** The message of the current story's play error, if it threw. */
@@ -65,7 +76,7 @@ function listenForPlayErrors(): void {
  * instrumented `userEvent` with each method logged as a step. The harness
  * matchers are added to `storybook/test`'s `expect`.
  */
-export function harnessed(hook?: StoryHook): {
+export function harnessed(options: HarnessedOptions = {}): {
   beforeEach: (context: HarnessedContext) => Promise<(() => Promise<void>) | void>
   afterEach: (context: HarnessedContext) => Promise<void>
 } {
@@ -83,9 +94,10 @@ export function harnessed(hook?: StoryHook): {
         // is only set where a clipboard exists; fall back to a plain one.
         user: (hasClick(context.userEvent) ? context.userEvent : userEvent.setup()) as UserEvent,
         container: context.canvasElement,
+        ...(options.afterAction === undefined ? {} : { afterAction: options.afterAction }),
       })
       // Before the story renders, so anything it fetches as it mounts is seen.
-      const cleanup = await hook?.(context, env)
+      const cleanup = await options.hook?.(context, env)
       const HarnessClass = context.parameters.harness
       if (HarnessClass !== undefined)
         context.harness = withSteps(new HarnessClass(env), context.step)

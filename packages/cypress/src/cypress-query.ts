@@ -131,6 +131,18 @@ export class CypressQuery extends Query {
   }
 
   /**
+   * Trusted input returns as soon as the browser has dispatched it, so a read
+   * straight after could beat a framework that renders on a timer of its own
+   * (zoneless Angular schedules after the event). A zero-delay timer in the AUT
+   * window runs after any it queued, as user-event's own pause does in the
+   * other mode.
+   */
+  private async afterReal(action: Promise<void>): Promise<void> {
+    await action
+    await new Promise<void>(resolve => this.env.window.setTimeout(resolve, 0))
+  }
+
+  /**
    * Every match, resolved in one pass — see `DomQuery.all` for why. Each result is
    * bound to its node and falls back to index resolution once that node leaves
    * the document.
@@ -147,14 +159,14 @@ export class CypressQuery extends Query {
   override async click(options?: WaitOptions): Promise<void> {
     this.log('click')
     const element = await this.element(options)
-    await (this.real ? realClick(element) : this.user.click(element))
+    await (this.real ? this.afterReal(realClick(element)) : this.user.click(element))
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
     this.log('fill', JSON.stringify(value))
     const element = await this.element(options)
     if (this.real) {
-      await realReplace(element, value)
+      await this.afterReal(realReplace(element, value))
       return
     }
     await this.user.clear(element)
@@ -166,21 +178,21 @@ export class CypressQuery extends Query {
   override async clear(options?: WaitOptions): Promise<void> {
     this.log('clear')
     const element = await this.element(options)
-    await (this.real ? realReplace(element, '') : this.user.clear(element))
+    await (this.real ? this.afterReal(realReplace(element, '')) : this.user.clear(element))
   }
 
   override async check(options?: WaitOptions): Promise<void> {
     this.log('check')
     const element = await this.element(options)
     if ((element as HTMLInputElement).checked) return
-    await (this.real ? realClick(element) : this.user.click(element))
+    await (this.real ? this.afterReal(realClick(element)) : this.user.click(element))
   }
 
   override async uncheck(options?: WaitOptions): Promise<void> {
     this.log('uncheck')
     const element = await this.element(options)
     if (!(element as HTMLInputElement).checked) return
-    await (this.real ? realClick(element) : this.user.click(element))
+    await (this.real ? this.afterReal(realClick(element)) : this.user.click(element))
   }
 
   /**
@@ -203,7 +215,7 @@ export class CypressQuery extends Query {
   override async hover(options?: WaitOptions): Promise<void> {
     this.log('hover')
     const element = await this.element(options)
-    await (this.real ? realHover(element) : this.user.hover(element))
+    await (this.real ? this.afterReal(realHover(element)) : this.user.hover(element))
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
@@ -220,7 +232,7 @@ export class CypressQuery extends Query {
     this.log('press', key)
     const element = await this.element(options)
     element.focus()
-    await (this.real ? realPress(key) : this.user.keyboard(toKeyboardInput(key)))
+    await (this.real ? this.afterReal(realPress(key)) : this.user.keyboard(toKeyboardInput(key)))
   }
 
   // --- observations -------------------------------------------------------

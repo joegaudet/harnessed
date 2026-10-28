@@ -67,17 +67,23 @@ async function withPresenceTestIds(body: () => Promise<void>): Promise<void> {
 }
 
 /**
- * jsdom computes no layout, so every box there is all zeros — the one documented
- * difference in `boundingBox()`. Read from the realm the specs run in: only the
- * dom driver runs them inside jsdom.
+ * jsdom and happy-dom compute no layout, so every box there is all zeros — the
+ * one documented difference in `boundingBox()`. Read from the realm the specs
+ * run in: only the dom driver runs them inside a simulated DOM. The DOM's own
+ * `window`, not `globalThis`: under node:test or Bun the DOM is installed beside
+ * the runtime, whose own `navigator` says Node or Bun.
  */
-const NO_LAYOUT = globalThis.navigator?.userAgent?.includes('jsdom') === true
+const USER_AGENT =
+  (globalThis as { window?: { navigator?: Navigator } }).window?.navigator?.userAgent ??
+  globalThis.navigator?.userAgent ??
+  ''
+const NO_LAYOUT = /\bjsdom\b|\bHappyDOM\b/.test(USER_AGENT)
 const NO_BOX: BoundingBox = { x: 0, y: 0, width: 0, height: 0 }
 
 /** Equal within half a pixel: engines disagree in the far decimals of a frame's position. */
 function assertBox(actual: BoundingBox, expected: BoundingBox, what: string): void {
   if (NO_LAYOUT) {
-    assert.deepEqual(actual, NO_BOX, `${what} under jsdom`)
+    assert.deepEqual(actual, NO_BOX, `${what} under a simulated DOM`)
     return
   }
   for (const key of ['x', 'y', 'width', 'height'] as const) {

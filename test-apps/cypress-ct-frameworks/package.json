@@ -1,0 +1,29 @@
+{
+  "name": "test-app-cypress-ct-frameworks",
+  "private": true,
+  "description": "Runs the conformance catalog under @harnessed-ts/cypress, as Cypress component tests mounting the Vue or Svelte port of the fixture (CYPRESS_FRAMEWORK picks which).",
+  "type": "module",
+  "scripts": {
+    "cy:run": "cypress run --component --browser ${CYPRESS_BROWSER:-electron}",
+    "test": "tsc --noEmit && pnpm cy:run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:*",
+    "@harnessed-ts/core": "workspace:*",
+    "@harnessed-ts/cypress": "workspace:*",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^26.6.3",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "cypress": "^16.1.1",
+    "esbuild": "^0.28.2",
+    "svelte": "^5.57.3",
+    "test-app-svelte": "workspace:*",
+    "test-app-vue": "workspace:*",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.2",
+    "vue": "^3.5.44"
+  }
+}

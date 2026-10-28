@@ -16,6 +16,7 @@ export default defineConfig({
     '@harnessed-ts/core',
     '@harnessed-ts/resolve',
     '@harnessed-ts/resolve/inject',
+    '@harnessed-ts/resolve/webdriver',
     'expect-webdriverio',
     'webdriverio',
   ],

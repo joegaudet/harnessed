@@ -1,4 +1,5 @@
-import type { PageApi, PageApiOptions, WireSelector } from '@harnessed-ts/resolve/inject'
+import type { PageApi, PageApiOptions } from './page-api'
+import type { WireSelector } from './wire'
 
 /**
  * What the in-page script does with the target it resolves. Reads happen in the
@@ -11,6 +12,7 @@ export type PageOp =
   | 'frameNow'
   | 'element'
   | 'probe'
+  | 'visible'
   | 'count'
   | 'texts'
   | 'text'
@@ -50,7 +52,11 @@ export function isFrameEntryError(error: unknown): boolean {
   return error instanceof PageError && error.name === 'FrameEntryError'
 }
 
-/** An element as WebDriver returns it from a script, before `$()` wraps it. */
+/**
+ * An element as WebDriver returns it from a script, before the driver's client
+ * wraps it (WebdriverIO's `$()`; selenium-webdriver hands back a `WebElement`
+ * already).
+ */
 export type ElementRef = { 'element-6066-11e4-a52e-4f735466cecf': string }
 
 /**
@@ -80,7 +86,13 @@ export async function pageScript(
     if (found !== null && found.localName !== 'iframe') {
       await api.count(null, [...scope, selector], selector, options)
     }
-    return { element: found, origin: found === null ? { x: 0, y: 0 } : api.origin(found) }
+    return {
+      element: found,
+      origin: found === null ? { x: 0, y: 0 } : api.origin(found),
+      // Whether the iframe is visible in its own document: content in a hidden
+      // frame is hidden, whatever its own style says.
+      visible: found !== null && api.visible(found),
+    }
   }
   try {
     let value: unknown
@@ -99,6 +111,15 @@ export async function pageScript(
         // more than one match means, with the whole scope chain in hand.
         const matches = api.allNow(null, scope, selector, options)
         value = { count: matches.length, element: matches.length === 1 ? matches[0] : null }
+        break
+      }
+      case 'visible': {
+        // `probe`'s answer, with the layout check made in the same round-trip.
+        const matches = api.allNow(null, scope, selector, options)
+        value = {
+          count: matches.length,
+          visible: matches.length === 1 && api.visible(matches[0] as Element),
+        }
         break
       }
       case 'count':
@@ -160,7 +181,7 @@ export async function pageScript(
       }
       case 'clear': {
         const element = (await one()) as HTMLInputElement
-        // WebdriverIO sets these input types' values directly: they take no typing.
+        // WebDriver sets these input types' values directly: they take no typing.
         const direct = ['range', 'date', 'datetime-local', 'month', 'week', 'time', 'color']
         element.focus()
         // Selected, so one Backspace deletes it all: a real edit, which fires the

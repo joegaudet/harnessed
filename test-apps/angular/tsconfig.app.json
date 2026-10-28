@@ -1,0 +1,28 @@
+{
+  "$comment": "The Angular app, as the Angular CLI configures one: legacy experimentalDecorators for @Component. Harness and page files are excluded — they use standard decorators and are checked by tsconfig.harness.json.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "strict": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "importHelpers": true,
+    "outDir": "tmp/tsc"
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "typeCheckHostBindings": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.harness.ts", "src/**/*.page.ts"]
+}

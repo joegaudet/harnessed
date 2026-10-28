@@ -1,0 +1,37 @@
+name: conformance-solid
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-solid-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Typecheck, the fixture-parity test, then the catalog under the dom
+          # driver (Vitest + jsdom, through @solidjs/testing-library).
+          - runner: dom
+            setup: ''
+            test: pnpm --filter test-app-solid test
+            artifacts: ''
+          # The catalog under the vitest-browser driver, in Chromium.
+          - runner: vitest-browser
+            setup: pnpm --filter test-app-solid exec playwright install --with-deps chromium
+            test: pnpm --filter test-app-solid test:browser
+            artifacts: test-apps/solid/.vitest/attachments
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: solid (${{ matrix.runner }})
+      setup: ${{ matrix.setup }}
+      test: ${{ matrix.test }}
+      artifacts: ${{ matrix.artifacts }}

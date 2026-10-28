@@ -25,7 +25,7 @@
 import { mock, resetMocks } from '@harnessed-ts/dom/mock'
 import type { ApiMock, Mockable, MockOptions } from '@harnessed-ts/dom/mock'
 import { harnessed as base } from './index'
-import type { HarnessedContext } from './index'
+import type { HarnessedContext, HarnessedOptions } from './index'
 
 /** What a story may set under `parameters.harnessed`. */
 export interface HarnessedParameters extends MockOptions {
@@ -38,15 +38,18 @@ export interface MockedContext extends HarnessedContext {
   mocks?: ApiMock
 }
 
-export function harnessed(): ReturnType<typeof base> {
-  return base(async (context, env) => {
-    const { mocks, ...options } = (context.parameters.harnessed ?? {}) as HarnessedParameters
-    if (mocks === undefined || mocks.length === 0) return undefined
-    const api = mock(env, options)
-    await api.use(...mocks)
-    ;(context as MockedContext).mocks = api
-    // Storybook runs this before the next story: its mocks must not outlive it.
-    return () => resetMocks()
+export function harnessed(options: Omit<HarnessedOptions, 'hook'> = {}): ReturnType<typeof base> {
+  return base({
+    ...options,
+    hook: async (context, env) => {
+      const { mocks, ...options } = (context.parameters.harnessed ?? {}) as HarnessedParameters
+      if (mocks === undefined || mocks.length === 0) return undefined
+      const api = mock(env, options)
+      await api.use(...mocks)
+      ;(context as MockedContext).mocks = api
+      // Storybook runs this before the next story: its mocks must not outlive it.
+      return () => resetMocks()
+    },
   })
 }
 

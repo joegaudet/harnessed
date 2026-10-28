@@ -1,0 +1,34 @@
+name: conformance-nightwatch
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-nightwatch-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+        # Nightwatch's own test runner and its Mocha runner, over the same specs.
+        runner: [nightwatch, mocha]
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: nightwatch (${{ matrix.browser }}, ${{ matrix.runner }})
+      # Chrome and Firefox are on the runner image. Drivers come from
+      # selenium-webdriver's Selenium Manager, which Nightwatch depends on: it
+      # uses a chromedriver or geckodriver already on PATH that matches the
+      # browser (the image ships both), and fetches one otherwise. So the npm
+      # geckodriver package, whose postinstall pnpm-workspace.yaml disallows,
+      # is never needed. Print what the leg runs against.
+      setup: ${{ matrix.browser == 'firefox' && 'firefox --version && (geckodriver --version | head -1 || true)' || 'google-chrome --version && (chromedriver --version || true)' }}
+      test: NIGHTWATCH_BROWSER=${{ matrix.browser }} pnpm --filter test-app-nightwatch test:${{ matrix.runner }}
+      artifacts: test-apps/nightwatch/logs

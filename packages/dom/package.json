@@ -1,7 +1,7 @@
 {
   "name": "@harnessed-ts/dom",
   "version": "0.6.0",
-  "description": "Testing Library / jsdom driver for @harnessed-ts/core. Framework-agnostic \u2014 no React dependency.",
+  "description": "Testing Library / jsdom driver for @harnessed-ts/core. Framework-agnostic — no React dependency.",
   "keywords": [
     "testing",
     "harness",
@@ -47,6 +47,10 @@
       "import": "./dist/mock.js",
       "require": "./dist/mock.cjs"
     },
+    "./matchers/bun": {
+      "types": "./dist/matchers-bun.d.ts",
+      "import": "./dist/matchers-bun.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -66,8 +70,9 @@
   "peerDependencies": {
     "@testing-library/dom": ">=10",
     "@testing-library/user-event": ">=14",
-    "vitest": ">=2",
-    "@mswjs/interceptors": ">=0.39"
+    "@mswjs/interceptors": ">=0.39",
+    "@types/bun": ">=1.2",
+    "vitest": ">=2"
   },
   "scripts": {
     "build": "tsup",
@@ -79,6 +84,7 @@
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.7",
+    "@types/bun": "^1.4.4",
     "vitest": "^5.0.3"
   },
   "peerDependenciesMeta": {
@@ -86,6 +92,9 @@
       "optional": true
     },
     "@mswjs/interceptors": {
+      "optional": true
+    },
+    "@types/bun": {
       "optional": true
     }
   }

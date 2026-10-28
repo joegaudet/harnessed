@@ -41,6 +41,11 @@
       "import": "./dist/inject.js",
       "require": "./dist/inject.cjs"
     },
+    "./webdriver": {
+      "types": "./dist/webdriver.d.ts",
+      "import": "./dist/webdriver.js",
+      "require": "./dist/webdriver.cjs"
+    },
     "./inject.global.js": "./dist/inject.global.js",
     "./package.json": "./package.json"
   },

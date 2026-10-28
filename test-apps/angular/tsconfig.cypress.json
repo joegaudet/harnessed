@@ -1,0 +1,9 @@
+{
+  "$comment": "The component specs and the app they mount, as the Angular plugin compiles them under Cypress — with the app's legacy decorators, so the specs import no harness file of their own — and as ngc checks them, with Cypress's globals.",
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["cypress"]
+  },
+  "include": ["src/**/*.ts", "cypress/**/*.ts"],
+  "exclude": ["src/**/*.harness.ts", "src/**/*.page.ts"]
+}

@@ -1,0 +1,78 @@
+{
+  "name": "@harnessed-ts/angular",
+  "version": "0.6.0",
+  "description": "Angular driver for @harnessed-ts/core: interactions through user-event, each one ending once the app is stable. TestBed, Testing Library and bootstrapped apps, zoneless.",
+  "keywords": [
+    "testing",
+    "harness",
+    "angular",
+    "testbed",
+    "testing-library"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/angular"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/resolve": "workspace:^"
+  },
+  "peerDependencies": {
+    "@angular/common": ">=21",
+    "@angular/core": ">=21",
+    "@angular/router": ">=21",
+    "@testing-library/dom": ">=10",
+    "@testing-library/user-event": ">=14"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/user-event": "^14.6.7",
+    "rxjs": "^7.8.2"
+  }
+}

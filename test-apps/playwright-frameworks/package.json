@@ -1,0 +1,20 @@
+{
+  "name": "test-app-playwright-frameworks",
+  "private": true,
+  "description": "Runs the conformance catalog under @harnessed-ts/playwright against the Vue, Solid and Svelte ports of the fixture, each built and served by its own test app: one Playwright project and one web server per port.",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm typecheck && playwright test",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/playwright": "workspace:^",
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.3",
+    "test-app-solid": "workspace:*",
+    "test-app-svelte": "workspace:*",
+    "test-app-vue": "workspace:*",
+    "typescript": "^6.0.3"
+  }
+}

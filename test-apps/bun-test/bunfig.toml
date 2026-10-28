@@ -1,0 +1,11 @@
+[test]
+# Order matters: the DOM first, so everything after it finds `document`; then
+# the decorator loader, before any harness file is imported; then the matchers
+# and Testing Library's cleanup.
+preload = [
+  "./happydom.ts",
+  "@harnessed-ts/core/bun",
+  "@harnessed-ts/dom/matchers/bun",
+  "./cleanup.ts",
+]
+root = "./tests"

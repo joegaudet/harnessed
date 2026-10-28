@@ -14,6 +14,19 @@ describe('the generated runners section', () => {
     expect(section).toContain('@harnessed-ts/core')
   })
 
+  it('tells an Angular repo how its env settles and where harness decorators come from', () => {
+    const section = runnersSection(['angular'])
+    expect(section).toContain('angular({ fixture })')
+    expect(section).toContain('whenStable()')
+    expect(section).toContain('experimentalDecorators')
+  })
+
+  it("asserts through Chai's own expect under Nightwatch", () => {
+    const section = runnersSection(['nightwatch'])
+    expect(section).toContain('nightwatch(browser)')
+    expect(section).toContain('chai.use(harnessedChai)')
+  })
+
   it('shows the Gherkin entry point for each adapter in use, and only those', () => {
     const section = runnersSection(['gherkin'], { gherkinAdapters: ['cucumber', 'yadda'] })
     expect(section).toContain('@harnessed-ts/gherkin/cucumber')
