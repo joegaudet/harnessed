@@ -60,6 +60,26 @@ describe('detectRunners', () => {
     expect(detectRunners(root)).toEqual(['ember', 'cypress', 'webdriverio', 'testcafe'])
   })
 
+  it('recognises node:test by the script that runs it, and Bun by its config or lockfile', () => {
+    const nodeTest = repo({
+      'package.json': JSON.stringify({
+        scripts: { test: 'node --test --import @harnessed-ts/core/register "tests/**/*.test.ts"' },
+      }),
+    })
+    expect(detectRunners(nodeTest)).toEqual(['node-test'])
+    expect(detectRunners(repo({ 'package.json': pkg({}), 'bunfig.toml': '' }))).toEqual(['bun'])
+    expect(detectRunners(repo({ 'package.json': pkg({ '@types/bun': '^1.2.0' }) }))).toEqual([
+      'bun',
+    ])
+  })
+
+  it('does not take a script that merely mentions --test for node:test', () => {
+    const root = repo({
+      'package.json': JSON.stringify({ scripts: { e2e: 'playwright test --test-dir e2e' } }),
+    })
+    expect(detectRunners(root)).toEqual([])
+  })
+
   it('is empty for a repo with none, rather than guessing', () => {
     expect(detectRunners(repo({ 'package.json': pkg({ react: '^19.0.0' }) }))).toEqual([])
   })

@@ -125,6 +125,8 @@ export const RUNNERS = [
   'playwright',
   'vitest-browser',
   'testing-library',
+  'node-test',
+  'bun',
   'gherkin',
   'storybook',
 ] as const
@@ -176,6 +178,8 @@ interface RunnerSignal {
   packages: RegExp
   /** A file a project using it leaves at its root. */
   files?: string[]
+  /** A package.json script that runs it, for runners that are not a dependency. */
+  scripts?: RegExp
 }
 
 const RUNNER_SIGNALS: RunnerSignal[] = [
@@ -205,6 +209,13 @@ const RUNNER_SIGNALS: RunnerSignal[] = [
   {
     runner: 'testing-library',
     packages: /^@testing-library\/(dom|react|vue|svelte|angular|preact|ember)$/,
+  },
+  // Node's own runner is no dependency: a script that runs `node --test` says so.
+  { runner: 'node-test', packages: /^$/, scripts: /\bnode\b[^&|;]*\s--test\b/ },
+  {
+    runner: 'bun',
+    packages: /^(@types\/bun|bun-types)$/,
+    files: ['bunfig.toml', 'bun.lock', 'bun.lockb'],
   },
   {
     runner: 'gherkin',
@@ -243,6 +254,12 @@ function readManifest(dir: string): Record<string, unknown> | undefined {
     // No manifest, or an unreadable one: only the config files can tell.
     return undefined
   }
+}
+
+function scriptsOf(manifest: Record<string, unknown> | undefined): string[] {
+  const scripts = manifest?.scripts
+  if (typeof scripts !== 'object' || scripts === null) return []
+  return Object.values(scripts).filter((script): script is string => typeof script === 'string')
 }
 
 function dependencyNames(manifest: Record<string, unknown> | undefined): string[] {
@@ -368,6 +385,8 @@ interface RepoEvidence {
   dependencies: Set<string>
   /** Each package directory's own dependencies, root included. */
   packages: Set<string>[]
+  /** Every package's package.json scripts. */
+  scripts: string[]
   /** Whether any of the repo's package directories holds this file. */
   hasFile(name: string): boolean
 }
@@ -375,12 +394,12 @@ interface RepoEvidence {
 function evidence(root: string): RepoEvidence {
   const rootManifest = readManifest(root)
   const dirs = packageDirs(root, rootManifest)
-  const packages = dirs.map(
-    dir => new Set(dependencyNames(dir === root ? rootManifest : readManifest(dir))),
-  )
+  const manifests = dirs.map(dir => (dir === root ? rootManifest : readManifest(dir)))
+  const packages = manifests.map(manifest => new Set(dependencyNames(manifest)))
   return {
     dependencies: new Set(packages.flatMap(deps => [...deps])),
     packages,
+    scripts: manifests.flatMap(scriptsOf),
     hasFile: name => dirs.some(dir => existsSync(join(dir, name))),
   }
 }
@@ -392,10 +411,12 @@ function evidence(root: string): RepoEvidence {
  * and `assert.harness`, not Cypress.
  */
 export function detectRunners(root: string): Runner[] {
-  const { dependencies, hasFile } = evidence(root)
+  const { dependencies, scripts, hasFile } = evidence(root)
   return RUNNER_SIGNALS.filter(
-    ({ packages, files = [] }) =>
-      [...dependencies].some(name => packages.test(name)) || files.some(hasFile),
+    ({ packages, files = [], scripts: script }) =>
+      [...dependencies].some(name => packages.test(name)) ||
+      files.some(hasFile) ||
+      (script !== undefined && scripts.some(line => script.test(line))),
   ).map(({ runner }) => runner)
 }
 

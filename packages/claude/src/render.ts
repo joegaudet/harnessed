@@ -70,6 +70,17 @@ const RUNNER_DOCS: Record<Runner, RunnerDoc> = {
     env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/dom/matchers`)',
   },
+  'node-test': {
+    title: 'node:test (`@harnessed-ts/dom` on jsdom)',
+    env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`; run with `node --test --import global-jsdom/register --import @harnessed-ts/core/register`, and `afterEach(cleanup)` from `node:test`',
+    assert:
+      '`await expect(page.total).to.readAs(/^\\$/)` with Chai (`chai.use(harnessedChai)` from `@harnessed-ts/chai`) — node:test has no `expect`',
+  },
+  bun: {
+    title: 'Bun test (`@harnessed-ts/dom` on happy-dom)',
+    env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`; `bunfig.toml` preloads happy-dom, `@harnessed-ts/core/bun`, `@harnessed-ts/dom/matchers/bun` and a cleanup file',
+    assert: '`await expect(page.total).toReadAs(/^\\$/)` with `expect` from `bun:test`',
+  },
   storybook: {
     title: 'Storybook (`@harnessed-ts/storybook`)',
     env: "spread `...harnessed()` into `.storybook/preview.ts` once; a story names its harness in `parameters: { harness: CheckoutHarness }` and `play: async ({ harness }) => …` receives it, each method logged as a step. From another runner, `await StoryPage.goto(pw(page), CheckoutStories, 'Default')` (`@harnessed-ts/storybook/page`), then `story.harness(CheckoutHarness)`",
