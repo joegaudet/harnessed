@@ -36,7 +36,7 @@ const rule: Rule.RuleModule = {
     type: 'suggestion',
     docs: {
       description:
-        "Disallow a runner's raw DOM queries and helpers in tests and Storybook play functions — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe, Storybook, the DOM — when a harness should be used.",
+        "Disallow a runner's raw DOM queries and helpers in tests and Storybook play functions — Playwright, Testing Library, Puppeteer, Vitest browser, Cypress, Ember test-helpers, WebdriverIO, TestCafe, Nightwatch, Angular, Vue Test Utils, Storybook, the DOM — when a harness should be used.",
       recommended: true,
     },
     schema: [dirOptionSchema],

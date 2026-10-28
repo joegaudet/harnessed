@@ -58,6 +58,25 @@ const EMBER_ACTIONS = new Set([
 const WDIO_SOURCES = new Set(['@wdio/globals', 'webdriverio'])
 const WDIO_QUERIES = new Set(['$', '$$'])
 const PUPPETEER_SOURCES = new Set(['puppeteer', 'puppeteer-core', 'jest-puppeteer'])
+/** Nightwatch's element API: `browser.element.find('…')` and kin. */
+const NIGHTWATCH_ELEMENT_QUERIES = /^find(All)?(By[A-Z]\w*)?$/
+/** Nightwatch's selector-taking commands, raw when handed a selector string. */
+const NIGHTWATCH_SELECTOR_COMMANDS = new Set([
+  'click',
+  'setValue',
+  'clearValue',
+  'getText',
+  'getValue',
+  'getAttribute',
+  'moveToElement',
+  'waitForElementVisible',
+  'waitForElementPresent',
+  'waitForElementNotPresent',
+  'waitForElementNotVisible',
+])
+/** @vue/test-utils' mounts, whose wrapper's `find` / `findAll` / `get` take CSS selectors. */
+const VUE_TEST_UTILS_MOUNTS = new Set(['mount', 'shallowMount'])
+const VUE_WRAPPER_QUERIES = new Set(['find', 'findAll', 'get'])
 
 /** The file's imports, keyed by local name: `{ click as tap }` is `tap`. */
 function collectImports(program: Rule.Node): Imports {
@@ -190,6 +209,58 @@ export function rawQueryOf(
     // WebdriverIO: browser.$('…'), browser.$$('…')
     if (object.type === 'Identifier' && object.name === 'browser' && WDIO_QUERIES.has(method)) {
       return { subject: 'browser', method, call: `browser.${method}` }
+    }
+
+    // Nightwatch: browser.element('…'), browser.findElement(s)('…'), and a
+    // selector command handed a selector string: browser.click('#pay').
+    if (object.type === 'Identifier' && object.name === 'browser') {
+      if (method === 'element' || method === 'findElement' || method === 'findElements') {
+        return { subject: 'browser', method, call: `browser.${method}` }
+      }
+      if (NIGHTWATCH_SELECTOR_COMMANDS.has(method) && isString(firstArg)) {
+        return { subject: 'browser', method, call: `browser.${method}` }
+      }
+    }
+
+    // Nightwatch: browser.element.find('…'), browser.element.findAllByText(…)
+    if (
+      object.type === 'MemberExpression' &&
+      object.object.type === 'Identifier' &&
+      object.object.name === 'browser' &&
+      object.property.type === 'Identifier' &&
+      object.property.name === 'element' &&
+      NIGHTWATCH_ELEMENT_QUERIES.test(method)
+    ) {
+      return { subject: 'browser.element', method, call: `browser.element.${method}` }
+    }
+
+    // Angular: fixture.nativeElement.querySelector('…'), debugElement.query(By.css('…'))
+    if (
+      (method === 'querySelector' || method === 'querySelectorAll') &&
+      object.type === 'MemberExpression' &&
+      object.property.type === 'Identifier' &&
+      object.property.name === 'nativeElement'
+    ) {
+      return { subject: 'nativeElement', method, call: `nativeElement.${method}` }
+    }
+    if (method === 'css' && object.type === 'Identifier') {
+      const binding = context.imports.get(object.name)
+      if (binding?.source === '@angular/platform-browser' && binding.imported === 'By') {
+        return { subject: '@angular/platform-browser', method, call: `${object.name}.css` }
+      }
+    }
+
+    // @vue/test-utils: wrapper.find('…') on a wrapper from mount() / shallowMount()
+    if (object.type === 'Identifier' && VUE_WRAPPER_QUERIES.has(method)) {
+      const def = variableNamed(sourceCode.getScope(call), object.name)?.defs[0]
+      const init = def?.type === 'Variable' ? def.node.init : undefined
+      const mounted = init?.type === 'AwaitExpression' ? init.argument : (init ?? undefined)
+      if (mounted?.type === 'CallExpression' && mounted.callee.type === 'Identifier') {
+        const binding = context.imports.get(mounted.callee.name)
+        if (binding?.source === '@vue/test-utils' && VUE_TEST_UTILS_MOUNTS.has(binding.imported)) {
+          return { subject: '@vue/test-utils', method, call: `${object.name}.${method}` }
+        }
+      }
     }
 
     // Ember: this.element.querySelector('…')

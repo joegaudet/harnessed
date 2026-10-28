@@ -330,6 +330,21 @@ describe('no-raw-locator-in-test', () => {
         code: `import $ from 'jquery'\n$('.price')`,
       },
       {
+        name: 'Nightwatch: a selector command handed an element is not a raw query',
+        filename: '/repo/nightwatch/checkout.ts',
+        code: `await browser.click(element); await browser.url('/')`,
+      },
+      {
+        name: 'a find on something @vue/test-utils did not mount',
+        filename: '/repo/tests/Cart.test.ts',
+        code: `import { mount } from '@vue/test-utils'\nconst items = new Map(); items.get('x'); mount(Cart)`,
+      },
+      {
+        name: 'Angular: a By from somewhere else',
+        filename: '/repo/tests/app.component.spec.ts',
+        code: `import { By } from './by'\nBy.css('x')`,
+      },
+      {
         name: 'TestCafe: Selector from somewhere else',
         filename: '/repo/tests/x.test.ts',
         code: `import { Selector } from './selectors'\nSelector('x')`,
@@ -639,6 +654,24 @@ describe('no-raw-locator-in-test', () => {
         filename: '/repo/tests/checkout.test.ts',
         code: `import { Selector } from 'testcafe'\nawait t.click(Selector('#pay'))`,
         errors: [{ messageId: 'raw', data: { call: 'Selector' } }],
+      },
+      {
+        name: 'Nightwatch: browser.element, browser.element.find and a selector command',
+        filename: '/repo/nightwatch/checkout.ts',
+        code: `browser.element('#pay'); browser.element.findByRole('button'); await browser.click('#pay')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: 'Angular: nativeElement.querySelector and By.css',
+        filename: '/repo/tests/app.component.spec.ts',
+        code: `import { By } from '@angular/platform-browser'\nfixture.nativeElement.querySelector('.x'); fixture.debugElement.query(By.css('.y'))`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
+      },
+      {
+        name: '@vue/test-utils: find and get on a mounted wrapper',
+        filename: '/repo/tests/Cart.test.ts',
+        code: `import { mount } from '@vue/test-utils'\nconst wrapper = mount(Cart); wrapper.find('.total'); wrapper.get('button')`,
+        errors: [{ messageId: 'raw' }, { messageId: 'raw' }],
       },
       {
         name: 'Vitest browser mode: page.getByRole from vitest/browser',
