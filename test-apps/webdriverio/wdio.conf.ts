@@ -33,7 +33,12 @@ export const config: WebdriverIO.Config = {
   capabilities: [
     {
       browserName: 'chrome',
-      'goog:chromeOptions': { args: ['--headless=new', '--window-size=1280,800'] },
+      'goog:chromeOptions': {
+        args: ['--headless=new', '--window-size=1280,800'],
+        // A local override; CI leaves it unset and WebdriverIO resolves Chrome
+        // itself. Its driver override is WebdriverIO's own CHROMEDRIVER_PATH.
+        ...(process.env.CHROME_BIN ? { binary: process.env.CHROME_BIN } : {}),
+      },
     },
   ],
   logLevel: 'warn',

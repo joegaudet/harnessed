@@ -14,7 +14,8 @@ export default defineConfig([
     external: ['@harnessed-ts/core', '@testing-library/dom'],
   },
   {
-    entry: ['src/inject.ts'],
+    // The Node-side entries for remote drivers; webdriver builds on inject.
+    entry: ['src/inject.ts', 'src/webdriver.ts'],
     format: ['esm', 'cjs'],
     target: 'es2022',
     dts: false,
