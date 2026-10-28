@@ -1,0 +1,24 @@
+name: conformance-storybook-ember
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-storybook-ember-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: storybook-ember
+      setup: pnpm --filter test-app-storybook-ember exec playwright install --with-deps chromium
+      test: pnpm --filter test-app-storybook-ember test
+      artifacts: |
+        test-apps/storybook-ember/.vitest/attachments
+        test-apps/storybook-ember/test-results

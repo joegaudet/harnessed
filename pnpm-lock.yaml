@@ -253,6 +253,9 @@ importers:
       '@harnessed-ts/core':
         specifier: workspace:^
         version: link:../core
+      ember-eslint-parser:
+        specifier: ^0.16.1
+        version: 0.16.1(@babel/eslint-parser@7.29.9(@babel/core@7.29.7(supports-color@11.0.0))(eslint@10.12.0(jiti@2.7.0)(supports-color@11.0.0)))(@typescript-eslint/parser@8.71.0(eslint@10.12.0(jiti@2.7.0)(supports-color@11.0.0))(supports-color@11.0.0)(typescript@6.0.3))(typescript@6.0.3)
       eslint:
         specifier: ^10.11.0
         version: 10.12.0(jiti@2.7.0)(supports-color@11.0.0)
@@ -397,12 +400,21 @@ importers:
         specifier: workspace:^
         version: link:../page
     devDependencies:
+      '@ember/test-waiters':
+        specifier: ^4.1.2
+        version: 4.1.2(supports-color@11.0.0)
       '@testing-library/dom':
         specifier: ^10.4.2
         version: 10.4.2
       '@testing-library/user-event':
         specifier: ^14.6.7
         version: 14.6.7(@testing-library/dom@10.4.2)
+      content-tag:
+        specifier: ^4.2.1
+        version: 4.2.1
+      ember-source:
+        specifier: ~7.3.0
+        version: 7.3.0(@glimmer/component@2.1.1(supports-color@11.0.0))(supports-color@11.0.0)
       jsdom:
         specifier: ^30.1.2
         version: 30.1.2
@@ -1129,6 +1141,114 @@ importers:
       storybook:
         specifier: 10.6.1
         version: 10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0)
+      vite:
+        specifier: ^8.3.2
+        version: 8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0)
+      vitest:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/node@26.6.4)(@vitest/browser-playwright@5.0.3)(@vitest/ui@5.0.3)(jsdom@30.1.2)(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))
+
+  test-apps/storybook-ember:
+    devDependencies:
+      '@babel/core':
+        specifier: ^7.29.7
+        version: 7.29.7(supports-color@11.0.0)
+      '@babel/plugin-transform-runtime':
+        specifier: ^7.29.7
+        version: 7.29.7(@babel/core@7.29.7(supports-color@11.0.0))(supports-color@11.0.0)
+      '@babel/plugin-transform-typescript':
+        specifier: ^7.29.7
+        version: 7.29.9(@babel/core@7.29.7(supports-color@11.0.0))(supports-color@11.0.0)
+      '@babel/runtime':
+        specifier: ^7.29.7
+        version: 7.29.7
+      '@ember/app-tsconfig':
+        specifier: ^2.0.0
+        version: 2.1.0
+      '@ember/test-waiters':
+        specifier: ^4.1.2
+        version: 4.1.2(supports-color@11.0.0)
+      '@embroider/core':
+        specifier: ^4.6.7
+        version: 4.6.7(@glint/template@1.9.0)(supports-color@11.0.0)
+      '@embroider/macros':
+        specifier: ^1.21.1
+        version: 1.21.1(@babel/core@7.29.7(supports-color@11.0.0))(@glint/template@1.9.0)(supports-color@11.0.0)
+      '@embroider/vite':
+        specifier: ^1.7.13
+        version: 1.7.13(@embroider/core@4.6.7(@glint/template@1.9.0)(supports-color@11.0.0))(@glint/template@1.9.0)(supports-color@11.0.0)(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))
+      '@glimmer/component':
+        specifier: ^2.1.1
+        version: 2.1.1(supports-color@11.0.0)
+      '@glint/ember-tsc':
+        specifier: ^1.11.4
+        version: 1.11.6(ember-source@7.3.0(@glimmer/component@2.1.1(supports-color@11.0.0))(supports-color@11.0.0))(supports-color@11.0.0)(typescript@6.0.3)
+      '@glint/template':
+        specifier: ^1.9.0
+        version: 1.9.0
+      '@harnessed-ts/conformance':
+        specifier: workspace:^
+        version: link:../../packages/conformance
+      '@harnessed-ts/core':
+        specifier: workspace:^
+        version: link:../../packages/core
+      '@harnessed-ts/dom':
+        specifier: workspace:^
+        version: link:../../packages/dom
+      '@harnessed-ts/page':
+        specifier: workspace:^
+        version: link:../../packages/page
+      '@harnessed-ts/playwright':
+        specifier: workspace:^
+        version: link:../../packages/playwright
+      '@harnessed-ts/storybook':
+        specifier: workspace:^
+        version: link:../../packages/storybook
+      '@playwright/test':
+        specifier: ^1.63.0
+        version: 1.63.0
+      '@rollup/plugin-babel':
+        specifier: ^7.1.0
+        version: 7.1.0(@babel/core@7.29.7(supports-color@11.0.0))(@types/babel__core@7.20.5)(rollup@4.63.1)(supports-color@11.0.0)
+      '@storybook/addon-vitest':
+        specifier: 10.6.1
+        version: 10.6.1(@vitest/browser-playwright@5.0.3)(@vitest/browser@5.0.3(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))(vitest@5.0.3))(react@19.3.0)(storybook@10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0))(vitest@5.0.3)
+      '@storybook/html-vite':
+        specifier: 10.6.1
+        version: 10.6.1(storybook@10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0))(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))
+      '@testing-library/dom':
+        specifier: ^10.4.2
+        version: 10.4.2
+      '@testing-library/user-event':
+        specifier: ^14.6.7
+        version: 14.6.7(@testing-library/dom@10.4.2)
+      '@vitest/browser':
+        specifier: 5.0.3
+        version: 5.0.3(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))(vitest@5.0.3)
+      '@vitest/browser-playwright':
+        specifier: 5.0.3
+        version: 5.0.3(playwright@1.63.0)(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))(vitest@5.0.3)
+      babel-plugin-ember-template-compilation:
+        specifier: ^4.0.0
+        version: 4.0.0
+      decorator-transforms:
+        specifier: ^2.4.0
+        version: 2.4.0(@babel/core@7.29.7(supports-color@11.0.0))
+      ember-source:
+        specifier: ~7.3.0
+        version: 7.3.0(@glimmer/component@2.1.1(supports-color@11.0.0))(supports-color@11.0.0)
+      playwright:
+        specifier: ^1.63.0
+        version: 1.63.0
+      storybook:
+        specifier: 10.6.1
+        version: 10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0)
+      test-app-ember-vite:
+        specifier: workspace:^
+        version: link:../ember-vite
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: ^8.3.2
         version: 8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0)
@@ -3908,6 +4028,17 @@ packages:
   '@storybook/global@5.0.0':
     resolution: {integrity: sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==}
 
+  '@storybook/html-vite@10.6.1':
+    resolution: {integrity: sha512-fcAzae67pxegT0IZRM86KKridQ35tlvTDhpSEAb2KtsFRNgJI3FDMwtBklGTf/UDsNJRFJW3YQdiL21m3iUQ8g==}
+    peerDependencies:
+      storybook: ^10.6.1
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
+
+  '@storybook/html@10.6.1':
+    resolution: {integrity: sha512-J6sgUP2dd5ufZiaahzr2jaIf1Jy5S0nGYFja1Aju2b+552mp2fKBpO4DkbL1G9F9dDhtOIvQn+Q7cswZTfhGoA==}
+    peerDependencies:
+      storybook: ^10.6.1
+
   '@storybook/icons@2.1.0':
     resolution: {integrity: sha512-Fxh9vYpX9bQqFeHRiY8h2ApeRGDzRSMLwJwNZ/AIRqnyOKHxRKL+yFe+ctEkVJmuptRE9u1Hrn8ZZNHyfDKKNg==}
     peerDependencies:
@@ -6219,8 +6350,23 @@ packages:
     engines: {node: '>= 20.19.0'}
     hasBin: true
 
+  ember-eslint-parser@0.16.1:
+    resolution: {integrity: sha512-1FSGhbknZwYG3nz3HK30lim4xVxM0B42ps5dOtrFrzz9cbdMtR5K+ftlOsfFjRLU7gL66zCJVVnsF1VuVlBSZg==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      '@babel/eslint-parser': ^7.28.6 || ^8.0.0
+      '@typescript-eslint/parser': '*'
+    peerDependenciesMeta:
+      '@babel/eslint-parser':
+        optional: true
+      '@typescript-eslint/parser':
+        optional: true
+
   ember-estree@0.8.1:
     resolution: {integrity: sha512-8gOi6SvtEGJ7njzSfVbzTOB46ryIYNQi9a56QBr0ZvXW676eJslnIet5n3oS6zAiaae0TkxbYForfDekzDUd2A==}
+
+  ember-estree@0.9.0:
+    resolution: {integrity: sha512-CExL0d6FbbffZaQkD0+zA5PaIgle3fbpzapuLVQ+QZfI2KLalnhuof0e85Zvfy/fh8+q9liw7dqUhQX4gibMBA==}
 
   ember-exam@10.2.0:
     resolution: {integrity: sha512-nLoBWQwa6icrFUvlCr+Hik9RnwrnbXYRNVcFF1l2FczyZOWkODwDxwwoArwSuCBWAnBqh53WMzoAUlkqqNqa4Q==}
@@ -7203,6 +7349,10 @@ packages:
   html-encoding-sniffer@7.0.0:
     resolution: {integrity: sha512-UikN5yr7xsCDAq87Or5or0PAlD3HJJOKVzM05az588WnpDJ4Ux7a2A53Qi6gofGg2/EtvF/H4hCi/TXfCW4Y6w==}
     engines: {node: ^22.13.0 || >=24.0.0}
+
+  html-tags@5.1.0:
+    resolution: {integrity: sha512-n6l5uca7/y5joxZ3LUePhzmBFUJ+U2YWzhMa8XUTecSeSlQiZdF5XAd/Q3/WUl0VsXgUwWi8I7CNIwdI5WN1SQ==}
+    engines: {node: '>=20.10'}
 
   htmlfy@0.8.1:
     resolution: {integrity: sha512-xWROBw9+MEGwxpotll0h672KCaLrKKiCYzsyN8ZgL9cQbVumFnyvsk2JqiB9ELAV1GLj1GG/jxZUjV9OZZi/yQ==}
@@ -8188,6 +8338,9 @@ packages:
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
+
+  mathml-tag-names@4.0.0:
+    resolution: {integrity: sha512-aa6AU2Pcx0VP/XWnh8IGL0SYSgQHDT6Ucror2j2mXeFAlN3ahaNs8EZtG1YiticMkSLj3Gt6VPFfZogt7G5iFQ==}
 
   mdn-data@2.27.1:
     resolution: {integrity: sha512-9Yubnt3e8A0OKwxYSXyhLymGW4sCufcLG6VdiDdUGVkPhpqLxlvP5vl1983gQjJl3tqbrM731mjaZaP68AgosQ==}
@@ -10001,6 +10154,9 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  svg-tags@1.0.0:
+    resolution: {integrity: sha512-ovssysQTa+luh7A5Weu3Rta6FJlFBBbInjOh722LIt6klpU2/HtdUbszju/G4devcvk8PGt7FCLv5wftu3THUA==}
 
   symbol-tree@3.2.4:
     resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
@@ -13836,6 +13992,19 @@ snapshots:
 
   '@storybook/global@5.0.0': {}
 
+  '@storybook/html-vite@10.6.1(storybook@10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0))(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))':
+    dependencies:
+      '@storybook/builder-vite': 10.6.1(storybook@10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0))(vite@8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0))
+      '@storybook/html': 10.6.1(storybook@10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0))
+      storybook: 10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0)
+      vite: 8.3.2(@types/node@26.6.4)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.0)
+
+  '@storybook/html@10.6.1(storybook@10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      storybook: 10.6.1(@types/react@19.3.0)(prettier@3.9.9)(react@19.3.0)
+      ts-dedent: 2.3.0
+
   '@storybook/icons@2.1.0(react@19.3.0)':
     dependencies:
       react: 19.3.0
@@ -14102,7 +14271,7 @@ snapshots:
 
   '@typescript-eslint/project-service@8.69.0(supports-color@11.0.0)(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.69.0(typescript@5.9.3)
+      '@typescript-eslint/tsconfig-utils': 8.71.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.69.0
       debug: 4.4.3(supports-color@11.0.0)
       typescript: 5.9.3
@@ -14124,6 +14293,10 @@ snapshots:
       '@typescript-eslint/visitor-keys': 8.71.0
 
   '@typescript-eslint/tsconfig-utils@8.69.0(typescript@5.9.3)':
+    dependencies:
+      typescript: 5.9.3
+
+  '@typescript-eslint/tsconfig-utils@8.71.0(typescript@5.9.3)':
     dependencies:
       typescript: 5.9.3
 
@@ -17045,7 +17218,30 @@ snapshots:
       - walrus
       - whiskers
 
+  ember-eslint-parser@0.16.1(@babel/eslint-parser@7.29.9(@babel/core@7.29.7(supports-color@11.0.0))(eslint@10.12.0(jiti@2.7.0)(supports-color@11.0.0)))(@typescript-eslint/parser@8.71.0(eslint@10.12.0(jiti@2.7.0)(supports-color@11.0.0))(supports-color@11.0.0)(typescript@6.0.3))(typescript@6.0.3):
+    dependencies:
+      '@glimmer/syntax': 0.95.0
+      '@typescript-eslint/tsconfig-utils': 8.71.0(typescript@6.0.3)
+      content-tag: 4.2.1
+      ember-estree: 0.9.0
+      eslint-scope: 9.1.2
+      html-tags: 5.1.0
+      mathml-tag-names: 4.0.0
+      svg-tags: 1.0.0
+    optionalDependencies:
+      '@babel/eslint-parser': 7.29.9(@babel/core@7.29.7(supports-color@11.0.0))(eslint@10.12.0(jiti@2.7.0)(supports-color@11.0.0))
+      '@typescript-eslint/parser': 8.71.0(eslint@10.12.0(jiti@2.7.0)(supports-color@11.0.0))(supports-color@11.0.0)(typescript@6.0.3)
+    transitivePeerDependencies:
+      - typescript
+
   ember-estree@0.8.1:
+    dependencies:
+      '@glimmer/env': 0.1.7
+      '@glimmer/syntax': 0.95.0
+      content-tag: 4.2.1
+      oxc-parser: 0.130.0
+
+  ember-estree@0.9.0:
     dependencies:
       '@glimmer/env': 0.1.7
       '@glimmer/syntax': 0.95.0
@@ -18477,6 +18673,8 @@ snapshots:
     transitivePeerDependencies:
       - '@noble/hashes'
 
+  html-tags@5.1.0: {}
+
   htmlfy@0.8.1: {}
 
   htmlparser2@10.1.0:
@@ -19467,6 +19665,8 @@ snapshots:
       minimatch: 3.1.5
 
   math-intrinsics@1.1.0: {}
+
+  mathml-tag-names@4.0.0: {}
 
   mdn-data@2.27.1: {}
 
@@ -21440,6 +21640,8 @@ snapshots:
       has-flag: 4.0.0
 
   supports-preserve-symlinks-flag@1.0.0: {}
+
+  svg-tags@1.0.0: {}
 
   symbol-tree@3.2.4: {}
 

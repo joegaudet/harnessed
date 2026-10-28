@@ -74,6 +74,22 @@ export function storyUrl<M extends StoriesModule, K extends StoryName<M>>(
   return `/iframe.html?${params.join('&')}`
 }
 
+/**
+ * A stand-in for a stories module the runner cannot import, typed as that
+ * module: only its meta's `title` (or `id`), which is all `StoryPage` reads.
+ * An Ember `.gts` stories file, or one importing a component, needs Ember's
+ * build to load; Playwright's Node process has neither.
+ *
+ * ```ts
+ * import type * as LoginStories from './LoginForm.stories.gts'
+ * const Login = storiesModule<typeof LoginStories>({ title: 'Forms/Login Form' })
+ * await StoryPage.goto(pw(page), Login, 'Submitted')
+ * ```
+ */
+export function storiesModule<M extends StoriesModule>(meta: StoriesModule['default']): M {
+  return { default: meta } as M
+}
+
 function encode(values: Record<string, unknown>): string {
   return Object.entries(values)
     .map(([key, value]) => `${key}:${encodeValue(key, value)}`)

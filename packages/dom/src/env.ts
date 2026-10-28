@@ -17,18 +17,25 @@ export interface DomEnv extends EnvConfig {
    * instances in one test, and portals, work without a cleanup race.
    */
   readonly container: HTMLElement
+  /**
+   * Awaited after every interaction, before it resolves. A framework that
+   * renders asynchronously settles here, so the next read sees the new DOM.
+   */
+  readonly afterAction?: () => Promise<void>
 }
 
 export interface DomEnvOptions {
   user: UserEvent
   container?: HTMLElement
+  afterAction?: () => Promise<void>
 }
 
 /** Builds the env a harness is constructed with under Testing Library. */
-export function dom({ user, container }: DomEnvOptions): DomEnv {
+export function dom({ user, container, afterAction }: DomEnvOptions): DomEnv {
   return {
     driver: DOM_DRIVER,
     user,
     container: container ?? document.body,
+    ...(afterAction === undefined ? {} : { afterAction }),
   }
 }

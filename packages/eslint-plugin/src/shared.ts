@@ -28,7 +28,8 @@ export function isRunnerSupportFile(filename: string): boolean {
 
 /** A Storybook CSF file, whose play functions are tests in all but name. */
 export function isStoriesFile(filename: string): boolean {
-  return /\.stories\.[cm]?[jt]sx?$/.test(filename)
+  // `.gjs` and `.gts`: Ember stories with <template> tags.
+  return /\.stories\.([cm]?[jt]sx?|g[jt]s)$/.test(filename)
 }
 
 function normalise(filename: string): string {
