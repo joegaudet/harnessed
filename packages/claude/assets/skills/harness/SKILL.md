@@ -87,8 +87,9 @@ How a test in this repo builds the env a harness takes, and asserts.
 <!-- BEGIN GENERATED: placement -->
 <!-- END GENERATED: placement -->
 
-Add the root `data-testid` to the component if it is not there. Sub-element test
-ids extend the host's: `{{WIDGET_EXAMPLE}}-label`, `{{WIDGET_EXAMPLE}}-hint`.
+Add the root test id (`{{TESTID_ATTRIBUTE}}`) to the component if it is not there.
+Under a `data-test-*` pattern, `testId('x')` means the attribute `data-test-x`.
+Sub-element test ids extend the host's: `{{WIDGET_EXAMPLE}}-label`, `{{WIDGET_EXAMPLE}}-hint`.
 
 ## Creating a component harness
 

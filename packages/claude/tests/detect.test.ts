@@ -3,6 +3,7 @@ import {
   detectEmberUnderVitest,
   detectGherkinAdapters,
   detectRunners,
+  detectTestIdAttribute,
   parseRunners,
   toRunners,
 } from '../src/detect'
@@ -187,5 +188,31 @@ describe('detectEmberUnderVitest', () => {
         repo({ ...files, 'apps/web/package.json': pkg({ 'ember-source': '*', vitest: '*' }) }),
       ),
     ).toBe(true)
+  })
+})
+
+describe('detectTestIdAttribute', () => {
+  it('reads ember-test-selectors presence attributes as the data-test-* pattern', () => {
+    const root = repo({
+      'package.json': JSON.stringify({ name: 'app' }),
+      'app/components/count.gts': '<template><span data-test-productions-count>1</span></template>',
+    })
+    expect(detectTestIdAttribute(root)).toBe('data-test-*')
+  })
+
+  it('finds them in classic .hbs templates too', () => {
+    const root = repo({
+      'package.json': JSON.stringify({ name: 'app' }),
+      'app/templates/index.hbs': '<h1 data-test-title>Hi</h1>',
+    })
+    expect(detectTestIdAttribute(root)).toBe('data-test-*')
+  })
+
+  it('keeps a value-matched attribute a plain name', () => {
+    const root = repo({
+      'package.json': JSON.stringify({ name: 'app' }),
+      'src/App.tsx': 'export const App = () => <div data-testid="app" />',
+    })
+    expect(detectTestIdAttribute(root)).toBe('data-testid')
   })
 })

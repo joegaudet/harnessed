@@ -37,13 +37,21 @@ function firstExisting(root: string, candidates: string[]): string | undefined {
  * last candidate or none of them.
  */
 export function detectTestIdAttribute(root: string): string {
-  const candidates = ['data-testid', 'data-test-id', 'data-test']
+  // What to look for, and the setting it means. `data-test-` followed by a
+  // name is ember-test-selectors' presence style: `data-test-*`.
+  const candidates: Array<[needle: string, attribute: string]> = [
+    ['data-testid', 'data-testid'],
+    ['data-test-id', 'data-test-id'],
+    ['data-test-', 'data-test-*'],
+    ['data-test', 'data-test'],
+  ]
+  const needles = candidates.map(([needle]) => needle)
   const searchRoots = ['src', 'app', 'lib'].map(dir => join(root, dir)).filter(existsSync)
   for (const dir of searchRoots) {
-    const found = firstNeedle(dir, candidates, 0)
-    if (found !== undefined) return found
+    const found = firstNeedle(dir, needles, 0)
+    if (found !== undefined) return candidates.find(([needle]) => needle === found)![1]
   }
-  return candidates[0]!
+  return 'data-testid'
 }
 
 function firstNeedle(dir: string, needles: string[], depth: number): string | undefined {
@@ -62,7 +70,7 @@ function firstNeedle(dir: string, needles: string[], depth: number): string | un
       if (found !== undefined) return found
       continue
     }
-    if (!/\.(tsx?|jsx?|vue|svelte)$/.test(entry.name)) continue
+    if (!/\.(tsx?|jsx?|vue|svelte|gts|gjs|hbs)$/.test(entry.name)) continue
     try {
       const contents = readFileSync(full, 'utf8')
       // Candidates are in priority order, so the first hit in this file wins.
