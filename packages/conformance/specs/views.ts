@@ -20,6 +20,8 @@ export function viewSearch(view: View): string {
       return '?view=frame'
     case 'wizard':
       return '?view=wizard'
+    case 'data':
+      return '?view=data'
   }
 }
 
@@ -35,5 +37,6 @@ const ALL: Record<View, true> = {
   dialog: true,
   frame: true,
   wizard: true,
+  data: true,
 }
 export const VIEWS = Object.keys(ALL) as View[]

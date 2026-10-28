@@ -84,9 +84,15 @@ interface Controller {
 function answer(controller: Controller, result: DispatchResult): void {
   if (result.kind === 'passthrough') return
   if (result.kind === 'error') {
-    if (result.fault === 'abort')
-      controller.errorWith(new DOMException('The request was aborted', 'AbortError'))
-    else controller.respondWith(Response.error())
+    if (result.fault === 'abort') {
+      // An Error named AbortError, not a DOMException: jsdom's DOMException is no
+      // Error in Node's realm, and the interceptor then never settles the request.
+      controller.errorWith(
+        Object.assign(new Error('The request was aborted'), { name: 'AbortError' }),
+      )
+    } else {
+      controller.respondWith(Response.error())
+    }
     return
   }
   controller.respondWith(toResponse(result.reply))

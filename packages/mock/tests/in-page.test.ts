@@ -1,6 +1,15 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { json, mock, networkError, registerMockTransport, resetMocks, sse, text } from '../src'
+import {
+  hang,
+  json,
+  mock,
+  networkError,
+  registerMockTransport,
+  resetMocks,
+  sse,
+  text,
+} from '../src'
 import { inPageTransport } from '../src/in-page'
 
 registerMockTransport('in-page-test', inPageTransport())
@@ -104,5 +113,19 @@ describe('in-page transport', () => {
     // Nothing listens on this port: a pass-through fails for real, which is the point.
     await expect(fetch('http://127.0.0.1:9/elsewhere')).rejects.toThrow()
     expect(() => api.verify()).not.toThrow()
+  })
+})
+
+describe('in-page transport: hang', () => {
+  it('releases a hung request on reset, as a failure', async () => {
+    const api = mock(env)
+    await api.get('/api/forever').reply(hang())
+    const settled = fetch('http://localhost/api/forever').then(
+      () => 'resolved',
+      () => 'rejected',
+    )
+    await new Promise(resolve => setTimeout(resolve, 50))
+    api.reset()
+    expect(await settled).toBe('rejected')
   })
 })

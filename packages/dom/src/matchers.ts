@@ -1,9 +1,12 @@
 import { harnessMatchers } from '@harnessed-ts/core'
 import type { Assertable } from '@harnessed-ts/core'
+import { mockMatchers } from '@harnessed-ts/mock'
+import type { RequestExpectation, Requested } from '@harnessed-ts/mock'
 import { expect } from 'vitest'
 
-// `import '@harnessed-ts/dom/matchers'` from a setup file registers all three.
+// `import '@harnessed-ts/dom/matchers'` from a setup file registers them all.
 expect.extend(harnessMatchers)
+expect.extend(mockMatchers)
 
 declare module 'vitest' {
   // The parameter list must match vitest's own declaration exactly. `T` is the
@@ -13,5 +16,8 @@ declare module 'vitest' {
     toBeSelected(): T extends Assertable ? R : never
     toBeAbsent(): T extends Assertable ? R : never
     toReadAs(expected: string | RegExp): T extends Assertable ? R : never
+    toHaveBeenRequested(): T extends Requested ? R : never
+    toHaveBeenRequestedTimes(times: number): T extends Requested ? R : never
+    toHaveBeenRequestedWith(expected: RequestExpectation): T extends Requested ? R : never
   }
 }

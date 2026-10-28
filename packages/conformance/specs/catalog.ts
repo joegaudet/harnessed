@@ -9,7 +9,14 @@ import { CardsPage } from '../fixture/harnesses/pages/cards.page'
 import { StepOnePage, StepTwoPage } from '../fixture/harnesses/pages/wizard-step.page'
 
 export type View =
-  'login' | 'login-error' | 'login-late-duplicates' | 'cards' | 'dialog' | 'frame' | 'wizard'
+  | 'login'
+  | 'login-error'
+  | 'login-late-duplicates'
+  | 'cards'
+  | 'dialog'
+  | 'frame'
+  | 'wizard'
+  | 'data'
 export interface ConformanceCtx {
   /** Puts the named view on screen and returns the env a harness is constructed with. */
   show(view: View): Promise<EnvConfig>

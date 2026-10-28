@@ -1,4 +1,7 @@
+import { json, mock } from '@harnessed-ts/mock'
 import type { Page } from '@playwright/test'
+import { pw } from './env'
+import './mock-transport'
 
 export interface ApiStubRoutes<Stubs> {
   /**
@@ -10,7 +13,7 @@ export interface ApiStubRoutes<Stubs> {
 }
 
 export interface ApiStubOptions<Stubs> {
-  /** Glob passed to `page.route`. */
+  /** Which requests the stubs answer: a glob over the URL path, as `mock()` matches it. */
   pattern?: string
   routes: ApiStubRoutes<Stubs>
   /** Fresh state per test. Cloned, so one test cannot leak into the next. */
@@ -29,6 +32,10 @@ export interface InstalledStubs<Stubs> {
 /**
  * Fulfils API requests from an in-memory object so a browser suite runs with no
  * backend and no database.
+ *
+ * @deprecated Use `mock()` from `@harnessed-ts/playwright/mock`, which does this
+ * under every runner, not only Playwright. `createApiStubs` is now built on it
+ * and is removed in the next minor.
  *
  * Deliberately not a Playwright fixture: fixture plumbing differs between plain
  * Playwright and playwright-bdd, so this returns the pieces and the caller wires
@@ -57,15 +64,12 @@ export function createApiStubs<Stubs extends object>(
     stubs,
     async install(page: Page): Promise<void> {
       if (live()) return
-      await page.route(pattern, async route => {
-        const pathname = new URL(route.request().url()).pathname
+      // Requests outside the pattern went to the network before; they still do.
+      const api = mock(pw(page), { onUnhandled: 'bypass' })
+      await api.all(pattern).reply(({ url }) => {
+        const pathname = url.pathname
         const match = pathnames.find(key => pathname.endsWith(key))
-        const body = match === undefined ? fallback(pathname, stubs) : routes[match]!(stubs)
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(body),
-        })
+        return json(match === undefined ? fallback(pathname, stubs) : routes[match]!(stubs))
       })
     },
   }

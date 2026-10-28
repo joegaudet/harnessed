@@ -211,3 +211,25 @@ describe('HAR', () => {
     expect(har.log.entries.map(entry => entry.request.url)).toEqual(['https://x.test/a'])
   })
 })
+
+describe('HAR anyOrigin', () => {
+  it('replays a recording made on another host', async () => {
+    const har = toHar([
+      {
+        request: { method: 'GET', url: 'https://staging.test/api/n?x=1', headers: {}, body: null },
+        status: 200,
+        statusText: 'OK',
+        headers: { 'content-type': 'application/json' },
+        body: '7',
+        startedAt: 0,
+        durationMs: 1,
+      },
+    ])
+    api = mock(testEnv())
+    await api.fromHar(har, { anyOrigin: true })
+    expect(jsonOf(await send({ url: 'http://localhost:5173/api/n?x=1' }))).toBe(7)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect((await send({ url: 'http://localhost:5173/api/n?x=2' })).kind).toBe('error')
+    expect(() => api.verify()).toThrow(/no mock answered/)
+  })
+})

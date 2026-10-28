@@ -42,6 +42,11 @@
       "import": "./dist/matchers.js",
       "require": "./dist/matchers.cjs"
     },
+    "./mock": {
+      "types": "./dist/mock.d.ts",
+      "import": "./dist/mock.js",
+      "require": "./dist/mock.cjs"
+    },
     "./bdd": {
       "types": "./dist/bdd.d.ts",
       "import": "./dist/bdd.js",
@@ -60,7 +65,8 @@
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
-    "@harnessed-ts/gherkin": "workspace:^"
+    "@harnessed-ts/gherkin": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.43"

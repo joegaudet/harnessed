@@ -51,6 +51,11 @@ export interface FromHarOptions {
   match?: 'url' | 'url+body'
   /** Only replay entries whose URL this accepts — e.g. to leave assets alone. */
   filter?: (url: string) => boolean
+  /**
+   * Match on path and query only, ignoring the recorded origin — to replay a
+   * recording made against staging on a local server.
+   */
+  anyOrigin?: boolean
 }
 
 function escapeRegExp(value: string): string {
@@ -115,7 +120,13 @@ export function harHandlers(har: Har, options?: FromHarOptions): HandlerDefiniti
     const definition: HandlerDefinition = {
       [HANDLER]: true,
       method: entry.request.method.toUpperCase(),
-      pattern: new RegExp(`^${escapeRegExp(href)}$`),
+      pattern:
+        options?.anyOrigin === true
+          ? new RegExp(
+              `^[a-z][a-z0-9+.-]*://[^/]+${escapeRegExp(href.replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i, ''))}$`,
+              'i',
+            )
+          : new RegExp(`^${escapeRegExp(href)}$`),
       respond: recorded,
       name: `HAR ${entry.request.method} ${href}`,
       predicates,

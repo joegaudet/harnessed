@@ -130,6 +130,11 @@ describe('require-host', () => {
         code: `class Helper extends Object {}`,
       },
       {
+        name: 'an API harness answers requests and has no host',
+        filename: '/repo/harness/apis/users.api.ts',
+        code: `@Api({ base: '/api/users' }) class UsersApi extends ApiHarness {}`,
+      },
+      {
         name: 'an abstract page base may leave the host to its subclasses',
         filename: '/repo/harness/pages/app.page.ts',
         code: `abstract class AppPage extends PageHarness { async heading() { return '' } }`,

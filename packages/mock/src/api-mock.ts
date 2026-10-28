@@ -181,6 +181,7 @@ export class ApiMock<State = unknown> {
   #installing: Promise<InstalledTransport> | undefined
   #installed: InstalledTransport | undefined
   #hanging = new Set<() => void>()
+  #socketsChanged: Promise<void> = Promise.resolve()
   #recording: ObservedExchange[] | undefined
   #pageDefaults = new WeakSet<object>()
   #disposed = false
@@ -232,6 +233,9 @@ export class ApiMock<State = unknown> {
       return installed
     })
     await this.#installing
+    // A socket route enables its transport's socket handling asynchronously;
+    // "ready" includes that, so a page loaded next sees it.
+    await this.#socketsChanged
   }
 
   // ----------------------------------------------------------- registration
@@ -389,7 +393,12 @@ export class ApiMock<State = unknown> {
     }
     const route = new WsRoute(pattern, this.#options.baseUrl)
     this.#webSockets.push(route)
-    void this.ready().then(() => this.#installed?.webSocketsChanged?.())
+    const changed = (this.#installing ?? this.ready()).then(() =>
+      this.#installed?.webSocketsChanged?.(),
+    )
+    this.#socketsChanged = changed.catch(error =>
+      this.#fail(`enabling WebSocket mocks failed: ${String(error)}`),
+    )
     return route
   }
 
