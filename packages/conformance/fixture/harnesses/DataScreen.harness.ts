@@ -1,4 +1,12 @@
-import { ByLabel, ByRole, ByTestId, ComponentHarness, Harness, testId } from '@harnessed-ts/core'
+import {
+  ByLabel,
+  ByRole,
+  ByTestId,
+  ComponentHarness,
+  Harness,
+  testId,
+  text,
+} from '@harnessed-ts/core'
 import type { Query, WaitOptions } from '@harnessed-ts/core'
 
 /**
@@ -44,6 +52,11 @@ export class DataScreenHarness extends ComponentHarness {
   async userError(options?: WaitOptions): Promise<string> {
     await this.userErrorLine.waitFor('visible', options)
     return this.userErrorLine.text()
+  }
+
+  /** Waits until the user panel shows `name` — after a reload, say. */
+  async waitForUserName(name: string, options?: WaitOptions): Promise<void> {
+    await this.elementBy(text(name)).waitFor('visible', options)
   }
 
   /** Immediate: whether the user request is still in flight. */

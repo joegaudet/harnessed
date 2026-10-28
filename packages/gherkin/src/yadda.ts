@@ -1,5 +1,7 @@
 import type { EnvConfig } from '@harnessed-ts/core'
 import Yadda from 'yadda'
+import { mock } from '@harnessed-ts/mock'
+import type { ApiMock } from '@harnessed-ts/mock'
 import { createWorld, pageParameter } from './index'
 import type { PageMap, PageRegistry } from './index'
 
@@ -74,6 +76,12 @@ export interface YaddaScenario<W, P extends PageMap> {
   readonly world: Partial<W>
   /** Constructs a registered page with the scenario's env. */
   open<N extends keyof P & string>(name: N): InstanceType<P[N]>
+  /**
+   * The API mock for the scenario's env — `mock(env())` from
+   * `@harnessed-ts/mock`. The driver's mock transport must be loaded
+   * (`@harnessed-ts/ember/mock` under ember-cli-yadda).
+   */
+  readonly mocks: ApiMock
   /**
    * Yadda's own context for the step: `step` (the line being run) and whatever
    * the runner passed in — ember-cli-yadda's `ctx`, and the QUnit test context.
@@ -171,7 +179,15 @@ function createSteps<W, P extends PageMap>(options: YaddaStepsOptions<P>): Yadda
   const wrap =
     <A extends unknown[]>(step: YaddaStep<W, P, A>) =>
     async (context: Record<string, unknown>, ...rest: unknown[]): Promise<void> => {
-      await step({ world, open, context }, ...(rest.slice(0, -1) as A))
+      const scenario: YaddaScenario<W, P> = {
+        world,
+        open,
+        context,
+        get mocks() {
+          return mock(env())
+        },
+      }
+      await step(scenario, ...(rest.slice(0, -1) as A))
     }
   const promise: Yadda.DefineOptions = { mode: 'promise' }
 

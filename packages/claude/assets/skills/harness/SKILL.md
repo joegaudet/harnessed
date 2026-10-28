@@ -184,6 +184,33 @@ await expect(checkout.total).toReadAs(/^\$/)
 const confirmation = await checkout.placeOrder()
 ```
 
+## Mocking the backend
+
+A test that needs the API to say something mocks it with `mock(env)` from
+`@harnessed-ts/mock` — never the runner's own interception (`page.route`,
+`cy.intercept`, …), so the same mocks run under every runner. Set mocks up
+**before** the page or component loads, and **await** each one:
+
+```ts
+const api = mock(env, { scope: '/api/**', state: { things: [] } })
+await api.use(ThingsApi) // an API harness
+await api.get('/api/things/:id').once().reply(notFound()) // a one-off, on top
+await thing.goto()
+await expect(api.lastCall('POST /api/things')?.body).toEqual({ name: 'Ada' })
+```
+
+- **One API harness per resource**, next to the page harnesses:
+  `examples/api-harness-template.ts`. Routes are methods; a test overrides one by
+  name. A page that always needs it says so with `get mocks() { return [ThingsApi] }`.
+- **Build bodies with the builders**, not hand-written headers: `json`, `created`,
+  `notFound`, `problem({ status, title })`, `jsonApi.resource(…)`, `gqlData(…)`,
+  `sse([…])`, `networkError()`, `hang()`. Test data comes from `defineFactory`.
+- **Newest handler wins.** Register defaults first and a test's specifics after.
+- **An unanswered request in `scope` fails the test**, naming the request. Widen
+  the mocks, or narrow `scope`; do not switch `onUnhandled` off to get green.
+- **End mocks after every test** — `resetMocks()` in an after-each hook, or the
+  runner's helper below. Within a test, `api.reset()` clears and keeps going.
+
 ## Gotchas
 
 1. **Render before `userEvent.setup()`.**

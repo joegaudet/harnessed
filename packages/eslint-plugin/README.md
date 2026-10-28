@@ -1,6 +1,6 @@
 # @harnessed-ts/eslint-plugin
 
-Nine rules that turn the harness authoring conventions into a gate. Harnesses
+Eleven rules that turn the harness authoring conventions into a gate. Harnesses
 speak in behaviours, never in the vocabulary of a test runner or the DOM, so a
 new variant of the app needs new harnesses, not new tests.
 
@@ -43,6 +43,17 @@ the rules named under `@harnessed-ts/`:
   directly instead of entering through a page. Runtime-agnostic: `testFiles`
   globs default to `*.spec.*`, `*.test.*`, `*.cy.*`, `*.steps.*`, and `steps/`;
   a file that calls `render()` or `mount()` is exempt. `strict` only.
+- `no-raw-intercept` — a runner's own request interception in a test where
+  `mock(env)` from `@harnessed-ts/mock` should be used: Playwright's
+  `page.route`/`routeWebSocket`/`routeFromHAR`, `cy.intercept`, Puppeteer's
+  `setRequestInterception`, WebdriverIO's `browser.mock`, TestCafe's
+  `RequestMock`, MSW's `setupServer`/`setupWorker`. A warning in `recommended`,
+  an error in `strict`.
+- `await-mock-install` — a floating `.reply()`, `.use()`, `.fromHar()` or
+  `graphql.query()` on a harnessed mock. They resolve once the runner is
+  intercepting; left unawaited, a request fired straight after can go
+  unanswered. Only chains that start at `mock(…)`, a variable holding one, or
+  something named `mocks` are checked, so `nock(…).get(…).reply(…)` is left alone.
 
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).

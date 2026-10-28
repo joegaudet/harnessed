@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { RUNNERS } from '../src/detect'
 import { runnersSection } from '../src/render'
 
 describe('the generated runners section', () => {
@@ -32,5 +33,12 @@ describe('the generated runners section', () => {
 
   it('keeps the Ember section to QUnit when the repo has no Vitest', () => {
     expect(runnersSection(['ember'])).not.toMatch(/harnessedChai/)
+  })
+
+  it('says how to mock the backend under every runner', () => {
+    const section = runnersSection([...RUNNERS])
+    expect(section.match(/^- Mock: /gm)).toHaveLength(RUNNERS.length)
+    expect(runnersSection(['cypress'])).toContain("import '@harnessed-ts/cypress/mock'")
+    expect(runnersSection(['ember'])).toContain('setupMocks(hooks)')
   })
 })

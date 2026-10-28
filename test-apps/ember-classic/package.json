@@ -28,6 +28,7 @@
     "@harnessed-ts/gherkin": "workspace:^",
     "@harnessed-ts/page": "workspace:^",
     "@harnessed-ts/qunit": "workspace:^",
+    "@mswjs/interceptors": "^0.45.10",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.7",
     "@tsconfig/ember": "^3.0.12",

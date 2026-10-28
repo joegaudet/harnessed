@@ -22,6 +22,8 @@ interface RunnerDoc {
   title: string
   env: string
   assert: string
+  /** How a test mocks the backend under this runner. */
+  mock: string
 }
 
 /** How a test builds an env and asserts, per runner. */
@@ -31,55 +33,65 @@ const RUNNER_DOCS: Record<Runner, RunnerDoc> = {
     env: '`new CheckoutPage(ember())` in a rendering or application test; `goto()` drives the router in application tests',
     assert:
       '`await assert.harness(page.total).readsAs(/^\\$/)` (`install(QUnit)` from `@harnessed-ts/qunit` in tests/test-helper)',
+    mock: '`setupMocks(hooks)` and `mock(ember())` from `@harnessed-ts/ember/mock` (with `@mswjs/interceptors` installed); `assert.requests(route)` checks what was sent',
   },
   cypress: {
     title: 'Cypress (`@harnessed-ts/cypress`)',
     env: "`import '@harnessed-ts/cypress/support'` in the support file (`cypress/support/e2e.ts`) registers the commands; then `cy.visitPage(CheckoutPage)` and `cy.harness(CheckoutPage, page => page.pay())` — never `cy.*` inside the callback",
     assert:
       '`await expect(page.total).to.readAs(/^\\$/)` inside the callback (`chai.use(harnessedChai)` from `@harnessed-ts/chai`)',
+    mock: "`import '@harnessed-ts/cypress/mock'` in the support file, then `cy.mock(api => api.get('/api/things').reply(json([])))` before the visit",
   },
   webdriverio: {
     title: 'WebdriverIO (`@harnessed-ts/webdriverio`)',
     env: '`new CheckoutPage(wdio(browser))`, then `await page.goto()`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/webdriverio/matchers`)',
+    mock: '`mock(wdio(browser))` from `@harnessed-ts/webdriverio/mock` (WebDriver BiDi only), before `goto()`; `afterEach(() => resetMocks())`',
   },
   testcafe: {
     title: 'TestCafe (`@harnessed-ts/testcafe`)',
     env: '`new CheckoutPage(testcafe(t))` inside a `test(…, async t => …)`',
     assert:
       '`await t.expect(await page.total.text()).match(/^\\$/)` — or Chai through `@harnessed-ts/chai`',
+    mock: '`mock(testcafe(t))` from `@harnessed-ts/testcafe/mock` inside the test, before navigating; no streaming or WebSockets',
   },
   puppeteer: {
     title: 'Puppeteer (`@harnessed-ts/puppeteer`)',
     env: '`new CheckoutPage(puppeteer(page, { baseURL }))` with a page from `browser.newPage()`, then `await checkout.goto()`',
     assert:
       "`await expect(page.total).toReadAs(/^\\$/)` — under Vitest, `import '@harnessed-ts/puppeteer/matchers'` in a setup file; under Jest, `expect.extend(harnessMatchers)` from `@harnessed-ts/core`",
+    mock: '`mock(puppeteer(page))` from `@harnessed-ts/puppeteer/mock`, before `goto()`',
   },
   playwright: {
     title: 'Playwright (`@harnessed-ts/playwright`)',
     env: '`new CheckoutPage(pw(page))`, then `await checkout.goto()`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/playwright/matchers`)',
+    mock: '`mock(pw(page))` from `@harnessed-ts/playwright/mock` before `goto()`, or `withMocks(test)` for a `mocks` fixture',
   },
   'vitest-browser': {
     title: 'Vitest browser mode (`@harnessed-ts/vitest-browser`)',
     env: '`render(<Checkout />)` then `new CheckoutPage(vitestBrowser())`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/vitest-browser/matchers`)',
+    mock: '`mock(vitestBrowser())` from `@harnessed-ts/vitest-browser/mock` before `render`; `@harnessed-ts/mock/vitest` as a setup file resets between tests',
   },
   'testing-library': {
     title: 'Testing Library / jsdom (`@harnessed-ts/dom`)',
     env: '`render(<Checkout />)` then `new CheckoutPage(dom({ user: userEvent.setup() }))`',
     assert: '`await expect(page.total).toReadAs(/^\\$/)` (`@harnessed-ts/dom/matchers`)',
+    mock: '`mock(dom({ user }))` from `@harnessed-ts/dom/mock` before `render` (with `@mswjs/interceptors` installed); `@harnessed-ts/mock/vitest` as a setup file resets between tests',
   },
   storybook: {
     title: 'Storybook (`@harnessed-ts/storybook`)',
     env: "spread `...harnessed()` into `.storybook/preview.ts` once; a story names its harness in `parameters: { harness: CheckoutHarness }` and `play: async ({ harness }) => …` receives it, each method logged as a step. From another runner, `await StoryPage.goto(pw(page), CheckoutStories, 'Default')` (`@harnessed-ts/storybook/page`), then `story.harness(CheckoutHarness)`",
     assert:
       '`await expect(harness.total).toReadAs(/^\\$/)` with `expect` from `storybook/test` — `harnessed()` registers the matchers',
+    mock: '`harnessed()` from `@harnessed-ts/storybook/mock` in the preview; a story declares `parameters: { harnessed: { mocks: [ThingsApi] } }`, and `play` gets `mocks`',
   },
   gherkin: {
     title: 'Gherkin (`@harnessed-ts/gherkin`)',
     env: 'keep pages in the scenario world, never a module-level `let`; name them with `definePages` and the `{page}` parameter type',
     assert: "the runner's own assertion style, as above, inside the step",
+    mock: '`this.mocks` on the cucumber-js world, `mocks` in a Yadda step, `withMocks(test)` for playwright-bdd, `cy.mock(…)` under Cypress',
   },
 }
 
@@ -117,7 +129,7 @@ export function allExampleFiles(): string[] {
 
 function runnerLines(runner: Runner, variants: RunnerVariants): string[] {
   const doc = RUNNER_DOCS[runner]
-  const lines = [`- Env: ${doc.env}`, `- Assert: ${doc.assert}`]
+  const lines = [`- Env: ${doc.env}`, `- Assert: ${doc.assert}`, `- Mock: ${doc.mock}`]
   if (runner === 'ember' && variants.emberUnderVitest === true) {
     lines.push(
       '- Under Vitest (`ember-vitest`): `await expect(page.total).to.readAs(/^\\$/)` (`chai.use(harnessedChai)` from `@harnessed-ts/chai` in the Vitest setup file)',

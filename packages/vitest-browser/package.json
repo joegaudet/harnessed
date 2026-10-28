@@ -42,6 +42,11 @@
       "import": "./dist/matchers.js",
       "require": "./dist/matchers.cjs"
     },
+    "./mock": {
+      "types": "./dist/mock.d.ts",
+      "import": "./dist/mock.js",
+      "require": "./dist/mock.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -55,11 +60,13 @@
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^",
     "@harnessed-ts/resolve": "workspace:^"
   },
   "peerDependencies": {
     "@testing-library/dom": ">=10",
-    "vitest": ">=4"
+    "vitest": ">=4",
+    "@mswjs/interceptors": ">=0.39"
   },
   "scripts": {
     "build": "tsup",
@@ -72,5 +79,10 @@
     "@testing-library/dom": "^10.4.2",
     "@vitest/browser": "5.0.3",
     "vitest": "^5.0.3"
+  },
+  "peerDependenciesMeta": {
+    "@mswjs/interceptors": {
+      "optional": true
+    }
   }
 }

@@ -20,10 +20,15 @@ every test unchanged with new harnesses behind it.
 - **Enter through a page.** Construct a component harness directly only in a test
   that renders the component itself (`render(<Form />)`, `cy.mount(…)`).
 - **Never cast through `unknown`** to reach a harness's internals.
+- **Mock the backend with `mock(env)`** from `@harnessed-ts/mock`, before the
+  page loads, and await every `.reply()` and `.use()`. Never the runner's own
+  `page.route(…)`, `cy.intercept(…)`, `browser.mock(…)` or `RequestMock()`: those
+  mocks only work under one runner.
 
 The test for a line of a test: if this app were rebuilt natively, would it still
 read correctly? If not, the line belongs in a harness.
 
 `@harnessed-ts/eslint-plugin` enforces this with `no-raw-locator-in-test` (in the
 directories its `testDirs` option names: `tests/`, `test/`, `e2e/`, `cypress/`,
-and `__tests__/` by default) and `no-component-harness-in-test`.
+and `__tests__/` by default), `no-component-harness-in-test`, `no-raw-intercept`
+and `await-mock-install`.

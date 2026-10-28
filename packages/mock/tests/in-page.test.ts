@@ -15,9 +15,9 @@ import { inPageTransport } from '../src/in-page'
 registerMockTransport('in-page-test', inPageTransport())
 const env = { driver: 'in-page-test' }
 
-afterEach(() => {
+afterEach(async () => {
   vi.restoreAllMocks()
-  resetMocks()
+  await resetMocks()
 })
 
 function xhr(
@@ -70,7 +70,9 @@ describe('in-page transport', () => {
     mock(env, { scope: '/api/**' })
     vi.spyOn(console, 'error').mockImplementation(() => {})
     await expect(fetch('http://localhost/api/missing')).rejects.toThrow()
-    expect(() => resetMocks()).toThrow(/no mock answered GET http:\/\/localhost\/api\/missing/)
+    await expect(resetMocks()).rejects.toThrow(
+      /no mock answered GET http:\/\/localhost\/api\/missing/,
+    )
   })
 
   it('streams chunks as they are produced', async () => {

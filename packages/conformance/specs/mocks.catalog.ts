@@ -185,6 +185,8 @@ export const mockSpecs: MockSpec[] = [
     name: 'mock: an unanswered request in scope is refused, and verify() names it',
     async run(ctx) {
       const mocks = api(ctx)
+      // Nothing registered here awaits the install, so wait for it explicitly.
+      await mocks.ready()
       const data = await screen(ctx)
       assert.equal(await data.userError(), 'Network error')
       assert.throws(() => mocks.verify(), /no mock answered GET \S*\/api\/users\/1/)
@@ -194,6 +196,7 @@ export const mockSpecs: MockSpec[] = [
     name: 'mock: a request outside scope is not policed',
     async run(ctx) {
       const mocks = api(ctx, { scope: '/api/todos' })
+      await mocks.ready()
       await (await screen(ctx)).userError()
       mocks.verify()
     },

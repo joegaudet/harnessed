@@ -131,7 +131,11 @@ export function install(options: InstallOptions = {}): InstallResult {
     write(join(root, '.claude/rules', name), renderRules(rulesTemplate, context), result, dryRun)
   }
 
-  for (const template of ['component-harness-template.ts', 'page-harness-template.ts']) {
+  for (const template of [
+    'component-harness-template.ts',
+    'page-harness-template.ts',
+    'api-harness-template.ts',
+  ]) {
     // Through `write` rather than copyFileSync, so dry-run semantics cannot
     // diverge between the rendered files and the copied ones.
     write(

@@ -12,7 +12,7 @@ import {
   text,
 } from '../src'
 import type { ApiMock, MockOptions } from '../src'
-import { currentDispatcher, jsonOf, replyOf, send, testEnv } from './helpers'
+import { currentDispatcher, disposed, jsonOf, replyOf, send, testEnv } from './helpers'
 
 let api: ApiMock
 
@@ -299,15 +299,38 @@ describe('ApiMock', () => {
     expect(await send({ url: 'http://x/api/x' })).toEqual({ kind: 'passthrough' })
   })
 
-  it('reset() clears handlers and resetMocks() resets every live mock', async () => {
+  it('reset() clears handlers but keeps intercepting', async () => {
     fresh({ onUnhandled: 'bypass' })
     await api.get('/api/x').reply(text('x'))
     await send({ url: 'http://x/api/x' })
-    resetMocks()
+    api.reset()
     expect(api.calls()).toHaveLength(0)
     expect(await send({ url: 'http://x/api/x' })).toEqual({ kind: 'passthrough' })
     // An unanswered request is still logged, with no handler.
     expect(api.calls()).toMatchObject([{ url: 'http://x/api/x', handler: undefined }])
+  })
+
+  it('resetMocks() ends every live mock, and the next mock(env) starts afresh', async () => {
+    const env = testEnv()
+    const first = mock(env, { latency: 5 })
+    await first.get('/api/x').reply(text('x'))
+    const before = disposed.length
+    await resetMocks()
+    expect(disposed.length).toBe(before + 1)
+    const second = mock(env)
+    expect(second).not.toBe(first)
+    await second.ready()
+    expect(await send({ url: 'http://x/api/x' })).toMatchObject({ kind: 'error' })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    api = second
+    expect(() => second.verify()).toThrow(/No handlers are registered/)
+  })
+
+  it('resetMocks() reports what a mock left unverified', async () => {
+    fresh()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    await send({ url: 'http://x/api/unanswered' })
+    await expect(resetMocks()).rejects.toThrow(/no mock answered GET http:\/\/x\/api\/unanswered/)
   })
 
   it('reads file() replies from disk', async () => {

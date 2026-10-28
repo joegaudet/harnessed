@@ -1,9 +1,10 @@
-import { pageSpecs, specs } from '@harnessed-ts/conformance'
+import { mockSpecs, pageSpecs, specs } from '@harnessed-ts/conformance'
 import type { ConformanceCtx } from '@harnessed-ts/conformance'
 import { dom } from '@harnessed-ts/dom'
+import { resetMocks } from '@harnessed-ts/storybook/mock'
 import { composeStories, setProjectAnnotations } from '@storybook/react-vite'
 import userEvent from '@testing-library/user-event'
-import { describe, it } from 'vitest'
+import { afterEach, describe, it } from 'vitest'
 import preview from '../.storybook/preview'
 import * as ViewStories from '../stories/Views.stories'
 import { STORY_FOR } from './views'
@@ -31,4 +32,13 @@ describe('conformance: portable stories', () => {
       await spec.run(context())
     })
   }
+  // Mocked in the preview's own realm, the way `parameters.harnessed.mocks` is.
+  for (const spec of mockSpecs) {
+    it(spec.name, async () => {
+      await spec.run({ ...context(), env: () => dom({ user: userEvent.setup() }) })
+    })
+  }
 })
+
+// The preview outlives a test: anything a spec left unverified fails it.
+afterEach(() => resetMocks())

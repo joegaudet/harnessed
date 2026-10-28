@@ -14,5 +14,11 @@ export default defineConfig({
   sourcemap: true,
   clean: false,
   treeshake: true,
-  external: ['@harnessed-ts/core', '@playwright/test', '@cucumber/cucumber', 'yadda'],
+  external: [
+    '@harnessed-ts/core',
+    '@harnessed-ts/mock',
+    '@playwright/test',
+    '@cucumber/cucumber',
+    'yadda',
+  ],
 })

@@ -82,7 +82,7 @@ function shimSockets(win: Window): void {
 let hooked = false
 
 /**
- * Registers the catch-all intercept before each test, and resets every mock
+ * Registers the catch-all intercept before each test, and ends every mock
  * after it, reporting anything left unverified as that test's failure.
  * Importing `@harnessed-ts/cypress/mock` calls it; it runs once however many
  * times it is imported.
@@ -93,18 +93,16 @@ export function registerMockHooks(): void {
   beforeEach(() => {
     interceptAll()
   })
-  // The mock outlives the test (it is keyed by the AUT window, which does), so
-  // its dispatcher stays live; resetting clears what the test registered.
-  afterEach(() => {
-    resetMocks()
-  })
+  // Mocha waits for the returned promise; no cy command is enqueued here.
+  afterEach(() => resetMocks())
   Cypress.on('window:before:load', shimSockets)
 }
 
 registerMockTransport(CYPRESS_DRIVER, {
   // Buffered: `req.reply` sends the body in one piece.
   capabilities: { streaming: false, websockets: true, harRecord: false },
-  // The AUT window is one object for the whole run; mocks are reset per test.
+  // The AUT window is one object for the whole run; each test's mock is ended
+  // after it, so the next test's `mock(env)` starts a fresh one.
   key: env => (env as CypressEnv).window,
   async install(env, dispatcher): Promise<InstalledTransport> {
     if (!hooked) {

@@ -1,7 +1,7 @@
 import { mockSpecs, mockUrlSpecs, pageSpecs, specs, urlSpecs } from '@harnessed-ts/conformance'
 import type { ConformanceCtx } from '@harnessed-ts/conformance'
 import { wdio } from '@harnessed-ts/webdriverio'
-import { existingMock, mock, resetMocks } from '@harnessed-ts/webdriverio/mock'
+import { mock, resetMocks } from '@harnessed-ts/webdriverio/mock'
 import { browser } from '@wdio/globals'
 import { show } from './stage'
 
@@ -59,10 +59,7 @@ describe('conformance: webdriverio driver', () => {
     })
   }
 
-  // The browser outlives a test: anything a spec left unverified fails it.
-  afterEach(async () => {
-    resetMocks()
-    // Over Classic the refused mock is dropped, so the next spec asks again.
-    if (!browser.isBidi) await existingMock(wdio(browser))?.dispose()
-  })
+  // The browser outlives a test: anything a spec left unverified fails it, and
+  // the next spec starts without interception.
+  afterEach(() => resetMocks())
 })

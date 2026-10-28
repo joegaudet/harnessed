@@ -1,6 +1,8 @@
 import { World } from '@cucumber/cucumber'
 import type { IWorldOptions } from '@cucumber/cucumber'
 import type { EnvConfig } from '@harnessed-ts/core'
+import { mock } from '@harnessed-ts/mock'
+import type { ApiMock } from '@harnessed-ts/mock'
 import { createWorld } from './index'
 import type { PageMap, PageRegistry } from './index'
 
@@ -45,6 +47,23 @@ export class HarnessedWorld<
 
   constructor(options: IWorldOptions) {
     super(options)
+  }
+
+  /**
+   * The API mock for the scenario's env — `mock(this.env)`. End it after each
+   * scenario: `After(() => resetMocks())`.
+   *
+   * ```ts
+   * Given('the API has no users', async function (this: AppWorld) {
+   *   await this.mocks.get('/api/users').reply([])
+   * })
+   * ```
+   */
+  get mocks(): ApiMock {
+    if (this.env === undefined) {
+      throw new Error('harnessed: this world has no env yet. Set `this.env` in a Before hook.')
+    }
+    return mock(this.env)
   }
 
   /** Constructs a registered page with the scenario's env. */

@@ -98,6 +98,12 @@ export default tseslint.config(
     },
   },
   {
+    // The drivers are where each runner's own interception belongs: they build
+    // `mock(env)` on it. `packages/cypress` would otherwise read as a test dir.
+    files: ['packages/*/src/**'],
+    rules: { 'harnessed/no-raw-intercept': 'off' },
+  },
+  {
     // errorQuery and lastMissing hand out a Query on purpose: the matcher specs
     // assert against a target directly, and last() on an empty set is a
     // guarantee of its own. A consumer's harness has no such reason.

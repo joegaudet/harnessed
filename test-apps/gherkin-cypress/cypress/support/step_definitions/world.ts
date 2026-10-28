@@ -1,15 +1,17 @@
 import { defineParameterType, Given, Then, When } from '@badeball/cypress-cucumber-preprocessor'
 import type { StepOnePage, StepTwoPage } from '@harnessed-ts/conformance'
-import { WizardPage } from '@harnessed-ts/conformance'
+import { DataPage, WizardPage } from '@harnessed-ts/conformance'
 import { definePages, pageParameter } from '@harnessed-ts/gherkin'
 import { cypressWorld } from '@harnessed-ts/gherkin/cypress'
+import { json } from '@harnessed-ts/cypress/mock'
 
-const pages = definePages({ wizard: WizardPage })
+const pages = definePages({ wizard: WizardPage, data: DataPage })
 defineParameterType(pageParameter(pages))
 type PageName = (typeof pages.names)[number]
 
 interface World {
   wizard: WizardPage
+  data: DataPage
   step: StepOnePage | StepTwoPage
 }
 
@@ -25,11 +27,25 @@ Given('the world is empty', () => {
 // Harness calls are promises, so they run inside the bridge: one command each.
 When('I open the {page} page', (name: PageName) => {
   cy.harnessEnv(async env => {
+    if (name === 'data') {
+      const data = pages.open(name, env)
+      await data.goto()
+      world().data = data
+      return
+    }
     const wizard = pages.open(name, env)
     await wizard.goto()
     world().wizard = wizard
     world().step = wizard.stepOne
   })
+})
+
+Given('the API answers the user as {string}', (name: string) => {
+  cy.mock(api => api.get('/api/users/:id').reply(json({ name })))
+})
+
+Then('the user shows {string}', (name: string) => {
+  cy.harnessEnv(() => world().data!.screen.userName()).should('eq', name)
 })
 
 Then('the wizard shows {string}', (heading: string) => {

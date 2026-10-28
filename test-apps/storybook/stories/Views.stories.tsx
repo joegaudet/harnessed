@@ -32,3 +32,4 @@ export const Cards: Story = { args: { view: 'cards' } }
 export const Dialog: Story = { args: { view: 'dialog' } }
 export const Frame: Story = { args: { view: 'frame' } }
 export const Wizard: Story = { args: { view: 'wizard' } }
+export const Data: Story = { args: { view: 'data' } }

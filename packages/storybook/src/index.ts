@@ -1,6 +1,7 @@
 import { getConfig, harnessMatchers, testIdPresenceSelector } from '@harnessed-ts/core'
 import type { Assertable, ScopedHarness, ScopedHarnessConstructor } from '@harnessed-ts/core'
 import { dom } from '@harnessed-ts/dom'
+import type { DomEnv } from '@harnessed-ts/dom'
 import type { UserEvent } from '@testing-library/user-event'
 import { PLAY_FUNCTION_THREW_EXCEPTION } from 'storybook/internal/core-events'
 import { addons } from 'storybook/preview-api'
@@ -16,11 +17,21 @@ export type { StepRunner } from './steps'
 /** What `harnessed()` reads from, and adds to, Storybook's story context. */
 export interface HarnessedContext {
   canvasElement: HTMLElement
-  parameters: { harness?: ScopedHarnessConstructor }
+  parameters: { harness?: ScopedHarnessConstructor; harnessed?: Record<string, unknown> }
   userEvent?: unknown
   step: StepRunner
   harness?: ScopedHarness
 }
+
+/**
+ * A hook `harnessed()` runs before each story with the story's env, returning
+ * what to run before the next one. `@harnessed-ts/storybook/mock` passes one
+ * that installs `parameters.harnessed.mocks`; this entry needs none of it.
+ */
+export type StoryHook = (
+  context: HarnessedContext,
+  env: DomEnv,
+) => Promise<(() => Promise<void>) | void>
 
 let matchersRegistered = false
 let listening = false
@@ -54,8 +65,8 @@ function listenForPlayErrors(): void {
  * instrumented `userEvent` with each method logged as a step. The harness
  * matchers are added to `storybook/test`'s `expect`.
  */
-export function harnessed(): {
-  beforeEach: (context: HarnessedContext) => Promise<void>
+export function harnessed(hook?: StoryHook): {
+  beforeEach: (context: HarnessedContext) => Promise<(() => Promise<void>) | void>
   afterEach: (context: HarnessedContext) => Promise<void>
 } {
   if (!matchersRegistered) {
@@ -67,15 +78,18 @@ export function harnessed(): {
       readyMarker(context.canvasElement.ownerDocument)?.remove()
       listenForPlayErrors()
       playError = undefined
-      const HarnessClass = context.parameters.harness
-      if (HarnessClass === undefined) return
       const env = dom({
         // Storybook's own instance, so each keystroke shows up in the panel. It
         // is only set where a clipboard exists; fall back to a plain one.
         user: (hasClick(context.userEvent) ? context.userEvent : userEvent.setup()) as UserEvent,
         container: context.canvasElement,
       })
-      context.harness = withSteps(new HarnessClass(env), context.step)
+      // Before the story renders, so anything it fetches as it mounts is seen.
+      const cleanup = await hook?.(context, env)
+      const HarnessClass = context.parameters.harness
+      if (HarnessClass !== undefined)
+        context.harness = withSteps(new HarnessClass(env), context.step)
+      return cleanup ?? undefined
     },
     async afterEach(context: HarnessedContext) {
       const document = context.canvasElement.ownerDocument

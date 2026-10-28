@@ -835,19 +835,22 @@ export function mock<State = unknown>(
 }
 
 /**
- * Resets every live mock, reporting what `verify()` would. Put it in an
- * after-each hook for runners whose network outlives a test — jsdom, Ember,
- * Vitest browser, WebdriverIO:
+ * Ends every live mock: interception stops, handlers and state are dropped,
+ * and anything `verify()` would report fails the test. The next `mock(env)`
+ * starts afresh — so a test that mocks nothing is never policed by one that
+ * did. Put it in an after-each hook:
  *
  * ```ts
  * afterEach(() => resetMocks())
  * ```
+ *
+ * Within a test, `api.reset()` clears handlers but keeps intercepting.
  */
-export function resetMocks(): void {
+export async function resetMocks(): Promise<void> {
   const errors: Error[] = []
-  for (const api of globals().live) {
+  for (const api of [...globals().live]) {
     try {
-      api.reset()
+      await api.dispose()
     } catch (error) {
       errors.push(error as Error)
     }
