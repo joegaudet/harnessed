@@ -47,12 +47,12 @@ function interceptAll(): void {
     if (dispatcher === undefined) return
     const key = `${request.method} ${request.url}`
     const abortedAt = aborted.get(key)
-    if (abortedAt !== undefined) {
-      aborted.delete(key)
-      if (Date.now() - abortedAt < RESEND_WINDOW_MS) {
-        request.destroy()
-        return
-      }
+    if (abortedAt !== undefined && Date.now() - abortedAt < RESEND_WINDOW_MS) {
+      // Aborting the resend closes the connection again, and the browser may
+      // resend again (Electron does several times), so each one renews the mark.
+      aborted.set(key, Date.now())
+      request.destroy()
+      return
     }
     const raw: RawRequest = {
       method: request.method,
