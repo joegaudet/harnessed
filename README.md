@@ -62,19 +62,23 @@ Inspired by [Angular CDK Component Harnesses][cdk],
 
 ## Support matrix
 
-| Runner                                                 | Package          | Component harnesses    | Pages and `goto()`                            | Assertions                | Gherkin                                            | Frames                           | Conformance in CI                  |
-| ------------------------------------------------------ | ---------------- | ---------------------- | --------------------------------------------- | ------------------------- | -------------------------------------------------- | -------------------------------- | ---------------------------------- |
-| [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin                      | ✓ React, Vue, Solid, Svelte        |
-| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                      | ✓                                             | `expect` matchers         | [playwright-bdd, cucumber-js](#using-with-gherkin) | cross-origin                     | ✓ React, Ember, Vue, Solid, Svelte |
-| [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests      | ✓ application tests                           | `assert.harness`          | [ember-cli-yadda](#ember-cli-yadda)                | same-origin                      | ✓                                  |
-| [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                      | ✓ application tests                           | Chai                      | —                                                  | same-origin                      | ✓                                  |
-| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness` | ✓ `cy.visitPage`                              | Chai                      | [Cypress cucumber](#cypress-cucumber)              | same-origin                      | ✓ React and Ember                  |
-| [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness` | constructs; no navigation                     | Chai                      | —                                                  | same-origin                      | ✓ React, Vue, Svelte               |
-| [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                      | ✓                                             | `expect` matchers, Chai   | —                                                  | cross-origin                     | ✓ BiDi and Classic                 |
-| [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                      | constructs; no navigation                     | `expect` matchers         | —                                                  | same-origin, Playwright provider | ✓ React, Vue, Solid, Svelte        |
-| [Puppeteer](#using-with-puppeteer)                     | `puppeteer`      | ✓                      | ✓                                             | `expect` matchers         | —                                                  | cross-origin                     | ✓                                  |
-| [TestCafe](#using-with-testcafe)                       | `testcafe`       | ✓                      | ✓                                             | `t.expect`, Chai          | —                                                  | same-origin                      | ✓                                  |
-| [Storybook](#using-with-storybook)                     | `storybook`      | ✓ in `play()`          | ✓ `StoryPage`, from any runner that navigates | `storybook/test` `expect` | —                                                  | same-origin                      | ✓ React                            |
+| Runner                                                 | Package          | Component harnesses             | Pages and `goto()`                            | Assertions                | Gherkin                                                     | Frames                           | Conformance in CI                                         |
+| ------------------------------------------------------ | ---------------- | ------------------------------- | --------------------------------------------- | ------------------------- | ----------------------------------------------------------- | -------------------------------- | --------------------------------------------------------- |
+| [Testing Library](#using-with-testing-library) (jsdom) | `dom`            | ✓                               | constructs; no navigation                     | `expect` matchers         | —                                                           | same-origin                      | ✓ React, Vue, Solid, Svelte                               |
+| [Playwright](#using-with-playwright)                   | `playwright`     | ✓                               | ✓                                             | `expect` matchers         | [playwright-bdd, cucumber-js](#using-with-gherkin)          | cross-origin                     | ✓ React, Ember, Vue, Solid, Svelte, Angular               |
+| [Ember](#using-with-ember): ember-qunit, ember-exam    | `ember`          | ✓ rendering tests               | ✓ application tests                           | `assert.harness`          | [ember-cli-yadda](#ember-cli-yadda)                         | same-origin                      | ✓                                                         |
+| [Ember](#using-with-ember): Vitest browser             | `ember`          | ✓                               | ✓ application tests                           | Chai                      | —                                                           | same-origin                      | ✓                                                         |
+| [Cypress](#using-with-cypress) e2e                     | `cypress`        | ✓ through `cy.harness`          | ✓ `cy.visitPage`                              | Chai                      | [Cypress cucumber](#cypress-cucumber)                       | same-origin                      | ✓ React and Ember                                         |
+| [Cypress](#using-with-cypress) component               | `cypress`        | ✓ through `cy.harness`          | constructs; no navigation                     | Chai                      | —                                                           | same-origin                      | ✓ React, Vue, Svelte                                      |
+| [Angular](#using-with-angular): Vitest, Vitest browser | `angular`        | ✓ TestBed or a bootstrapped app | ✓ with a provided router                      | `expect` matchers         | —                                                           | same-origin                      | ✓                                                         |
+| [WebdriverIO](#using-with-webdriverio)                 | `webdriverio`    | ✓                               | ✓                                             | `expect` matchers, Chai   | —                                                           | cross-origin                     | ✓ BiDi and Classic                                        |
+| [Vitest browser mode](#using-with-vitest-browser-mode) | `vitest-browser` | ✓                               | constructs; no navigation                     | `expect` matchers         | —                                                           | same-origin, Playwright provider | ✓ React, Vue, Solid, Svelte                               |
+| [Nightwatch](#using-with-nightwatch)                   | `nightwatch`     | ✓                               | ✓                                             | Chai                      | [Nightwatch cucumber](#gherkin-nightwatchs-cucumber-runner) | cross-origin                     | ✓ Chrome and Firefox, two runners; component (React, Vue) |
+| [node:test](#using-with-nodetest)                      | `dom`            | ✓                               | constructs; no navigation                     | Chai                      | —                                                           | same-origin                      | ✓                                                         |
+| [Bun test](#using-with-bun)                            | `dom`            | ✓                               | constructs; no navigation                     | `expect` matchers         | —                                                           | same-origin                      | ✓ happy-dom                                               |
+| [Puppeteer](#using-with-puppeteer)                     | `puppeteer`      | ✓                               | ✓                                             | `expect` matchers         | —                                                           | cross-origin                     | ✓                                                         |
+| [TestCafe](#using-with-testcafe)                       | `testcafe`       | ✓                               | ✓                                             | `t.expect`, Chai          | —                                                           | same-origin                      | ✓                                                         |
+| [Storybook](#using-with-storybook)                     | `storybook`      | ✓ in `play()`                   | ✓ `StoryPage`, from any runner that navigates | `storybook/test` `expect` | —                                                           | same-origin                      | ✓ React                                                   |
 
 Every package is `@harnessed-ts/<name>`. "Conformance" means the shared catalog in
 `packages/conformance` runs, unchanged, under that runner on every pull request —
@@ -97,14 +101,14 @@ A harness queries the DOM, not a framework, so nothing in one is tied to React
 or Ember. What earns a ✓ here is a fixture written in that framework and a
 conformance run against it.
 
-| Framework | Status      | Covered by                                                                                                                                                                                                                                                                                                                                         |
-| --------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| React     | ✓           | The conformance fixture, `packages/conformance/fixture`, is a React app. Every runner above except Ember's drives it.                                                                                                                                                                                                                              |
-| Ember     | ✓           | A Glimmer copy of that fixture in `test-apps/ember-vite` and `test-apps/ember-classic`, held to the React fixture's markup by a fixture-parity test. ember-qunit, ember-exam and Vitest browser run the catalog against it, and Playwright and Cypress e2e run it against the built app (`test-apps/playwright-ember`, `test-apps/cypress-ember`). |
-| Vue       | ✓           | A Vue 3.5 port in `test-apps/vue`, held to the React fixture by the same parity test. Testing Library (`@testing-library/vue`), Vitest browser mode, Cypress component and Playwright (`test-apps/playwright-frameworks`) run the catalog against it. See [Using with Vue](#using-with-vue).                                                       |
-| Solid     | ✓           | A Solid port in `test-apps/solid`: Testing Library (`@solidjs/testing-library`), Vitest browser mode and Playwright. Cypress has no official Solid mount, so no component run. See [Using with Solid](#using-with-solid).                                                                                                                          |
-| Svelte    | ✓           | A Svelte 5 port in `test-apps/svelte`: Testing Library (`@testing-library/svelte`), Vitest browser mode, Cypress component and Playwright. See [Using with Svelte](#using-with-svelte).                                                                                                                                                            |
-| Angular   | coming soon | Harnesses are framework-agnostic, but Angular has no fixture or conformance run yet.                                                                                                                                                                                                                                                               |
+| Framework | Status | Covered by                                                                                                                                                                                                                                                                                                                                         |
+| --------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React     | ✓      | The conformance fixture, `packages/conformance/fixture`, is a React app. Every runner above except Ember's drives it.                                                                                                                                                                                                                              |
+| Ember     | ✓      | A Glimmer copy of that fixture in `test-apps/ember-vite` and `test-apps/ember-classic`, held to the React fixture's markup by a fixture-parity test. ember-qunit, ember-exam and Vitest browser run the catalog against it, and Playwright and Cypress e2e run it against the built app (`test-apps/playwright-ember`, `test-apps/cypress-ember`). |
+| Vue       | ✓      | A Vue 3.5 port in `test-apps/vue`, held to the React fixture by the same parity test. Testing Library (`@testing-library/vue`), Vitest browser mode, Cypress component and Playwright (`test-apps/playwright-frameworks`) run the catalog against it. See [Using with Vue](#using-with-vue).                                                       |
+| Solid     | ✓      | A Solid port in `test-apps/solid`: Testing Library (`@solidjs/testing-library`), Vitest browser mode and Playwright. Cypress has no official Solid mount, so no component run. See [Using with Solid](#using-with-solid).                                                                                                                          |
+| Svelte    | ✓      | A Svelte 5 port in `test-apps/svelte`: Testing Library (`@testing-library/svelte`), Vitest browser mode, Cypress component and Playwright. See [Using with Svelte](#using-with-svelte).                                                                                                                                                            |
+| Angular   | ✓      | A zoneless, standalone Angular port in `test-apps/angular`, built with the Analog Vite plugin. The [`angular` driver](#using-with-angular) runs the catalog under Vitest on jsdom and in Vitest browser mode, Playwright runs it against the built app, and Cypress component testing mounts it.                                                   |
 
 ## See it run
 
@@ -165,6 +169,8 @@ npm i -D @harnessed-ts/webdriverio     # WebdriverIO 10
 npm i -D @harnessed-ts/vitest-browser  # Vitest browser mode
 npm i -D @harnessed-ts/puppeteer       # Puppeteer
 npm i -D @harnessed-ts/testcafe        # TestCafe
+npm i -D @harnessed-ts/nightwatch      # Nightwatch 3: e2e and component tests
+npm i -D @harnessed-ts/angular         # Angular 21+, zoneless: TestBed or a bootstrapped app
 npm i -D @harnessed-ts/page            # page objects: screens composed of harnesses
 npm i -D @harnessed-ts/gherkin         # Gherkin: world, page registry, {page}
 
@@ -773,6 +779,161 @@ files go straight to the Svelte plugin. Content `mount()`ed into
 `document.body` is reachable from a `{ global: true }` field. In Vitest browser
 mode, `await render(LoginForm)` from `vitest-browser-svelte`.
 
+## Using with Angular
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/angular @testing-library/dom @testing-library/user-event
+```
+
+Zoneless, standalone, Angular 21 and later. Build envs with `angular()`: queries
+resolve through the shared resolver, interactions go through user-event, and
+every action returns once the app is stable — `fixture.whenStable()`, or the
+`ApplicationRef`'s for an app bootstrapped without TestBed:
+
+```ts
+import { angular } from '@harnessed-ts/angular'
+import { render } from '@testing-library/angular/zoneless' // or TestBed
+
+const { fixture } = await render(LoginForm)
+const form = new LoginFormHarness(angular({ fixture }))
+await form.signInAs('ada@example.com', 'hunter2')
+
+// with provideRouter(): goto() drives the router
+const page = new CheckoutPage(angular({ fixture }))
+await page.goto({ token })
+
+// an app bootstrapped without TestBed
+const app = await bootstrapApplication(AppComponent, config)
+const shell = new ShellPage(angular({ app }))
+```
+
+**Two kinds of decorators.** `@Component` needs `experimentalDecorators`;
+harnesses use standard ones. Split them by file name, in the build and in the
+type-check:
+
+```ts
+// vite.config.ts (and vitest.config.ts), with @analogjs/vite-plugin-angular
+const HARNESS_FILES = /\.(harness|page)\.ts$/
+
+plugins: [
+  harnessedDecorators({ include: HARNESS_FILES }), // first
+  angular({ transformFilter: (_code, id) => !HARNESS_FILES.test(id) }), // leaves them alone
+]
+```
+
+```jsonc
+// tsconfig.app.json — experimentalDecorators on, harness files out
+{ "exclude": ["src/**/*.harness.ts", "src/**/*.page.ts"] }
+
+// tsconfig.harness.json — standard decorators, harness and spec files
+{ "extends": "@harnessed-ts/core/tsconfig.json", "include": ["src/**/*.harness.ts", "src/**/*.page.ts", "tests"] }
+```
+
+A harness may import an app module that uses Angular's decorators, and an app
+component may sit beside a harness: `test-apps/angular/src/app/boundary/` proves
+both. Under Vitest without globals, import `@angular/compiler` in a setup file
+(Angular ships partially compiled) and call `getTestBed().resetTestingModule()`
+in an `afterEach`.
+
+Matchers: `import '@harnessed-ts/dom/matchers'` in the Vitest setup file
+registers `toBeAbsent`, `toBeSelected` and `toReadAs` with Vitest's `expect`; they
+read through the public `Query` surface, so they work on the `angular` driver's
+targets too.
+
+Where Angular differs: queries and `{ global: true }` start at `document.body`,
+where CDK overlays land; `isVisible()` is a layout check in a browser and a
+style check under jsdom; `whenStable()` does not wait for a bare `setTimeout`;
+`goto()` and the URL members need a provided router, and refuse before its first
+navigation.
+
+**Angular CDK harnesses.** `@angular/cdk/testing` has component harnesses of its
+own: Angular-only, and suited to component libraries tested under TestBed. A
+harnessed harness runs unchanged under every runner and framework above. The two
+do not interoperate; pick per suite.
+
+## Using with Nightwatch
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/nightwatch @harnessed-ts/chai chai # Nightwatch 3
+```
+
+Build the env from Nightwatch's `browser` and hand it to any harness or page.
+Assert with `@harnessed-ts/chai`, on Chai's own `expect`, not the `expect`
+global Nightwatch installs for its element assertions. The same spec runs under
+Nightwatch's own runner and under its Mocha runner (`test_runner: { type: 'mocha' }`):
+
+```ts
+import { harnessedChai } from '@harnessed-ts/chai'
+import { nightwatch } from '@harnessed-ts/nightwatch'
+import * as chai from 'chai'
+
+chai.use(harnessedChai)
+
+describe('sign in', function () {
+  it('signs in', async function () {
+    const login = new LoginPage(nightwatch(browser))
+    await login.goto() // browser.navigateTo(), resolved against launch_url
+    await login.form.signInAs('ada@example.com', 'hunter2')
+    await chai.expect(login.form.errorBanner).to.be.absent
+  })
+})
+```
+
+The shared resolver is injected into each document on first use, through
+selenium-webdriver's `executeScript` on `browser.driver`, and `testIdAttribute`
+travels with every call. Actions are the WebElement's and the Actions API's.
+Differences from the other drivers:
+
+- **Frames** are entered with `switchTo().frame()` and left afterwards, so
+  cross-origin frames work.
+- **`isVisible()`** is the shared layout check made in the page (Playwright's
+  rule), not selenium's `isDisplayed()`: `opacity: 0` is visible.
+- **`currentUrl`** is the top-level URL as of the driver's last round-trip.
+  After an in-app navigation, `await page.assertPathname(...)` before reading it.
+- **`goto()`** resolves a relative path against `launch_url`. Without one it is refused.
+- **`press()`** takes Playwright's key names and `+` chords.
+- **`upload()`** writes each file to disk first: the browser must share the
+  test's file system.
+
+### Component testing
+
+`@nightwatch/react` and `@nightwatch/vue` mount a component through Vite. Mount,
+then build the env as in e2e:
+
+```ts
+await browser.mountComponent('/src/LoginForm.tsx')
+const form = new LoginFormHarness(nightwatch(browser))
+```
+
+Under React 19, point the plugin's generated mount script at `react-dom/client`
+(see `test-apps/nightwatch-ct/vite.react.config.ts`): `@nightwatch/react` 3.1
+otherwise falls back to `ReactDOM.render`, which React 19 removed.
+`@nightwatch/vue` imports `@vue/test-utils` from the app's own `node_modules`, so
+install it there.
+
+### Gherkin (Nightwatch's Cucumber runner)
+
+Nightwatch launches a browser per scenario in its own `Before`.
+`Before(nightwatchEnv)` turns it into the world's env:
+
+```ts
+import { Before, setWorldConstructor, When } from '@cucumber/cucumber'
+import { definePages } from '@harnessed-ts/gherkin'
+import { HarnessedWorld, nightwatchEnv } from '@harnessed-ts/gherkin/nightwatch'
+
+const pageMap = { checkout: CheckoutPage }
+class AppWorld extends HarnessedWorld<{ checkout: CheckoutPage }, typeof pageMap> {
+  override pages = definePages(pageMap)
+}
+setWorldConstructor(AppWorld)
+Before(nightwatchEnv)
+
+When('I open the {page} page', async function (this: AppWorld, name: 'checkout') {
+  this.bag.checkout = this.open(name)
+  await this.bag.checkout.goto()
+})
+```
+
 ## Using with Playwright
 
 ```bash
@@ -1253,6 +1414,9 @@ export const pages = definePages({ checkout: CheckoutPage })
 defineParameterType(pageParameter(pages)) // the runner's own defineParameterType
 ```
 
+Nightwatch's Cucumber runner has an adapter too, `@harnessed-ts/gherkin/nightwatch`:
+see [Gherkin (Nightwatch's Cucumber runner)](#gherkin-nightwatchs-cucumber-runner).
+
 ### playwright-bdd
 
 `withWorld` adds a `world` fixture to playwright-bdd's `test`. A fixture is
@@ -1463,8 +1627,10 @@ config alone.
 | `@harnessed-ts/webdriverio`    | WebdriverIO driver + matchers over the injected resolver; BiDi and Classic, cross-origin frames                                                                  |
 | `@harnessed-ts/cypress`        | Cypress driver: the `cy.harness` bridge and `cy.visitPage`, e2e and component testing                                                                            |
 | `@harnessed-ts/testcafe`       | TestCafe driver over the injected resolver                                                                                                                       |
+| `@harnessed-ts/nightwatch`     | Nightwatch driver over the injected resolver; Nightwatch and Mocha runners, component testing, cross-origin frames                                               |
+| `@harnessed-ts/angular`        | Angular driver: every action settles at `whenStable()`; TestBed fixtures or a bootstrapped app, router navigation                                                |
 | `@harnessed-ts/storybook`      | `harnessed()` for Storybook's preview: a harness in every play function, each method a step, the matchers on its `expect`; `StoryPage` opens stories as fixtures |
-| `@harnessed-ts/gherkin`        | Gherkin: a scenario-scoped world, a typed page registry and `{page}`; adapters for playwright-bdd, cucumber-js, Cypress cucumber and ember-cli-yadda             |
+| `@harnessed-ts/gherkin`        | Gherkin: a scenario-scoped world, a typed page registry and `{page}`; adapters for playwright-bdd, cucumber-js, Cypress cucumber, ember-cli-yadda and Nightwatch |
 | `@harnessed-ts/qunit`          | `assert.harness(x)` checks for QUnit and ember-qunit                                                                                                             |
 | `@harnessed-ts/chai`           | `expect(x).to.be.absent` and friends for Chai: Mocha, Cypress, WebdriverIO                                                                                       |
 | `@harnessed-ts/page`           | `PageHarness`                                                                                                                                                    |
@@ -1529,19 +1695,21 @@ Node ≥ 22.12 (≥ 22.19 for `@harnessed-ts/webdriverio`, WebdriverIO 10's own 
 and TypeScript ≥ 5.2. Published as ESM and CJS. Each driver's runner is a peer
 dependency, with these floors:
 
-| Package                        | Peer floor                                                                                                        |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `@harnessed-ts/dom`            | `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14                                                   |
-| `@harnessed-ts/playwright`     | `@playwright/test` ≥ 1.43                                                                                         |
-| `@harnessed-ts/ember`          | `@ember/test-helpers` ≥ 5 (Ember 5.12 and later), `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14 |
-| `@harnessed-ts/cypress`        | `cypress` ≥ 13, `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14                                   |
-| `@harnessed-ts/webdriverio`    | `webdriverio` ≥ 10                                                                                                |
-| `@harnessed-ts/vitest-browser` | `vitest` ≥ 4, `@testing-library/dom` ≥ 10                                                                         |
-| `@harnessed-ts/puppeteer`      | `puppeteer` ≥ 24                                                                                                  |
-| `@harnessed-ts/testcafe`       | `testcafe` ≥ 3                                                                                                    |
-| `@harnessed-ts/gherkin`        | the adapter's runner: `@cucumber/cucumber` ≥ 10, `yadda` ≥ 3, …                                                   |
-| `@harnessed-ts/core/babel`     | Babel ≥ 7.24 < 8, with the decorator and TypeScript plugins                                                       |
-| `@harnessed-ts/qunit`, `chai`  | `qunit` ≥ 2.19, `chai` ≥ 4                                                                                        |
+| Package                        | Peer floor                                                                                                                  |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `@harnessed-ts/dom`            | `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14                                                             |
+| `@harnessed-ts/playwright`     | `@playwright/test` ≥ 1.43                                                                                                   |
+| `@harnessed-ts/ember`          | `@ember/test-helpers` ≥ 5 (Ember 5.12 and later), `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14           |
+| `@harnessed-ts/cypress`        | `cypress` ≥ 13, `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14                                             |
+| `@harnessed-ts/webdriverio`    | `webdriverio` ≥ 10                                                                                                          |
+| `@harnessed-ts/vitest-browser` | `vitest` ≥ 4, `@testing-library/dom` ≥ 10                                                                                   |
+| `@harnessed-ts/puppeteer`      | `puppeteer` ≥ 24                                                                                                            |
+| `@harnessed-ts/testcafe`       | `testcafe` ≥ 3                                                                                                              |
+| `@harnessed-ts/nightwatch`     | `nightwatch` ≥ 3                                                                                                            |
+| `@harnessed-ts/angular`        | `@angular/core`, `@angular/common`, `@angular/router` ≥ 21, `@testing-library/dom` ≥ 10, `@testing-library/user-event` ≥ 14 |
+| `@harnessed-ts/gherkin`        | the adapter's runner: `@cucumber/cucumber` ≥ 10, `yadda` ≥ 3, …                                                             |
+| `@harnessed-ts/core/babel`     | Babel ≥ 7.24 < 8, with the decorator and TypeScript plugins                                                                 |
+| `@harnessed-ts/qunit`, `chai`  | `qunit` ≥ 2.19, `chai` ≥ 4                                                                                                  |
 
 ## Contributing
 

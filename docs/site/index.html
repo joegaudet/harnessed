@@ -66,9 +66,10 @@
           </h1>
           <p class="hero-sub">
             Like page objects, but for components too. One harness API for Testing Library,
-            Playwright, Cypress, WebdriverIO, Vitest browser mode, Puppeteer, TestCafe and Ember,
-            with Gherkin on top and Storybook play functions beside. The same class drives a fast
-            jsdom unit test, a story, and a real-browser end-to-end test.
+            node:test, Bun, Playwright, Cypress, WebdriverIO, Nightwatch, Vitest browser mode,
+            Puppeteer, TestCafe, Ember and Angular, over React, Vue, Solid and Svelte alike, with
+            Gherkin on top and Storybook play functions beside. The same class drives a fast jsdom
+            unit test, a story, and a real-browser end-to-end test.
           </p>
           <div class="hero-actions">
             <a href="https://github.com/joegaudet/harnessed#install" role="button">Get started</a>
@@ -145,7 +146,7 @@
             <use href="#rope-1" />
             <use href="#rope-2" />
             <use href="#rope-3" />
-            <use href="#rope-4" class="todo" />
+            <use href="#rope-4" />
             <use href="#rope-5" />
             <use href="#rope-6" />
             <use href="#rope-7" />
@@ -157,7 +158,7 @@
             <use href="#rope-13" />
             <use href="#rope-14" />
             <use href="#rope-15" />
-            <use href="#rope-16" class="todo" />
+            <use href="#rope-16" />
             <use href="#rope-17" class="todo" />
             <use href="#rope-18" />
             <use href="#rope-g" class="gherkin" />
@@ -180,6 +181,8 @@
             <use href="#rope-2" style="--i: 13" />
             <use href="#rope-3" style="--i: 14" />
             <use href="#rope-5" style="--i: 15" />
+            <use href="#rope-4" style="--i: 16" />
+            <use href="#rope-16" style="--i: 17" />
           </g>
 
           <g class="nodes">
@@ -187,7 +190,7 @@
             <rect x="10" y="197" width="140" height="28" rx="8" />
             <rect x="10" y="233" width="140" height="28" rx="8" />
             <rect x="10" y="269" width="140" height="28" rx="8" />
-            <rect class="todo" x="10" y="305" width="140" height="28" rx="8" />
+            <rect x="10" y="305" width="140" height="28" rx="8" />
             <rect x="10" y="341" width="140" height="28" rx="8" />
             <rect x="570" y="44" width="140" height="28" rx="8" />
             <rect x="570" y="80" width="140" height="28" rx="8" />
@@ -200,7 +203,7 @@
             <rect x="570" y="368" width="140" height="28" rx="8" />
             <rect x="570" y="404" width="140" height="28" rx="8" />
             <rect x="570" y="440" width="140" height="28" rx="8" />
-            <rect class="todo" x="570" y="476" width="140" height="28" rx="8" />
+            <rect x="570" y="476" width="140" height="28" rx="8" />
             <rect class="todo" x="570" y="512" width="140" height="28" rx="8" />
             <rect class="gherkin" x="310" y="148" width="100" height="26" rx="13" />
           </g>
@@ -209,7 +212,7 @@
             <text x="80" y="211">Ember</text>
             <text x="80" y="247">Vue</text>
             <text x="80" y="283">Svelte</text>
-            <text class="todo" x="80" y="319">Angular</text>
+            <text x="80" y="319">Angular</text>
             <text x="80" y="355">Solid</text>
             <text x="640" y="58">Testing Library</text>
             <text x="640" y="94">Vitest browser</text>
@@ -222,7 +225,7 @@
             <text x="640" y="382">WebdriverIO</text>
             <text x="640" y="418">Puppeteer</text>
             <text x="640" y="454">TestCafe</text>
-            <text class="todo" x="640" y="490">Nightwatch</text>
+            <text x="640" y="490">Nightwatch</text>
             <text class="todo" x="640" y="526">Detox</text>
             <text class="gherkin" x="360" y="161">Gherkin</text>
           </g>
@@ -278,8 +281,8 @@
             </svg>
             <h3>Every runner</h3>
             <p>
-              Testing Library, node:test, Bun, Playwright, Cypress, WebdriverIO, Vitest, Puppeteer,
-              TestCafe and Ember, plus Storybook play functions.
+              Testing Library, node:test, Bun, Playwright, Cypress, WebdriverIO, Nightwatch, Vitest,
+              Puppeteer, TestCafe, Ember and Angular, plus Storybook play functions.
             </p>
           </article>
           <article>
@@ -299,7 +302,7 @@
               <path d="m2 17 10 5 10-5" />
             </svg>
             <h3>Framework-agnostic</h3>
-            <p>Harnesses query the DOM, not React, Ember, Vue, Solid or Svelte.</p>
+            <p>Harnesses query the DOM, not React, Ember, Vue, Solid, Svelte or Angular.</p>
           </article>
         </div>
       </section>
@@ -500,7 +503,7 @@ await expect(form).toBeAbsent()</code></pre>
                   />
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-playwright-frameworks.yml/badge.svg?branch=main"
-                    alt="Playwright Vue, Solid and Svelte status"
+                    alt="Playwright Vue, Solid, Svelte and Angular status"
                   />
                 </td>
               </tr>
@@ -520,6 +523,21 @@ await expect(form).toBeAbsent()</code></pre>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-ember-vitest.yml/badge.svg?branch=main"
                     alt="Ember Vitest status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-angular">Angular</a> (Vitest, Vitest browser)</th>
+                <td><code>angular</code></td>
+                <td>jsdom or real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-angular.yml/badge.svg?branch=main"
+                    alt="Angular status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-angular-cypress-ct.yml/badge.svg?branch=main"
+                    alt="Angular Cypress component status"
                   />
                 </td>
               </tr>
@@ -569,6 +587,21 @@ await expect(form).toBeAbsent()</code></pre>
                 </td>
               </tr>
               <tr>
+                <th scope="row"><a href="#setup-nightwatch">Nightwatch</a> (e2e and component)</th>
+                <td><code>nightwatch</code></td>
+                <td>Real browser (Nightwatch and Mocha runners)</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-nightwatch.yml/badge.svg?branch=main"
+                    alt="Nightwatch status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-nightwatch-ct.yml/badge.svg?branch=main"
+                    alt="Nightwatch component status"
+                  />
+                </td>
+              </tr>
+              <tr>
                 <th scope="row"><a href="#setup-puppeteer">Puppeteer</a></th>
                 <td><code>puppeteer</code></td>
                 <td>Real browser</td>
@@ -603,7 +636,8 @@ await expect(form).toBeAbsent()</code></pre>
               </tr>
               <tr>
                 <th scope="row">
-                  <a href="#use-cases">Gherkin</a> (playwright-bdd, cucumber-js, Cypress cucumber)
+                  <a href="#use-cases">Gherkin</a> (playwright-bdd, cucumber-js, Cypress cucumber,
+                  Nightwatch)
                 </th>
                 <td><code>gherkin</code></td>
                 <td>Real browser</td>
@@ -619,6 +653,10 @@ await expect(form).toBeAbsent()</code></pre>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-cypress.yml/badge.svg?branch=main"
                     alt="Cypress cucumber status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-nightwatch.yml/badge.svg?branch=main"
+                    alt="Nightwatch cucumber status"
                   />
                 </td>
               </tr>
@@ -714,6 +752,20 @@ const checkout = new CheckoutPage(ember())
 await checkout.goto({ token })</code></pre>
         </details>
 
+        <details id="setup-angular">
+          <summary>Angular (zoneless, Vitest)</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/angular @testing-library/dom @testing-library/user-event</code></pre>
+          <pre><code class="language-typescript">// vite.config.ts, with @analogjs/vite-plugin-angular: harness files get standard decorators
+const HARNESS_FILES = /\.(harness|page)\.ts$/
+plugins: [harnessedDecorators({ include: HARNESS_FILES }), angular({ transformFilter: (_c, id) =&gt; !HARNESS_FILES.test(id) })]
+
+// a test: every action settles at fixture.whenStable()
+import { angular } from '@harnessed-ts/angular'
+const { fixture } = await render(LoginForm)
+const form = new LoginFormHarness(angular({ fixture }))
+await form.signInAs('ada@example.com', 'hunter2')</code></pre>
+        </details>
+
         <details id="setup-cypress">
           <summary>Cypress</summary>
           <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/cypress @harnessed-ts/chai \
@@ -759,6 +811,19 @@ await render(&lt;LoginForm /&gt;)
 const form = new LoginFormHarness(vitestBrowser())
 await form.signInAs('ada@example.com', 'hunter2')
 expect(await form.error()).toBeNull()</code></pre>
+        </details>
+
+        <details id="setup-nightwatch">
+          <summary>Nightwatch</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/nightwatch @harnessed-ts/chai chai</code></pre>
+          <pre><code class="language-typescript">import { nightwatch } from '@harnessed-ts/nightwatch'
+
+it('signs in', async function () {
+  const login = new LoginPage(nightwatch(browser))
+  await login.goto() // resolved against launch_url
+  await login.form.signInAs('ada@example.com', 'hunter2')
+  await chai.expect(login.form.errorBanner).to.be.absent
+})</code></pre>
         </details>
 
         <details id="setup-puppeteer">
@@ -887,7 +952,8 @@ await story.harness(LoginFormHarness).signInAs('ada@example.com', 'hunter2')</co
             <p>
               <code>@harnessed-ts/gherkin</code> adds a page registry, a
               <code>{page}</code> parameter type and a world for playwright-bdd, cucumber-js,
-              Cypress cucumber and ember-cli-yadda. Steps call harness methods, not selectors.
+              Cypress cucumber, ember-cli-yadda and Nightwatch. Steps call harness methods, not
+              selectors.
             </p>
             <div class="grid">
               <pre><code class="language-gherkin">Feature: Checkout
