@@ -1,14 +1,15 @@
 {
   "name": "@harnessed-ts/gherkin",
   "version": "0.6.0",
-  "description": "Gherkin support for harnessed: a scenario-scoped world, a typed page registry and a {page} parameter type, with adapters for playwright-bdd, cucumber-js, Cypress cucumber and ember-cli-yadda.",
+  "description": "Gherkin support for harnessed: a scenario-scoped world, a typed page registry and a {page} parameter type, with adapters for playwright-bdd, cucumber-js, Nightwatch's Cucumber runner, Cypress cucumber and ember-cli-yadda.",
   "keywords": [
     "testing",
     "harness",
     "gherkin",
     "cucumber",
     "bdd",
-    "playwright-bdd"
+    "playwright-bdd",
+    "nightwatch"
   ],
   "license": "MIT",
   "contributors": [
@@ -48,6 +49,11 @@
       "import": "./dist/cucumber.js",
       "require": "./dist/cucumber.cjs"
     },
+    "./nightwatch": {
+      "types": "./dist/nightwatch.d.ts",
+      "import": "./dist/nightwatch.js",
+      "require": "./dist/nightwatch.cjs"
+    },
     "./cypress": {
       "types": "./dist/cypress.d.ts",
       "import": "./dist/cypress.js",
@@ -76,7 +82,9 @@
     "@badeball/cypress-cucumber-preprocessor": ">=20",
     "@cucumber/cucumber": ">=10",
     "@playwright/test": ">=1.43",
-    "yadda": ">=3"
+    "yadda": ">=3",
+    "@harnessed-ts/nightwatch": "workspace:^",
+    "nightwatch": ">=3"
   },
   "scripts": {
     "build": "tsup",
@@ -89,7 +97,9 @@
   "devDependencies": {
     "@cucumber/cucumber": "~13.2.1",
     "@cucumber/cucumber-expressions": "~20.0.0",
+    "@harnessed-ts/nightwatch": "workspace:^",
     "@playwright/test": "^1.63.0",
+    "nightwatch": "^3.16.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.3",
     "yadda": "^3.2.0"
@@ -105,6 +115,12 @@
       "optional": true
     },
     "yadda": {
+      "optional": true
+    },
+    "@harnessed-ts/nightwatch": {
+      "optional": true
+    },
+    "nightwatch": {
       "optional": true
     }
   }

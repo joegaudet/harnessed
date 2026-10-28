@@ -1,0 +1,18 @@
+{
+  "name": "test-app-gherkin-nightwatch",
+  "private": true,
+  "description": "Runs the shared harness-world feature under Nightwatch's Cucumber runner, with @harnessed-ts/gherkin/nightwatch and the nightwatch driver against the served React fixture.",
+  "type": "module",
+  "scripts": {
+    "test": "start-server-and-test 'FIXTURE_PORT=5197 pnpm --filter @harnessed-ts/conformance serve:fixture' http://localhost:5197 'nightwatch --config nightwatch.conf.cjs --env chrome'"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "~13.2.1",
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/gherkin": "workspace:^",
+    "@harnessed-ts/nightwatch": "workspace:^",
+    "nightwatch": "^3.16.0",
+    "start-server-and-test": "^3.0.12"
+  }
+}

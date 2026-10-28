@@ -5,6 +5,7 @@ export default defineConfig({
     'src/index.ts',
     'src/playwright-bdd.ts',
     'src/cucumber.ts',
+    'src/nightwatch.ts',
     'src/cypress.ts',
     'src/yadda.ts',
   ],
@@ -14,5 +15,12 @@ export default defineConfig({
   sourcemap: true,
   clean: false,
   treeshake: true,
-  external: ['@harnessed-ts/core', '@playwright/test', '@cucumber/cucumber', 'yadda'],
+  external: [
+    '@harnessed-ts/core',
+    '@harnessed-ts/nightwatch',
+    '@playwright/test',
+    '@cucumber/cucumber',
+    'nightwatch',
+    'yadda',
+  ],
 })

@@ -14,12 +14,13 @@ defineParameterType(pageParameter(pages)) // the runner's own defineParameterTyp
 
 One adapter per runner gives the world a scenario's lifetime:
 
-| Import                                 | Runner                                  | Gives you                      |
-| -------------------------------------- | --------------------------------------- | ------------------------------ |
-| `@harnessed-ts/gherkin/playwright-bdd` | playwright-bdd                          | `withWorld`, a `world` fixture |
-| `@harnessed-ts/gherkin/cucumber`       | cucumber-js                             | `HarnessedWorld`               |
-| `@harnessed-ts/gherkin/cypress`        | @badeball/cypress-cucumber-preprocessor | `cypressWorld`                 |
-| `@harnessed-ts/gherkin/yadda`          | ember-cli-yadda                         | `yaddaWorld`, `pageDictionary` |
+| Import                                 | Runner                                  | Gives you                         |
+| -------------------------------------- | --------------------------------------- | --------------------------------- |
+| `@harnessed-ts/gherkin/playwright-bdd` | playwright-bdd                          | `withWorld`, a `world` fixture    |
+| `@harnessed-ts/gherkin/cucumber`       | cucumber-js                             | `HarnessedWorld`                  |
+| `@harnessed-ts/gherkin/nightwatch`     | Nightwatch's Cucumber runner            | `HarnessedWorld`, `nightwatchEnv` |
+| `@harnessed-ts/gherkin/cypress`        | @badeball/cypress-cucumber-preprocessor | `cypressWorld`                    |
+| `@harnessed-ts/gherkin/yadda`          | ember-cli-yadda                         | `yaddaWorld`, `pageDictionary`    |
 
 Each runner is an optional peer dependency; install the one you use. Setup for
 each, with examples: [Using with Gherkin](https://github.com/joegaudet/harnessed#using-with-gherkin).

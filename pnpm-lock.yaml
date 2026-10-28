@@ -312,9 +312,15 @@ importers:
       '@cucumber/cucumber-expressions':
         specifier: ~20.0.0
         version: 20.0.0
+      '@harnessed-ts/nightwatch':
+        specifier: workspace:^
+        version: link:../nightwatch
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
+      nightwatch:
+        specifier: ^3.16.0
+        version: 3.16.0(@cucumber/cucumber@13.2.1)(geckodriver@7.0.0(supports-color@11.0.0))(supports-color@11.0.0)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1233,6 +1239,30 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+
+  test-apps/gherkin-nightwatch:
+    devDependencies:
+      '@cucumber/cucumber':
+        specifier: ~13.2.1
+        version: 13.2.1
+      '@harnessed-ts/conformance':
+        specifier: workspace:^
+        version: link:../../packages/conformance
+      '@harnessed-ts/core':
+        specifier: workspace:^
+        version: link:../../packages/core
+      '@harnessed-ts/gherkin':
+        specifier: workspace:^
+        version: link:../../packages/gherkin
+      '@harnessed-ts/nightwatch':
+        specifier: workspace:^
+        version: link:../../packages/nightwatch
+      nightwatch:
+        specifier: ^3.16.0
+        version: 3.16.0(@cucumber/cucumber@13.2.1)(geckodriver@7.0.0(supports-color@11.0.0))(supports-color@11.0.0)
+      start-server-and-test:
+        specifier: ^3.0.12
+        version: 3.0.12(supports-color@11.0.0)
 
   test-apps/gherkin-playwright-bdd:
     devDependencies:
