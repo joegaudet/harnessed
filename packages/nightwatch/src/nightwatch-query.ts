@@ -285,9 +285,12 @@ export class NightwatchQuery extends Query {
     await this.act('upload', options, async (element, found) => {
       checkFileTarget(found.target as FileTarget, list.length, this.scope, this.selector)
       const paths = await filesOnDisk(list)
-      // A multiple input appends what is typed into it; the shared semantic replaces.
+      // A multiple input appends what is typed into it; the shared semantic
+      // replaces. Emptied by script, the one value a page may set on a file
+      // input: WebDriver's Element Clear on one is not something every driver
+      // agrees on.
       if (found.filled === true && (found.target as { multiple: boolean }).multiple) {
-        await element.clear()
+        await this.driver.executeScript('arguments[0].value = ""', element)
       }
       await element.sendKeys(paths.join('\n'))
     })

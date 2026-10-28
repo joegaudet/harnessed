@@ -1,15 +1,18 @@
+import type { EnvConfig } from '@harnessed-ts/core'
 import { nightwatch } from '@harnessed-ts/nightwatch'
 import type { NightwatchAPI } from 'nightwatch'
-import type { HarnessedWorld } from './cucumber'
 
 export { HarnessedWorld } from './cucumber'
 
 /**
- * A `HarnessedWorld` as Nightwatch's Cucumber runner hands it to a hook: the
- * runner's own `Before` launches a browser for each scenario and sets it on the
- * world as `browser`.
+ * What the hook needs of a world — any `HarnessedWorld`, whatever its pages —
+ * as Nightwatch's Cucumber runner hands it over: the runner's own `Before`
+ * launches a browser for each scenario and sets it on the world as `browser`.
  */
-export type NightwatchWorld = HarnessedWorld & { browser?: NightwatchAPI }
+export interface NightwatchWorld {
+  env: EnvConfig | undefined
+  browser?: NightwatchAPI
+}
 
 function browserOf(world: NightwatchWorld): NightwatchAPI {
   const browser = world.browser ?? (Reflect.get(globalThis, 'browser') as NightwatchAPI | undefined)

@@ -49,7 +49,7 @@ module.exports = {
       desiredCapabilities: {
         browserName: 'firefox',
         'moz:firefoxOptions': {
-          args: ['-headless', '-width=1280', '-height=800'],
+          args: ['-headless'],
           ...(env('FIREFOX_BIN') ? { binary: env('FIREFOX_BIN') } : {}),
         },
       },

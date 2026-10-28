@@ -1,0 +1,22 @@
+name: conformance-gherkin-nightwatch
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-gherkin-nightwatch-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: gherkin-nightwatch
+      # Chrome is on the runner image; Selenium Manager matches its driver.
+      test: pnpm --filter test-app-gherkin-nightwatch test
+      artifacts: test-apps/gherkin-nightwatch/logs

@@ -1,0 +1,28 @@
+name: conformance-nightwatch-ct
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: conformance-nightwatch-ct-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        # One entry per framework fixture: its Nightwatch environment and its
+        # test:<framework> script in test-apps/nightwatch-ct.
+        framework: [react]
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: nightwatch-ct (${{ matrix.framework }})
+      # Chrome is on the runner image; Selenium Manager matches its driver.
+      test: pnpm --filter test-app-nightwatch-ct test:${{ matrix.framework }}
+      artifacts: test-apps/nightwatch-ct/logs

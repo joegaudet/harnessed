@@ -4,8 +4,9 @@
   "description": "Runs the @harnessed-ts/conformance component catalog under @harnessed-ts/nightwatch, as Nightwatch component tests mounting the React fixture through @nightwatch/react.",
   "type": "module",
   "scripts": {
-    "test": "pnpm typecheck && pnpm test:react",
-    "test:react": "start-server-and-test 'vite --config vite.react.config.ts' http://localhost:5196/_nightwatch/ 'nightwatch --config nightwatch.conf.cjs --env react'",
+    "test": "pnpm test:react",
+    "test:react": "pnpm typecheck && pnpm ct:react",
+    "ct:react": "start-server-and-test 'vite --config vite.react.config.ts' http://localhost:5196/_nightwatch/ 'nightwatch --config nightwatch.conf.cjs --env react'",
     "typecheck": "tsc -p ."
   },
   "devDependencies": {

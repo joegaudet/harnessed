@@ -1,4 +1,4 @@
-import type { IWorldOptions } from '@cucumber/cucumber'
+import type { Before, IWorldOptions } from '@cucumber/cucumber'
 import type { EnvConfig } from '@harnessed-ts/core'
 import type { NightwatchAPI } from 'nightwatch'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -52,6 +52,12 @@ describe('@harnessed-ts/gherkin/nightwatch', () => {
     expect(() => nightwatchEnv.call(new AppWorld(options))).toThrow(
       /has not started a browser for this scenario.*auto_start_session/,
     )
+  })
+
+  it('is a Before hook for any HarnessedWorld, whatever its pages', () => {
+    // Checked by the compiler: cucumber's own Before takes it for a world subclass.
+    const register = (before: typeof Before) => before<AppWorld>(nightwatchEnv)
+    expect(register).toBeTypeOf('function')
   })
 
   it('re-exports the cucumber-js world, so one import serves the step file', async () => {

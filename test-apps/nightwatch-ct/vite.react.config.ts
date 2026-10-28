@@ -26,10 +26,17 @@ function mountScriptsUseReactDomClient(): Plugin {
   }
 }
 
-// Its types mark `renderPage` required; the plugin defaults it to its own page.
-const rendererOptions = { componentType: 'react' } as Parameters<typeof nightwatchPlugin>[0]
+/**
+ * The plugin that serves @nightwatch/react's renderer page. Its types mark
+ * `renderPage` required, though it defaults to its own page, and name Vite's
+ * `Plugin` from whichever Vite is hoisted — it declares no Vite dependency —
+ * so they are restated here: it is a plain plugin object under any Vite.
+ */
+const renderer = nightwatchPlugin({
+  componentType: 'react',
+} as Parameters<typeof nightwatchPlugin>[0]) as unknown as Plugin
 
 export default defineConfig({
-  plugins: [mountScriptsUseReactDomClient(), react(), nightwatchPlugin(rendererOptions)],
+  plugins: [mountScriptsUseReactDomClient(), react(), renderer],
   server: { port: PORT, strictPort: true },
 })
