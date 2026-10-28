@@ -6,7 +6,7 @@
 import { spawn } from 'node:child_process'
 import { constants } from 'node:os'
 
-const port = process.env.FIXTURE_PORT || '5191'
+const port = process.env.FIXTURE_PORT || '5197'
 const outDir = `tmp/serve-${port}`
 const SIGNALS = ['SIGINT', 'SIGTERM', 'SIGHUP']
 
