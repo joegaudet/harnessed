@@ -19,6 +19,9 @@ module.exports = {
       feature_path: '../../packages/gherkin/features/*.feature',
       // The step file is an ES module: cucumber loads it with --import.
       enable_esm: true,
+      // @harnessed-ts/nightwatch has no mock transport yet, so the mocked
+      // scenario cannot run here.
+      tags: 'not @mocks',
     },
   },
 
