@@ -92,8 +92,8 @@ Each phase's definition of done:
 - its CI job, required
 - its package README (if it adds a package)
 - its root README section, matrix row, and UI-frameworks row (for a framework)
-- `docs/site/` updated per **The website** in CONTRIBUTING.md: hero box solid, runner
-  table row and badge, setup `<details>`
+- `docs/site/` updated in the same PR, using that phase's row in
+  [Marketing site](#marketing-site), and the PR template's Website box ticked
 - `claude` detection and the `eslint-plugin` patterns for that library (Phase 7 lists them;
   each lands with its library, not at the end)
 - a changeset
@@ -102,14 +102,15 @@ Each phase's definition of done:
 
 ### Phase 0: Foundations
 
-| Step | Work                                                                                                                                                                                                                                                                           | Test first                                                                                                                     |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| 0.1  | Create the `next` branch from `main`. Point PR CI at it too                                                                                                                                                                                                                    | n/a                                                                                                                            |
-| 0.2  | `@harnessed-ts/core/register`: a `module.register` load hook that lowers `accessor` and 2023-11 decorators with esbuild (already an optional peer of core) in files matching an `include` (same default globs as `/babel`), and leaves everything else to Node's own stripping | A node:test file whose harness uses `accessor` fails to load without `--import @harnessed-ts/core/register` and passes with it |
-| 0.3  | `@harnessed-ts/core/bun`: a `Bun.plugin` `onLoad` doing the same, registered through `preload` in `bunfig.toml`. Spike first: if Bun 1.2 already lowers `accessor` correctly, this becomes a no-op entry that only checks the Bun version                                      | The same harness under `bun test`, red without the preload                                                                     |
-| 0.4  | Extract webdriverio's `realm.ts` and `page-script.ts` into `@harnessed-ts/resolve/webdriver`. The code only needs WebDriver's `execute` and frame switching, behind a small `WebDriverLike` interface that each driver adapts                                                  | Refactor: `conformance-webdriverio` (BiDi and Classic) stays green                                                             |
-| 0.5  | A `parityTest(render: (url) => Promise<Element>)` helper in conformance that loops over `VIEWS` and compares `fixtureTree(stage)` with `fixtureTrees`, runner-agnostic (it takes `it` and `deepEqual`). Port the Ember parity test onto it                                     | Refactor: the Ember parity test stays green. A deliberate drift in a scratch port goes red                                     |
-| 0.6  | `test-apps/playwright-frameworks` skeleton: `testDir` points at `packages/conformance/specs` like `playwright-ember`, with an empty `projects` list that each framework phase adds to. Ports in the 5191–5194 range                                                            | n/a                                                                                                                            |
+| Step | Work                                                                                                                                                                                                                                                                             | Test first                                                                                                                     |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 0.1  | Create the `next` branch from `main`. Point PR CI at it too                                                                                                                                                                                                                      | n/a                                                                                                                            |
+| 0.2  | `@harnessed-ts/core/register`: a `module.register` load hook that lowers `accessor` and 2023-11 decorators with esbuild (already an optional peer of core) in files matching an `include` (same default globs as `/babel`), and leaves everything else to Node's own stripping   | A node:test file whose harness uses `accessor` fails to load without `--import @harnessed-ts/core/register` and passes with it |
+| 0.3  | `@harnessed-ts/core/bun`: a `Bun.plugin` `onLoad` doing the same, registered through `preload` in `bunfig.toml`. Spike first: if Bun 1.2 already lowers `accessor` correctly, this becomes a no-op entry that only checks the Bun version                                        | The same harness under `bun test`, red without the preload                                                                     |
+| 0.4  | Extract webdriverio's `realm.ts` and `page-script.ts` into `@harnessed-ts/resolve/webdriver`. The code only needs WebDriver's `execute` and frame switching, behind a small `WebDriverLike` interface that each driver adapts                                                    | Refactor: `conformance-webdriverio` (BiDi and Classic) stays green                                                             |
+| 0.5  | A `parityTest(render: (url) => Promise<Element>)` helper in conformance that loops over `VIEWS` and compares `fixtureTree(stage)` with `fixtureTrees`, runner-agnostic (it takes `it` and `deepEqual`). Port the Ember parity test onto it                                       | Refactor: the Ember parity test stays green. A deliberate drift in a scratch port goes red                                     |
+| 0.6  | `test-apps/playwright-frameworks` skeleton: `testDir` points at `packages/conformance/specs` like `playwright-ember`, with an empty `projects` list that each framework phase adds to. Ports in the 5191–5194 range                                                              | n/a                                                                                                                            |
+| 0.7  | **Site-sync check** (`scripts/site-sync.test.mjs`, run by `pnpm test`): every `conformance-*.yml` workflow has a badge in `docs/site/index.html`'s runner table, and every hero label marked `todo` has no conformance workflow behind it. See [Marketing site](#marketing-site) | Mark Vue's box solid with no workflow behind it, then add a workflow with no badge. Both go red                                |
 
 ### Phase 1: node:test and Bun test
 
@@ -320,8 +321,9 @@ applies only when its import source or global is present.
   - `mock.timers` under node:test
 - **Packages table:** `angular`, `nightwatch`, and the new subpaths (`core/register`,
   `core/bun`, `dom/matchers/bun`, `resolve/webdriver`, `gherkin/nightwatch`).
-- **Site:** the hero's Detox box is the only dashed one left. Check light, dark, and
-  375 px as in the homepage plan's verification.
+- **Site:** a last pass over `docs/site/` for consistency, using the
+  [Marketing site](#marketing-site) checklist. By now each phase has already made its
+  own edits.
 
 ### Phase 9: Coordinated release (0.7.0)
 
@@ -335,6 +337,47 @@ As 0.4.0 did: merge `next` into `main`, which produces one Version Packages PR a
 - configure trusted publishers for both, then revoke the token
 
 Bump `examples/vitest-dom` afterwards.
+
+## Marketing site
+
+`docs/site/index.html` is hand-written, so nothing updates it for us (CLAUDE.md,
+**The website** in CONTRIBUTING.md). Until a phase lands, the site keeps showing that
+library as "not yet". The site never claims support ahead of the code. Each phase
+makes its own site edits **in the same PR**, and step 0.7's site-sync check fails the
+build if a badge or hero box is out of step with the workflows.
+
+### Edits common to every phase
+
+1. **Hero illustration** (`<svg class="hero-art">`). For the library's box:
+   - drop `class="todo"` from its `<rect>` and `<text>` under `.nodes` / `.labels`
+   - drop `class="todo"` from its rope under `.ropes`
+   - add a `<use href="#rope-N" style="--i: K" />` under `.pulses`, with `K` the next
+     index, so the line animates like the supported ones
+2. **Supported runners table** (`#runners`). One `<tr>` per runner, in matrix order:
+   - runner name linking to its `#setup-*` details
+   - package
+   - environment
+   - its `conformance-*.yml` badge or badges
+3. **Setup `<details>`** (`#setup-<name>`). A short snippet taken from that package's
+   README, highlighted by Prism (`language-typescript`, or `language-bash` for
+   install lines).
+4. **Preview.** Use the command in CONTRIBUTING.md, checking light mode, dark mode,
+   and a 375 px width with no horizontal scroll. The table scrolls inside
+   `.overflow-auto`.
+
+### Per phase
+
+| Phase            | Hero (rope)                                | Runner table and setup                                                                                                                                                                                 | Elsewhere on the page                                                                                                                                                                    |
+| ---------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 Foundations    | none                                       | none                                                                                                                                                                                                   | none. Step 0.7 adds the site-sync check                                                                                                                                                  |
+| 1 node:test, Bun | node:test (`rope-10`), Bun test (`rope-9`) | rows "node:test" (`dom`, jsdom) and "Bun test" (`dom`, happy-dom), badges `conformance-node-test`, `conformance-bun-test`. `#setup-node-test` (the `--import` line), `#setup-bun-test` (`bunfig.toml`) | `#features` "Every runner": add Bun and node:test. Tooling: mention the `core/register` and `core/bun` loaders                                                                           |
+| 2 Vue            | Vue (`rope-2`)                             | no new runner row. The Testing Library, Playwright, Vitest browser, and Cypress rows each gain a `conformance-vue` / `-playwright-frameworks` / `-cypress-ct-frameworks` badge                         | `#features` "Framework-agnostic": "Harnesses query the DOM, not React, Ember or Vue", and so on per framework. `#runners` intro: a line saying which frameworks the catalog runs against |
+| 3 Solid          | Solid (`rope-5`)                           | `conformance-solid` badge on the Testing Library and Vitest browser rows                                                                                                                               | "Framework-agnostic" copy                                                                                                                                                                |
+| 4 Svelte         | Svelte (`rope-3`)                          | `conformance-svelte` badge on the Testing Library and Vitest browser rows                                                                                                                              | "Framework-agnostic" copy                                                                                                                                                                |
+| 5 Nightwatch     | Nightwatch (`rope-16`)                     | row "Nightwatch" (`nightwatch`, real browser), badges `conformance-nightwatch`, `-nightwatch-ct`. `#setup-nightwatch` with e2e and component snippets                                                  | `#features` "Every runner" copy. `#use-cases` "BDD with Gherkin": add Nightwatch to the runner list, with a `conformance-gherkin-nightwatch` mention                                     |
+| 6 Angular        | Angular (`rope-4`)                         | row "Angular" (`angular`, jsdom or browser), badge `conformance-angular`. `#setup-angular` (two tsconfigs, plugin order, `angular()` env)                                                              | "Framework-agnostic" copy now names all six. Tooling list: `@harnessed-ts/angular`                                                                                                       |
+| 8 Consolidation  | Detox is the only dashed box left          | row order matches the README matrix                                                                                                                                                                    | The hero's `<title>` and legend still say dashed means "not yet", which stays true for Detox. `og-image.*` shows no library names, so it needs no change                                 |
+| 9 Release        | none                                       | none                                                                                                                                                                                                   | Bump `examples/vitest-dom` to 0.7.0 after publish, so the "Try it live" StackBlitz embed shows the released API                                                                          |
 
 ## CI shape
 
@@ -407,7 +450,7 @@ Out of scope (decision 1), recorded so the dashed hero box has a plan behind it:
 1. `chore`: create `next`, point CI at it (0.1)
 2. `feat(core)`: `/register` and `/bun` decorator loaders (0.2, 0.3)
 3. `refactor`: extract `@harnessed-ts/resolve/webdriver` from webdriverio (0.4)
-4. `refactor(conformance)`: `parityTest` helper, Ember parity on it (0.5); `test`: `playwright-frameworks` skeleton (0.6)
+4. `refactor(conformance)`: `parityTest` helper, Ember parity on it (0.5); `test`: `playwright-frameworks` skeleton (0.6); `test`: site-sync check (0.7)
 5. `test`: node:test conformance runner (Phase 1)
 6. `feat(dom)`: `/matchers/bun`, plus the Bun conformance runner (Phase 1)
 7. `test(vue)`: Vue port, parity, dom, Vitest browser, Playwright, Cypress CT (Phase 2)
