@@ -3,6 +3,7 @@
 '@harnessed-ts/dom': minor
 '@harnessed-ts/resolve': minor
 '@harnessed-ts/playwright': minor
+'@harnessed-ts/cypress': minor
 '@harnessed-ts/webdriverio': minor
 '@harnessed-ts/nightwatch': minor
 '@harnessed-ts/angular': minor
@@ -22,7 +23,7 @@ New packages: `@harnessed-ts/nightwatch` drives Nightwatch 3 through the injecte
 
 `@harnessed-ts/resolve/webdriver` holds the WebDriver half of injected resolution, shared by the WebdriverIO and Nightwatch drivers. `@harnessed-ts/gherkin/nightwatch` adapts the cucumber-js world to Nightwatch's Cucumber runner.
 
-`@harnessed-ts/playwright` gives the page a task after every action, so a read straight after it sees what a framework that renders on a timer (zoneless Angular) has rendered.
+`@harnessed-ts/playwright`, and `@harnessed-ts/cypress` under `realEvents`, give the page a task after every action, so a read straight after it sees what a framework that renders on a timer (zoneless Angular) has rendered. The injectable resolver installs on the page's `window` rather than the script's global, which under Firefox's WebDriver is a sandbox in front of it.
 
 `@harnessed-ts/conformance` exports `fixtureParity()`, the per-view parity check a port of the fixture to another framework runs, naming the first place its markup parts from the React original; it detects a simulated DOM from the DOM's own window.
 
