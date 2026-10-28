@@ -1,5 +1,5 @@
 {
-  "$comment": "The Vite, Vitest and Playwright configs, which run in Node.",
+  "$comment": "The Vite, Vitest and Cypress configs, which run in Node.",
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,

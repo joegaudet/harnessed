@@ -11,7 +11,6 @@
     "test": "pnpm typecheck && pnpm test:dom && pnpm test:browser",
     "test:dom": "vitest run --config vitest.config.ts",
     "test:browser": "vitest run --config vitest.browser.config.ts",
-    "test:playwright": "playwright test",
     "test:cypress": "cypress run --component --browser ${CYPRESS_BROWSER:-electron}"
   },
   "devDependencies": {
@@ -29,7 +28,6 @@
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/cypress": "workspace:^",
     "@harnessed-ts/page": "workspace:^",
-    "@playwright/test": "^1.63.0",
     "@testing-library/angular": "^19.6.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.7",

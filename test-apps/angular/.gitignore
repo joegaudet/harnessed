@@ -3,7 +3,5 @@
 /tmp/
 # Vitest browser mode writes failure screenshots here.
 /.vitest/
-/test-results/
-/playwright-report/
 /cypress/screenshots/
 /cypress/videos/

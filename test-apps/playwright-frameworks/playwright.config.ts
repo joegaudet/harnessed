@@ -9,7 +9,7 @@ const PORTS = {
   vue: { app: 'test-app-vue', port: 5197 },
   solid: { app: 'test-app-solid', port: 5192 },
   svelte: { app: 'test-app-svelte', port: 5193 },
-  // angular: { app: 'test-app-angular', port: 5194 },
+  angular: { app: 'test-app-angular', port: 5194 },
 } as const satisfies Record<string, { app: string; port: number }>
 
 type Framework = keyof typeof PORTS

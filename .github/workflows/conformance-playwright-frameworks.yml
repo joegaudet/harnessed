@@ -19,7 +19,7 @@ jobs:
       matrix:
         # One leg per framework port; FRAMEWORK limits the config to that port's
         # project and web server, so each leg builds and serves only its own app.
-        framework: [vue, solid, svelte]
+        framework: [vue, solid, svelte, angular]
     uses: ./.github/workflows/conformance-driver.yml
     with:
       name: playwright-frameworks (${{ matrix.framework }})
