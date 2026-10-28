@@ -22,6 +22,15 @@ export interface HarnessedContext {
   harness?: ScopedHarness
 }
 
+export interface HarnessedOptions {
+  /**
+   * Awaited after every interaction a harness makes, before the next step reads
+   * the canvas. A renderer that updates the DOM asynchronously settles here;
+   * `@harnessed-ts/storybook/ember` passes Ember's.
+   */
+  afterAction?: () => Promise<void>
+}
+
 let matchersRegistered = false
 let listening = false
 /** The message of the current story's play error, if it threw. */
@@ -54,7 +63,7 @@ function listenForPlayErrors(): void {
  * instrumented `userEvent` with each method logged as a step. The harness
  * matchers are added to `storybook/test`'s `expect`.
  */
-export function harnessed(): {
+export function harnessed(options: HarnessedOptions = {}): {
   beforeEach: (context: HarnessedContext) => Promise<void>
   afterEach: (context: HarnessedContext) => Promise<void>
 } {
@@ -74,6 +83,7 @@ export function harnessed(): {
         // is only set where a clipboard exists; fall back to a plain one.
         user: (hasClick(context.userEvent) ? context.userEvent : userEvent.setup()) as UserEvent,
         container: context.canvasElement,
+        ...(options.afterAction === undefined ? {} : { afterAction: options.afterAction }),
       })
       context.harness = withSteps(new HarnessClass(env), context.step)
     },

@@ -37,4 +37,17 @@ const story = await StoryPage.goto(pw(page), LoginStories, 'WrongPassword', { pl
 await story.harness(LoginFormHarness).signInAs('ada@example.com', 'hunter2')
 ```
 
-Storybook 9 or later. See [Using with Storybook](https://github.com/joegaudet/harnessed#using-with-storybook).
+**Ember.** `@harnessed-ts/storybook/ember` renders stories as Ember components
+under `@storybook/html-vite`, through Ember's `renderComponent`, and its
+`harnessed()` settles Ember after every interaction. `emberIndexer` from
+`/ember/node` indexes `.gts` stories.
+
+```ts
+// .storybook/preview.ts
+import { emberRenderer, harnessed } from '@harnessed-ts/storybook/ember'
+export default { ...emberRenderer, ...harnessed() } satisfies Preview
+```
+
+Storybook 9 or later; 10 or later, with Ember 6.8 or later, for Ember. See
+[Using with Storybook](https://github.com/joegaudet/harnessed#using-with-storybook)
+and [Ember stories](https://github.com/joegaudet/harnessed#ember-stories).

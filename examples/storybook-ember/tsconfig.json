@@ -1,0 +1,11 @@
+{
+  "extends": "@ember/app-tsconfig",
+  "include": ["src", "e2e", ".storybook", "vitest.config.ts", "playwright.config.ts"],
+  "exclude": ["src/harness"],
+  "compilerOptions": {
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["ember-source/types", "vite/client", "@glint/ember-tsc/types"]
+  },
+  "references": [{ "path": "./src/harness" }]
+}

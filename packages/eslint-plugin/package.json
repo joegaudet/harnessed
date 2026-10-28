@@ -60,6 +60,7 @@
   },
   "devDependencies": {
     "@harnessed-ts/core": "workspace:^",
+    "ember-eslint-parser": "^0.16.1",
     "eslint": "^10.11.0",
     "eslint8": "npm:eslint@^8.57.1",
     "typescript-eslint": "^8.71.0",

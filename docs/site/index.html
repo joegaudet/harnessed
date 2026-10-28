@@ -540,13 +540,17 @@ await expect(form).toBeAbsent()</code></pre>
                 </td>
               </tr>
               <tr>
-                <th scope="row"><a href="#setup-storybook">Storybook</a> (React)</th>
+                <th scope="row"><a href="#setup-storybook">Storybook</a> (React and Ember)</th>
                 <td><code>storybook</code></td>
                 <td>Play functions; stories as fixtures</td>
                 <td>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-storybook.yml/badge.svg?branch=main"
                     alt="Storybook status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-storybook-ember.yml/badge.svg?branch=main"
+                    alt="Storybook Ember status"
                   />
                 </td>
               </tr>
@@ -702,6 +706,15 @@ export const WrongPassword: WithHarness&lt;StoryObj&lt;typeof meta&gt;, LoginFor
     await expect(await harness.error()).toBe('Wrong password')
   },
 }</code></pre>
+          <p>
+            Ember stories (Embroider and Vite, Ember 6.8 or later) render through
+            <code>@harnessed-ts/storybook/ember</code> under <code>@storybook/html-vite</code>, and
+            every interaction waits for Ember to settle.
+            <a href="https://github.com/joegaudet/harnessed#ember-stories">Ember setup</a>.
+          </p>
+          <pre><code class="language-typescript">// .storybook/preview.ts
+import { emberRenderer, harnessed } from '@harnessed-ts/storybook/ember'
+export default { ...emberRenderer, ...harnessed() } satisfies Preview</code></pre>
         </details>
       </section>
 
@@ -758,7 +771,7 @@ class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
               <code>@harnessed-ts/storybook</code> hands every play function its harness. Each
               harness method shows up as one step in the Interactions panel, with its clicks and
               keystrokes nested underneath, and Storybook's Vitest addon runs the same plays as
-              tests.
+              tests. React and Ember stories alike.
             </p>
             <p>
               The stories double as end-to-end fixtures: <code>StoryPage</code> opens one by URL

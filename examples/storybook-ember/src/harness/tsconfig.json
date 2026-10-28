@@ -1,0 +1,16 @@
+{
+  "$comment": "Harnesses use standard decorators and `accessor`; the app's tsconfig uses Ember's legacy experimentalDecorators, under which they cannot be typed. A project of their own, referenced from the app's.",
+  "extends": "@harnessed-ts/core/tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../tmp/harness-types",
+    "rootDir": ".",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": ["**/*.ts"]
+}
