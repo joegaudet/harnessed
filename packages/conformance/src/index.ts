@@ -59,3 +59,6 @@ export {
   WizardStepPage,
 } from '../fixture/harnesses/pages/wizard-step.page'
 export { WizardPage } from '../fixture/harnesses/pages/wizard.page'
+
+export { firstDifference, fixtureParity } from './parity'
+export type { DefineTest, RenderStage } from './parity'
