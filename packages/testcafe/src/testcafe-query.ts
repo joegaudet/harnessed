@@ -1,8 +1,17 @@
 import { Selector as TestCafeSelector } from 'testcafe'
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
-import { checkedFrom, describeScope, enabledFrom, getConfig, timeoutFor } from '@harnessed-ts/core'
-import { encodeSelector, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
+import type { BoundingBox, EnvConfig, FileTarget, Selector } from '@harnessed-ts/core'
+import type { WaitOptions, WaitState } from '@harnessed-ts/core'
+import {
+  checkedFrom,
+  checkFileTarget,
+  checkTestIds,
+  describeScope,
+  enabledFrom,
+  getConfig,
+  timeoutFor,
+} from '@harnessed-ts/core'
+import { encodeSelector, filesOnDisk, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import type { PageApiOptions } from '@harnessed-ts/resolve/inject'
 import { TESTCAFE_DRIVER } from './driver-id'
 import type { TestCafeEnv } from './env'
@@ -76,6 +85,8 @@ export class TestCafeQuery extends Query {
 
   /** Runtime config travels with every call: the page cannot see `configure()`. */
   private pageOptions(timeout?: number): PageApiOptions {
+    // Refused here, so the page never folds a refusal into "nothing there".
+    checkTestIds(this.scope, this.selector)
     return { testIdAttribute: getConfig().testIdAttribute, timeout: timeoutFor(timeout) }
   }
 
@@ -148,12 +159,14 @@ export class TestCafeQuery extends Query {
     scope: readonly Selector[],
     selector: Selector,
     timeout: number,
+    control = false,
   ): ReturnType<typeof TestCafeSelector> {
     const harnessedTarget: TargetDependency = {
       name: PAGE_API_GLOBAL,
       scope: scope.map(encodeSelector),
       selector: encodeSelector(selector),
       options: this.pageOptions(timeout),
+      control,
     }
     return TestCafeSelector(pickTarget, {
       dependencies: { harnessedTarget },
@@ -179,6 +192,7 @@ export class TestCafeQuery extends Query {
     run: (target: ReturnType<typeof TestCafeSelector>, deadline: number) => Promise<unknown>,
     options?: WaitOptions,
     prepare?: (deadline: number, timeout: number) => Promise<void>,
+    control = false,
   ): Promise<void> {
     return this.session.exclusive(async () => {
       const timeout = timeoutFor(options?.timeout)
@@ -193,7 +207,7 @@ export class TestCafeQuery extends Query {
             this.selectorFor(this.scope.slice(0, index), unframed(this.scope[index]!), remaining()),
           )
         }
-        await run(this.selectorFor(this.scope, this.selector, remaining()), deadline)
+        await run(this.selectorFor(this.scope, this.selector, remaining(), control), deadline)
       } catch (error) {
         throw toError(error, `act on ${this.described}`)
       } finally {
@@ -290,6 +304,28 @@ export class TestCafeQuery extends Query {
     })
   }
 
+  /**
+   * TestCafe sets files only from paths, so each File is written to disk first
+   * (see `filesOnDisk`): the name and bytes arrive, and the type is inferred
+   * from the extension.
+   */
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    let paths: string[] = []
+    await this.act(
+      target => this.t.setFilesToUpload(target, paths),
+      options,
+      async (deadline: number) => {
+        const target = await this.readOne<FileTarget>('fileTarget', {
+          timeout: Math.max(deadline - Date.now(), 0),
+        })
+        checkFileTarget(target, list.length, this.scope, this.selector)
+        paths = await filesOnDisk(list)
+      },
+      true,
+    )
+  }
+
   override async hover(options?: WaitOptions): Promise<void> {
     await this.act(target => this.t.hover(target), options)
   }
@@ -329,6 +365,10 @@ export class TestCafeQuery extends Query {
 
   override async attribute(name: string, options?: WaitOptions): Promise<string | null> {
     return this.readOne<string | null>('attribute', options, name)
+  }
+
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    return this.readOne<BoundingBox>('box', options)
   }
 
   /** Answers at once, as Playwright's does: an absent target is not visible. */

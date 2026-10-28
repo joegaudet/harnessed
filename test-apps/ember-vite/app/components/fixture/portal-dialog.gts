@@ -29,12 +29,12 @@ export default class PortalDialog extends Component {
   };
 
   <template>
-    <div data-testid="portal-host">
+    <div data-testid="portal-host" data-test-portal-host>
       <button type="button" {{on "click" this.show}}>Open confirm</button>
       {{#if this.open}}
         {{#in-element this.target insertBefore=null}}
           <div role="dialog" aria-label="Confirm">
-            <p data-testid="dialog-body">Are you sure?</p>
+            <p data-testid="dialog-body" data-test-dialog-body>Are you sure?</p>
             <button type="button" {{on "click" this.dismiss}}>Dismiss</button>
           </div>
         {{/in-element}}

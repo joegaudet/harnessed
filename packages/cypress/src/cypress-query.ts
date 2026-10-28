@@ -1,7 +1,8 @@
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
+  checkFileTarget,
   describeScope,
   enabledFrom,
   nth as withNth,
@@ -9,7 +10,9 @@ import {
   timeoutFor,
 } from '@harnessed-ts/core'
 import {
+  boundingBoxOf,
   countAll,
+  fileInputOf,
   FrameEntryError,
   isVisibleInLayout,
   resolveAll,
@@ -221,6 +224,23 @@ export class CypressQuery extends Query {
   }
 
   // --- observations -------------------------------------------------------
+
+  /**
+   * Through user-event, real events or not: the Chrome DevTools Protocol sets
+   * files only from paths on disk, and a File here has none.
+   */
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    this.log('upload', list.map(file => file.name).join(', '))
+    const input = fileInputOf(await this.element(options))
+    checkFileTarget(input, list.length, this.scope, this.selector)
+    await this.user.upload(input, list)
+  }
+
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    this.log('boundingBox')
+    return boundingBoxOf(await this.element(options), this.env.document)
+  }
 
   override async text(options?: WaitOptions): Promise<string> {
     this.log('text')

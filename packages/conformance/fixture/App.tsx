@@ -36,7 +36,9 @@ export function App() {
         <section data-testid="page-cards">
           <CardGrid cards={CARDS} />
           {/* Same test id, outside the grid: a scope-dropping query finds this. */}
-          <span data-testid="card-hint">decoy outside the grid</span>
+          <span data-testid="card-hint" data-test-card-hint="">
+            decoy outside the grid
+          </span>
         </section>
       ) : null}
       {view === 'dialog' ? (

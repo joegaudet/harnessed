@@ -30,6 +30,8 @@ export type PageOp =
   | 'focus'
   | 'blur'
   | 'select'
+  | 'box'
+  | 'fileTarget'
 
 /**
  * How a single-target operation looks for its node. `now` answers at once,
@@ -218,6 +220,24 @@ export function pageCall(
       )
     case 'resolve':
       return withTarget(() => null)
+    case 'fileTarget':
+      return withTarget(node => resolver.fileTarget(node))
+    case 'box':
+      // Measured in the node's own document, then offset by each frame up to `home`.
+      return withTarget(node => {
+        const box = resolver.box(node)
+        if (box === null) return { x: 0, y: 0, width: 0, height: 0 }
+        let view: Window | null = node.ownerDocument.defaultView
+        while (view !== null && view !== home) {
+          const frame: Element | null = view.frameElement
+          if (frame === null) break
+          const origin = resolver.origin(frame)
+          box.x += origin.x
+          box.y += origin.y
+          view = frame.ownerDocument.defaultView
+        }
+        return box
+      })
     case 'editable':
       // TestCafe's typeText types into the first editable descendant of a
       // wrapper, and does nothing at all to a disabled or readonly control; both
@@ -294,7 +314,7 @@ export function pageCall(
 export function pickTarget(): Element[] {
   // Dependencies, declared for the type checker. TestCafe defines each one as a
   // variable in the function's scope before running it.
-  const { name, scope, selector, options } = harnessedTarget
+  const { name, scope, selector, options, control } = harnessedTarget
   let api: PageApi | null = null
   let current: Window = window
   for (;;) {
@@ -309,7 +329,11 @@ export function pickTarget(): Element[] {
   }
   if (api === null) return []
   const node = api.oneNow(null, scope, selector, options)
-  return node === null ? [] : [node]
+  if (node === null) return []
+  // An upload through a <label> acts on the input it labels.
+  const labelled = control === true && node.localName === 'label'
+  const target = labelled ? (node as HTMLLabelElement).control : node
+  return target === null ? [] : [target]
 }
 
 /** The shape of `pickTarget`'s one dependency. */
@@ -318,6 +342,8 @@ export interface TargetDependency {
   scope: WireSelector[]
   selector: WireSelector
   options: PageApiOptions
+  /** Pick a label's control instead of the label. */
+  control?: boolean
 }
 
 declare const harnessedTarget: TargetDependency

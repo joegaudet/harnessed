@@ -5,7 +5,7 @@ import {
   reviveStrictViolation,
   timeoutFor,
 } from '@harnessed-ts/core'
-import type { Selector } from '@harnessed-ts/core'
+import type { FileTarget, Selector } from '@harnessed-ts/core'
 import { encodeSelector, injectSource, PAGE_API_GLOBAL } from '@harnessed-ts/resolve/inject'
 import type { PageApi, PageApiOptions, WireSelector } from '@harnessed-ts/resolve/inject'
 import type { ElementHandle, Frame, Page } from 'puppeteer'
@@ -194,6 +194,18 @@ function pageVisible(element: Element, name: string): boolean {
   const api = (globalThis as unknown as Record<string, PageApi | undefined>)[name]
   if (api === undefined) throw new Error(`${name} is not installed`)
   return api.visible(element)
+}
+
+/** The page side of an upload's target check. Serialised into the page: no closures. */
+function pageFileTarget(element: Element, name: string): FileTarget {
+  const api = (globalThis as unknown as Record<string, PageApi | undefined>)[name]
+  if (api === undefined) throw new Error(`${name} is not installed`)
+  return api.fileTarget(element)
+}
+
+/** What an upload would set on the element, by the shared rule. */
+export async function fileTargetOf(element: ElementHandle<Element>): Promise<FileTarget> {
+  return element.evaluate(pageFileTarget, PAGE_API_GLOBAL)
 }
 
 /**

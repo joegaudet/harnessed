@@ -116,6 +116,37 @@ export function emptySet(scope: readonly Selector[], selector: Selector): Error 
 }
 
 /**
+ * What an upload found at its target: the file input — anything with its
+ * `multiple` — or, when it is something else, that thing described as markup
+ * (`<div>`, `<input type="text">`) by the driver that looked.
+ */
+export type FileTarget = { readonly multiple: boolean } | string
+
+/**
+ * Refuses an upload no driver can honour: a target that is not a file input,
+ * or several files for an input that takes one. Neither changes by waiting.
+ */
+export function checkFileTarget<T extends FileTarget>(
+  target: T,
+  files: number,
+  scope: readonly Selector[],
+  selector: Selector,
+): asserts target is Exclude<T, string> {
+  if (typeof target === 'string') {
+    throw new Error(
+      `harnessed: ${describeScope(scope, selector)} is not a file input: it is ${target}. ` +
+        `Upload to an <input type="file">, or to the <label> of one.`,
+    )
+  }
+  if (files > 1 && !target.multiple) {
+    throw new Error(
+      `harnessed: ${describeScope(scope, selector)} takes one file, not ${files}: ` +
+        `the input is not multiple.`,
+    )
+  }
+}
+
+/**
  * Whether a control counts as checked.
  *
  * An explicit `aria-checked` wins over native checkedness, so a non-native control

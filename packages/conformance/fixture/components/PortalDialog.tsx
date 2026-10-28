@@ -8,14 +8,16 @@ import { createPortal } from 'react-dom'
 export function PortalDialog() {
   const [open, setOpen] = useState(false)
   return (
-    <div data-testid="portal-host">
+    <div data-testid="portal-host" data-test-portal-host="">
       <button type="button" onClick={() => setOpen(true)}>
         Open confirm
       </button>
       {open
         ? createPortal(
             <div role="dialog" aria-label="Confirm">
-              <p data-testid="dialog-body">Are you sure?</p>
+              <p data-testid="dialog-body" data-test-dialog-body="">
+                Are you sure?
+              </p>
               <button type="button" onClick={() => setOpen(false)}>
                 Dismiss
               </button>

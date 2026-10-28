@@ -15,6 +15,7 @@ export type { ElementOptions } from './decorators'
 export type { EnvConfig } from './env'
 export {
   checkedFrom,
+  checkFileTarget,
   emptySet,
   enabledFrom,
   indexOutOfRange,
@@ -22,6 +23,7 @@ export {
   StrictModeViolation,
   strictViolation,
 } from './errors'
+export type { FileTarget } from './errors'
 export type { HarnessHost } from './harness-host'
 export { findHostMeta, requireHostMeta } from './host-meta'
 export type { HarnessOptions } from './host-meta'
@@ -32,7 +34,7 @@ export type { Assertable, MatcherResult } from './matchers'
 export { Query } from './query'
 export { ScopedHarness } from './scoped-harness'
 export type { ChildHarnessOptions, ScopedHarnessConstructor } from './scoped-harness'
-export type { WaitOptions, WaitState } from './query'
+export type { BoundingBox, WaitOptions, WaitState } from './query'
 export {
   createQuery,
   navigationFor,
@@ -53,4 +55,4 @@ export {
   text,
 } from './selector'
 export type { RoleOptions, Selector, SelectorType } from './selector'
-export { testIdSync } from './test-id'
+export { checkTestIds, testIdPresenceSelector, testIdSync } from './test-id'

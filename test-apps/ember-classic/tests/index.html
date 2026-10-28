@@ -12,6 +12,21 @@
     <link rel="stylesheet" href="{{rootURL}}assets/test-app-ember-classic.css" />
     <link rel="stylesheet" href="{{rootURL}}assets/test-support.css" />
 
+    <style>
+      /* The catalog measures boundingBox() in viewport pixels. ember-qunit
+         draws the app at half size, and its transforms make the test container
+         the box fixed-position nodes are placed in; draw the app as it runs.
+         Scoped under body to outrank ember-qunit's stylesheet, whichever loads last. */
+      body #ember-testing-container {
+        transform: none;
+      }
+      body #ember-testing-container #ember-testing {
+        transform: none;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+
     {{content-for "head-footer"}} {{content-for "test-head-footer"}}
   </head>
   <body>

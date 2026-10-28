@@ -1,15 +1,18 @@
 import { click, fillIn, getRootElement, settled } from '@ember/test-helpers'
 import { Query, registerDriver } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
+  checkFileTarget,
   enabledFrom,
   nth as withNth,
   StrictModeViolation,
   timeoutFor,
 } from '@harnessed-ts/core'
 import {
+  boundingBoxOf,
   countAll,
+  fileInputOf,
   FrameEntryError,
   isVisibleInLayout,
   resolveAll,
@@ -177,6 +180,15 @@ export class EmberQuery extends Query {
     await settled()
   }
 
+  /** Ember's test helpers have no file upload; user-event's is the one Testing Library users know. */
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    const input = fileInputOf(await this.element(options))
+    checkFileTarget(input, list.length, this.scope, this.selector)
+    await userFor(input).upload(input, list)
+    await settled()
+  }
+
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
@@ -225,6 +237,10 @@ export class EmberQuery extends Query {
   override async selectedOptions(options?: WaitOptions): Promise<string[]> {
     const element = (await this.element(options)) as HTMLSelectElement
     return [...(element.selectedOptions ?? [])].map(option => option.value)
+  }
+
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    return boundingBoxOf(await this.element(options), this.container().ownerDocument)
   }
 
   // --- waiting ------------------------------------------------------------

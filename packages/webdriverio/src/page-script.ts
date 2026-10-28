@@ -23,6 +23,8 @@ export type PageOp =
   | 'clear'
   | 'focus'
   | 'blur'
+  | 'box'
+  | 'upload'
 
 /**
  * The script's answer. A page error comes back as a value rather than a thrown
@@ -74,20 +76,20 @@ export async function pageScript(
    * same link with the shared resolver raises its FrameEntryError, so the
    * refusal and its wording stay the resolver's rather than a copy kept here.
    */
-  const iframe = async (found: Element | null): Promise<Element | null> => {
+  const iframe = async (found: Element | null) => {
     if (found !== null && found.localName !== 'iframe') {
       await api.count(null, [...scope, selector], selector, options)
     }
-    return found
+    return { element: found, origin: found === null ? { x: 0, y: 0 } : api.origin(found) }
   }
   try {
     let value: unknown
     switch (op) {
       case 'frame':
-        value = { element: await iframe(await one()) }
+        value = await iframe(await one())
         break
       case 'frameNow':
-        value = { element: await iframe(api.oneNow(null, scope, selector, options)) }
+        value = await iframe(api.oneNow(null, scope, selector, options))
         break
       case 'element':
         value = { element: await one() }
@@ -169,6 +171,22 @@ export async function pageScript(
           element,
           direct: element.localName === 'input' && direct.includes(element.type),
           filled: (element.value ?? element.textContent ?? '') !== '',
+        }
+        break
+      }
+      case 'box':
+        // In this document's viewport; the driver adds the frames' origins.
+        value = api.box(await one())
+        break
+      case 'upload': {
+        const element = await one()
+        const control = element.localName === 'label' ? (element as HTMLLabelElement).control : null
+        // The input itself, where a label is the target: WebDriver types paths into the input.
+        const input = (control ?? element) as HTMLInputElement
+        value = {
+          element: input,
+          target: api.fileTarget(element),
+          filled: (input.files?.length ?? 0) > 0,
         }
         break
       }

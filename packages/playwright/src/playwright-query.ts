@@ -1,6 +1,8 @@
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
-import { checkedFrom, strictViolation, timeoutFor } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig, FileTarget, Selector } from '@harnessed-ts/core'
+import type { WaitOptions, WaitState } from '@harnessed-ts/core'
+import { checkedFrom, checkFileTarget, strictViolation, timeoutFor } from '@harnessed-ts/core'
+import { Buffer } from 'node:buffer'
 import type { Locator, Page } from '@playwright/test'
 import { PLAYWRIGHT_DRIVER } from './driver-id'
 import type { PlaywrightEnv } from './env'
@@ -87,6 +89,35 @@ export class PlaywrightQuery extends Query {
     await this.act(l => l.press(key, { timeout: timeoutFor(options?.timeout) }))
   }
 
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    const timeout = timeoutFor(options?.timeout)
+    await this.act(async l => {
+      // Checked first, so a wrong target fails in the shared words rather than
+      // Playwright's. Serialised into the page: the shared rule, restated.
+      const target = await l.evaluate(
+        (element: Element): FileTarget => {
+          const control = element.localName === 'label' ? (element as HTMLLabelElement).control : element
+          if (control === null) return '<label> with no control'
+          if (control.localName !== 'input') return `<${control.localName}>`
+          const input = control as HTMLInputElement
+          return input.type === 'file' ? { multiple: input.multiple } : `<input type="${input.type}">`
+        },
+        undefined,
+        { timeout },
+      )
+      checkFileTarget(target, list.length, this.scope, this.selector)
+      const payloads = await Promise.all(
+        list.map(async file => ({
+          name: file.name,
+          mimeType: file.type,
+          buffer: Buffer.from(await file.arrayBuffer()),
+        })),
+      )
+      await l.setInputFiles(payloads, { timeout })
+    })
+  }
+
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
@@ -135,6 +166,12 @@ export class PlaywrightQuery extends Query {
         { timeout: timeoutFor(options?.timeout) },
       ),
     )
+  }
+
+  /** Playwright's own box, relative to the main frame's viewport; `null` (no box) reads as zeros. */
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    const box = await this.act(l => l.boundingBox({ timeout: timeoutFor(options?.timeout) }))
+    return box ?? { x: 0, y: 0, width: 0, height: 0 }
   }
 
   // --- waiting ------------------------------------------------------------

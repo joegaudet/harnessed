@@ -1,13 +1,16 @@
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig, FileTarget, Selector } from '@harnessed-ts/core'
+import type { WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
   checkedFrom,
+  checkFileTarget,
   describeScope,
   enabledFrom,
   StrictModeViolation,
   strictViolation,
   timeoutFor,
 } from '@harnessed-ts/core'
+import { filesOnDisk } from '@harnessed-ts/resolve/inject'
 import { WEBDRIVERIO_DRIVER } from './driver-id'
 import type { WebdriverioEnv } from './env'
 import { toKeySequence } from './keys'
@@ -234,6 +237,25 @@ export class WebdriverioQuery extends Query {
     )
   }
 
+  /**
+   * WebDriver sets files from paths typed into the input, so each File is
+   * written to disk first (see `filesOnDisk`): the name and bytes arrive, and
+   * the browser infers the type from the extension. The browser must share a
+   * file system with this process — a remote grid needs `browser.uploadFile`.
+   */
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    await this.act('upload', options, async (element, found) => {
+      checkFileTarget(found.target as FileTarget, list.length, this.scope, this.selector)
+      const paths = await filesOnDisk(list)
+      // A multiple input appends what is typed into it; the shared semantic replaces.
+      if (found.filled === true && (found.target as { multiple: boolean }).multiple) {
+        await element.clearValue()
+      }
+      await element.addValue(paths.join('\n'))
+    })
+  }
+
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
@@ -288,6 +310,22 @@ export class WebdriverioQuery extends Query {
       if (isTransient(error) && attempt < 3) return this.visibleNow(attempt + 1)
       throw error
     }
+  }
+
+  /** Measured in the target's own document, then offset by every frame crossed to reach it. */
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    return walk(
+      this.browser,
+      this.scope,
+      { waiting: true, timeout: timeoutFor(options?.timeout) },
+      async (site, scope, remaining) => {
+        const box = (await callPage(site, 'box', scope, this.selector, remaining())) as
+          | BoundingBox
+          | null
+        if (box === null) return { x: 0, y: 0, width: 0, height: 0 }
+        return { ...box, x: box.x + site.origin.x, y: box.y + site.origin.y }
+      },
+    )
   }
 
   override async isEnabled(options?: WaitOptions): Promise<boolean> {

@@ -25,6 +25,7 @@ export default class LoginForm extends Component<LoginFormSignature> {
   @tracked password = '';
   @tracked status: LoginStatus = 'idle';
   @tracked late = false;
+  @tracked uploads = '';
 
   constructor(owner: Owner, args: LoginFormSignature['Args']) {
     super(owner, args);
@@ -49,6 +50,12 @@ export default class LoginForm extends Component<LoginFormSignature> {
 
   updatePassword = (event: Event) => {
     this.password = (event.target as HTMLInputElement).value;
+  };
+
+  // What a change listener sees in the input's own `files`: names and sizes.
+  onFiles = (event: Event) => {
+    const files = (event.currentTarget as HTMLInputElement).files ?? [];
+    this.uploads = [...files].map((file) => `${file.name}:${file.size}`).join(', ');
   };
 
   submit = (event: Event) => {
@@ -99,6 +106,14 @@ export default class LoginForm extends Component<LoginFormSignature> {
         <label for="login-referral">Referral code</label>
         <input id="login-referral" data-testid="login-referral" />
       </fieldset>
+
+      <label for="login-avatar">Avatar</label>
+      <input id="login-avatar" type="file" {{on "change" this.onFiles}} />
+
+      <label for="login-attachments">Attachments</label>
+      <input id="login-attachments" type="file" multiple {{on "change" this.onFiles}} />
+
+      <p data-testid="login-uploads">{{this.uploads}}</p>
 
       {{#if this.late}}
         <p>

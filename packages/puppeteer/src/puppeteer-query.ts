@@ -1,6 +1,14 @@
 import { Query, registerDriver, registerNavigation } from '@harnessed-ts/core'
-import type { EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
-import { checkedFrom, describeScope, enabledFrom, timeoutFor } from '@harnessed-ts/core'
+import type { BoundingBox, EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
+import {
+  checkedFrom,
+  checkFileTarget,
+  checkTestIds,
+  describeScope,
+  enabledFrom,
+  timeoutFor,
+} from '@harnessed-ts/core'
+import { filesOnDisk } from '@harnessed-ts/resolve/inject'
 import type { ElementHandle, KeyInput, Page } from 'puppeteer'
 import { PUPPETEER_DRIVER } from './driver-id'
 import type { PuppeteerEnv } from './env'
@@ -8,6 +16,7 @@ import {
   countIn,
   disposeAll,
   enterFrames,
+  fileTargetOf,
   isAbsence,
   isNavigationError,
   isResolverOutcome,
@@ -75,6 +84,8 @@ export class PuppeteerQuery extends Query {
    * something on the way is not on screen yet. The caller owns every handle.
    */
   private async resolve(lookup: Lookup, timeout?: number): Promise<Target | null> {
+    // Refused here, so no frame walk reads a refusal as "nothing there".
+    checkTestIds(this.scope, this.selector)
     const entered = await enterFrames(this.page, this.scope, lookup, timeout)
     if (entered === null) return null
     try {
@@ -280,6 +291,28 @@ export class PuppeteerQuery extends Query {
     })
   }
 
+  /**
+   * Puppeteer sets files only from paths, so each File is written to disk
+   * first (see `filesOnDisk`): the name and bytes arrive, and the browser
+   * infers the type from the extension.
+   */
+  override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
+    const list = Array.isArray(files) ? files : [files]
+    await this.withTarget(options, async element => {
+      checkFileTarget(await fileTargetOf(element), list.length, this.scope, this.selector)
+      const paths = await filesOnDisk(list)
+      // A label hands the files to its control, as under every other driver.
+      const input = (await element.evaluateHandle(node =>
+        node.localName === 'label' ? (node as HTMLLabelElement).control : node,
+      )) as ElementHandle<HTMLInputElement>
+      try {
+        await input.uploadFile(...paths)
+      } finally {
+        await input.dispose()
+      }
+    })
+  }
+
   // --- observations -------------------------------------------------------
 
   override async text(options?: WaitOptions): Promise<string> {
@@ -298,6 +331,12 @@ export class PuppeteerQuery extends Query {
     return this.withTarget(options, element =>
       element.evaluate((node, attribute) => node.getAttribute(attribute), name),
     )
+  }
+
+  /** Puppeteer's own box, relative to the main frame; `null` (no box) reads as zeros. */
+  override async boundingBox(options?: WaitOptions): Promise<BoundingBox> {
+    const box = await this.withTarget(options, element => element.boundingBox())
+    return box ?? { x: 0, y: 0, width: 0, height: 0 }
   }
 
   override async isVisible(options?: WaitOptions): Promise<boolean> {
@@ -372,6 +411,7 @@ export class PuppeteerQuery extends Query {
   }
 
   override async count(): Promise<number> {
+    checkTestIds(this.scope, this.selector)
     let entered: Entered | null
     try {
       entered = await enterFrames(this.page, this.scope, 'wait')
