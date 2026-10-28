@@ -50,28 +50,56 @@ const recommendedRules = {
   'harnessed/no-raw-locator-in-test': 'warn',
 } as const
 
-const plugin = {
-  meta,
-  rules,
-  configs: {} as Record<string, unknown>,
+const strictRules = {
+  ...recommendedRules,
+  'harnessed/no-raw-locator-in-test': 'error',
+  // Strict only: a repo mid-adoption has tests that reach a component harness
+  // directly, and those should keep passing until it has pages to enter through.
+  'harnessed/no-component-harness-in-test': 'error',
+} as const
+
+/**
+ * The same rules under the name eslintrc gives this package: `@harnessed-ts`,
+ * from `@harnessed-ts/eslint-plugin`. Flat config lets a config name its own
+ * plugin key; `.eslintrc` does not.
+ */
+function legacy(flat: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(flat).map(([rule, level]) => [
+      rule.replace(/^harnessed\//, '@harnessed-ts/'),
+      level,
+    ]),
+  )
 }
 
-plugin.configs.recommended = {
+/**
+ * Flat configs (`recommended`, `strict`) for ESLint 9+, and eslintrc ones
+ * (`legacy-recommended`, `legacy-strict`) for ESLint 8.57 with `.eslintrc`:
+ *
+ * ```json
+ * { "extends": ["plugin:@harnessed-ts/legacy-recommended"] }
+ * ```
+ */
+export const configs: Record<string, unknown> = {}
+
+const plugin = { meta, rules, configs }
+
+configs.recommended = {
   name: 'harnessed/recommended',
   plugins: { harnessed: plugin },
   rules: recommendedRules,
 }
 
-plugin.configs.strict = {
+configs.strict = {
   name: 'harnessed/strict',
   plugins: { harnessed: plugin },
-  rules: {
-    ...recommendedRules,
-    'harnessed/no-raw-locator-in-test': 'error',
-    // Strict only: a repo mid-adoption has tests that reach a component harness
-    // directly, and those should keep passing until it has pages to enter through.
-    'harnessed/no-component-harness-in-test': 'error',
-  },
+  rules: strictRules,
 }
 
+configs['legacy-recommended'] = { plugins: ['@harnessed-ts'], rules: legacy(recommendedRules) }
+configs['legacy-strict'] = { plugins: ['@harnessed-ts'], rules: legacy(strictRules) }
+
+// Named as well as default: eslintrc `require()`s the CJS build and reads
+// `rules` and `configs` off what it gets, never off `.default`.
+export { meta }
 export default plugin

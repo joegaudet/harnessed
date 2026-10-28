@@ -9,6 +9,13 @@ import harnessed from '@harnessed-ts/eslint-plugin'
 export default [harnessed.configs.recommended] // or .strict
 ```
 
+ESLint 8.57 with a legacy `.eslintrc` takes the eslintrc configs instead, with
+the rules named under `@harnessed-ts/`:
+
+```json
+{ "extends": ["plugin:@harnessed-ts/legacy-recommended"] }
+```
+
 - `no-page-or-screen-in-harness` — the one violation that silently destroys the
   abstraction. Exempts a page's `waitForReady()`.
 - `require-host` — a concrete harness or page with no `@Harness({ host })`
