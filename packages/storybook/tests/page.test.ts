@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { storyUrl } from '../src/page'
+import { storiesModule, storyUrl } from '../src/page'
 
 const stories = {
   default: { title: 'Forms/Login Form' },
@@ -12,6 +12,11 @@ describe('storyUrl', () => {
     expect(storyUrl(stories, 'WrongPassword')).toBe(
       '/iframe.html?id=forms-login-form--wrong-password&viewMode=story',
     )
+  })
+
+  it('takes a stand-in for a module the runner cannot import', () => {
+    const standIn = storiesModule<typeof stories>({ title: 'Forms/Login Form' })
+    expect(storyUrl(standIn, 'WrongPassword')).toBe(storyUrl(stories, 'WrongPassword'))
   })
 
   it('prefers an explicit meta id', () => {

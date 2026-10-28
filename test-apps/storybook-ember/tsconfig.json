@@ -1,0 +1,21 @@
+{
+  "extends": "@ember/app-tsconfig",
+  "include": [
+    ".storybook",
+    "stories",
+    "tests",
+    "specs",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ],
+  "compilerOptions": {
+    // The fixture is imported from the ember-vite app: its export map has no
+    // extension for TypeScript to find a `.gts` by, so point at the sources.
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["ember-source/types", "vite/client", "@glint/ember-tsc/types"],
+    "paths": {
+      "test-app-ember-vite/*": ["../ember-vite/app/*"]
+    }
+  }
+}

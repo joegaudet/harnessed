@@ -1,4 +1,5 @@
 import { RuleTester } from 'eslint'
+import emberParser from 'ember-eslint-parser'
 import tseslint from 'typescript-eslint'
 import { describe, expect, it } from 'vitest'
 import noComponentHarnessInTest from '../src/rules/no-component-harness-in-test'
@@ -690,6 +691,41 @@ describe('no-raw-locator-in-test', () => {
         filename: '/repo/tests/components/Form.test.tsx',
         code: `screen.getByText('Sign in')`,
         errors: [{ messageId: 'raw' }],
+      },
+    ],
+  })
+})
+
+// Ember stories with <template> tags, parsed as an Ember app's ESLint config parses them.
+const emberTester = new RuleTester({
+  languageOptions: {
+    parser: emberParser,
+    parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+  },
+})
+
+describe('no-raw-locator-in-test, Ember .gjs and .gts stories', () => {
+  const meta = `import Greeting from './greeting'\nexport default {\n  title: 'Greeting',\n  render: () => <template><Greeting @name="Ada" /></template>,\n}\n`
+  emberTester.run('no-raw-locator-in-test', noRawLocatorInTest, {
+    valid: [
+      {
+        name: 'a .gts play function that drives its harness',
+        filename: '/repo/stories/Greeting.stories.gts',
+        code: `${meta}export const Greeted = { play: async ({ harness }) => { await harness.greet('Ada') } }`,
+      },
+    ],
+    invalid: [
+      {
+        name: "a .gts play function's canvas queries",
+        filename: '/repo/stories/Greeting.stories.gts',
+        code: `${meta}export const Greeted = { play: async ({ canvas }) => { await canvas.getByRole('button') } }`,
+        errors: [{ messageId: 'raw', data: { call: 'canvas.getByRole' } }],
+      },
+      {
+        name: 'a .gjs play function reaching into the canvas element',
+        filename: '/repo/stories/Greeting.stories.gjs',
+        code: `${meta}export const Greeted = { play: async ({ canvasElement }) => { canvasElement.querySelector('input') } }`,
+        errors: [{ messageId: 'raw', data: { call: 'canvasElement.querySelector' } }],
       },
     ],
   })

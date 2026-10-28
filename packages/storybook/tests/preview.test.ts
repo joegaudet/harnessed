@@ -61,6 +61,20 @@ describe('harnessed()', () => {
     expect(context.canvasElement.querySelector('input')?.value).toBe('Ada')
   })
 
+  it('awaits afterAction once each interaction is done, before the method resolves', async () => {
+    const context = storyContext(GreetingHarness)
+    const seen: string[] = []
+    await harnessed({
+      afterAction: async () => {
+        seen.push(context.canvasElement.querySelector('input')?.value ?? '')
+      },
+    }).beforeEach(context)
+
+    await (context.harness as GreetingHarness).greet('Ada')
+
+    expect(seen).toEqual(['Ada'])
+  })
+
   it('leaves the context alone when no harness is named', async () => {
     const context = storyContext()
     await harnessed().beforeEach(context)

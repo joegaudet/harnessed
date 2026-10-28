@@ -116,12 +116,18 @@ export class DomQuery extends Query {
     private readonly container: HTMLElement,
     scope: readonly Selector[],
     selector: Selector,
+    private readonly afterAction?: () => Promise<void>,
   ) {
     super(scope, selector)
   }
 
   protected override clone(selector: Selector): Query {
-    return new DomQuery(this.user, this.container, this.scope, selector)
+    return new DomQuery(this.user, this.container, this.scope, selector, this.afterAction)
+  }
+
+  /** Awaited at the end of every interaction: the env's `afterAction`, if it has one. */
+  private async settle(): Promise<void> {
+    await this.afterAction?.()
   }
 
   protected element(options?: WaitOptions): Promise<HTMLElement> {
@@ -163,6 +169,7 @@ export class DomQuery extends Query {
           this.scope,
           withNth(this.selector, index),
           element,
+          this.afterAction,
         ),
     )
   }
@@ -171,6 +178,7 @@ export class DomQuery extends Query {
 
   override async click(options?: WaitOptions): Promise<void> {
     await this.user.click(await this.target(options))
+    await this.settle()
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
@@ -179,20 +187,24 @@ export class DomQuery extends Query {
     // user-event throws on an empty string, and clearing is the whole intent
     // anyway — which is also what Playwright's fill('') does.
     if (value !== '') await this.user.type(element, value)
+    await this.settle()
   }
 
   override async clear(options?: WaitOptions): Promise<void> {
     await this.user.clear(await this.target(options))
+    await this.settle()
   }
 
   override async check(options?: WaitOptions): Promise<void> {
     const element = await this.target(options)
     if (!(element as HTMLInputElement).checked) await this.user.click(element)
+    await this.settle()
   }
 
   override async uncheck(options?: WaitOptions): Promise<void> {
     const element = await this.target(options)
     if ((element as HTMLInputElement).checked) await this.user.click(element)
+    await this.settle()
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
@@ -205,24 +217,29 @@ export class DomQuery extends Query {
       if (selected.length > 0) await this.user.deselectOptions(element, selected)
     }
     await this.user.selectOptions(element, value)
+    await this.settle()
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
     await this.user.hover(await this.target(options))
+    await this.settle()
   }
 
   override async focus(options?: WaitOptions): Promise<void> {
     ;(await this.target(options)).focus()
+    await this.settle()
   }
 
   override async blur(options?: WaitOptions): Promise<void> {
     ;(await this.target(options)).blur()
+    await this.settle()
   }
 
   override async press(key: string, options?: WaitOptions): Promise<void> {
     const element = await this.target(options)
     element.focus()
     await this.user.keyboard(toKeyboardInput(key))
+    await this.settle()
   }
 
   override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
@@ -230,6 +247,7 @@ export class DomQuery extends Query {
     const input = fileInputOf(await this.target(options))
     checkFileTarget(input, list.length, this.scope, this.selector)
     await this.user.upload(input, list)
+    await this.settle()
   }
 
   // --- observations -------------------------------------------------------
@@ -319,8 +337,9 @@ class BoundDomQuery extends DomQuery {
     scope: readonly Selector[],
     selector: Selector,
     private readonly bound: HTMLElement,
+    afterAction?: () => Promise<void>,
   ) {
-    super(user, container, scope, selector)
+    super(user, container, scope, selector, afterAction)
   }
 
   protected override async element(options?: WaitOptions): Promise<HTMLElement> {
@@ -337,5 +356,5 @@ class BoundDomQuery extends DomQuery {
  */
 registerDriver(DOM_DRIVER, (env: EnvConfig, scope, selector) => {
   const domEnv = env as DomEnv
-  return new DomQuery(domEnv.user, domEnv.container, scope, selector)
+  return new DomQuery(domEnv.user, domEnv.container, scope, selector, domEnv.afterAction)
 })

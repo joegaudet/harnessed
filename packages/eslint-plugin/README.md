@@ -30,9 +30,10 @@ the rules named under `@harnessed-ts/`:
   `By.css`, Vue Test Utils' `wrapper.find`/`findAll`/`get`,
   `document.querySelector`. It looks in `tests/`, `test/`, `e2e/`, `cypress/`,
   `nightwatch/` and `__tests__/` (`testDirs` changes that; a project that keeps
-  specs beside its components, as Angular's does, lists `src`). Storybook stories files
-  (`*.stories.*`) count as tests wherever they live: `canvas.getBy*`,
-  `within` from `storybook/test`, and `canvasElement.querySelector`
+  specs beside its components, as Angular's does, lists `src`). Storybook stories
+  files (`*.stories.*`, Ember's `.gjs` and `.gts` included) count as tests
+  wherever they live: `canvas.getBy*`, `within` from `storybook/test`, and
+  `canvasElement.querySelector`
 - `no-runner-import-in-harness` — a harness importing a runner or a driver, or
   using `document`, `window`, `cy`, `browser`, `$`, or `$$`. Only `@harnessed-ts/core`,
   `@harnessed-ts/page`, and `@harnessed-ts/route` are allowed from the harnessed
