@@ -36,13 +36,15 @@ export { ScopedHarness } from './scoped-harness'
 export type { ChildHarnessOptions, ScopedHarnessConstructor } from './scoped-harness'
 export type { BoundingBox, WaitOptions, WaitState } from './query'
 export {
+  beforeNavigate,
   createQuery,
   navigationFor,
+  registerBeforeNavigate,
   registerDriver,
   registerNavigation,
   registeredDrivers,
 } from './registry'
-export type { Navigation, QueryFactory } from './registry'
+export type { BeforeNavigate, Navigation, QueryFactory } from './registry'
 export {
   describeScope,
   describeSelector,

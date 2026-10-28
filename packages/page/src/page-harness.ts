@@ -1,4 +1,4 @@
-import { navigationFor, ScopedHarness, timeoutFor } from '@harnessed-ts/core'
+import { beforeNavigate, navigationFor, ScopedHarness, timeoutFor } from '@harnessed-ts/core'
 import type { EnvConfig, Navigation, Selector, WaitOptions } from '@harnessed-ts/core'
 import { nestedInFrame, noPath, notReady, notReadyWithin } from './errors'
 
@@ -57,6 +57,22 @@ export abstract class PageHarness<Params extends Record<string, string> = Record
    */
   get path(): string | undefined {
     return undefined
+  }
+
+  /**
+   * API mocks this page needs, installed by `@harnessed-ts/mock` before `goto()`
+   * navigates: API harness classes, handler arrays, or MSW handlers. A test's own
+   * mocks registered afterwards win over these. Empty by default, and ignored
+   * when `@harnessed-ts/mock` is not loaded.
+   *
+   * ```ts
+   * get mocks() {
+   *   return [UsersApi]
+   * }
+   * ```
+   */
+  get mocks(): readonly unknown[] {
+    return []
   }
 
   /**
@@ -133,7 +149,10 @@ export abstract class PageHarness<Params extends Record<string, string> = Record
     // The page's own facts first, then the driver's: a missing path is the
     // cheaper and more local mistake.
     this.requirePath()
-    await this.navigation.goto(this._env, this.resolvePath(params))
+    const navigation = this.navigation
+    // Whatever must be in place before the first request, such as API mocks.
+    await beforeNavigate(this._env, this)
+    await navigation.goto(this._env, this.resolvePath(params))
     await this.expectReady()
   }
 

@@ -1,0 +1,98 @@
+{
+  "name": "@harnessed-ts/mock",
+  "version": "0.6.0",
+  "description": "API mocking for harnessed: one handler model, response builders for every common format, and an adapter per test runner — Testing Library, Playwright, Ember, Cypress, WebdriverIO, Vitest browser, Puppeteer, TestCafe and Storybook.",
+  "keywords": [
+    "testing",
+    "harness",
+    "mock",
+    "api-mocking",
+    "msw",
+    "playwright",
+    "cypress"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/mock"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./builders": {
+      "types": "./dist/builders.d.ts",
+      "import": "./dist/builders.js",
+      "require": "./dist/builders.cjs"
+    },
+    "./in-page": {
+      "types": "./dist/in-page.d.ts",
+      "import": "./dist/in-page.js",
+      "require": "./dist/in-page.cjs"
+    },
+    "./graphql": {
+      "types": "./dist/graphql-schema.d.ts",
+      "import": "./dist/graphql-schema.js",
+      "require": "./dist/graphql-schema.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^"
+  },
+  "peerDependencies": {
+    "@mswjs/interceptors": ">=0.39",
+    "graphql": ">=16"
+  },
+  "peerDependenciesMeta": {
+    "@mswjs/interceptors": {
+      "optional": true
+    },
+    "graphql": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@mswjs/interceptors": "^0.45.10",
+    "graphql": "^17.0.2",
+    "jsdom": "^30.1.2",
+    "msw": "^3.0.3",
+    "vitest": "^5.0.3"
+  }
+}
