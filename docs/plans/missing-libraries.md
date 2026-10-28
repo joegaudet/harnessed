@@ -1,6 +1,6 @@
 # Plan: Vue, Svelte, Angular, Solid, Bun test, node:test, and Nightwatch
 
-Status: draft · Branch: `claude/eloquent-thompson-txmnzj` · Base: `main` @ `b9cb567` (0.6.0)
+Status: implemented on this branch (see **As built** below) · Branch: `claude/eloquent-thompson-txmnzj` · Base: `main` @ `b9cb567` (0.6.0)
 
 ## Goal
 
@@ -463,3 +463,27 @@ Out of scope (decision 1), recorded so the dashed hero box has a plan behind it:
 14. `chore(release)`: 0.7.0 (Phase 9)
 
 Lint patterns and `claude` detection ride in the PR of the library they cover (Phase 7).
+
+## As built
+
+Where the implementation departs from the plan above:
+
+- **Ports.** Vue serves on 5197 (5191 was already cypress-ember's), Solid 5192,
+  Svelte 5193, Angular 5194. Nightwatch e2e uses 5195, its component tests 5196
+  (React) and 5189 (Vue), and gherkin-nightwatch 5199.
+- **Angular's Cypress component run** lives in `test-apps/angular` (`test:cypress`,
+  `conformance-angular-cypress-ct.yml`): it builds through the Analog plugin,
+  which `cypress-ct-frameworks`' Vite dev servers do not carry. Its Playwright run
+  is the `angular` project in `playwright-frameworks`, as planned.
+- **Bun.** Bun 1.2+ compiles standard decorators itself; `@harnessed-ts/core/bun`
+  still lowers decorated files, so an `experimentalDecorators` tsconfig cannot
+  switch harnesses to the legacy protocol. happy-dom needed
+  `enableIframePageLoading`, and three dom-driver fixes (frame focus before an
+  interaction, finding a frame's `<iframe>` without `frameElement`, reading a
+  selection off `options`); no spec was skipped.
+- **Playwright** now gives the page a task after each action: zoneless Angular
+  renders on a timer, and a read straight after a click could see the old node.
+- **Nightwatch** resolves through selenium-webdriver's `executeScript` rather
+  than `browser.execute`, which swallows script errors and retries them.
+- **Unverified locally**, CI-only: every Cypress run (the binary cannot be
+  downloaded in the environment this was built in) and Nightwatch under Firefox.
