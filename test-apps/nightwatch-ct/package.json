@@ -1,0 +1,28 @@
+{
+  "name": "test-app-nightwatch-ct",
+  "private": true,
+  "description": "Runs the @harnessed-ts/conformance component catalog under @harnessed-ts/nightwatch, as Nightwatch component tests mounting the React fixture through @nightwatch/react.",
+  "type": "module",
+  "scripts": {
+    "test": "pnpm typecheck && pnpm test:react",
+    "test:react": "start-server-and-test 'vite --config vite.react.config.ts' http://localhost:5196/_nightwatch/ 'nightwatch --config nightwatch.conf.cjs --env react'",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "@harnessed-ts/conformance": "workspace:^",
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/nightwatch": "workspace:^",
+    "@nightwatch/react": "^3.1.2",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "nightwatch": "^3.16.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "start-server-and-test": "^3.0.12",
+    "typescript": "^6.0.3",
+    "vite": "^4.5.14",
+    "vite-plugin-nightwatch": "^0.4.6"
+  }
+}

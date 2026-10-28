@@ -1,0 +1,4 @@
+# Written by Nightwatch on each run: driver logs, and the mount scripts the
+# component plugin generates.
+logs/
+nightwatch/.cache/
