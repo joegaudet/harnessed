@@ -1,0 +1,6 @@
+{
+  "//": "A project that compiles its own code with legacy decorators, as Angular or MobX apps do. Bun follows this for every file below it.",
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "experimentalDecorators": true },
+  "include": ["."]
+}

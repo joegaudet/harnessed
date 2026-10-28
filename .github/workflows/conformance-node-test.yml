@@ -1,0 +1,16 @@
+name: conformance-node-test
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  run:
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: node-test
+      # node:test with jsdom installed globally (global-jsdom) and harness files
+      # loaded through @harnessed-ts/core/register. No browser.
+      test: pnpm --filter test-app-node-test test

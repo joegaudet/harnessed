@@ -1,0 +1,22 @@
+name: conformance-bun-test
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        # The 1.2 floor the README promises, and a pinned current release.
+        bun: ['1.2.23', '1.4.4']
+    uses: ./.github/workflows/conformance-driver.yml
+    with:
+      name: bun-test (bun ${{ matrix.bun }})
+      # Bun from npm, so the leg's version is exactly the matrix's. happy-dom is
+      # the DOM (bunfig.toml preloads it), so there is no browser to install.
+      setup: npm install -g bun@${{ matrix.bun }} && bun --version
+      test: pnpm --filter test-app-bun-test test
