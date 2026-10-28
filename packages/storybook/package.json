@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/storybook",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Harnesses in Storybook: drive play() functions through a harness, and open stories as fixtures from any runner that can navigate.",
   "keywords": [
     "testing",

@@ -1,5 +1,12 @@
 # @harnessed-ts/page
 
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [e324e94]
+  - @harnessed-ts/core@0.6.0
+
 ## 0.5.0
 
 ### Patch Changes
