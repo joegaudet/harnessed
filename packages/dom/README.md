@@ -11,6 +11,9 @@ render(<LoginForm />)
 const form = new LoginFormHarness(dom({ user: userEvent.setup() }))
 ```
 
+Under `bun test`, preload `@harnessed-ts/dom/matchers/bun` instead of
+`/matchers`, which imports Vitest. The driver runs on jsdom and on happy-dom.
+
 Pass `container` to scope a harness to one tree — which is what makes two
 instances in a single test, and portals, work without a cleanup race.
 

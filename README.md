@@ -200,7 +200,10 @@ export default defineConfig({
 ```
 
 Both your Vite config and your Vitest config need it. Playwright's own transform
-handles decorators already, so its config does not.
+handles decorators already, so its config does not. Without Vite, the same
+lowering comes as a loader: `node --import @harnessed-ts/core/register` for
+node:test, and the `@harnessed-ts/core/bun` preload for `bun test` (see
+[Using with node:test](#using-with-nodetest) and [Using with Bun](#using-with-bun)).
 
 > Omitting either step fails at runtime, not at typecheck: every decorated field
 > becomes a syntax error or silently loses its getter.
@@ -608,6 +611,91 @@ jsdom has no layout and no address bar, so:
 - **Pages construct, but do not navigate.** Render the app, then
   `await page.expectReady()`; `goto()` and the URL members are refused.
 - **Frames** are entered when they are same-origin.
+
+## Using with node:test
+
+```bash
+npm i -D @harnessed-ts/core @harnessed-ts/dom @harnessed-ts/chai chai esbuild \
+  @testing-library/dom @testing-library/user-event jsdom global-jsdom
+```
+
+Node's own test runner, on jsdom, with harnesses loaded straight from
+TypeScript. Two `--import` flags do the setup: `global-jsdom/register` installs
+the DOM, and `@harnessed-ts/core/register` hands `.ts` and `.tsx` files to esbuild,
+which strips the types, lowers decorators and `accessor`, and compiles JSX:
+
+```bash
+node --test --import global-jsdom/register --import @harnessed-ts/core/register "tests/**/*.test.tsx"
+```
+
+```tsx
+import { harnessedChai } from '@harnessed-ts/chai'
+import { dom } from '@harnessed-ts/dom'
+import { cleanup, render } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import * as chai from 'chai'
+import { afterEach, it } from 'node:test'
+
+chai.use(harnessedChai)
+afterEach(cleanup) // node:test has no globals, so Testing Library cannot register it
+
+it('signs in', async () => {
+  const { baseElement } = render(<LoginForm />)
+  const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+  await form.signInAs('ada@example.com', 'hunter2')
+  await chai.expect(form.errorBanner).to.be.absent
+})
+```
+
+node:test has no `expect`, so assertions come through
+[`@harnessed-ts/chai`](packages/chai/README.md). The register hook resolves
+extensionless and NodeNext `./x.js` imports to the TypeScript file. Everything
+in [Using with Testing Library](#using-with-testing-library) about jsdom applies.
+`mock.timers` from `node:test` is not something Testing Library's waits know
+about; prefer real timers in harness-driven tests.
+
+## Using with Bun
+
+```bash
+bun add -d @harnessed-ts/core @harnessed-ts/dom esbuild \
+  @testing-library/dom @testing-library/user-event @happy-dom/global-registrator
+```
+
+`bun test` on happy-dom, Bun's documented DOM. Preload the DOM, the decorator
+loader and the matchers, in that order:
+
+```toml
+# bunfig.toml
+[test]
+preload = ["./happydom.ts", "@harnessed-ts/core/bun", "@harnessed-ts/dom/matchers/bun", "./cleanup.ts"]
+```
+
+```ts
+// happydom.ts
+import { GlobalRegistrator } from '@happy-dom/global-registrator'
+// happy-dom loads no frame documents unless asked, not even about:blank.
+GlobalRegistrator.register({
+  url: 'http://localhost/',
+  settings: { enableIframePageLoading: true },
+})
+
+// cleanup.ts — bun:test has no global afterEach for Testing Library to find
+import { cleanup } from '@testing-library/react'
+import { afterEach } from 'bun:test'
+afterEach(cleanup)
+```
+
+Tests then read like the Vitest ones, with `expect` from `bun:test`:
+`await expect(form.errorBanner).toBeAbsent()`. Add
+`import '@harnessed-ts/dom/matchers/bun'` to a `.d.ts` your tsconfig includes, so
+the test files see the matchers' types.
+
+Bun compiles standard decorators itself, but follows `experimentalDecorators`
+in the nearest tsconfig — which an Angular or MobX project sets for its own code.
+`@harnessed-ts/core/bun` lowers every TypeScript file that uses decorators with
+esbuild first, so harnesses keep the standard protocol whatever the tsconfig
+says. happy-dom computes no layout, so `isVisible()` and `boundingBox()` behave as
+under jsdom. Bun 1.2 or later.
 
 ## Using with Playwright
 

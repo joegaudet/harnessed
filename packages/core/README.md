@@ -2,7 +2,7 @@
 
 The driver-free core: `Query`, `Selector`, `ComponentHarness`, the decorators, the
 driver registry, `configure()`, the matcher implementations, and the Vite and
-Babel plugins that lower standard decorators.
+Babel plugins and Node and Bun loaders that lower standard decorators.
 
 Depends on no driver. Install a driver alongside it —
 [`@harnessed-ts/dom`](https://www.npmjs.com/package/@harnessed-ts/dom) or
@@ -22,6 +22,17 @@ export default defineConfig({ plugins: [harnessedDecorators(), react()] })
 ```js
 // babel.config.cjs — an app whose own decorators are legacy (Ember)
 plugins: [require.resolve('@harnessed-ts/core/babel') /* , …the app's plugins */]
+```
+
+```bash
+# node:test — strips types, lowers decorators and compiles JSX with esbuild
+node --test --import @harnessed-ts/core/register
+```
+
+```toml
+# bunfig.toml — bun test, whatever experimentalDecorators the tsconfig sets
+[test]
+preload = ["@harnessed-ts/core/bun"]
 ```
 
 Full guide, the cross-driver guarantees, and the API: the
