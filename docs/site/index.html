@@ -150,8 +150,8 @@
             <use href="#rope-6" />
             <use href="#rope-7" />
             <use href="#rope-8" />
-            <use href="#rope-9" class="todo" />
-            <use href="#rope-10" class="todo" />
+            <use href="#rope-9" />
+            <use href="#rope-10" />
             <use href="#rope-11" />
             <use href="#rope-12" />
             <use href="#rope-13" />
@@ -175,6 +175,8 @@
             <use href="#rope-14" style="--i: 8" />
             <use href="#rope-15" style="--i: 9" />
             <use href="#rope-18" style="--i: 10" />
+            <use href="#rope-9" style="--i: 11" />
+            <use href="#rope-10" style="--i: 12" />
           </g>
 
           <g class="nodes">
@@ -188,8 +190,8 @@
             <rect x="570" y="80" width="140" height="28" rx="8" />
             <rect x="570" y="116" width="140" height="28" rx="8" />
             <rect x="570" y="152" width="140" height="28" rx="8" />
-            <rect class="todo" x="570" y="188" width="140" height="28" rx="8" />
-            <rect class="todo" x="570" y="224" width="140" height="28" rx="8" />
+            <rect x="570" y="188" width="140" height="28" rx="8" />
+            <rect x="570" y="224" width="140" height="28" rx="8" />
             <rect x="570" y="296" width="140" height="28" rx="8" />
             <rect x="570" y="332" width="140" height="28" rx="8" />
             <rect x="570" y="368" width="140" height="28" rx="8" />
@@ -210,8 +212,8 @@
             <text x="640" y="94">Vitest browser</text>
             <text x="640" y="130">Ember QUnit</text>
             <text x="640" y="166">Storybook</text>
-            <text class="todo" x="640" y="202">Bun test</text>
-            <text class="todo" x="640" y="238">node:test</text>
+            <text x="640" y="202">Bun test</text>
+            <text x="640" y="238">node:test</text>
             <text x="640" y="310">Playwright</text>
             <text x="640" y="346">Cypress</text>
             <text x="640" y="382">WebdriverIO</text>
@@ -273,8 +275,8 @@
             </svg>
             <h3>Every runner</h3>
             <p>
-              Testing Library, Playwright, Cypress, WebdriverIO, Vitest, Puppeteer, TestCafe and
-              Ember, plus Storybook play functions.
+              Testing Library, node:test, Bun, Playwright, Cypress, WebdriverIO, Vitest, Puppeteer,
+              TestCafe and Ember, plus Storybook play functions.
             </p>
           </article>
           <article>
@@ -447,6 +449,28 @@ await expect(form).toBeAbsent()</code></pre>
                 </td>
               </tr>
               <tr>
+                <th scope="row"><a href="#setup-node-test">node:test</a></th>
+                <td><code>dom</code></td>
+                <td>jsdom</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-node-test.yml/badge.svg?branch=main"
+                    alt="node:test status"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th scope="row"><a href="#setup-bun-test">Bun test</a></th>
+                <td><code>dom</code></td>
+                <td>happy-dom</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-bun-test.yml/badge.svg?branch=main"
+                    alt="Bun test status"
+                  />
+                </td>
+              </tr>
+              <tr>
                 <th scope="row"><a href="#setup-playwright">Playwright</a></th>
                 <td><code>playwright</code></td>
                 <td>Real browser</td>
@@ -492,6 +516,10 @@ await expect(form).toBeAbsent()</code></pre>
                   <img
                     src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ct.yml/badge.svg?branch=main"
                     alt="Cypress component status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-cypress-ember.yml/badge.svg?branch=main"
+                    alt="Cypress Ember status"
                   />
                 </td>
               </tr>
@@ -550,6 +578,27 @@ await expect(form).toBeAbsent()</code></pre>
                   />
                 </td>
               </tr>
+              <tr>
+                <th scope="row">
+                  <a href="#use-cases">Gherkin</a> (playwright-bdd, cucumber-js, Cypress cucumber)
+                </th>
+                <td><code>gherkin</code></td>
+                <td>Real browser</td>
+                <td>
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-playwright-bdd.yml/badge.svg?branch=main"
+                    alt="playwright-bdd status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-cucumber.yml/badge.svg?branch=main"
+                    alt="cucumber-js status"
+                  />
+                  <img
+                    src="https://github.com/joegaudet/harnessed/actions/workflows/conformance-gherkin-cypress.yml/badge.svg?branch=main"
+                    alt="Cypress cucumber status"
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -571,6 +620,41 @@ const { baseElement } = render(&lt;LoginForm /&gt;)
 const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
 await form.signInAs('ada@example.com', 'hunter2')
 expect(await form.error()).toBeNull()</code></pre>
+        </details>
+
+        <details id="setup-node-test">
+          <summary>node:test (jsdom)</summary>
+          <pre><code class="language-bash">npm i -D @harnessed-ts/core @harnessed-ts/dom @harnessed-ts/chai chai esbuild jsdom global-jsdom
+node --test --import global-jsdom/register --import @harnessed-ts/core/register "tests/**/*.test.tsx"</code></pre>
+          <pre><code class="language-tsx">import { harnessedChai } from '@harnessed-ts/chai'
+import * as chai from 'chai'
+import { afterEach, it } from 'node:test'
+
+chai.use(harnessedChai)
+afterEach(cleanup)
+
+it('signs in', async () =&gt; {
+  const { baseElement } = render(&lt;LoginForm /&gt;)
+  const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+  await form.signInAs('ada@example.com', 'hunter2')
+  await chai.expect(form.errorBanner).to.be.absent
+})</code></pre>
+        </details>
+
+        <details id="setup-bun-test">
+          <summary>Bun test (happy-dom)</summary>
+          <pre><code class="language-bash">bun add -d @harnessed-ts/core @harnessed-ts/dom esbuild @happy-dom/global-registrator</code></pre>
+          <pre><code class="language-toml"># bunfig.toml: the DOM, then the decorator loader, then the matchers
+[test]
+preload = ["./happydom.ts", "@harnessed-ts/core/bun", "@harnessed-ts/dom/matchers/bun"]</code></pre>
+          <pre><code class="language-tsx">import { expect, it } from 'bun:test'
+
+it('signs in', async () =&gt; {
+  const { baseElement } = render(&lt;LoginForm /&gt;)
+  const form = new LoginFormHarness(dom({ user: userEvent.setup(), container: baseElement }))
+  await form.signInAs('ada@example.com', 'hunter2')
+  await expect(form.errorBanner).toBeAbsent()
+})</code></pre>
         </details>
 
         <details id="setup-playwright">
@@ -849,6 +933,7 @@ export default [harnessed.configs.recommended]</code></pre>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-gherkin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-toml.min.js"></script>
 
     <dialog id="lightbox" class="lightbox" aria-label="Demo recordings">
       <figure>
