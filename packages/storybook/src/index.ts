@@ -1,4 +1,4 @@
-import { getConfig, harnessMatchers } from '@harnessed-ts/core'
+import { getConfig, harnessMatchers, testIdPresenceSelector } from '@harnessed-ts/core'
 import type { Assertable, ScopedHarness, ScopedHarnessConstructor } from '@harnessed-ts/core'
 import { dom } from '@harnessed-ts/dom'
 import type { UserEvent } from '@testing-library/user-event'
@@ -81,7 +81,11 @@ export function harnessed(): {
       const document = context.canvasElement.ownerDocument
       if (readyMarker(document) !== null) return
       const marker = document.createElement('div')
-      marker.setAttribute(getConfig().testIdAttribute, STORY_READY_TEST_ID)
+      const attribute = getConfig().testIdAttribute
+      // Under a presence pattern the id is part of the name: `data-test-<id>`.
+      if (attribute.endsWith('*'))
+        marker.setAttribute(attribute.slice(0, -1) + STORY_READY_TEST_ID, '')
+      else marker.setAttribute(attribute, STORY_READY_TEST_ID)
       marker.hidden = true
       if (playError !== undefined) marker.setAttribute(PLAY_ERROR_ATTRIBUTE, playError)
       document.body.append(marker)
@@ -89,8 +93,11 @@ export function harnessed(): {
   }
 }
 
+/** Found the way `testId(STORY_READY_TEST_ID)` finds it, which is what `StoryPage` waits on. */
 function readyMarker(document: Document): Element | null {
-  return document.querySelector(`[${getConfig().testIdAttribute}="${STORY_READY_TEST_ID}"]`)
+  const attribute = getConfig().testIdAttribute
+  const presence = testIdPresenceSelector(attribute, STORY_READY_TEST_ID)
+  return document.querySelector(presence ?? `[${attribute}="${STORY_READY_TEST_ID}"]`)
 }
 
 function hasClick(value: unknown): boolean {
