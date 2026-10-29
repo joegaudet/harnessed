@@ -1978,8 +1978,8 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0(supports-color@11.0.0)(yauzl@3.4.0)
       '@wdio/spec-reporter':
-        specifier: ^10.0.0
-        version: 10.0.0
+        specifier: ^10.1.0
+        version: 10.1.0
       '@wdio/types':
         specifier: ^10.1.0
         version: 10.1.0
@@ -6359,6 +6359,10 @@ packages:
     resolution: {integrity: sha512-qPxe2dq0hFDd6AZj6Z3SunpMvCOv9UdXS3CINtSrJweGNGHj1VltSNVPVqWYWwzs3ywuEjGg2t91JIQVxgfgWA==}
     engines: {node: '>=22.19.0'}
 
+  '@wdio/reporter@10.1.0':
+    resolution: {integrity: sha512-VijtnGZHgwKFRzWwfGQSTF5WCxtwZLMstTQurKgXFUUh6rJi5ORkfL2515q5/7hbHm9ziMbAeBrfUdiDJCk1dQ==}
+    engines: {node: '>=22.19.0'}
+
   '@wdio/runner@10.0.0':
     resolution: {integrity: sha512-eFpec964oivTK33/8zhsbwzp6lcTElaL6h3KCEb9I0+jP2avaZS8g6KStHP9Nl/itSYarKiIrsoxZmT9k2x/ng==}
     engines: {node: '>=22.19.0'}
@@ -6382,8 +6386,8 @@ packages:
       appium:
         optional: true
 
-  '@wdio/spec-reporter@10.0.0':
-    resolution: {integrity: sha512-48q0tROaNvP8JQ+JyquJYk1eXBXE9JTGksCKwuiuC8hhYcNyunX1uAtkxAshC5qPVg31pByLcSWnIkBLZkzMBg==}
+  '@wdio/spec-reporter@10.1.0':
+    resolution: {integrity: sha512-3Ei+XqpJIsZ2tOwHZDtEw9e5T68X9jqnJ29WDPEUym8sB/XxRYAOUsxOV4EKtxy9LrDZ7yG1vNW/RKa5iNZAOg==}
     engines: {node: '>=22.19.0'}
 
   '@wdio/types@10.0.0':
@@ -7338,6 +7342,10 @@ packages:
   chalk@5.6.2:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+
+  chalk@6.0.1:
+    resolution: {integrity: sha512-/Ce6KNm3vIbWdMlNna6RVIZ/ICQxnJxCicet5LBKK9ZffBkqzDw0xh9EiKSljdRtiIQ1S1z4YgcscUUGzNCWrA==}
+    engines: {node: '>=22'}
 
   chardet@0.7.0:
     resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
@@ -18604,6 +18612,13 @@ snapshots:
       diff: 8.0.4
       object-inspect: 1.13.4
 
+  '@wdio/reporter@10.1.0':
+    dependencies:
+      '@types/node': 22.20.5
+      '@wdio/types': 10.1.0
+      diff: 9.0.0
+      object-inspect: 1.13.4
+
   '@wdio/runner@10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))(yauzl@3.4.0)':
     dependencies:
       '@types/node': 22.20.5
@@ -18660,11 +18675,11 @@ snapshots:
       - utf-8-validate
       - yauzl
 
-  '@wdio/spec-reporter@10.0.0':
+  '@wdio/spec-reporter@10.1.0':
     dependencies:
-      '@wdio/reporter': 10.0.0
-      '@wdio/types': 10.0.0
-      chalk: 5.6.2
+      '@wdio/reporter': 10.1.0
+      '@wdio/types': 10.1.0
+      chalk: 6.0.1
       easy-table: 1.2.0
       pretty-ms: 9.3.1
 
@@ -19956,6 +19971,8 @@ snapshots:
       supports-color: 7.2.0
 
   chalk@5.6.2: {}
+
+  chalk@6.0.1: {}
 
   chardet@0.7.0: {}
 
