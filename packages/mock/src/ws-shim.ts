@@ -101,7 +101,7 @@ export function wsShim(postGlobal: string): void {
     }
   }
 
-  page['__harnessedWs'] = (raw: string): void => {
+  const handle = (raw: string): void => {
     const message = JSON.parse(raw) as {
       type: string
       id: number
@@ -121,6 +121,13 @@ export function wsShim(postGlobal: string): void {
     } else if (message.type === 'close' && socket.readyState < 3) {
       socket.finish(message.code ?? 1000, message.reason ?? '')
     }
+  }
+  // A real socket never fires an event inside the call that caused it. Where
+  // the test process shares the page's thread (Cypress), a reply would
+  // otherwise arrive inside `new WebSocket()`, before the app has listened for
+  // `open`. Timers keep the order the messages were sent in.
+  page['__harnessedWs'] = (raw: string): void => {
+    setTimeout(() => handle(raw), 0)
   }
   page['WebSocket'] = MockSocket
 }
