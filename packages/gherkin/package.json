@@ -98,7 +98,7 @@
     "@cucumber/cucumber": "~13.2.1",
     "@cucumber/cucumber-expressions": "~20.0.0",
     "@harnessed-ts/nightwatch": "workspace:^",
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.1",
     "nightwatch": "^3.16.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.3",
