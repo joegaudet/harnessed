@@ -18,7 +18,7 @@
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/nightwatch": "workspace:^",
     "@types/chai": "^5.2.3",
-    "@types/node": "^26.6.4",
+    "@types/node": "^26.6.5",
     "chai": "^6.3.0",
     "nightwatch": "^3.16.0",
     "start-server-and-test": "^3.0.12",
