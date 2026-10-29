@@ -96,7 +96,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "~13.2.1",
+    "@cucumber/cucumber": "~13.3.0",
     "@cucumber/cucumber-expressions": "~20.0.0",
     "@harnessed-ts/nightwatch": "workspace:^",
     "@playwright/test": "^1.64.1",
