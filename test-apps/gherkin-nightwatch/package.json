@@ -7,7 +7,7 @@
     "test": "start-server-and-test 'FIXTURE_PORT=5199 pnpm --filter @harnessed-ts/conformance serve:fixture' http://localhost:5199 'nightwatch --config nightwatch.conf.cjs --env chrome'"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "~13.2.1",
+    "@cucumber/cucumber": "~13.3.0",
     "@harnessed-ts/conformance": "workspace:^",
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/gherkin": "workspace:^",
