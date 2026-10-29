@@ -11,7 +11,7 @@ import { answer, readRequest } from './fetch-glue'
 import type { Controller } from './fetch-glue'
 import { decodeResult, encodeRequest } from './wire'
 import type { WireResult } from './wire'
-import { wsShim } from './ws-bridge'
+import { wsShim } from './ws-shim'
 import type { RawRequest } from './types'
 
 /** What the agent posts to the test process. */
