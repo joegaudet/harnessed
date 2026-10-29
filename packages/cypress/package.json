@@ -79,6 +79,6 @@
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.7",
-    "cypress": "^16.1.1"
+    "cypress": "^16.2.0"
   }
 }

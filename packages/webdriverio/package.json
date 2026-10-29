@@ -81,7 +81,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@wdio/types": "^10.0.0",
+    "@wdio/types": "^10.1.0",
     "expect-webdriverio": "^8.0.0-alpha.3",
     "webdriverio": "^10.0.0"
   }
