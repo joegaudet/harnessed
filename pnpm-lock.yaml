@@ -529,11 +529,11 @@ importers:
         version: link:../resolve
     devDependencies:
       '@wdio/types':
-        specifier: ^10.0.0
-        version: 10.0.0
+        specifier: ^10.1.0
+        version: 10.1.0
       expect-webdriverio:
         specifier: ^8.0.0-alpha.3
-        version: 8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
+        version: 8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
       webdriverio:
         specifier: ^10.0.0
         version: 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
@@ -1967,10 +1967,10 @@ importers:
         version: 26.6.4
       '@wdio/cli':
         specifier: ^10.0.0
-        version: 10.0.0(@types/node@26.6.4)(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
+        version: 10.0.0(@types/node@26.6.4)(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
       '@wdio/globals':
         specifier: ^10.0.0
-        version: 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
+        version: 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
       '@wdio/local-runner':
         specifier: ^10.0.0
         version: 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))(yauzl@3.4.0)
@@ -1981,11 +1981,11 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
       '@wdio/types':
-        specifier: ^10.0.0
-        version: 10.0.0
+        specifier: ^10.1.0
+        version: 10.1.0
       expect-webdriverio:
         specifier: ^8.0.0-alpha.3
-        version: 8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
+        version: 8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
       webdriverio:
         specifier: ^10.0.0
         version: 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
@@ -6385,6 +6385,10 @@ packages:
 
   '@wdio/types@10.0.0':
     resolution: {integrity: sha512-qUJbKEHjsN0PuC3S2r7Gy9wYtbChmX+PYghKGHYQhjyH9P9t+sWhSPQWUBk3S+IUTYT1f+Z4VbF+5FmvlHL6Lg==}
+    engines: {node: '>=22.19.0'}
+
+  '@wdio/types@10.1.0':
+    resolution: {integrity: sha512-MxGhIjP74w2xaIhqtzBfrtzDc41qyb9cMqvHgdIDC7MbaREJxpUd/paAg8qmouIph7hBp8MruXap/BPKlVXmVA==}
     engines: {node: '>=22.19.0'}
 
   '@wdio/utils@10.0.0':
@@ -18454,11 +18458,11 @@ snapshots:
     optionalDependencies:
       '@vue/server-renderer': 3.5.44
 
-  '@wdio/cli@10.0.0(@types/node@26.6.4)(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)':
+  '@wdio/cli@10.0.0(@types/node@26.6.4)(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)':
     dependencies:
       '@vitest/snapshot': 5.0.3
       '@wdio/config': 10.0.0(supports-color@11.0.0)(yauzl@3.4.0)
-      '@wdio/globals': 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
+      '@wdio/globals': 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
       '@wdio/logger': 10.0.0
       '@wdio/protocols': 10.0.0
       '@wdio/session': 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
@@ -18518,9 +18522,9 @@ snapshots:
       '@wdio/types': 10.0.0
       chalk: 5.6.2
 
-  '@wdio/globals@10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))':
+  '@wdio/globals@10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))':
     dependencies:
-      expect-webdriverio: 8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
+      expect-webdriverio: 8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
       webdriverio: 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
 
   '@wdio/local-runner@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))(yauzl@3.4.0)':
@@ -18530,7 +18534,7 @@ snapshots:
       '@wdio/display-server': 10.0.0
       '@wdio/logger': 10.0.0
       '@wdio/repl': 10.0.0
-      '@wdio/runner': 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))(yauzl@3.4.0)
+      '@wdio/runner': 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))(yauzl@3.4.0)
       '@wdio/types': 10.0.0
       exit-hook: 4.0.0
       expect-webdriverio: 8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
@@ -18593,18 +18597,18 @@ snapshots:
       diff: 8.0.4
       object-inspect: 1.13.4
 
-  '@wdio/runner@10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))(yauzl@3.4.0)':
+  '@wdio/runner@10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))(yauzl@3.4.0)':
     dependencies:
       '@types/node': 22.20.5
       '@wdio/config': 10.0.0(supports-color@11.0.0)(yauzl@3.4.0)
       '@wdio/dot-reporter': 10.0.0
-      '@wdio/globals': 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
+      '@wdio/globals': 10.0.0(expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)))(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
       '@wdio/logger': 10.0.0
       '@wdio/session': 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
       '@wdio/types': 10.0.0
       '@wdio/utils': 10.0.0(supports-color@11.0.0)(yauzl@3.4.0)
       deepmerge-ts: 8.0.2
-      expect-webdriverio: 8.0.0-alpha.3(@wdio/types@10.0.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
+      expect-webdriverio: 8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0))
       webdriver: 10.0.0(supports-color@11.0.0)(yauzl@3.4.0)
       webdriverio: 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
     transitivePeerDependencies:
@@ -18658,6 +18662,10 @@ snapshots:
       pretty-ms: 9.3.1
 
   '@wdio/types@10.0.0':
+    dependencies:
+      '@types/node': 22.20.5
+
+  '@wdio/types@10.1.0':
     dependencies:
       '@types/node': 22.20.5
 
@@ -22155,6 +22163,15 @@ snapshots:
     dependencies:
       '@vitest/snapshot': 5.0.3
       '@wdio/types': 10.0.0
+      deep-eql: 5.0.2
+      expect: 30.5.2
+      jest-matcher-utils: 30.5.2
+      webdriverio: 10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)
+
+  expect-webdriverio@8.0.0-alpha.3(@wdio/types@10.1.0)(webdriverio@10.0.0(puppeteer-core@25.12.0(yauzl@3.4.0))(supports-color@11.0.0)(yauzl@3.4.0)):
+    dependencies:
+      '@vitest/snapshot': 5.0.3
+      '@wdio/types': 10.1.0
       deep-eql: 5.0.2
       expect: 30.5.2
       jest-matcher-utils: 30.5.2
