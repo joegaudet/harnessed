@@ -1,5 +1,37 @@
 # @harnessed-ts/eslint-plugin
 
+## 0.7.0
+
+### Minor Changes
+
+- ec06bdf: Vue, Solid, Svelte and Angular join React and Ember as conformance-tested UI frameworks, and node:test, Bun and Nightwatch join the runners.
+
+  New packages: `@harnessed-ts/nightwatch` drives Nightwatch 3 through the injected resolver, under Nightwatch's own runner and its Mocha runner, in end-to-end and component tests (`@nightwatch/react`, `@nightwatch/vue`), with cross-origin frames. `@harnessed-ts/angular` drives zoneless Angular 21+: every action settles at `fixture.whenStable()`, or at the `ApplicationRef`'s for an app bootstrapped without TestBed, and `goto()` drives a provided router.
+
+  `@harnessed-ts/core/register` loads TypeScript harnesses under `node --import`: esbuild strips the types, lowers standard decorators and `accessor`, and compiles JSX. `@harnessed-ts/core/bun` does the same as a `bun test` preload, so harnesses keep the standard decorator protocol whatever `experimentalDecorators` the tsconfig sets.
+
+  `@harnessed-ts/dom/matchers/bun` registers the matchers with `bun:test`. The dom driver runs on happy-dom too: it focuses the frames leading to an interaction's target, finds a frame's `<iframe>` where `frameElement` is unset, and reads a select's selection off `options`.
+
+  `@harnessed-ts/resolve/webdriver` holds the WebDriver half of injected resolution, shared by the WebdriverIO and Nightwatch drivers. `@harnessed-ts/gherkin/nightwatch` adapts the cucumber-js world to Nightwatch's Cucumber runner.
+
+  `@harnessed-ts/playwright`, and `@harnessed-ts/cypress` under `realEvents`, give the page a task after every action, so a read straight after it sees what a framework that renders on a timer (zoneless Angular) has rendered. The injectable resolver installs on the page's `window` rather than the script's global, which under Firefox's WebDriver is a sandbox in front of it.
+
+  `@harnessed-ts/conformance` exports `fixtureParity()`, the per-view parity check a port of the fixture to another framework runs, naming the first place its markup parts from the React original; it detects a simulated DOM from the DOM's own window.
+
+  `@harnessed-ts/eslint-plugin` recognises Nightwatch's, Angular's and Vue Test Utils' raw queries, and looks in `nightwatch/` by default. `npx @harnessed-ts/claude install` detects Angular, Nightwatch, node:test and Bun.
+
+- 3f53eb6: Ember stories. `@harnessed-ts/storybook/ember` renders stories as Ember components under `@storybook/html-vite`, through Ember's public `renderComponent` (Ember 6.8 or later, Storybook 10): spread `emberRenderer` and its `harnessed()` into `.storybook/preview.ts`, and a story renders its meta's `component` with the story's args, or whatever its `render` returns, `<template>` included. Its `harnessed()` resolves every harness interaction once Ember has settled (rendering, run loop, timers and `@ember/test-waiters`), as `@harnessed-ts/ember` does; `settled()` is exported too. `parameters.ember.owner` sets the owner a story renders with. `composeStories`, `composeStory` and `setProjectAnnotations` from the same entry run Ember stories as portable stories, and `Meta`, `StoryObj` and `Preview` type them. `emberIndexer` from `@harnessed-ts/storybook/ember/node` indexes `.stories.gjs` and `.stories.gts` files, whose `<template>` tags Storybook's own indexer cannot parse; it needs `content-tag`. The conformance catalog runs against Ember stories all three ways React's do: as portable stories, through `StoryPage` under Playwright, and through the Vitest addon.
+
+  `storiesModule()` from `@harnessed-ts/storybook/page` stands in for a stories module a Node runner cannot import (one that imports Ember components), typed as that module: `StoryPage.goto` only reads its meta's `title` or `id`.
+
+  `harnessed()` takes an `afterAction` option, awaited after every interaction a harness makes, and `dom()` takes the same option for any framework that renders asynchronously.
+
+  The ESLint plugin treats `.stories.gjs` and `.stories.gts` files as stories files, so `no-raw-locator-in-test` flags raw canvas queries in Ember play functions.
+
+### Patch Changes
+
+- @harnessed-ts/config@0.7.0
+
 ## 0.6.0
 
 ### Minor Changes

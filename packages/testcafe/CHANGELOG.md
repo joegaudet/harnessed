@@ -1,5 +1,13 @@
 # @harnessed-ts/testcafe
 
+## 0.7.0
+
+### Patch Changes
+
+- Updated dependencies [ec06bdf]
+  - @harnessed-ts/core@0.7.0
+  - @harnessed-ts/resolve@0.7.0
+
 ## 0.6.0
 
 ### Minor Changes
