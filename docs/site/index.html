@@ -47,6 +47,7 @@
           </li>
         </ul>
         <ul>
+          <li><a href="guide/">Guide</a></li>
           <li><a href="#runners">Runners</a></li>
           <li class="wide-only"><a href="#mocking">Mocking</a></li>
           <li class="wide-only"><a href="#use-cases">Use cases</a></li>
@@ -73,7 +74,7 @@
             unit test, a story, and a real-browser end-to-end test.
           </p>
           <div class="hero-actions">
-            <a href="https://github.com/joegaudet/harnessed#install" role="button">Get started</a>
+            <a href="guide/getting-started/installation.md" role="button">Get started</a>
             <a href="https://github.com/joegaudet/harnessed" role="button" class="ghost">
               <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
                 <path
@@ -402,9 +403,7 @@ expect(await profile.error()).toBe('500')</code></pre>
             deterministic factories.
           </li>
         </ul>
-        <p>
-          <a href="https://github.com/joegaudet/harnessed#mocking-apis">Mocking APIs, in full</a>.
-        </p>
+        <p><a href="guide/mocking/mocking-apis.md">Mocking APIs, in full</a>.</p>
       </section>
 
       <section id="see-it-run">
@@ -489,6 +488,7 @@ expect(await profile.error()).toBe('500')</code></pre>
         <p>
           Every package is <code>@harnessed-ts/&lt;name&gt;</code>. Each runner passes the same
           conformance catalog on every pull request.
+          <a href="guide/runners/testing-library.md">Read the runner guides →</a>
         </p>
         <div class="overflow-auto">
           <table class="striped">
@@ -744,7 +744,7 @@ expect(await profile.error()).toBe('500')</code></pre>
         <h3>Setup</h3>
         <p>
           Every runner needs <code>@harnessed-ts/core</code> and standard decorators; see
-          <a href="https://github.com/joegaudet/harnessed#required-setup">required setup</a>.
+          <a href="guide/getting-started/installation.md#required-setup">required setup</a>.
         </p>
 
         <details id="setup-dom">
@@ -982,7 +982,7 @@ export const WrongPassword: WithHarness&lt;StoryObj&lt;typeof meta&gt;, LoginFor
             Ember stories (Embroider and Vite, Ember 6.8 or later) render through
             <code>@harnessed-ts/storybook/ember</code> under <code>@storybook/html-vite</code>, and
             every interaction waits for Ember to settle.
-            <a href="https://github.com/joegaudet/harnessed#ember-stories">Ember setup</a>.
+            <a href="guide/storybook-and-bdd/storybook.md#ember-stories">Ember setup</a>.
           </p>
           <pre><code class="language-typescript">// .storybook/preview.ts
 import { emberRenderer, harnessed } from '@harnessed-ts/storybook/ember'
@@ -1008,9 +1008,7 @@ export const Loaded = { parameters: { harnessed: { mocks: [UsersApi] } } }</code
             <p>
               Behaviour is held to the same rules under every driver: absence answers immediately,
               single-target operations are strict, and scopes don't leak.
-              <a href="https://github.com/joegaudet/harnessed#cross-driver-guarantees"
-                >See the guarantees</a
-              >.
+              <a href="guide/writing-harnesses/cross-driver-guarantees.md">See the guarantees</a>.
             </p>
           </article>
 
@@ -1038,6 +1036,7 @@ class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
     return this.transitionTo(ConfirmationPage)
   }
 }</code></pre>
+            <p><a href="guide/writing-harnesses/page-harnesses.md">Read the guide →</a></p>
           </article>
 
           <article>
@@ -1057,9 +1056,7 @@ class CheckoutPage extends PageHarness&lt;{ token: string }&gt; {
 const story = await StoryPage.goto(pw(page), LoginStories, 'WrongPassword', { play: false })
 await story.harness(LoginFormHarness).signInAs('ada@example.com', 'hunter2')</code></pre>
             <p>
-              <a href="https://github.com/joegaudet/harnessed#using-with-storybook"
-                >Storybook setup</a
-              >
+              <a href="guide/storybook-and-bdd/storybook.md">Storybook setup</a>
             </p>
           </article>
 
@@ -1086,9 +1083,7 @@ Then('the total is {string}', async ({ world }, total) =&gt; {
 })</code></pre>
             </div>
             <p>
-              <a href="https://github.com/joegaudet/harnessed#using-with-gherkin"
-                >Gherkin setup for each runner</a
-              >
+              <a href="guide/storybook-and-bdd/gherkin.md">Gherkin setup for each runner</a>
             </p>
           </article>
 
@@ -1122,6 +1117,7 @@ Then('the total is {string}', async ({ world }, total) =&gt; {
                 >: installs a Claude Code skill that writes harnesses in your project's conventions.
               </li>
             </ul>
+            <p><a href="guide/tooling/eslint-plugin.md">Read the guide →</a></p>
             <pre><code class="language-javascript">// eslint.config.js
 import harnessed from '@harnessed-ts/eslint-plugin'
 export default [harnessed.configs.recommended]</code></pre>
@@ -1133,6 +1129,7 @@ export default [harnessed.configs.recommended]</code></pre>
     <footer class="container">
       <small>
         MIT © Joe Gaudet, Jay Seo ·
+        <a href="guide/">Guide</a> ·
         <a href="https://github.com/joegaudet/harnessed#readme">README</a> ·
         <a href="https://github.com/joegaudet/harnessed/blob/main/CONTRIBUTING.md">Contributing</a>
       </small>

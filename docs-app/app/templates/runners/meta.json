@@ -1,0 +1,14 @@
+{
+  "order": [
+    "testing-library",
+    "node-test",
+    "bun",
+    "playwright",
+    "cypress",
+    "webdriverio",
+    "vitest-browser",
+    "puppeteer",
+    "testcafe",
+    "nightwatch"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "order": [
+    "selectors",
+    "queries",
+    "component-harnesses",
+    "page-harnesses",
+    "matchers",
+    "configuration",
+    "cross-driver-guarantees"
+  ]
+}

@@ -2,10 +2,10 @@
 
 Test harnesses for components and pages: like page objects, but for components
 too. One API that runs under every major JavaScript test runner: Testing Library,
-Playwright, Ember, Cypress, WebdriverIO, Vitest browser mode, Puppeteer and
-TestCafe, with Gherkin on top, and inside Storybook's play functions.
+Playwright, Ember, Cypress, WebdriverIO, Vitest browser mode, Puppeteer,
+TestCafe, Nightwatch, node:test and Bun, with Gherkin on top, and inside Storybook's play functions.
 
-**Website:** [joegaudet.com/harnessed](https://joegaudet.com/harnessed/)
+**Website:** [joegaudet.com/harnessed](https://joegaudet.com/harnessed/) · **Guide:** [joegaudet.com/harnessed/guide](https://joegaudet.com/harnessed/guide/)
 
 A **harness** is a class that lets a test drive a component the way a person would,
 through methods named for what the component _does_. Tests state intent; the

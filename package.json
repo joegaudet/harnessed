@@ -27,6 +27,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm test:rules && pnpm test:units && pnpm --filter conformance test",
+    "guide:build": "pnpm --filter docs-app run build",
+    "guide:start": "pnpm --filter docs-app start",
     "test:dom": "pnpm --filter conformance test:dom",
     "test:playwright": "pnpm --filter conformance test:playwright",
     "release": "pnpm build && node scripts/publish.mjs",
