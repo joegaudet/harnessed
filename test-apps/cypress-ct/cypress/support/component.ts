@@ -1,4 +1,6 @@
 import '@harnessed-ts/cypress/support'
+// The catch-all intercept mocks go through, and a reset after every test.
+import '@harnessed-ts/cypress/mock'
 import { mount } from 'cypress/react'
 
 declare global {

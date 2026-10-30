@@ -14,11 +14,13 @@
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^",
     "@harnessed-ts/page": "workspace:^"
   },
   "devDependencies": {
     "@harnessed-ts/dom": "workspace:^",
     "@harnessed-ts/playwright": "workspace:^",
+    "@mswjs/interceptors": "^0.45.10",
     "@playwright/test": "^1.64.1",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",

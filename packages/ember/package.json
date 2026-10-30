@@ -37,6 +37,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./mock": {
+      "types": "./dist/mock.d.ts",
+      "import": "./dist/mock.js",
+      "require": "./dist/mock.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -50,12 +55,14 @@
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^",
     "@harnessed-ts/resolve": "workspace:^"
   },
   "peerDependencies": {
     "@ember/test-helpers": ">=5",
     "@testing-library/dom": ">=10",
-    "@testing-library/user-event": ">=14"
+    "@testing-library/user-event": ">=14",
+    "@mswjs/interceptors": ">=0.39"
   },
   "scripts": {
     "build": "tsup",
@@ -68,5 +75,10 @@
     "@ember/test-helpers": "^5.4.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.7"
+  },
+  "peerDependenciesMeta": {
+    "@mswjs/interceptors": {
+      "optional": true
+    }
   }
 }

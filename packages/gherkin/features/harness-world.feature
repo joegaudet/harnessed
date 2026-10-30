@@ -18,3 +18,11 @@ Feature: Harnesses in a Gherkin scenario
     When I open the wizard page
     And I continue from step one
     Then the current step shows "Step two"
+
+  # @mocks needs a mock transport; a runner without one leaves it out by tag.
+  @mocks
+  Scenario: A mock set in a step answers the page as it loads
+    Given the world is empty
+    And the API answers the user as "Ada"
+    When I open the data page
+    Then the user shows "Ada"

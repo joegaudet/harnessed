@@ -17,6 +17,7 @@ export default defineConfig({
   treeshake: true,
   external: [
     '@harnessed-ts/core',
+    '@harnessed-ts/mock',
     '@harnessed-ts/nightwatch',
     '@playwright/test',
     '@cucumber/cucumber',

@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest'
 import noComponentHarnessInTest from '../src/rules/no-component-harness-in-test'
 import noPageOrScreenInHarness from '../src/rules/no-page-or-screen-in-harness'
 import noRawLocatorInTest from '../src/rules/no-raw-locator-in-test'
+import noRawIntercept from '../src/rules/no-raw-intercept'
+import awaitMockInstall from '../src/rules/await-mock-install'
 import noReachThroughCast from '../src/rules/no-reach-through-cast'
 import requireHost from '../src/rules/require-host'
 import requireWaitForReady from '../src/rules/require-wait-for-ready'
@@ -129,6 +131,11 @@ describe('require-host', () => {
         name: 'a class that is not a harness',
         filename: '/repo/harness/util.ts',
         code: `class Helper extends Object {}`,
+      },
+      {
+        name: 'an API harness answers requests and has no host',
+        filename: '/repo/harness/apis/users.api.ts',
+        code: `@Api({ base: '/api/users' }) class UsersApi extends ApiHarness {}`,
       },
       {
         name: 'an abstract page base may leave the host to its subclasses',
@@ -860,5 +867,125 @@ describe('shared helpers', () => {
     expect(classifyConstructed('RouteHarness')).toBe('page')
     expect(classifyConstructed('CartHarness')).toBe('component')
     expect(classifyConstructed('Helper')).toBeUndefined()
+  })
+})
+
+describe('no-raw-intercept', () => {
+  tester.run('no-raw-intercept', noRawIntercept, {
+    valid: [
+      {
+        name: "harnessed's mock",
+        filename: '/repo/tests/checkout.spec.ts',
+        code: `await mock(pw(page)).get('/api/cart').reply(json([]))`,
+      },
+      {
+        name: "cy.mock is harnessed's own command",
+        filename: '/repo/cypress/e2e/cart.cy.ts',
+        code: `cy.mock(api => api.get('/api/cart').reply([]))`,
+      },
+      {
+        name: 'a Cypress support file is runner plumbing',
+        filename: '/repo/cypress/support/e2e.ts',
+        code: `cy.intercept('**', () => {})`,
+      },
+      {
+        name: "app code is not this rule's business",
+        filename: '/repo/src/router.ts',
+        code: `router.route('/x')`,
+      },
+      {
+        name: 'route on something that is not a page',
+        filename: '/repo/tests/app.test.ts',
+        code: `app.route('/x')`,
+      },
+    ],
+    invalid: [
+      {
+        name: "Playwright's page.route",
+        filename: '/repo/e2e/cart.spec.ts',
+        code: `await page.route('**/api/**', route => route.fulfill({ json: [] }))`,
+        errors: [{ messageId: 'raw', data: { call: 'page.route' } }],
+      },
+      {
+        name: 'a browser context, and WebSockets',
+        filename: '/repo/e2e/live.spec.ts',
+        code: `await context.routeWebSocket('/ws', () => {}); await this.page.routeFromHAR('x.har')`,
+        errors: [
+          { messageId: 'raw', data: { call: 'context.routeWebSocket' } },
+          { messageId: 'raw', data: { call: 'page.routeFromHAR' } },
+        ],
+      },
+      {
+        name: 'cy.intercept in a spec',
+        filename: '/repo/cypress/e2e/cart.cy.ts',
+        code: `cy.intercept('GET', '/api/cart', [])`,
+        errors: [{ messageId: 'raw', data: { call: 'cy.intercept' } }],
+      },
+      {
+        name: 'Puppeteer, WebdriverIO, TestCafe and MSW',
+        filename: '/repo/test/all.test.ts',
+        code: `await page.setRequestInterception(true); await browser.mock('**/api'); RequestMock(); setupServer()`,
+        errors: [
+          { messageId: 'raw', data: { call: 'page.setRequestInterception' } },
+          { messageId: 'raw', data: { call: 'browser.mock' } },
+          { messageId: 'raw', data: { call: 'RequestMock' } },
+          { messageId: 'raw', data: { call: 'setupServer' } },
+        ],
+      },
+      {
+        name: 'a Storybook play function',
+        filename: '/repo/src/Cart.stories.tsx',
+        code: `export const S = { play: async () => { setupWorker() } }`,
+        errors: [{ messageId: 'raw', data: { call: 'setupWorker' } }],
+      },
+    ],
+  })
+})
+
+describe('await-mock-install', () => {
+  tester.run('await-mock-install', awaitMockInstall, {
+    valid: [
+      { name: 'awaited', code: `await mock(env).get('/api/x').once().reply(json([]))` },
+      {
+        name: 'awaited through a variable',
+        code: `const api = mock(env); await api.post('/api/x').reply(created())`,
+      },
+      { name: 'returned from a callback', code: `cy.mock(api => api.get('/x').reply([]))` },
+      {
+        name: 'kept in a variable',
+        code: `const api = mock(env); const route = api.get('/x').reply([])`,
+      },
+      { name: 'nock is synchronous, and not ours', code: `nock('http://x').get('/a').reply(200)` },
+      { name: 'an unrelated use()', code: `app.use(cors())` },
+      { name: 'voided on purpose', code: `void mock(env).ready()` },
+    ],
+    invalid: [
+      {
+        name: 'a floating reply on mock(env)',
+        code: `mock(env).get('/api/x').reply(json([]))`,
+        errors: [{ messageId: 'floating', data: { call: '.reply()' } }],
+      },
+      {
+        name: 'through a variable, with modifiers in the chain',
+        code: `const api = mock(env, { scope: '/api/**' }); api.post('/api/orders').once().delay(10).reply(created())`,
+        errors: [{ messageId: 'floating', data: { call: '.reply()' } }],
+      },
+      {
+        name: "a world's or fixture's mocks",
+        code: `this.mocks.get('/a').reply([]); mocks.graphql.query('Q', gqlData({}))`,
+        errors: [
+          { messageId: 'floating', data: { call: '.reply()' } },
+          { messageId: 'floating', data: { call: '.query()' } },
+        ],
+      },
+      {
+        name: 'use() and fromHar() on the mock',
+        code: `const api = mock(env); api.use(UsersApi); api.fromHar(har)`,
+        errors: [
+          { messageId: 'floating', data: { call: '.use()' } },
+          { messageId: 'floating', data: { call: '.fromHar()' } },
+        ],
+      },
+    ],
   })
 })

@@ -1073,5 +1073,171 @@
         ]
       }
     ]
+  },
+  "data": {
+    "tag": "div",
+    "attrs": {
+      "data-testid": "stage"
+    },
+    "children": [
+      {
+        "tag": "section",
+        "attrs": {
+          "data-testid": "page-data"
+        },
+        "children": [
+          {
+            "tag": "div",
+            "attrs": {
+              "data-testid": "data-screen"
+            },
+            "children": [
+              {
+                "tag": "section",
+                "attrs": {
+                  "data-testid": "user-panel"
+                },
+                "children": [
+                  {
+                    "tag": "p",
+                    "attrs": {
+                      "data-testid": "user-loading"
+                    },
+                    "children": [
+                      "Loading"
+                    ]
+                  },
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "button"
+                    },
+                    "children": [
+                      "Reload user"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "section",
+                "attrs": {
+                  "data-testid": "todo-panel"
+                },
+                "children": [
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "button"
+                    },
+                    "children": [
+                      "Load todos"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "form",
+                "attrs": {
+                  "data-testid": "search-panel"
+                },
+                "children": [
+                  {
+                    "tag": "label",
+                    "attrs": {},
+                    "children": [
+                      "Query",
+                      {
+                        "tag": "input",
+                        "attrs": {},
+                        "children": []
+                      }
+                    ]
+                  },
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "submit"
+                    },
+                    "children": [
+                      "Search"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "section",
+                "attrs": {
+                  "data-testid": "profile-panel"
+                },
+                "children": [
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "button"
+                    },
+                    "children": [
+                      "Load profile"
+                    ]
+                  }
+                ]
+              },
+              {
+                "tag": "section",
+                "attrs": {
+                  "data-testid": "feed-panel"
+                },
+                "children": [
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "button"
+                    },
+                    "children": [
+                      "Open feed"
+                    ]
+                  },
+                  {
+                    "tag": "ul",
+                    "attrs": {},
+                    "children": []
+                  }
+                ]
+              },
+              {
+                "tag": "section",
+                "attrs": {
+                  "data-testid": "socket-panel"
+                },
+                "children": [
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "button"
+                    },
+                    "children": [
+                      "Connect"
+                    ]
+                  },
+                  {
+                    "tag": "button",
+                    "attrs": {
+                      "type": "button"
+                    },
+                    "children": [
+                      "Send ping"
+                    ]
+                  },
+                  {
+                    "tag": "ul",
+                    "attrs": {},
+                    "children": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

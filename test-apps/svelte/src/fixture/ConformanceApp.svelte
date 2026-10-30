@@ -7,6 +7,7 @@
 <script lang="ts">
   import CardGrid from './CardGrid.svelte'
   import { CARDS } from './cards'
+  import DataScreen from './DataScreen.svelte'
   import FramedPanel from './FramedPanel.svelte'
   import LoginForm from './LoginForm.svelte'
   import PortalDialog from './PortalDialog.svelte'
@@ -44,6 +45,11 @@
   {#if view === 'frame'}
     <section data-testid="page-frame">
       <FramedPanel />
+    </section>
+  {/if}
+  {#if view === 'data'}
+    <section data-testid="page-data">
+      <DataScreen />
     </section>
   {/if}
   {#if view === 'wizard'}

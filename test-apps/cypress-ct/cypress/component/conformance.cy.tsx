@@ -1,4 +1,4 @@
-import { pageSpecs, specs, viewSearch } from '@harnessed-ts/conformance'
+import { mockSpecs, pageSpecs, specs, viewSearch } from '@harnessed-ts/conformance'
 import type { ConformanceCtx, View } from '@harnessed-ts/conformance'
 import { App } from '@harnessed-ts/conformance/fixture'
 import { timeoutFor } from '@harnessed-ts/core'
@@ -73,9 +73,15 @@ function registerCatalog(options: HarnessCommandOptions): void {
       cy.harnessEnv(env => spec.run(context(env)), options)
     })
   }
+  for (const spec of mockSpecs) {
+    it(spec.name, () => {
+      cy.mount(<Stage />)
+      cy.harnessEnv(env => spec.run({ ...context(env), env: () => env }), options)
+    })
+  }
 }
 
-// No urlSpecs: a component test has no address bar of its own to drive — the
+// No urlSpecs or mockUrlSpecs: a component test has no address bar of its own to drive — the
 // spec frame is the page — so goto() refuses here by design.
 describe('conformance: cypress driver (component)', () => {
   registerCatalog({})

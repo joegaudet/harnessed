@@ -17,6 +17,8 @@ export default tseslint.config(
       'test-apps/**',
       // Standalone StackBlitz projects, installed from npm rather than the workspace.
       'examples/**',
+      // The guide app, like a test-app: Ember tooling and its own `typecheck`.
+      'docs-app/**',
     ],
   },
   js.configs.recommended,
@@ -96,6 +98,12 @@ export default tseslint.config(
       // that is their job, and there is no harness to route through.
       'harnessed/no-raw-locator-in-test': 'off',
     },
+  },
+  {
+    // The drivers are where each runner's own interception belongs: they build
+    // `mock(env)` on it. `packages/cypress` would otherwise read as a test dir.
+    files: ['packages/*/src/**'],
+    rules: { 'harnessed/no-raw-intercept': 'off' },
   },
   {
     // errorQuery and lastMissing hand out a Query on purpose: the matcher specs

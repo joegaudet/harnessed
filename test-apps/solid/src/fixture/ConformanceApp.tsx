@@ -1,6 +1,7 @@
 import { createSignal, Show } from 'solid-js'
 import { CardGrid } from './CardGrid'
 import type { CardSpec } from './CardGrid'
+import { DataScreen } from './DataScreen'
 import { FramedPanel } from './FramedPanel'
 import { LoginForm } from './LoginForm'
 import { PortalDialog } from './PortalDialog'
@@ -50,6 +51,11 @@ export function ConformanceApp() {
       <Show when={view === 'frame'}>
         <section data-testid="page-frame">
           <FramedPanel />
+        </section>
+      </Show>
+      <Show when={view === 'data'}>
+        <section data-testid="page-data">
+          <DataScreen />
         </section>
       </Show>
       <Show when={view === 'wizard'}>

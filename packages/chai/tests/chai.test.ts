@@ -103,3 +103,34 @@ describe('@harnessed-ts/chai', () => {
     await expect(harness).to.readAs('Hi')
   })
 })
+
+describe('request assertions', () => {
+  const call = (body: unknown) => ({
+    method: 'POST',
+    url: 'http://x/api/orders?src=web',
+    headers: { 'content-type': 'application/json' },
+    body,
+    params: {},
+    query: { src: 'web' },
+    handler: 'POST /api/orders',
+    status: 201,
+    at: 0,
+  })
+
+  it('requested, requestedTimes and requestedWith read a log of calls', async () => {
+    const calls = [call({ sku: 'A1' })]
+    await expect(calls).to.be.requested
+    await expect([]).not.to.be.requested
+    await expect(calls).to.have.been.requestedTimes(1)
+    await expect(calls).to.have.been.requestedWith({ body: { sku: 'A1' }, query: { src: 'web' } })
+  })
+
+  it('says what the requests carried when requestedWith fails', async () => {
+    const message = await failure(() =>
+      expect([call({ sku: 'B2' })]).to.have.been.requestedWith({ body: { sku: 'A1' } }),
+    )
+    expect(message).to.match(
+      /requested with \{"body":\{"sku":"A1"\}\}, but it got:\n {2}POST http:\/\/x\/api\/orders\?src=web \{"sku":"B2"\}/,
+    )
+  })
+})

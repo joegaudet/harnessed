@@ -37,6 +37,8 @@ const story = await StoryPage.goto(pw(page), LoginStories, 'WrongPassword', { pl
 await story.harness(LoginFormHarness).signInAs('ada@example.com', 'hunter2')
 ```
 
+**Mocking:** `harnessed()` from `@harnessed-ts/storybook/mock` installs a story's `parameters.harnessed.mocks` before it renders, and hands `play` the mock. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 **Ember.** `@harnessed-ts/storybook/ember` renders stories as Ember components
 under `@storybook/html-vite`, through Ember's `renderComponent`, and its
 `harnessed()` settles Ember after every interaction. `emberIndexer` from

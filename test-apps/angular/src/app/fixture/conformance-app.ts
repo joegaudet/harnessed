@@ -6,6 +6,7 @@ import { defer, filter, map, of, startWith } from 'rxjs'
 import type { Observable } from 'rxjs'
 import { CardGrid } from './card-grid'
 import type { CardSpec } from './card-grid'
+import { DataScreen } from './data-screen'
 import { FramedPanel } from './framed-panel'
 import { LoginForm } from './login-form'
 import { PortalDialog } from './portal-dialog'
@@ -36,7 +37,7 @@ export const FIXTURE_ROUTES: Routes = [{ path: '**', children: [] }]
  */
 @Component({
   selector: 'fixture-app',
-  imports: [CardGrid, FramedPanel, LoginForm, PortalDialog, StepOne, StepTwo],
+  imports: [CardGrid, DataScreen, FramedPanel, LoginForm, PortalDialog, StepOne, StepTwo],
   template: `
     @if (location(); as at) {
       <div data-testid="stage">
@@ -60,6 +61,11 @@ export const FIXTURE_ROUTES: Routes = [{ path: '**', children: [] }]
         @if (view() === 'frame') {
           <section data-testid="page-frame">
             <div fixtureFramedPanel></div>
+          </section>
+        }
+        @if (view() === 'data') {
+          <section data-testid="page-data">
+            <div fixtureDataScreen></div>
           </section>
         }
         @if (view() === 'wizard') {

@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/page.ts', 'src/ember.ts', 'src/ember-node.ts'],
+  entry: ['src/index.ts', 'src/page.ts', 'src/mock.ts', 'src/ember.ts', 'src/ember-node.ts'],
   format: ['esm', 'cjs'],
   target: 'es2022',
   dts: false,
@@ -9,9 +9,8 @@ export default defineConfig({
   clean: false,
   treeshake: true,
   external: [
-    '@harnessed-ts/core',
-    '@harnessed-ts/dom',
-    '@harnessed-ts/page',
+    /^@harnessed-ts\//,
+    /^@mswjs\//,
     '@testing-library/dom',
     /^storybook(\/.*)?$/,
     // The app's own Ember, resolved by its build: Embroider maps these to ember-source.

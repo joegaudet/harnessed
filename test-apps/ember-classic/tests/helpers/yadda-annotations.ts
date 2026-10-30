@@ -1,4 +1,5 @@
 import { setupApplicationTest, setupRenderingTest, setupTest } from 'ember-qunit'
+import { setupMocks } from '@harnessed-ts/ember/mock'
 
 /**
  * ember-cli-yadda's hooks, which every compiled feature imports. The shared
@@ -23,7 +24,11 @@ export function runScenario(
 export function setupFeature(annotations: Annotations): Setup {
   if (annotations['setuprenderingtest']) return setupRenderingTest
   if (annotations['setuptest']) return setupTest
-  return setupApplicationTest
+  // Every scenario's mocks are ended after it, as `setupMocks` does for a module.
+  return hooks => {
+    setupApplicationTest(hooks)
+    setupMocks(hooks)
+  }
 }
 
 export function setupScenario(

@@ -1,12 +1,15 @@
 name: pages
 
-# Publishes docs/site, with the README's GIFs from docs/media, to GitHub Pages.
+# Publishes docs/site, with the README's GIFs from docs/media and the guide built from
+# docs-app into guide/, to GitHub Pages.
 on:
   push:
     branches: [main]
     paths:
       - 'docs/site/**'
       - 'docs/media/**'
+      - 'docs-app/**'
+      - 'packages/*/src/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -27,11 +30,22 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm guide:build
       - uses: actions/configure-pages@v6
       - run: |
           mkdir -p _site/media
           cp -R docs/site/. _site/
           cp docs/media/*.gif _site/media/
+          cp -R docs-app/dist _site/guide
+          # Deep links into the guide land on Pages' 404; the app routes them.
+          cp docs-app/dist/index.html _site/404.html
       - uses: actions/upload-pages-artifact@v5
       - id: deployment
         uses: actions/deploy-pages@v5

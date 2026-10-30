@@ -1,0 +1,34 @@
+diff --git a/addon-main.cjs b/addon-main.cjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..1385e17a9cdf9c6a393d2300caecbf065d04a2ec
+--- /dev/null
++++ b/addon-main.cjs
+@@ -0,0 +1,4 @@
++'use strict'
++
++const { addonV1Shim } = require('@embroider/addon-shim')
++module.exports = addonV1Shim(__dirname)
+diff --git a/package.json b/package.json
+index 43d61709440c440382f5a069e7c76ffae0e6a84c..3e58deb90965f2f73c5d5fd27d382384126238ea 100644
+--- a/package.json
++++ b/package.json
+@@ -16,7 +16,8 @@
+   "files": [
+     "declarations",
+     "dist",
+-    "src"
++    "src",
++    "addon-main.cjs"
+   ],
+   "dependencies": {
+     "@ember/test-helpers": "^5.4.1",
+@@ -105,7 +106,8 @@
+   },
+   "ember-addon": {
+     "version": 2,
+-    "type": "addon"
++    "type": "addon",
++    "main": "addon-main.cjs"
+   },
+   "imports": {
+     "#src/*": "./src/*",

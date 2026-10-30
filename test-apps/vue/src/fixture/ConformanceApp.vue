@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import CardGrid from './CardGrid.vue'
 import { CARDS } from './cards'
+import DataScreen from './DataScreen.vue'
 import FramedPanel from './FramedPanel.vue'
 import LoginForm from './LoginForm.vue'
 import PortalDialog from './PortalDialog.vue'
@@ -39,6 +40,9 @@ const step = ref<'one' | 'two'>('one')
     </section>
     <section v-if="view === 'frame'" data-testid="page-frame">
       <FramedPanel />
+    </section>
+    <section v-if="view === 'data'" data-testid="page-data">
+      <DataScreen />
     </section>
     <section v-if="view === 'wizard'" data-testid="page-wizard">
       <StepTwo v-if="onStepTwoPath" :token="token" />

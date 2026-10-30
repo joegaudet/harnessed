@@ -1,6 +1,6 @@
 import { fixtureParity } from '@harnessed-ts/conformance'
 import { render } from '@solidjs/testing-library'
-import { describe, it } from 'vitest'
+import { afterEach, describe, it, vi } from 'vitest'
 import { ConformanceApp } from '../src/fixture/ConformanceApp'
 
 /**
@@ -10,7 +10,14 @@ import { ConformanceApp } from '../src/fixture/ConformanceApp'
  * package's own test.
  */
 describe('conformance: Solid fixture parity', () => {
-  fixtureParity(it, async url => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  fixtureParity(it, async (url, view) => {
+    // The data view fetches as it mounts. React's tree is read with the request
+    // still in flight, so hold this one there too.
+    if (view === 'data') vi.stubGlobal('fetch', () => new Promise<never>(() => {}))
     window.history.pushState({}, '', url)
     const { container } = render(() => <ConformanceApp />)
     // jsdom replaces a srcless iframe's first document before its `load`, and the

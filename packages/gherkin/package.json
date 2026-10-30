@@ -76,7 +76,8 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "@harnessed-ts/core": "workspace:^"
+    "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^"
   },
   "peerDependencies": {
     "@badeball/cypress-cucumber-preprocessor": ">=20",

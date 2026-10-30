@@ -19,13 +19,15 @@ export const DEFAULT_RUNTIME_CONFIG: Readonly<RuntimeConfig> = Object.freeze({
 
 import type { RuntimeConfig } from './config'
 import type { HarnessOptions } from './host-meta'
-import type { Navigation, QueryFactory } from './registry'
+import type { BeforeNavigate, Navigation, QueryFactory } from './registry'
 
 const SLOT = Symbol.for('harnessed.globals.v1')
 
 export interface HarnessedGlobals {
   drivers: Map<string, QueryFactory>
   navigations: Map<string, Navigation>
+  /** Run, in order, before a page navigates. See `registerBeforeNavigate`. */
+  beforeNavigate: Map<string, BeforeNavigate>
   hostMeta: WeakMap<object, HarnessOptions>
   /** Overrides applied by `configure()`, and the merged view readers get. */
   overrides: Partial<RuntimeConfig>
@@ -43,6 +45,7 @@ export function globals(): HarnessedGlobals {
     slot = {
       drivers: new Map(),
       navigations: new Map(),
+      beforeNavigate: new Map(),
       hostMeta: new WeakMap(),
       overrides: {},
       merged: DEFAULT_RUNTIME_CONFIG,
@@ -52,5 +55,6 @@ export function globals(): HarnessedGlobals {
   // An older copy of this module may have created the slot before this field
   // existed; sharing state across copies is the slot's whole job, so tolerate it.
   slot.navigations ??= new Map()
+  slot.beforeNavigate ??= new Map()
   return slot
 }

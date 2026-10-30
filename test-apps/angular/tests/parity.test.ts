@@ -1,5 +1,5 @@
 import { fixtureParity } from '@harnessed-ts/conformance'
-import { describe, it } from 'vitest'
+import { afterEach, describe, it, vi } from 'vitest'
 import { renderAt } from './show'
 
 /**
@@ -9,7 +9,14 @@ import { renderAt } from './show'
  * package's own test.
  */
 describe('conformance: Angular fixture parity', () => {
-  fixtureParity(it, async url => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  fixtureParity(it, async (url, view) => {
+    // The data view fetches as it mounts. React's tree is read with the request
+    // still in flight, so hold this one there too.
+    if (view === 'data') vi.stubGlobal('fetch', () => new Promise<never>(() => {}))
     const fixture = await renderAt(url)
     return (fixture.nativeElement as HTMLElement).querySelector('[data-testid="stage"]')
   })

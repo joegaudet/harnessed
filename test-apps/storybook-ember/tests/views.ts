@@ -11,4 +11,5 @@ export const STORY_FOR: Record<View, StoryName<typeof ViewStories>> = {
   dialog: 'Dialog',
   frame: 'Frame',
   wizard: 'Wizard',
+  data: 'Data',
 }

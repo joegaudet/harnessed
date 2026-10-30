@@ -43,6 +43,11 @@
       "import": "./dist/page.js",
       "require": "./dist/page.cjs"
     },
+    "./mock": {
+      "types": "./dist/mock.d.ts",
+      "import": "./dist/mock.js",
+      "require": "./dist/mock.cjs"
+    },
     "./ember": {
       "types": "./dist/ember.d.ts",
       "import": "./dist/ember.js",
@@ -67,18 +72,23 @@
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/dom": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^",
     "@harnessed-ts/page": "workspace:^"
   },
   "peerDependencies": {
     "@ember/test-waiters": ">=4",
     "@testing-library/dom": ">=10",
     "@testing-library/user-event": ">=14",
+    "@mswjs/interceptors": ">=0.39",
     "content-tag": ">=3",
     "ember-source": ">=6.8",
     "storybook": ">=9"
   },
   "peerDependenciesMeta": {
     "@ember/test-waiters": {
+      "optional": true
+    },
+    "@mswjs/interceptors": {
       "optional": true
     },
     "content-tag": {

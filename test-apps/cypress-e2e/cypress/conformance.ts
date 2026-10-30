@@ -1,4 +1,11 @@
-import { pageSpecs, specs, urlSpecs, viewSearch } from '@harnessed-ts/conformance'
+import {
+  mockSpecs,
+  mockUrlSpecs,
+  pageSpecs,
+  specs,
+  urlSpecs,
+  viewSearch,
+} from '@harnessed-ts/conformance'
 import type { ConformanceCtx, View } from '@harnessed-ts/conformance'
 import { navigationFor, timeoutFor } from '@harnessed-ts/core'
 import type { CypressEnv, HarnessCommandOptions } from '@harnessed-ts/cypress'
@@ -42,6 +49,16 @@ function registerCatalog(options: HarnessCommandOptions): void {
     })
   }
   for (const spec of urlSpecs) {
+    it(`url: ${spec.name}`, () => {
+      cy.harnessEnv(env => spec.run({ env }), options)
+    })
+  }
+  for (const spec of mockSpecs) {
+    it(spec.name, () => {
+      cy.harnessEnv(env => spec.run({ ...context(env), env: () => env }), options)
+    })
+  }
+  for (const spec of mockUrlSpecs) {
     it(`url: ${spec.name}`, () => {
       cy.harnessEnv(env => spec.run({ env }), options)
     })

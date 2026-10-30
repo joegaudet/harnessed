@@ -1,6 +1,7 @@
-import { pageSpecs, specs, urlSpecs } from '@harnessed-ts/conformance'
+import { mockSpecs, mockUrlSpecs, pageSpecs, specs, urlSpecs } from '@harnessed-ts/conformance'
 import type { ConformanceCtx } from '@harnessed-ts/conformance'
 import { wdio } from '@harnessed-ts/webdriverio'
+import { mock, resetMocks } from '@harnessed-ts/webdriverio/mock'
 import { browser } from '@wdio/globals'
 import { show } from './stage'
 
@@ -27,4 +28,38 @@ describe('conformance: webdriverio driver', () => {
       await spec.run({ env: wdio(browser) })
     })
   }
+
+  // Mocking needs BiDi. Over Classic every mock spec asserts the documented
+  // refusal instead, so the gap is pinned rather than skipped.
+  async function refusedOverClassic(): Promise<boolean> {
+    if (browser.isBidi) return false
+    const refusal = await mock(wdio(browser))
+      .ready()
+      .then(
+        () => undefined,
+        (error: Error) => error.message,
+      )
+    if (refusal === undefined || !/needs WebDriver BiDi/.test(refusal)) {
+      throw new Error(`expected the Classic refusal, got ${String(refusal)}`)
+    }
+    return true
+  }
+
+  for (const spec of mockSpecs) {
+    it(spec.name, async () => {
+      if (await refusedOverClassic()) return
+      await spec.run({ ...context(), env: () => wdio(browser) })
+    })
+  }
+
+  for (const spec of mockUrlSpecs) {
+    it(`url: ${spec.name}`, async () => {
+      if (await refusedOverClassic()) return
+      await spec.run({ env: wdio(browser) })
+    })
+  }
+
+  // The browser outlives a test: anything a spec left unverified fails it, and
+  // the next spec starts without interception.
+  afterEach(() => resetMocks())
 })

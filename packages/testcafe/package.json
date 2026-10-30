@@ -37,7 +37,19 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./mock": {
+      "types": "./dist/mock.d.ts",
+      "import": "./dist/mock.js",
+      "require": "./dist/mock.cjs"
+    },
     "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "mock": [
+        "./dist/mock.d.ts"
+      ]
+    }
   },
   "files": [
     "dist",
@@ -50,6 +62,7 @@
   },
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^",
     "@harnessed-ts/resolve": "workspace:^"
   },
   "peerDependencies": {

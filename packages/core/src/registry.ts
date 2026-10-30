@@ -36,6 +36,28 @@ export function registerNavigation(id: string, navigation: Navigation): void {
   globals().navigations.set(id, navigation)
 }
 
+/**
+ * Work a page must wait for before it navigates: `@harnessed-ts/mock` uses it so
+ * a request fired while the page loads is answered by a mock the test set up
+ * just before `goto()`. `page` is the page harness about to navigate.
+ */
+export type BeforeNavigate = (env: EnvConfig, page: object) => Promise<void>
+
+/**
+ * Registers work every `goto()` awaits before navigating. Lives in core so a
+ * package can hook navigation without `@harnessed-ts/page` depending on it.
+ * Keyed rather than listed: a module evaluated twice (an ESM and a CJS copy)
+ * replaces its own hook instead of running it twice.
+ */
+export function registerBeforeNavigate(key: string, hook: BeforeNavigate): void {
+  globals().beforeNavigate.set(key, hook)
+}
+
+/** Runs every registered `BeforeNavigate` hook, in registration order. */
+export async function beforeNavigate(env: EnvConfig, page: object): Promise<void> {
+  for (const hook of globals().beforeNavigate.values()) await hook(env, page)
+}
+
 /** The navigation capability for an env, or a readable refusal. */
 export function navigationFor(env: EnvConfig): Navigation {
   const navigation = globals().navigations.get(env.driver)

@@ -8,5 +8,5 @@ export default defineConfig({
   sourcemap: true,
   clean: false,
   treeshake: true,
-  external: ['@harnessed-ts/core', 'qunit'],
+  external: ['@harnessed-ts/mock', '@harnessed-ts/core', 'qunit'],
 })

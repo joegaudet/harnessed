@@ -1,6 +1,7 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import CardGrid, { type CardSpec } from './card-grid';
+import DataScreen from './data-screen';
 import FramedPanel from './framed-panel';
 import LoginForm from './login-form';
 import PortalDialog from './portal-dialog';
@@ -42,6 +43,7 @@ export default class ConformanceApp extends Component<Signature> {
       dialog: view === 'dialog',
       frame: view === 'frame',
       wizard: view === 'wizard',
+      data: view === 'data',
     };
   }
 
@@ -87,6 +89,11 @@ export default class ConformanceApp extends Component<Signature> {
       {{#if this.is.frame}}
         <section data-testid="page-frame">
           <FramedPanel />
+        </section>
+      {{/if}}
+      {{#if this.is.data}}
+        <section data-testid="page-data">
+          <DataScreen />
         </section>
       {{/if}}
       {{#if this.is.wizard}}

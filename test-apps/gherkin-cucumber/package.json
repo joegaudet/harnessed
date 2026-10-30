@@ -10,6 +10,7 @@
     "@harnessed-ts/conformance": "workspace:^",
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/gherkin": "workspace:^",
+    "@harnessed-ts/mock": "workspace:^",
     "@harnessed-ts/playwright": "workspace:^",
     "playwright": "^1.64.1",
     "start-server-and-test": "^3.0.12"

@@ -1,8 +1,10 @@
 import type { Rule } from 'eslint'
+import awaitMockInstall from './rules/await-mock-install'
 import behaviouralMethodNames from './rules/behavioural-method-names'
 import harnessPublicSurface from './rules/harness-public-surface'
 import noComponentHarnessInTest from './rules/no-component-harness-in-test'
 import noPageOrScreenInHarness from './rules/no-page-or-screen-in-harness'
+import noRawIntercept from './rules/no-raw-intercept'
 import noRawLocatorInTest from './rules/no-raw-locator-in-test'
 import noReachThroughCast from './rules/no-reach-through-cast'
 import noRunnerImportInHarness from './rules/no-runner-import-in-harness'
@@ -10,10 +12,12 @@ import requireHost from './rules/require-host'
 import requireWaitForReady from './rules/require-wait-for-ready'
 
 export const rules: Record<string, Rule.RuleModule> = {
+  'await-mock-install': awaitMockInstall,
   'behavioural-method-names': behaviouralMethodNames,
   'harness-public-surface': harnessPublicSurface,
   'no-component-harness-in-test': noComponentHarnessInTest,
   'no-page-or-screen-in-harness': noPageOrScreenInHarness,
+  'no-raw-intercept': noRawIntercept,
   'no-raw-locator-in-test': noRawLocatorInTest,
   'no-reach-through-cast': noReachThroughCast,
   'no-runner-import-in-harness': noRunnerImportInHarness,
@@ -48,11 +52,17 @@ const recommendedRules = {
   // A suggestion by default: a repo mid-adoption still has tests that predate
   // their harnesses, and failing the build on those helps nobody.
   'harnessed/no-raw-locator-in-test': 'warn',
+  // A floating mock install is a race, not a style point.
+  'harnessed/await-mock-install': 'error',
+  // A suggestion for the same reason as raw locators: tests that predate
+  // harnessed mocking keep passing.
+  'harnessed/no-raw-intercept': 'warn',
 } as const
 
 const strictRules = {
   ...recommendedRules,
   'harnessed/no-raw-locator-in-test': 'error',
+  'harnessed/no-raw-intercept': 'error',
   // Strict only: a repo mid-adoption has tests that reach a component harness
   // directly, and those should keep passing until it has pages to enter through.
   'harnessed/no-component-harness-in-test': 'error',

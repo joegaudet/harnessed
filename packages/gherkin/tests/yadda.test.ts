@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs'
 import type { EnvConfig } from '@harnessed-ts/core'
-import { describe, expect, it } from 'vitest'
+import { json, registerMockTransport, resetMocks } from '@harnessed-ts/mock'
+import type { Dispatcher } from '@harnessed-ts/mock'
+import { afterEach, describe, expect, it } from 'vitest'
 import Yadda from 'yadda'
 import { definePages } from '../src/index'
 import { pageDictionary, yaddaWorld } from '../src/yadda'
@@ -32,11 +34,40 @@ class WizardSummary {
   constructor(readonly env: EnvConfig) {}
 }
 
-const pages = definePages({ wizard: Wizard, 'wizard summary': WizardSummary })
+// A transport with no browser: the data page's request goes straight to the
+// mock, so the mocked scenario runs its real `mocks` getter end to end.
+let network: Dispatcher | undefined
+registerMockTransport('test', {
+  capabilities: { streaming: false, websockets: false, harRecord: false },
+  key: () => globalThis,
+  async install(_env, dispatcher) {
+    network = dispatcher
+    return { async dispose() {} }
+  },
+})
+afterEach(() => resetMocks())
+
+/** A stand-in for the data page: loading it requests the user. */
+class Data {
+  userName: string | undefined
+  constructor(readonly env: EnvConfig) {}
+  async goto(): Promise<void> {
+    const result = await network!.dispatch({
+      method: 'GET',
+      url: 'http://app.test/api/users/1',
+      headers: {},
+      body: null,
+    })
+    if (result.kind === 'reply') this.userName = JSON.parse(String(result.reply.body)).name
+  }
+}
+
+const pages = definePages({ wizard: Wizard, 'wizard summary': WizardSummary, data: Data })
 const env: EnvConfig = { driver: 'test' }
 
 interface World {
   wizard: Wizard
+  data: Data
   step: StepOne | StepTwo
 }
 
@@ -54,11 +85,22 @@ function steps(seen: Array<Partial<World>> = []) {
       seen.push(world)
       expect(world).toEqual({})
     })
-    .when('I open the $page page', async ({ world, open }, name: 'wizard') => {
+    .when('I open the $page page', async ({ world, open }, name: 'wizard' | 'data') => {
+      if (name === 'data') {
+        world.data = open(name)
+        await world.data.goto()
+        return
+      }
       const wizard = open(name)
       await wizard.goto()
       world.wizard = wizard
       world.step = wizard.stepOne
+    })
+    .given('the API answers the user as "$name"', async ({ mocks }, name: string) => {
+      await mocks.get('/api/users/:id').reply(json({ name }))
+    })
+    .then('the user shows "$name"', ({ world }, name: string) => {
+      expect(world.data?.userName).toBe(name)
     })
     .then('the wizard shows "$heading"', async ({ world }, heading: string) => {
       expect(await world.wizard?.stepOne.heading()).toBe(heading)
@@ -79,15 +121,16 @@ describe('@harnessed-ts/gherkin/yadda', () => {
   it('runs every scenario of the shared feature, a fresh world each, in either order', async () => {
     // Every scenario checks its world starts empty and then fills it, so the
     // check holds whichever order a runner (ember-exam --random) picks.
-    expect(feature.scenarios).toHaveLength(2)
+    expect(feature.scenarios).toHaveLength(3)
     for (const order of [feature.scenarios, [...feature.scenarios].reverse()]) {
       const seen: Array<Partial<World>> = []
       for (const scenario of order) {
         // A library per scenario, the way ember-cli-yadda builds one per test.
         await run(steps(seen).library, scenario.steps)
+        await resetMocks()
       }
-      expect(seen).toHaveLength(2)
-      expect(seen[0]).not.toBe(seen[1])
+      expect(seen).toHaveLength(3)
+      expect(new Set(seen).size).toBe(3)
     }
   })
 

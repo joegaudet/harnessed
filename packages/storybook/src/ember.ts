@@ -26,7 +26,6 @@ import type {
   WebRenderer,
 } from 'storybook/internal/types'
 import { harnessed as harnessedFor } from './index'
-import type { HarnessedContext } from './index'
 
 /**
  * Storybook's renderer type for Ember: a story's `component`, and what its
@@ -94,10 +93,7 @@ export async function settled(timeout = timeoutFor()): Promise<void> {
  * export default { ...emberRenderer, ...harnessed() } satisfies Preview
  * ```
  */
-export function harnessed(): {
-  beforeEach: (context: HarnessedContext) => Promise<void>
-  afterEach: (context: HarnessedContext) => Promise<void>
-} {
+export function harnessed(): ReturnType<typeof harnessedFor> {
   return harnessedFor({ afterAction: () => settled() })
 }
 

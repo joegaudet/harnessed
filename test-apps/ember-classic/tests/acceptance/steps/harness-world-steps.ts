@@ -1,5 +1,6 @@
-import { WizardPage } from '@harnessed-ts/conformance'
+import { DataPage, WizardPage } from '@harnessed-ts/conformance'
 import { ember } from '@harnessed-ts/ember'
+import { json } from '@harnessed-ts/ember/mock'
 import { definePages } from '@harnessed-ts/gherkin'
 import { yaddaWorld } from '@harnessed-ts/gherkin/yadda'
 
@@ -8,10 +9,10 @@ import { yaddaWorld } from '@harnessed-ts/gherkin/yadda'
  * ember-cli-yadda calls this once per scenario, inside the scenario's
  * application test, so each scenario gets a fresh world.
  */
-const pages = definePages({ wizard: WizardPage })
+const pages = definePages({ wizard: WizardPage, data: DataPage })
 
 type Step = WizardPage['stepOne'] | WizardPage['stepTwo']
-const harnessWorld = yaddaWorld<{ wizard: WizardPage; step: Step }>()
+const harnessWorld = yaddaWorld<{ wizard: WizardPage; data: DataPage; step: Step }>()
 
 export default function (assert: Assert) {
   const steps = harnessWorld.steps({ pages, env: () => ember() })
@@ -21,11 +22,22 @@ export default function (assert: Assert) {
     .step('the world is empty', ({ world }) => {
       assert.deepEqual(world, {})
     })
-    .when('I open the $page page', async ({ world, open }, name: 'wizard') => {
+    .when('I open the $page page', async ({ world, open }, name: 'wizard' | 'data') => {
+      if (name === 'data') {
+        world.data = open(name)
+        await world.data.goto()
+        return
+      }
       const wizard = open(name)
       await wizard.goto()
       world.wizard = wizard
       world.step = wizard.stepOne
+    })
+    .given('the API answers the user as "$name"', async ({ mocks }, name: string) => {
+      await mocks.get('/api/users/:id').reply(json({ name }))
+    })
+    .then('the user shows "$name"', async ({ world }, name: string) => {
+      assert.strictEqual(await world.data?.screen.userName(), name)
     })
     .then('the wizard shows "$heading"', async ({ world }, heading: string) => {
       assert.strictEqual(await world.wizard?.stepOne.heading(), heading)

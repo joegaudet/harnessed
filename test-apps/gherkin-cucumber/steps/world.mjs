@@ -10,13 +10,14 @@ import {
   Then,
   When,
 } from '@cucumber/cucumber'
-import { WizardPage } from '@harnessed-ts/conformance'
+import { DataPage, WizardPage } from '@harnessed-ts/conformance'
 import { definePages, pageParameter } from '@harnessed-ts/gherkin'
 import { HarnessedWorld } from '@harnessed-ts/gherkin/cucumber'
+import { json, resetMocks } from '@harnessed-ts/mock'
 import { pw } from '@harnessed-ts/playwright'
 import { chromium } from 'playwright'
 
-const pages = definePages({ wizard: WizardPage })
+const pages = definePages({ wizard: WizardPage, data: DataPage })
 defineParameterType(pageParameter(pages))
 
 class AppWorld extends HarnessedWorld {
@@ -39,6 +40,7 @@ Before(async function () {
   this.env = pw(page)
 })
 After(async function () {
+  await resetMocks()
   await this.page.close()
 })
 
@@ -48,10 +50,18 @@ Given('the world is empty', function () {
 })
 
 When('I open the {page} page', async function (name) {
-  const wizard = this.open(name)
-  await wizard.goto()
-  this.bag.wizard = wizard
-  this.bag.step = wizard.stepOne
+  const page = this.open(name)
+  await page.goto()
+  this.bag[name] = page
+  if (name === 'wizard') this.bag.step = page.stepOne
+})
+
+Given('the API answers the user as {string}', async function (name) {
+  await this.mocks.get('/api/users/:id').reply(json({ name }))
+})
+
+Then('the user shows {string}', async function (name) {
+  assert.equal(await this.bag.data.screen.userName(), name)
 })
 
 Then('the wizard shows {string}', async function (heading) {

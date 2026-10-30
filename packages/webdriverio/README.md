@@ -18,6 +18,8 @@ Works under WebDriver BiDi (WebdriverIO's default) and Classic. Frames are
 entered through WebDriver, so a harness nested in a cross-origin frame works too.
 Under Mocha, `@harnessed-ts/chai` gives the same assertions in Chai's style.
 
+**Mocking:** `import { mock } from '@harnessed-ts/webdriverio/mock'` mocks over WebDriver BiDi, through an agent injected before the page's scripts; a Classic session refuses. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Needs WebdriverIO 10. Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).
 

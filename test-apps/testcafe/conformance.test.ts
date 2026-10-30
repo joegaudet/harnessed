@@ -1,7 +1,15 @@
-import { pageSpecs, specs, urlSpecs, viewSearch } from '@harnessed-ts/conformance'
+import {
+  mockSpecs,
+  mockUrlSpecs,
+  pageSpecs,
+  specs,
+  urlSpecs,
+  viewSearch,
+} from '@harnessed-ts/conformance'
 import type { ConformanceCtx, View } from '@harnessed-ts/conformance'
 import type { EnvConfig } from '@harnessed-ts/core'
 import { testcafe } from '@harnessed-ts/testcafe'
+import { resetMocks } from '@harnessed-ts/testcafe/mock'
 import { Selector } from 'testcafe'
 
 /**
@@ -12,7 +20,10 @@ import { Selector } from 'testcafe'
  */
 const FIXTURE = 'http://127.0.0.1:5184'
 
-fixture('harnessed conformance').page(`${FIXTURE}/`)
+// Anything a spec left unverified fails it.
+fixture('harnessed conformance')
+  .page(`${FIXTURE}/`)
+  .afterEach(async () => resetMocks())
 
 /** The stage is the fixture's root: once it exists, the view has rendered. */
 const stage = Selector('[data-testid="stage"]')
@@ -42,6 +53,18 @@ for (const spec of pageSpecs) {
 
 // URL behaviour needs a driver that can navigate, which this one can.
 for (const spec of urlSpecs) {
+  test(`url: ${spec.name}`, async t => {
+    await spec.run({ env: testcafe(t) })
+  })
+}
+
+for (const spec of mockSpecs) {
+  test(spec.name, async t => {
+    await spec.run({ ...context(t), env: () => testcafe(t) })
+  })
+}
+
+for (const spec of mockUrlSpecs) {
   test(`url: ${spec.name}`, async t => {
     await spec.run({ env: testcafe(t) })
   })

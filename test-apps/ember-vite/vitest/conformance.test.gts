@@ -1,9 +1,10 @@
-import { describe } from 'vitest';
+import { afterEach, describe } from 'vitest';
 import { render, visit } from '@ember/test-helpers';
 import { applicationTest, renderingTest } from 'ember-vitest';
-import { pageSpecs, specs, urlSpecs, viewSearch } from '@harnessed-ts/conformance';
+import { mockSpecs, mockUrlSpecs, pageSpecs, specs, urlSpecs, viewSearch } from '@harnessed-ts/conformance';
 import type { ConformanceCtx, View } from '@harnessed-ts/conformance';
 import { ember } from '@harnessed-ts/ember';
+import { resetMocks } from '@harnessed-ts/ember/mock';
 import App from 'test-app-ember-vite/app';
 import ConformanceApp from 'test-app-ember-vite/components/fixture/conformance-app';
 
@@ -37,6 +38,9 @@ describe('conformance: ember under Vitest (rendering)', () => {
   for (const spec of pageSpecs) {
     rendering(`page: ${spec.name}`, () => spec.run(rendered));
   }
+  for (const spec of mockSpecs) {
+    rendering(spec.name, () => spec.run({ ...rendered, env: () => ember() }));
+  }
 });
 
 describe('conformance: ember under Vitest (application)', () => {
@@ -46,4 +50,10 @@ describe('conformance: ember under Vitest (application)', () => {
   for (const spec of urlSpecs) {
     application(`url: ${spec.name}`, () => spec.run({ env: ember() }));
   }
+  for (const spec of mockUrlSpecs) {
+    application(`url: ${spec.name}`, () => spec.run({ env: ember() }));
+  }
 });
+
+// The page outlives a test: anything a spec left unverified fails it.
+afterEach(() => resetMocks());

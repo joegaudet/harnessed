@@ -1,5 +1,7 @@
 import { harnessMatchers } from '@harnessed-ts/core'
 import type { Assertable, MatcherResult } from '@harnessed-ts/core'
+import { mockMatchers } from '@harnessed-ts/mock'
+import type { RequestExpectation, Requested } from '@harnessed-ts/mock'
 
 /**
  * The checks `assert.harness(subject)` offers. Each is async — a harness reads
@@ -19,6 +21,18 @@ export interface HarnessAssertions {
   doesNotReadAs(expected: string | RegExp, message?: string): Promise<void>
 }
 
+/**
+ * The checks `assert.requests(route)` offers, for a mocked route or a list of
+ * calls from `api.calls()`. Async like the harness checks, for one shape.
+ */
+export interface RequestAssertions {
+  wasRequested(message?: string): Promise<void>
+  wasNotRequested(message?: string): Promise<void>
+  wasRequestedTimes(times: number, message?: string): Promise<void>
+  /** At least one request carried this body, query or headers. */
+  wasRequestedWith(expected: RequestExpectation, message?: string): Promise<void>
+}
+
 /** The slice of QUnit's `assert` these checks report through. */
 interface PushResult {
   pushResult(result: {
@@ -35,8 +49,8 @@ export interface QUnitLike {
   assert: object
 }
 
-function checks(assert: PushResult, subject: Assertable): HarnessAssertions {
-  const report = async (
+function reporter(assert: PushResult) {
+  return async (
     run: Promise<MatcherResult>,
     negated: boolean,
     message: string | undefined,
@@ -53,7 +67,10 @@ function checks(assert: PushResult, subject: Assertable): HarnessAssertions {
       message: message ?? outcome.message(),
     })
   }
+}
 
+function checks(assert: PushResult, subject: Assertable): HarnessAssertions {
+  const report = reporter(assert)
   return {
     isAbsent: message => report(harnessMatchers.toBeAbsent(subject), false, message),
     isPresent: message => report(harnessMatchers.toBeAbsent(subject), true, message),
@@ -66,8 +83,21 @@ function checks(assert: PushResult, subject: Assertable): HarnessAssertions {
   }
 }
 
+function requestChecks(assert: PushResult, subject: Requested): RequestAssertions {
+  const report = reporter(assert)
+  return {
+    wasRequested: message => report(mockMatchers.toHaveBeenRequested(subject), false, message),
+    wasNotRequested: message => report(mockMatchers.toHaveBeenRequested(subject), true, message),
+    wasRequestedTimes: (times, message) =>
+      report(mockMatchers.toHaveBeenRequestedTimes(subject, times), false, message),
+    wasRequestedWith: (expected, message) =>
+      report(mockMatchers.toHaveBeenRequestedWith(subject, expected), false, message),
+  }
+}
+
 /**
- * Adds `assert.harness(subject)` to every QUnit test. Call once, from
+ * Adds `assert.harness(subject)` and `assert.requests(route)` to every QUnit
+ * test. Call once, from
  * `tests/test-helper` in an Ember app, before `start()`:
  *
  * ```ts
@@ -78,6 +108,7 @@ function checks(assert: PushResult, subject: Assertable): HarnessAssertions {
  * // in a test
  * await assert.harness(banner).isAbsent()
  * await assert.harness(price).readsAs(/^\$/)
+ * await assert.requests(orders).wasRequestedWith({ body: { sku: 'A1' } })
  * ```
  */
 export function install(qunit: QUnitLike): void {
@@ -88,6 +119,13 @@ export function install(qunit: QUnitLike): void {
       return checks(this, subject)
     },
   })
+  Object.defineProperty(qunit.assert, 'requests', {
+    configurable: true,
+    writable: true,
+    value: function requests(this: PushResult, subject: Requested): RequestAssertions {
+      return requestChecks(this, subject)
+    },
+  })
 }
 
 declare global {
@@ -95,5 +133,7 @@ declare global {
   interface Assert {
     /** Harness checks in the qunit-dom style. Each is async: await it. */
     harness(subject: Assertable): HarnessAssertions
+    /** Checks on a mocked route's requests. Each is async: await it. */
+    requests(subject: Requested): RequestAssertions
   }
 }

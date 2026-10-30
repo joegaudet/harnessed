@@ -25,6 +25,8 @@ relative path against the current page, or against `testcafe(t, { baseUrl })`.
 There is no `/matchers` entry, because TestCafe asserts with `t.expect`. Await
 the harness and assert on the value, or use `@harnessed-ts/chai`.
 
+**Mocking:** `import { mock } from '@harnessed-ts/testcafe/mock'` mocks through a request hook on the test's controller. No streaming or WebSockets. See [Mocking APIs](https://github.com/joegaudet/harnessed#mocking-apis).
+
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).
 

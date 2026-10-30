@@ -43,6 +43,7 @@
     "@harnessed-ts/ember": "workspace:^",
     "@harnessed-ts/page": "workspace:^",
     "@harnessed-ts/qunit": "workspace:^",
+    "@mswjs/interceptors": "^0.45.10",
     "@rollup/plugin-babel": "^7.1.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/user-event": "^14.6.7",

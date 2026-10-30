@@ -1,5 +1,7 @@
 import { harnessMatchers, Query, ScopedHarness } from '@harnessed-ts/core'
 import type { Assertable, MatcherResult } from '@harnessed-ts/core'
+import { mockMatchers } from '@harnessed-ts/mock'
+import type { RequestExpectation, Requested } from '@harnessed-ts/mock'
 import { expect } from 'expect-webdriverio'
 
 /**
@@ -32,6 +34,7 @@ const elementToBeSelected = registered('toBeSelected')
 // `before` hook, registers all three with the testrunner's `expect`.
 expect.extend({
   ...harnessMatchers,
+  ...mockMatchers,
   async toBeSelected(this: unknown, subject: unknown, ...args: unknown[]): Promise<MatcherResult> {
     if (isAssertable(subject)) return harnessMatchers.toBeSelected(subject)
     if (elementToBeSelected !== undefined) return elementToBeSelected.call(this, subject, ...args)
@@ -74,6 +77,12 @@ declare global {
     interface Matchers<R extends void | Promise<void>, T> {
       toBeAbsent(): T extends Assertable ? Promise<Awaited<R>> : never
       toReadAs(expected: string | RegExp): T extends Assertable ? Promise<Awaited<R>> : never
+      // Not expect-webdriverio's `toBeRequested*`, which take its own mocks.
+      toHaveBeenRequested(): T extends Requested ? Promise<Awaited<R>> : never
+      toHaveBeenRequestedTimes(times: number): T extends Requested ? Promise<Awaited<R>> : never
+      toHaveBeenRequestedWith(
+        expected: RequestExpectation,
+      ): T extends Requested ? Promise<Awaited<R>> : never
     }
   }
 }

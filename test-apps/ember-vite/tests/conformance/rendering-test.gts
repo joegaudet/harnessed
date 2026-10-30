@@ -1,9 +1,10 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
-import { pageSpecs, specs, viewSearch } from '@harnessed-ts/conformance';
+import { mockSpecs, pageSpecs, specs, viewSearch } from '@harnessed-ts/conformance';
 import type { ConformanceCtx, View } from '@harnessed-ts/conformance';
 import { ember } from '@harnessed-ts/ember';
+import { setupMocks } from '@harnessed-ts/ember/mock';
 import ConformanceApp from 'test-app-ember-vite/components/fixture/conformance-app';
 
 /**
@@ -20,6 +21,7 @@ const ctx: ConformanceCtx = {
 
 module('conformance: ember (rendering)', function (hooks) {
   setupRenderingTest(hooks);
+  setupMocks(hooks);
 
   for (const spec of specs) {
     test(spec.name, async function (assert) {
@@ -33,6 +35,13 @@ module('conformance: ember (rendering)', function (hooks) {
     test(`page: ${spec.name}`, async function (assert) {
       assert.expect(0);
       await spec.run(ctx);
+    });
+  }
+
+  for (const spec of mockSpecs) {
+    test(spec.name, async function (assert) {
+      assert.expect(0);
+      await spec.run({ ...ctx, env: () => ember() });
     });
   }
 });

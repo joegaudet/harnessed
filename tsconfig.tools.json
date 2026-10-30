@@ -13,6 +13,9 @@
     "packages/*/tsup.config.ts",
     "packages/*/vitest.config.ts",
     "packages/*/tests/**/*.ts",
+    // The mock tests reach `?bundle` imports through ../src; its own tsconfig
+    // includes this declaration, but this program would not otherwise.
+    "packages/mock/src/bundle.d.ts",
     "packages/conformance/runners/**/*.ts",
     // The release scripts and their node:test suites (scripts/*.test.mjs), here
     // so type-aware linting has a project for them. Without checkJs, tsc parses

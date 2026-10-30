@@ -1,5 +1,6 @@
-import { pageSpecs, specs } from '@harnessed-ts/conformance'
+import { mockSpecs, pageSpecs, specs } from '@harnessed-ts/conformance'
 import type { ConformanceCtx } from '@harnessed-ts/conformance'
+import { resetMocks } from '@harnessed-ts/mock'
 import { pw } from '@harnessed-ts/playwright'
 import { StoryPage } from '@harnessed-ts/storybook/page'
 import { test } from '@playwright/test'
@@ -26,3 +27,12 @@ for (const spec of pageSpecs) {
     await spec.run(context(page))
   })
 }
+
+// Mocked at the network, by Playwright, while the story is the page.
+for (const spec of mockSpecs) {
+  test(spec.name, async ({ page }) => {
+    await spec.run({ ...context(page), env: () => pw(page) })
+  })
+}
+
+test.afterEach(() => resetMocks())

@@ -129,6 +129,9 @@ export function superClassName(node: Rule.Node): string | undefined {
 
 export function extendsHarnessBase(node: Rule.Node): boolean {
   const name = superClassName(node) ?? ''
+  // An API harness (`@harnessed-ts/mock`) answers requests; it has no host and
+  // drives no DOM, so none of the UI harness rules apply to it.
+  if (name.endsWith('ApiHarness')) return false
   return name.endsWith('Harness') || name.endsWith('Page') || name.endsWith('Route')
 }
 

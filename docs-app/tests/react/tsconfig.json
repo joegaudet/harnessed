@@ -1,0 +1,18 @@
+{
+  "$comment": "The React fixtures mounted by the react-island modifier. JSX needs its own project: the app's is Glint-only.",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "outDir": "../../tmp/react-types",
+    "rootDir": ".",
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": ["**/*.tsx"]
+}

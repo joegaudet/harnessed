@@ -2,6 +2,8 @@ import type { EnvConfig } from '@harnessed-ts/core'
 import { WEBDRIVERIO_DRIVER } from './driver-id'
 // Side effect: constructing an env is the moment the driver has to be registered.
 import './webdriverio-query'
+// And its mock transport, so `mock(wdio(browser))` works without a second import.
+import './mock-transport'
 
 export { WEBDRIVERIO_DRIVER }
 
