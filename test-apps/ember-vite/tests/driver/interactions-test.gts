@@ -126,6 +126,47 @@ module('Ember driver | interactions', function (hooks) {
     await assert.rejects(target('s').selectOption('nope'))
     assert.strictEqual(field('s').value, 'pro', 'a miss leaves the selection alone')
   })
+
+  test('upload leaves the document unpatched for later tests', async function (assert) {
+    // user-event's setup patches a document for good: every input focused after
+    // it reads back a number as `String(Number(value))`, "42.50" as "42.5". An
+    // iframe's document, so no earlier test has patched it.
+    const frame = document.createElement('iframe')
+    document.body.append(frame)
+    try {
+      const doc = frame.contentDocument!
+      doc.body.innerHTML = '<input type="file" data-testid="f"><input type="number" data-testid="n">'
+      await createQuery(ember({ root: doc.body }), [], testId('f')).upload(new File(['x'], 'x.txt'))
+      const amount = doc.querySelector<HTMLInputElement>('[data-testid="n"]')!
+      // A capture listener on the document is what patches: a synthetic focus
+      // reaches it whether or not the frame has the browser's focus.
+      amount.dispatchEvent(new FocusEvent('focus'))
+      amount.value = '42.50'
+      assert.strictEqual(amount.value, '42.50')
+    } finally {
+      frame.remove()
+    }
+  })
+
+  test('upload drops files the input does not accept, and skips a disabled input', async function (assert) {
+    const names: string[] = []
+    const record = (event: Event) =>
+      names.push(...[...((event.target as HTMLInputElement).files ?? [])].map(file => file.name))
+    await render(
+      <template>
+        <input type="file" multiple accept=".csv,image/*" data-testid="f" {{on "change" record}} />
+        <input type="file" disabled data-testid="d" {{on "change" record}} />
+      </template>,
+    )
+    await target('f').upload([
+      new File(['a'], 'a.CSV'),
+      new File(['b'], 'b.txt', { type: 'text/plain' }),
+      new File(['c'], 'c.png', { type: 'image/png' }),
+    ])
+    await target('d').upload(new File(['d'], 'd.csv'))
+    assert.deepEqual(names, ['a.CSV', 'c.png'])
+    assert.strictEqual(field('d').files?.length, 0)
+  })
 })
 
 import { on } from '@ember/modifier'

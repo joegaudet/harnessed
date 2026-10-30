@@ -45,6 +45,23 @@ function toKeyboardInput(key: string): string {
   return key.length === 1 ? key : `{${key}}`
 }
 
+/** user-event's `accept` rule: case-insensitive, jpg and jpeg alike, `image/*` wildcards. */
+function accepts(accept: string, file: File): boolean {
+  if (accept === '') return true
+  const normalize = (nameOrType: string) =>
+    nameOrType.toLowerCase().replace(/(\.|\/)jpg\b/g, '$1jpeg')
+  return normalize(accept)
+    .trim()
+    .split(/\s*,\s*/)
+    .some(token => {
+      if (token.startsWith('.')) return normalize(file.name).endsWith(token)
+      if (['audio/*', 'image/*', 'video/*'].includes(token)) {
+        return normalize(file.type).startsWith(token.slice(0, -1))
+      }
+      return normalize(file.type) === token
+    })
+}
+
 /**
  * Testing Library's `waitFor` retries every throw, but a frame that cannot be
  * entered never becomes enterable, and several matches never become one — so
@@ -180,12 +197,26 @@ export class EmberQuery extends Query {
     await settled()
   }
 
-  /** Ember's test helpers have no file upload; user-event's is the one Testing Library users know. */
+  /**
+   * What user-event's upload does — skip a disabled input, drop files `accept`
+   * refuses, fire nothing when the selection is unchanged — without user-event:
+   * its setup patches the document for good, and an Ember run shares one
+   * document, so a number input in a later test read "42.50" back as "42.5".
+   */
   override async upload(files: File | File[], options?: WaitOptions): Promise<void> {
     const list = Array.isArray(files) ? files : [files]
     const input = fileInputOf(await this.element(options))
     checkFileTarget(input, list.length, this.scope, this.selector)
-    await userFor(input).upload(input, list)
+    if (input.matches(':disabled')) return
+    const chosen = list.filter(file => accepts(input.accept, file))
+    const current = [...(input.files ?? [])]
+    if (chosen.length === current.length && chosen.every((file, i) => file === current[i])) return
+    // The input's own window: a DataTransfer from another realm is refused.
+    const transfer = new input.ownerDocument.defaultView!.DataTransfer()
+    for (const file of chosen) transfer.items.add(file)
+    input.files = transfer.files
+    input.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    input.dispatchEvent(new Event('change', { bubbles: true }))
     await settled()
   }
 
