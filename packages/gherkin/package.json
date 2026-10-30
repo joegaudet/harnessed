@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/gherkin",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Gherkin support for harnessed: a scenario-scoped world, a typed page registry and a {page} parameter type, with adapters for playwright-bdd, cucumber-js, Nightwatch's Cucumber runner, Cypress cucumber and ember-cli-yadda.",
   "keywords": [
     "testing",

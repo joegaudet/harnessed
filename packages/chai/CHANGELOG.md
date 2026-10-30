@@ -1,5 +1,12 @@
 # @harnessed-ts/chai
 
+## 0.7.0
+
+### Patch Changes
+
+- Updated dependencies [ec06bdf]
+  - @harnessed-ts/core@0.7.0
+
 ## 0.6.0
 
 ### Patch Changes
