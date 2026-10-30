@@ -1,5 +1,7 @@
 node_modules/
 dist/
+# Ember's compat prebuild and the guide's harness/React declaration output.
+docs-app/tmp/
 *.tsbuildinfo
 .DS_Store
 

@@ -17,6 +17,8 @@ export default tseslint.config(
       'test-apps/**',
       // Standalone StackBlitz projects, installed from npm rather than the workspace.
       'examples/**',
+      // The guide app, like a test-app: Ember tooling and its own `typecheck`.
+      'docs-app/**',
     ],
   },
   js.configs.recommended,
