@@ -1,5 +1,12 @@
 # @harnessed-ts/route
 
+## 0.8.0
+
+### Patch Changes
+
+- Updated dependencies [d00bf4e]
+  - @harnessed-ts/page@0.8.0
+
 ## 0.7.0
 
 ### Patch Changes
