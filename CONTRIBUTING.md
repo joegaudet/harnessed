@@ -180,8 +180,16 @@ a short-lived token (restore that file from git history if it has been deleted; 
 the steps). After that, set `joegaudet/harnessed` / `release.yml` as the package's trusted
 publisher on npmjs.com.
 
-Actions must be allowed to create pull requests (Settings → Actions → General), or the version
-PR cannot open.
+The version PR is opened by a GitHub App, not `GITHUB_TOKEN`: GitHub runs no workflows for
+pushes made with `GITHUB_TOKEN`, so the PR would never get its required checks. One App serves
+every repository that uses this workflow. To set it up:
+
+1. Create a GitHub App (Settings → Developer settings → GitHub Apps → New) with webhooks off and
+   repository permissions **Contents: read and write** and **Pull requests: read and write**.
+2. Install it on this repository.
+3. Generate a private key, then in this repository (Settings → Secrets and variables → Actions)
+   add the variable `RELEASE_APP_CLIENT_ID` (the App's client ID) and the secret
+   `RELEASE_APP_PRIVATE_KEY` (the whole `.pem` file).
 
 ## Changesets
 
