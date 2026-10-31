@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/nightwatch",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Nightwatch driver for @harnessed-ts/core: the shared resolver injected into the page, selenium-webdriver actions, and frames entered from outside the page.",
   "keywords": [
     "testing",

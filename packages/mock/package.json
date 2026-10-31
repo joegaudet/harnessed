@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/mock",
-  "version": "0.6.0",
+  "version": "0.8.0",
   "description": "API mocking for harnessed: one handler model, response builders for every common format, and an adapter per test runner \u2014 Testing Library, Playwright, Ember, Cypress, WebdriverIO, Vitest browser, Puppeteer, TestCafe and Storybook.",
   "keywords": [
     "testing",

@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/angular",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Angular driver for @harnessed-ts/core: interactions through user-event, each one ending once the app is stable. TestBed, Testing Library and bootstrapped apps, zoneless.",
   "keywords": [
     "testing",
