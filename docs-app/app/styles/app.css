@@ -165,6 +165,23 @@ a {
   padding: 1.5rem 0 5rem;
 }
 
+/* The sibling projects, as on the project site's footer. */
+.guide-footer {
+  padding: 1.5rem clamp(var(--g-gutter), 3vw, 2rem);
+  border-top: 1px solid var(--g-border);
+  color: var(--g-muted);
+  font-size: 0.875rem;
+}
+
+.guide-footer a {
+  color: inherit;
+}
+
+.guide-footer [aria-current='page'] {
+  font-weight: 600;
+  text-decoration: none;
+}
+
 @media (max-width: 860px) {
   .guide-layout {
     grid-template-columns: 1fr;
