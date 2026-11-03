@@ -97,6 +97,28 @@ module('Ember driver | interactions', function (hooks) {
     assert.strictEqual(field('m').value, 'ab')
   })
 
+  test('click sends the pointer events a browser sends, around the mouse ones', async function (assert) {
+    // Handlers on pointerup (links that must survive a re-render mid-click) never ran:
+    // test-helpers' click sends only mousedown, mouseup and click.
+    const events: string[] = []
+    const record = (event: Event) => events.push(event.type)
+    await render(
+      <template>
+        <button
+          type="button"
+          data-testid="b"
+          {{on "pointerdown" record}}
+          {{on "mousedown" record}}
+          {{on "pointerup" record}}
+          {{on "mouseup" record}}
+          {{on "click" record}}
+        >B</button>
+      </template>,
+    )
+    await target('b').click()
+    assert.deepEqual(events, ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'])
+  })
+
   test('hovering one element and then another leaves the first', async function (assert) {
     const events: string[] = []
     const leftA = () => events.push('leave a')
