@@ -1,5 +1,14 @@
 # @harnessed-ts/ember
 
+## 0.8.1
+
+### Patch Changes
+
+- 3d4c23d: `click()`, `check()` and `uncheck()` no longer go through user-event. In 0.8.0 they did, and user-event's setup patches the document for good. An Ember test run shares one document, so after any test that clicked through a harness, a number input in a later test read "42.50" back as "42.5". They now use `@ember/test-helpers`' click again and add the `pointerdown` and `pointerup` events a browser sends just before `mousedown` and `mouseup`. `press`, `hover` and `selectOption` still use user-event, so they still patch the document.
+- @harnessed-ts/core@0.8.1
+  - @harnessed-ts/mock@0.8.1
+  - @harnessed-ts/resolve@0.8.1
+
 ## 0.8.0
 
 ### Minor Changes
@@ -14,6 +23,7 @@
 
 ### Patch Changes
 
+- 88ec679: `click()`, `check()` and `uncheck()` under the Ember driver now send the pointer events a browser sends (`pointerdown` and `pointerup` around `mousedown`, `mouseup` and `click`), as the dom driver does. They went through `@ember/test-helpers`' `click`, which sends no pointer events, so a handler on `pointerup` never ran.
 - Updated dependencies [d00bf4e]
   - @harnessed-ts/mock@0.8.0
   - @harnessed-ts/core@0.8.0

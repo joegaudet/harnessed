@@ -1,5 +1,13 @@
 # @harnessed-ts/gherkin
 
+## 0.8.1
+
+### Patch Changes
+
+- @harnessed-ts/core@0.8.1
+  - @harnessed-ts/mock@0.8.1
+  - @harnessed-ts/nightwatch@0.8.1
+
 ## 0.8.0
 
 ### Minor Changes
