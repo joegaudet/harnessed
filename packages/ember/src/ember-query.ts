@@ -1,4 +1,4 @@
-import { click, fillIn, getRootElement, settled } from '@ember/test-helpers'
+import { fillIn, getRootElement, settled } from '@ember/test-helpers'
 import { Query, registerDriver } from '@harnessed-ts/core'
 import type { BoundingBox, EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
@@ -38,6 +38,15 @@ function userFor(element: Element): UserEvent {
     users.set(document, user)
   }
   return user
+}
+
+/**
+ * user-event's click, as the dom driver clicks: test-helpers' click sends no pointer
+ * events, so a handler on pointerdown or pointerup never ran.
+ */
+async function clickLikeABrowser(element: Element): Promise<void> {
+  await userFor(element).click(element)
+  await settled()
 }
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
@@ -134,7 +143,7 @@ export class EmberQuery extends Query {
   // --- interactions -------------------------------------------------------
 
   override async click(options?: WaitOptions): Promise<void> {
-    await click(await this.element(options))
+    await clickLikeABrowser(await this.element(options))
   }
 
   override async fill(value: string, options?: WaitOptions): Promise<void> {
@@ -148,12 +157,12 @@ export class EmberQuery extends Query {
 
   override async check(options?: WaitOptions): Promise<void> {
     const element = await this.element(options)
-    if (!(element as HTMLInputElement).checked) await click(element)
+    if (!(element as HTMLInputElement).checked) await clickLikeABrowser(element)
   }
 
   override async uncheck(options?: WaitOptions): Promise<void> {
     const element = await this.element(options)
-    if ((element as HTMLInputElement).checked) await click(element)
+    if ((element as HTMLInputElement).checked) await clickLikeABrowser(element)
   }
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
