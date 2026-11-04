@@ -1,5 +1,12 @@
 # @harnessed-ts/angular
 
+## 0.8.1
+
+### Patch Changes
+
+- @harnessed-ts/core@0.8.1
+  - @harnessed-ts/resolve@0.8.1
+
 ## 0.8.0
 
 ### Patch Changes
