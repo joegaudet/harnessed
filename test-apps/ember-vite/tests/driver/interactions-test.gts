@@ -170,6 +170,23 @@ module('Ember driver | interactions', function (hooks) {
     }
   })
 
+  test('click leaves the document unpatched for later tests', async function (assert) {
+    // As upload above: clicking through user-event patched the shared document.
+    const frame = document.createElement('iframe')
+    document.body.append(frame)
+    try {
+      const doc = frame.contentDocument!
+      doc.body.innerHTML = '<button type="button" data-testid="b">B</button><input type="number" data-testid="n">'
+      await createQuery(ember({ root: doc.body }), [], testId('b')).click()
+      const amount = doc.querySelector<HTMLInputElement>('[data-testid="n"]')!
+      amount.dispatchEvent(new FocusEvent('focus'))
+      amount.value = '42.50'
+      assert.strictEqual(amount.value, '42.50')
+    } finally {
+      frame.remove()
+    }
+  })
+
   test('upload drops files the input does not accept, and skips a disabled input', async function (assert) {
     const names: string[] = []
     const record = (event: Event) =>

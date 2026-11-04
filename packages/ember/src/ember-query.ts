@@ -1,4 +1,4 @@
-import { fillIn, getRootElement, settled } from '@ember/test-helpers'
+import { click, fillIn, getRootElement, settled } from '@ember/test-helpers'
 import { Query, registerDriver } from '@harnessed-ts/core'
 import type { BoundingBox, EnvConfig, Selector, WaitOptions, WaitState } from '@harnessed-ts/core'
 import {
@@ -40,13 +40,36 @@ function userFor(element: Element): UserEvent {
   return user
 }
 
+const POINTER: PointerEventInit = {
+  bubbles: true,
+  cancelable: true,
+  composed: true,
+  pointerId: 1,
+  pointerType: 'mouse',
+  isPrimary: true,
+}
+
 /**
- * user-event's click, as the dom driver clicks: test-helpers' click sends no pointer
- * events, so a handler on pointerdown or pointerup never ran.
+ * test-helpers' click, with the pointerdown and pointerup a browser sends just before
+ * its mousedown and mouseup: test-helpers sends no pointer events, so a handler on
+ * pointerup never ran. Not user-event's click: its setup patches the document for
+ * good, and an Ember test run shares one document.
  */
 async function clickLikeABrowser(element: Element): Promise<void> {
-  await userFor(element).click(element)
-  await settled()
+  const document = element.ownerDocument
+  const precede = (mouse: string, pointer: string) => {
+    const listener = (event: Event) => {
+      if (event.target === element) element.dispatchEvent(new PointerEvent(pointer, POINTER))
+    }
+    document.addEventListener(mouse, listener, { capture: true })
+    return () => document.removeEventListener(mouse, listener, { capture: true })
+  }
+  const stops = [precede('mousedown', 'pointerdown'), precede('mouseup', 'pointerup')]
+  try {
+    await click(element)
+  } finally {
+    for (const stop of stops) stop()
+  }
 }
 
 /** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
@@ -101,7 +124,7 @@ async function waitUntil(condition: () => Promise<void>, timeout: number): Promi
  * runloop drained, rendering done, test waiters clear.
  *
  * Clicks and fills go through `@ember/test-helpers`, the way an Ember test
- * dispatches them. Keys, hover, focus and selects go through user-event, as in
+ * dispatches them; a click adds the pointer events test-helpers leaves out. Keys, hover, focus and selects go through user-event, as in
  * the dom driver: test-helpers' versions dispatch events without a browser's
  * default actions (a pressed key never reaches the value), refuse elements a
  * browser would accept (a disabled control, a non-focusable dialog), and match
