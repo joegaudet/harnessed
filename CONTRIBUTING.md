@@ -182,7 +182,8 @@ publisher on npmjs.com.
 
 The version PR is opened by a GitHub App, not `GITHUB_TOKEN`: GitHub runs no workflows for
 pushes made with `GITHUB_TOKEN`, so the PR would never get its required checks. One App serves
-every repository that uses this workflow. To set it up:
+every repository that uses this workflow. Until the App is set up, the version job is skipped,
+and the release script opens the version PR as the person releasing. To set the App up:
 
 1. Create a GitHub App (Settings → Developer settings → GitHub Apps → New) with webhooks off and
    repository permissions **Contents: read and write** and **Pull requests: read and write**.
