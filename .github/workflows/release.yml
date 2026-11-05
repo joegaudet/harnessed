@@ -20,7 +20,9 @@ concurrency:
 
 jobs:
   version:
-    if: github.ref == 'refs/heads/main'
+    # Without the release App the job cannot open the PR, so it skips instead of failing;
+    # release.sh then opens the version PR as the person releasing.
+    if: github.ref == 'refs/heads/main' && vars.RELEASE_APP_CLIENT_ID != ''
     runs-on: ubuntu-latest
     # GITHUB_TOKEN only checks out. The version PR is pushed and opened with a
     # GitHub App token, because GitHub never runs workflows for pushes made
