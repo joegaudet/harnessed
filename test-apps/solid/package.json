@@ -13,7 +13,7 @@
     "serve:fixture": "node scripts/serve-fixture.mjs"
   },
   "dependencies": {
-    "solid-js": "^1.9.17"
+    "solid-js": "^1.9.18"
   },
   "devDependencies": {
     "@harnessed-ts/conformance": "workspace:^",
