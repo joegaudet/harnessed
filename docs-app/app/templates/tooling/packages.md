@@ -36,3 +36,12 @@ fixture: the page's mock, ended after the test.
 
 **`withWorld`** (from `@harnessed-ts/playwright/bdd`) is deprecated: it moved to
 `@harnessed-ts/gherkin/playwright-bdd` — see [Gherkin](../storybook-and-bdd/gherkin.md).
+
+## Related libraries
+
+These Ember libraries ship harnesses of their own for what they render:
+
+- [Formwright](https://joegaudet.com/ember-formwright/): `@ember-formwright/test-support` has a
+  harness for every form and field.
+- [Joinery](https://joegaudet.com/ember-joinery/): `@ember-joinery/test-support` has a harness for
+  every component and primitive.
