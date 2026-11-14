@@ -10,7 +10,7 @@
   "devDependencies": {
     "@harnessed-ts/conformance": "workspace:^",
     "@harnessed-ts/playwright": "workspace:^",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.0",
     "@types/node": "^26.6.5",
     "test-app-solid": "workspace:*",
     "test-app-svelte": "workspace:*",
