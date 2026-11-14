@@ -62,6 +62,7 @@ function title(name: string): string {
     More open source from <a href="https://joegaudet.com/">Joe Gaudet</a>:
     <a href="https://joegaudet.com/harnessed/" aria-current="page">harnessed</a> ·
     <a href="https://joegaudet.com/real-enums/">real-enums</a> ·
-    <a href="https://joegaudet.com/ember-formwright/">Formwright</a>
+    <a href="https://joegaudet.com/ember-formwright/">Formwright</a> ·
+    <a href="https://joegaudet.com/ember-joinery/">Joinery</a>
   </footer>
 </template>
