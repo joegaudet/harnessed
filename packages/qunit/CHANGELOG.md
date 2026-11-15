@@ -1,5 +1,12 @@
 # @harnessed-ts/qunit
 
+## 0.8.2
+
+### Patch Changes
+
+- @harnessed-ts/core@0.8.2
+  - @harnessed-ts/mock@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes
