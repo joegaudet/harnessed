@@ -19,26 +19,11 @@ import {
   resolveOne,
 } from '@harnessed-ts/resolve'
 import { waitFor as waitForCondition } from '@testing-library/dom'
-import userEvent from '@testing-library/user-event'
-import type { UserEvent } from '@testing-library/user-event'
 import { EMBER_DRIVER } from './driver-id'
 import type { EmberEnv } from './env'
 
-/**
- * One user-event instance per document, kept so pointer state carries between
- * calls: hovering B after A has to leave A first.
- */
-const users = new WeakMap<Document, UserEvent>()
-
-function userFor(element: Element): UserEvent {
-  const document = element.ownerDocument
-  let user = users.get(document)
-  if (user === undefined) {
-    user = userEvent.setup({ document })
-    users.set(document, user)
-  }
-  return user
-}
+/** The element each document's pointer is over, so hovering B after A leaves A first. */
+const hovered = new WeakMap<Document, Element>()
 
 const POINTER: PointerEventInit = {
   bubbles: true,
@@ -72,9 +57,170 @@ async function clickLikeABrowser(element: Element): Promise<void> {
   }
 }
 
-/** Playwright key names such as `Enter` map onto user-event's `{Enter}` syntax. */
-function toKeyboardInput(key: string): string {
-  return key.length === 1 ? key : `{${key}}`
+/** `element` and its ancestors up to, not including, the first one that contains `other`. */
+function chainUntil(element: Element | undefined, other: Element | undefined): Element[] {
+  const chain: Element[] = []
+  for (
+    let node = element ?? null;
+    node !== null && !node.contains(other ?? null);
+    node = node.parentElement
+  ) {
+    chain.push(node)
+  }
+  return chain
+}
+
+/**
+ * The events a browser sends when the pointer moves from the last hovered element
+ * onto `element`: out and leave on what it leaves, over and enter on what it enters.
+ */
+function hoverLikeABrowser(element: Element): void {
+  const document = element.ownerDocument
+  const last = hovered.get(document)
+  hovered.set(document, element)
+  if (last === element) return
+  // A previous test's element is gone: there is nothing left to leave.
+  const from = last?.isConnected ? last : undefined
+  const fire = (target: Element, pointer: string, mouse: string, bubbles: boolean) => {
+    target.dispatchEvent(new PointerEvent(pointer, { ...POINTER, bubbles }))
+    target.dispatchEvent(new MouseEvent(mouse, { bubbles, cancelable: bubbles, composed: true }))
+  }
+  if (from !== undefined) {
+    fire(from, 'pointerout', 'mouseout', true)
+    for (const node of chainUntil(from, element)) fire(node, 'pointerleave', 'mouseleave', false)
+  }
+  fire(element, 'pointerover', 'mouseover', true)
+  for (const node of chainUntil(element, from).reverse())
+    fire(node, 'pointerenter', 'mouseenter', false)
+  fire(element, 'pointermove', 'mousemove', true)
+}
+
+type Editable = HTMLInputElement | HTMLTextAreaElement
+
+/** A field a typed key changes: a text-like input or a textarea, not read-only or disabled. */
+function editableOf(target: Element): Editable | undefined {
+  // Tag names, not instanceof: an element rendered into a frame can carry the
+  // parent window's prototypes.
+  const isField =
+    target.localName === 'textarea' ||
+    (target.localName === 'input' &&
+      ![
+        'button',
+        'checkbox',
+        'color',
+        'file',
+        'hidden',
+        'image',
+        'radio',
+        'range',
+        'reset',
+        'submit',
+      ].includes((target as HTMLInputElement).type))
+  if (!isField) return undefined
+  const field = target as Editable
+  return field.readOnly || field.disabled ? undefined : field
+}
+
+/**
+ * The caret, or the end of the value where the input has no selection API
+ * (email, number): reading `selectionStart` there gives null.
+ */
+function selectionOf(field: Editable): [number, number] {
+  const start = field.selectionStart
+  const end = field.selectionEnd
+  return start === null || end === null ? [field.value.length, field.value.length] : [start, end]
+}
+
+/** Writes the field's new value and caret, then fires `input` as a browser does. */
+function edit(
+  field: Editable,
+  value: string,
+  caret: number,
+  inputType: string,
+  data: string | null,
+): void {
+  field.value = value
+  if (field.selectionStart !== null) field.setSelectionRange(caret, caret)
+  field.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, inputType, data }))
+}
+
+const TABBABLE =
+  'a[href], area[href], button, input, select, textarea, iframe, summary, [tabindex], [contenteditable]:not([contenteditable="false"])'
+
+/**
+ * Tab: focus the next element in document order that Tab reaches, from wherever
+ * focus is once keydown's handlers have run.
+ * shortcut: ignores positive tabindex order and Shift+Tab; add them when a harness needs one.
+ */
+function tabFrom(target: Element): void {
+  const document = target.ownerDocument
+  const reachable = [...document.querySelectorAll<HTMLElement>(TABBABLE)].filter(
+    element =>
+      element.tabIndex >= 0 &&
+      !element.matches(':disabled, [inert] *, input[type="hidden"]') &&
+      element.getClientRects().length > 0,
+  )
+  const next = reachable.find(
+    element =>
+      target.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING &&
+      !target.contains(element),
+  )
+  if (next === undefined) (document.activeElement as HTMLElement | null)?.blur()
+  else next.focus()
+}
+
+/**
+ * What a browser does when nothing prevents a key: move focus with Tab, type
+ * the key, delete with it, or submit with Enter.
+ * shortcut: no Space or Enter clicks, no held modifiers (user-event's `Meta>`
+ * syntax); add them when a harness presses one.
+ */
+function keyDefault(target: Element, key: string): void {
+  if (key === 'Tab') {
+    tabFrom(target.ownerDocument.activeElement ?? target)
+    return
+  }
+  const field = editableOf(target)
+  if (field === undefined) return
+  const [start, end] = selectionOf(field)
+  const value = field.value
+  if (key.length === 1) {
+    if (field.maxLength >= 0 && value.length - (end - start) + 1 > field.maxLength) return
+    edit(field, value.slice(0, start) + key + value.slice(end), start + 1, 'insertText', key)
+  } else if (key === 'Backspace') {
+    const from = start === end ? Math.max(0, start - 1) : start
+    if (from === end) return
+    edit(field, value.slice(0, from) + value.slice(end), from, 'deleteContentBackward', null)
+  } else if (key === 'Delete') {
+    const to = start === end ? Math.min(value.length, end + 1) : end
+    if (start === to) return
+    edit(field, value.slice(0, start) + value.slice(to), start, 'deleteContentForward', null)
+  } else if (key === 'Enter') {
+    if (field.localName === 'textarea') {
+      edit(
+        field,
+        value.slice(0, start) + '\n' + value.slice(end),
+        start + 1,
+        'insertLineBreak',
+        null,
+      )
+    } else {
+      // Implicit submission: the form's submit button decides, as in a browser.
+      field.form?.requestSubmit()
+    }
+  }
+}
+
+/**
+ * keydown to the focused element, the browser's default action unless a handler
+ * prevented it, then keyup to whatever has focus after that, as a browser sends a key.
+ */
+function pressLikeABrowser(element: Element, key: string): void {
+  const document = element.ownerDocument
+  const init: KeyboardEventInit = { key, bubbles: true, cancelable: true, composed: true }
+  const target = document.activeElement ?? document.body
+  if (target.dispatchEvent(new KeyboardEvent('keydown', init))) keyDefault(target, key)
+  ;(document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent('keyup', init))
 }
 
 /** user-event's `accept` rule: case-insensitive, jpg and jpeg alike, `image/*` wildcards. */
@@ -124,11 +270,13 @@ async function waitUntil(condition: () => Promise<void>, timeout: number): Promi
  * runloop drained, rendering done, test waiters clear.
  *
  * Clicks and fills go through `@ember/test-helpers`, the way an Ember test
- * dispatches them; a click adds the pointer events test-helpers leaves out. Keys, hover, focus and selects go through user-event, as in
- * the dom driver: test-helpers' versions dispatch events without a browser's
+ * dispatches them; a click adds the pointer events test-helpers leaves out. Keys,
+ * hover and selects are dispatched here: test-helpers' versions skip a browser's
  * default actions (a pressed key never reaches the value), refuse elements a
  * browser would accept (a disabled control, a non-focusable dialog), and match
- * options by value only.
+ * options by value only. Nothing goes through user-event: its setup patches the
+ * document for good, and an Ember test run shares one document, so a number input
+ * in a later test read "42.50" back as "42.5".
  *
  * Each helper is handed the resolved element, never a selector string, so
  * strictness and scope stay this library's rather than `querySelector`'s.
@@ -190,21 +338,23 @@ export class EmberQuery extends Query {
 
   override async selectOption(value: string | string[], options?: WaitOptions): Promise<void> {
     const element = (await this.element(options)) as HTMLSelectElement
-    const user = userFor(element)
-    // user-event adds to a multi-select's existing selection; the shared API
-    // replaces it, so clear first — as the dom driver does. user-event matches
-    // a value or a label, and rejects one that matches no option.
-    if (element.multiple) {
-      const selected = [...element.selectedOptions].map(option => option.value)
-      if (selected.length > 0) await user.deselectOptions(element, selected)
-    }
-    await user.selectOptions(element, value)
+    // Each value matches an option's value or its label. A miss throws before
+    // anything changes; the new selection replaces the old one, as in Playwright.
+    const chosen = (Array.isArray(value) ? value : [value]).map(wanted => {
+      const option = [...element.options].find(
+        o => o.value === wanted || o.label === wanted || o.text.trim() === wanted,
+      )
+      if (option === undefined) throw new Error(`No option matches "${wanted}"`)
+      return option
+    })
+    for (const option of element.options) option.selected = chosen.includes(option)
+    element.dispatchEvent(new Event('input', { bubbles: true, composed: true }))
+    element.dispatchEvent(new Event('change', { bubbles: true }))
     await settled()
   }
 
   override async hover(options?: WaitOptions): Promise<void> {
-    const element = await this.element(options)
-    await userFor(element).hover(element)
+    hoverLikeABrowser(await this.element(options))
     await settled()
   }
 
@@ -225,7 +375,7 @@ export class EmberQuery extends Query {
     // Focus, then press: the key goes to the focused element, as in a browser.
     // On an element that cannot take focus, that is whatever already had it.
     element.focus()
-    await userFor(element).keyboard(toKeyboardInput(key))
+    pressLikeABrowser(element, key)
     await settled()
   }
 
