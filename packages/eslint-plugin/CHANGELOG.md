@@ -1,5 +1,11 @@
 # @harnessed-ts/eslint-plugin
 
+## 0.8.2
+
+### Patch Changes
+
+- @harnessed-ts/config@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes
