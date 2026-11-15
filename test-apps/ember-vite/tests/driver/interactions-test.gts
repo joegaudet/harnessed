@@ -187,6 +187,99 @@ module('Ember driver | interactions', function (hooks) {
     }
   })
 
+  for (const [name, act] of [
+    ['press', (query: Query) => query.press('Enter')],
+    ['hover', (query: Query) => query.hover()],
+    ['selectOption', (query: Query) => query.selectOption('Pro')],
+  ] as const) {
+    test(`${name} leaves the document unpatched for later tests`, async function (assert) {
+      // As click and upload above: user-event patched the shared document.
+      const frame = document.createElement('iframe')
+      document.body.append(frame)
+      try {
+        const doc = frame.contentDocument!
+        doc.body.innerHTML =
+          '<select data-testid="t"><option value="free">Free</option><option value="pro">Pro</option></select>' +
+          '<input type="number" data-testid="n">'
+        await act(createQuery(ember({ root: doc.body }), [], testId('t')))
+        const amount = doc.querySelector<HTMLInputElement>('[data-testid="n"]')!
+        amount.dispatchEvent(new FocusEvent('focus'))
+        amount.value = '42.50'
+        assert.strictEqual(amount.value, '42.50')
+      } finally {
+        frame.remove()
+      }
+    })
+  }
+
+  test('a multi-select picks exactly the given options', async function (assert) {
+    await render(
+      <template>
+        <select multiple data-testid="s">
+          <option value="a" selected>A</option>
+          <option value="b">B</option>
+          <option value="c">C</option>
+        </select>
+      </template>,
+    )
+    await target('s').selectOption(['B', 'c'])
+    assert.deepEqual(
+      [...(field('s') as unknown as HTMLSelectElement).selectedOptions].map(option => option.value),
+      ['b', 'c'],
+    )
+  })
+
+  test('press sends keydown and keyup, and a prevented keydown types nothing', async function (assert) {
+    const events: string[] = []
+    const record = (event: KeyboardEvent) => events.push(`${event.type} ${event.key}`)
+    const block = (event: KeyboardEvent) => event.preventDefault()
+    await render(
+      <template>
+        <input data-testid="t" {{on "keydown" record}} {{on "keyup" record}} />
+        <input data-testid="p" {{on "keydown" block}} />
+      </template>,
+    )
+    await target('t').press('x')
+    await target('p').press('y')
+    assert.deepEqual(events, ['keydown x', 'keyup x'])
+    assert.strictEqual(field('t').value, 'x')
+    assert.strictEqual(field('p').value, '')
+  })
+
+  test('Tab moves focus to the next field, from where keydown left it', async function (assert) {
+    // A popup's search field sends focus back to its trigger on Tab; Tab then
+    // goes on from the trigger, not from the field.
+    const back = () => field('trigger').focus()
+    await render(
+      <template>
+        <button type="button" data-testid="trigger">Open</button>
+        <input disabled />
+        <input data-testid="next" />
+        <input data-testid="search" {{on "keydown" back}} />
+      </template>,
+    )
+    await target('search').press('Tab')
+    assert.strictEqual(document.activeElement, field('next'))
+  })
+
+  test('Enter in a form field submits the form', async function (assert) {
+    let submits = 0
+    const submit = (event: Event) => {
+      event.preventDefault()
+      submits++
+    }
+    await render(
+      <template>
+        <form {{on "submit" submit}}>
+          <input data-testid="t" />
+          <button type="submit">Go</button>
+        </form>
+      </template>,
+    )
+    await target('t').press('Enter')
+    assert.strictEqual(submits, 1)
+  })
+
   test('upload drops files the input does not accept, and skips a disabled input', async function (assert) {
     const names: string[] = []
     const record = (event: Event) =>
