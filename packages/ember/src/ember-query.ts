@@ -148,11 +148,11 @@ const TABBABLE =
   'a[href], area[href], button, input, select, textarea, iframe, summary, [tabindex], [contenteditable]:not([contenteditable="false"])'
 
 /**
- * Tab: focus the next element in document order that Tab reaches, from wherever
- * focus is once keydown's handlers have run.
- * shortcut: ignores positive tabindex order and Shift+Tab; add them when a harness needs one.
+ * Tab: focus the next element in document order that Tab reaches (the previous one
+ * with Shift), from wherever focus is once keydown's handlers have run.
+ * shortcut: ignores positive tabindex order; add it when a harness needs one.
  */
-function tabFrom(target: Element): void {
+function tabFrom(target: Element, backward: boolean): void {
   const document = target.ownerDocument
   const reachable = [...document.querySelectorAll<HTMLElement>(TABBABLE)].filter(
     element =>
@@ -160,11 +160,19 @@ function tabFrom(target: Element): void {
       !element.matches(':disabled, [inert] *, input[type="hidden"]') &&
       element.getClientRects().length > 0,
   )
-  const next = reachable.find(
-    element =>
-      target.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING &&
-      !target.contains(element),
-  )
+  const next = backward
+    ? reachable
+        .filter(
+          element =>
+            target.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_PRECEDING &&
+            !element.contains(target),
+        )
+        .at(-1)
+    : reachable.find(
+        element =>
+          target.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING &&
+          !target.contains(element),
+      )
   if (next === undefined) (document.activeElement as HTMLElement | null)?.blur()
   else next.focus()
 }
@@ -172,12 +180,11 @@ function tabFrom(target: Element): void {
 /**
  * What a browser does when nothing prevents a key: move focus with Tab, type
  * the key, delete with it, or submit with Enter.
- * shortcut: no Space or Enter clicks, no held modifiers (user-event's `Meta>`
- * syntax); add them when a harness presses one.
+ * shortcut: no Space or Enter clicks; add them when a harness presses one.
  */
-function keyDefault(target: Element, key: string): void {
+function keyDefault(target: Element, key: string, shift: boolean): void {
   if (key === 'Tab') {
-    tabFrom(target.ownerDocument.activeElement ?? target)
+    tabFrom(target.ownerDocument.activeElement ?? target, shift)
     return
   }
   const field = editableOf(target)
@@ -211,16 +218,56 @@ function keyDefault(target: Element, key: string): void {
   }
 }
 
+/** The modifier flag each held key sets on the events sent while it is down. */
+const MODIFIERS: Record<string, 'altKey' | 'ctrlKey' | 'metaKey' | 'shiftKey'> = {
+  Alt: 'altKey',
+  Control: 'ctrlKey',
+  Meta: 'metaKey',
+  Shift: 'shiftKey',
+}
+
 /**
  * keydown to the focused element, the browser's default action unless a handler
  * prevented it, then keyup to whatever has focus after that, as a browser sends a key.
+ * A Playwright chord (`Shift+ArrowDown`) holds its modifiers down around the last key,
+ * and the events sent while they are down carry their flags.
  */
-function pressLikeABrowser(element: Element, key: string): void {
+function pressLikeABrowser(element: Element, chord: string): void {
   const document = element.ownerDocument
-  const init: KeyboardEventInit = { key, bubbles: true, cancelable: true, composed: true }
-  const target = document.activeElement ?? document.body
-  if (target.dispatchEvent(new KeyboardEvent('keydown', init))) keyDefault(target, key)
-  ;(document.activeElement ?? document.body).dispatchEvent(new KeyboardEvent('keyup', init))
+  const focused = () => document.activeElement ?? document.body
+  // `+` alone, or a trailing `++`, is the plus key itself rather than a separator.
+  const keys = (chord.length > 1 ? chord.split(/\+(?!$)/) : [chord]).map(key =>
+    key === 'ControlOrMeta' ? controlOrMeta(document) : key,
+  )
+  const flags: KeyboardEventInit = {}
+  const send = (type: 'keydown' | 'keyup', key: string) =>
+    focused().dispatchEvent(
+      new KeyboardEvent(type, { key, bubbles: true, cancelable: true, composed: true, ...flags }),
+    )
+  for (const [index, key] of keys.entries()) {
+    const modifier = MODIFIERS[key]
+    if (index < keys.length - 1 && modifier !== undefined) {
+      flags[modifier] = true
+      send('keydown', key)
+      continue
+    }
+    const target = focused()
+    // A shortcut (Control, Meta or Alt held) does not type or delete.
+    const shortcut = flags.ctrlKey || flags.metaKey || flags.altKey
+    if (send('keydown', key) && !shortcut) keyDefault(target, key, flags.shiftKey === true)
+    send('keyup', key)
+  }
+  for (const key of keys.slice(0, -1).reverse()) {
+    const modifier = MODIFIERS[key]
+    if (modifier === undefined) continue
+    flags[modifier] = false
+    send('keyup', key)
+  }
+}
+
+/** Playwright's `ControlOrMeta`: Meta on macOS, Control elsewhere. */
+function controlOrMeta(document: Document): 'Control' | 'Meta' {
+  return /Mac/.test(document.defaultView?.navigator.platform ?? '') ? 'Meta' : 'Control'
 }
 
 /** user-event's `accept` rule: case-insensitive, jpg and jpeg alike, `image/*` wildcards. */

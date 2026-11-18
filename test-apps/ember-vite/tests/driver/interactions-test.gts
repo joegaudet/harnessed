@@ -246,6 +246,33 @@ module('Ember driver | interactions', function (hooks) {
     assert.strictEqual(field('p').value, '')
   })
 
+  test('a chord holds its modifiers down around the key, as Playwright names it', async function (assert) {
+    const events: string[] = []
+    const record = (event: KeyboardEvent) =>
+      events.push(`${event.type} ${event.key}${event.shiftKey ? ' shift' : ''}${event.ctrlKey ? ' ctrl' : ''}`)
+    await render(
+      <template>
+        <input data-testid="t" {{on "keydown" record}} {{on "keyup" record}} />
+      </template>,
+    )
+    await target('t').press('Control+Shift+ArrowDown')
+    assert.deepEqual(events, [
+      'keydown Control ctrl',
+      'keydown Shift shift ctrl',
+      'keydown ArrowDown shift ctrl',
+      'keyup ArrowDown shift ctrl',
+      'keyup Shift ctrl',
+      'keyup Control',
+    ])
+  })
+
+  test('a shortcut chord types nothing, and + alone is the plus key', async function (assert) {
+    await render(<template><input data-testid="t" /></template>)
+    await target('t').press('Control+a')
+    await target('t').press('+')
+    assert.strictEqual(field('t').value, '+')
+  })
+
   test('Tab moves focus to the next field, from where keydown left it', async function (assert) {
     // A popup's search field sends focus back to its trigger on Tab; Tab then
     // goes on from the trigger, not from the field.
@@ -260,6 +287,18 @@ module('Ember driver | interactions', function (hooks) {
     )
     await target('search').press('Tab')
     assert.strictEqual(document.activeElement, field('next'))
+  })
+
+  test('Shift+Tab moves focus to the previous field', async function (assert) {
+    await render(
+      <template>
+        <input data-testid="before" />
+        <input disabled />
+        <input data-testid="here" />
+      </template>,
+    )
+    await target('here').press('Shift+Tab')
+    assert.strictEqual(document.activeElement, field('before'))
   })
 
   test('Enter in a form field submits the form', async function (assert) {
