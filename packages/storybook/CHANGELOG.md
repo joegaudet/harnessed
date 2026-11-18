@@ -1,5 +1,14 @@
 # @harnessed-ts/storybook
 
+## 0.8.3
+
+### Patch Changes
+
+- @harnessed-ts/core@0.8.3
+  - @harnessed-ts/dom@0.8.3
+  - @harnessed-ts/mock@0.8.3
+  - @harnessed-ts/page@0.8.3
+
 ## 0.8.2
 
 ### Patch Changes
