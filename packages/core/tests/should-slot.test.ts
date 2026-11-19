@@ -1,21 +1,18 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import {
   applyConfig,
-  ComponentHarness,
   getConfig,
-  Harness,
   Query,
   registerShould,
   resetConfig,
-  testId,
+  ScopedHarness,
 } from '../src/index'
 import { globals } from '../src/globals'
 
-// Applied by hand: this package's tests run without a decorator transform.
-class ProbeHarness extends ComponentHarness {}
-Harness({ host: testId('probe') })(ProbeHarness, {} as ClassDecoratorContext)
-
-const env = { driver: 'should-slot-probe' }
+/** Reads `should` off `prototype` for `subject`, as an instance would. */
+function readShould(prototype: object, subject: object): unknown {
+  return Object.getOwnPropertyDescriptor(prototype, 'should')?.get?.call(subject)
+}
 
 afterEach(() => {
   globals().should = undefined
@@ -28,16 +25,14 @@ afterEach(() => {
  */
 describe('should slot', () => {
   it('refuses, naming the import, before anything is registered', () => {
-    const probe = new ProbeHarness(env)
-    expect(() => (probe as unknown as { should: unknown }).should).toThrow(
-      /@harnessed-ts\/should\/register/,
-    )
+    expect(() => readShould(ScopedHarness.prototype, {})).toThrow(/@harnessed-ts\/should\/register/)
   })
 
-  it('hands the harness to the registered factory', () => {
+  it('hands the harness or query to the registered factory', () => {
     registerShould(subject => ({ subject }))
-    const probe = new ProbeHarness(env)
-    expect((probe as unknown as { should: { subject: unknown } }).should.subject).toBe(probe)
+    const subject = {}
+    expect(readShould(ScopedHarness.prototype, subject)).toEqual({ subject })
+    expect(readShould(Query.prototype, subject)).toEqual({ subject })
   })
 
   it('defines the getter on Query too, without making it enumerable', () => {
