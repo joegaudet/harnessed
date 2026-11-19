@@ -15,6 +15,12 @@ export interface RuntimeConfig {
   testIdAttribute: string
   /** Default milliseconds a driver waits for a target before giving up. */
   defaultTimeout: number
+  /**
+   * Whether a `.should` assertion retries until it passes or `defaultTimeout`
+   * runs out, instead of checking once. `@harnessed-ts/cypress` turns it on, to
+   * match Cypress's own retrying `.should`; any suite may.
+   */
+  retryAssertions: boolean
 }
 
 /** Where harnesses live and how their test ids are named. Read by tooling, not at runtime. */
@@ -89,6 +95,7 @@ export function applyConfig(config: HarnessedConfig): void {
   const runtime: Partial<RuntimeConfig> = {}
   if (config.testIdAttribute !== undefined) runtime.testIdAttribute = config.testIdAttribute
   if (config.defaultTimeout !== undefined) runtime.defaultTimeout = config.defaultTimeout
+  if (config.retryAssertions !== undefined) runtime.retryAssertions = config.retryAssertions
   configure(runtime)
 }
 

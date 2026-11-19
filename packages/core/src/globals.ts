@@ -5,6 +5,7 @@
 export const DEFAULT_RUNTIME_CONFIG: Readonly<RuntimeConfig> = Object.freeze({
   testIdAttribute: 'data-testid',
   defaultTimeout: 5_000,
+  retryAssertions: false,
 })
 
 /**
@@ -20,6 +21,7 @@ export const DEFAULT_RUNTIME_CONFIG: Readonly<RuntimeConfig> = Object.freeze({
 import type { RuntimeConfig } from './config'
 import type { HarnessOptions } from './host-meta'
 import type { BeforeNavigate, Navigation, QueryFactory } from './registry'
+import type { ShouldFactory } from './should'
 
 const SLOT = Symbol.for('harnessed.globals.v1')
 
@@ -32,6 +34,8 @@ export interface HarnessedGlobals {
   /** Overrides applied by `configure()`, and the merged view readers get. */
   overrides: Partial<RuntimeConfig>
   merged: Readonly<RuntimeConfig>
+  /** What every `.should` getter builds its chain with. See `registerShould`. */
+  should?: ShouldFactory | undefined
 }
 
 interface GlobalCarrier {
