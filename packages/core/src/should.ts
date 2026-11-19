@@ -22,8 +22,14 @@ export function defineShould(prototype: object): void {
     configurable: true,
     enumerable: false,
     get(this: object): unknown {
-      const factory = globals().should
+      // An own property only: the slot is a plain object, and `chai.should()`
+      // puts a `should` on Object.prototype that it would otherwise inherit.
+      const slot = globals()
+      const factory = Object.hasOwn(slot, 'should') ? slot.should : undefined
       if (factory === undefined) {
+        // Without @harnessed-ts/should, step aside for Chai's should interface.
+        const inherited = Object.getOwnPropertyDescriptor(Object.prototype, 'should')
+        if (inherited?.get !== undefined) return inherited.get.call(this)
         throw new Error(
           'harnessed: `.should` is not registered. Add `import "@harnessed-ts/should/register"` to your test setup file.',
         )

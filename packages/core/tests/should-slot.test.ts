@@ -28,6 +28,23 @@ describe('should slot', () => {
     expect(() => readShould(ScopedHarness.prototype, {})).toThrow(/@harnessed-ts\/should\/register/)
   })
 
+  it("steps aside for an inherited should, such as chai.should()'s, until one is registered", () => {
+    Object.defineProperty(Object.prototype, 'should', {
+      configurable: true,
+      get(this: object) {
+        return { chai: this }
+      },
+    })
+    try {
+      const subject = {}
+      expect(readShould(Query.prototype, subject)).toEqual({ chai: subject })
+      registerShould(registered => ({ registered }))
+      expect(readShould(Query.prototype, subject)).toEqual({ registered: subject })
+    } finally {
+      delete (Object.prototype as { should?: unknown }).should
+    }
+  })
+
   it('hands the harness or query to the registered factory', () => {
     registerShould(subject => ({ subject }))
     const subject = {}
