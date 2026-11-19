@@ -28,6 +28,8 @@ export type Settled = { ok: true; value: unknown } | { ok: false; error: unknown
 export interface ValueCheck {
   (actual: unknown, args: readonly unknown[], flags: Flags): Verdict
   acceptsRejection?: boolean
+  /** Also a word, as Chai's `a` and `an` are: `be.an('array')` and `be.an.instanceOf(Array)`. */
+  chainable?: boolean
 }
 
 /** A target assertion: reads the page through a query or a harness host. */
@@ -116,7 +118,10 @@ interface ChainState {
   deep: boolean
 }
 
-type Terminal = (args: unknown[], state: ChainState) => Promise<void>
+interface Terminal {
+  (args: unknown[], state: ChainState): Promise<void>
+  chainable?: boolean
+}
 
 /**
  * The shared proxy behind every chain: words, `not` and `deep` return a new
@@ -143,6 +148,12 @@ function chain(
       if (prop === 'deep') return next({ deep: true }, prop)
       if (WORDS.has(prop)) return next({}, prop)
       const run = terminal(prop)
+      if (run?.chainable === true) {
+        const word = next({}, prop)
+        return new Proxy((...args: unknown[]) => run(args, state), {
+          get: (_target, key) => Reflect.get(word, key),
+        })
+      }
       if (run !== undefined) return (...args: unknown[]) => run(args, state)
       if (fallback !== undefined) return fallback(prop)
       throw new TypeError(
@@ -173,7 +184,7 @@ function valueChain(label: string, path: string, read: () => Promise<unknown>): 
   return chain({ path, negate: false, deep: false }, name => {
     const check = valueChecks.get(name)
     if (check === undefined) return undefined
-    return (args, state) =>
+    const run: Terminal = (args, state) =>
       settle(async () => {
         let settled: Settled
         try {
@@ -194,6 +205,8 @@ function valueChain(label: string, path: string, read: () => Promise<unknown>): 
               : `expected ${label} to ${verdict.phrase}, but ${verdict.but ?? `it was ${show(actual)}`}`,
         }
       }, state.negate)
+    if (check.chainable === true) run.chainable = true
+    return run
   })
 }
 

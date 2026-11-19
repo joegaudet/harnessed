@@ -42,6 +42,16 @@
       "import": "./dist/register.js",
       "require": "./dist/register.cjs"
     },
+    "./bdd": {
+      "types": "./dist/bdd/index.d.ts",
+      "import": "./dist/bdd/index.js",
+      "require": "./dist/bdd/index.cjs"
+    },
+    "./bdd/register": {
+      "types": "./dist/bdd/register.d.ts",
+      "import": "./dist/bdd/register.js",
+      "require": "./dist/bdd/register.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
