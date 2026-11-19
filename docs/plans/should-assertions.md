@@ -1,6 +1,6 @@
 # Plan: should-style assertions (`@harnessed-ts/should`)
 
-Status: draft · Base: `main` @ `68cd2c0`
+Status: implemented on `feat/joe/should-assertions` · Base: `main` @ `cb2f813`
 
 ## Goal
 
@@ -12,13 +12,40 @@ expect(await form.error()).toBeNull()
 // after
 await form.should.error.be.null()
 await form.should.error.not.be.null()
-await form.submitButton.should.be.absent()
+await page.banner.should.be.absent() // a @ChildHarness
 ```
 
 It ships as its own package and works the same under every driver harnessed supports
 (Vitest browser, Playwright, Cypress, WebdriverIO, Nightwatch, Puppeteer, TestCafe,
 node:test, bun, testing-library/dom, Ember). Failure messages for harness matchers are
 the ones `harnessMatchers` already produces.
+
+## As built: where this differs from the plan below
+
+The sections after this one are the plan as agreed. The implementation departs from it
+in these places; where they disagree, this list is current.
+
+- **Core owns the getter.** Every driver's query extends `Query`, so there is no
+  `registerQueryExtension` hook. Core defines a non-enumerable `should` getter on
+  `ScopedHarness.prototype` and `Query.prototype` (`packages/core/src/should.ts`) that
+  reads a factory from the shared `Symbol.for` globals slot; `/register` fills the slot.
+  Each copy of core (ESM and CJS) then has its own getter, and all of them read the same
+  slot. With nothing registered, the getter defers to an inherited `should`, such as
+  `chai.should()`'s, so that keeps working.
+- **Retry is a runtime setting, `retryAssertions`**, not an env capability, so a `Query`
+  subject, which carries no env, can see it. `@harnessed-ts/cypress/support` turns it on,
+  and any suite may.
+- **The vocabulary tables sit on `globalThis`** (`Symbol.for('harnessed.should.tables.v1')`),
+  for the same dual-package reason as core's registry.
+- **Reserved names.** Chain words, `not`, `deep` and the matcher names are excluded from
+  `HarnessShould<T>`. A harness method with one of those names is asserted with `expect`.
+- **An uncalled terminal rejects.** `await form.should.error.be.null` throws
+  `` `.null` is a call `` instead of passing.
+- **`await-should` is in `strict` only.** Chai's synchronous should interface reads the
+  same, so the rule would flag it in `recommended`.
+- **Targets in the docs are child harnesses or `self`.** `harness-public-surface` keeps
+  `Query` fields private, so the examples don't use public queries.
+- **Not ported:** Chai's mock assertions (`requested`, `requestedTimes`, `requestedWith`).
 
 ## Decisions (from the clarifying round)
 

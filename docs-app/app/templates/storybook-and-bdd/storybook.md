@@ -44,6 +44,18 @@ export const WrongPassword: Story = {
 Storybook's Vitest addon runs those play functions as tests, and portable
 stories (`composeStories`) run them anywhere else, with no extra setup.
 
+**Should style:** import `@harnessed-ts/should/register` in `.storybook/preview.ts`,
+and a play function can assert on the harness directly:
+
+```tsx
+play: async ({ harness }) => {
+  await harness.signInAs('ada@example.com', 'guess')
+  await harness.should.error.equal('Wrong password')
+}
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 **Stories as fixtures.** `StoryPage` (`@harnessed-ts/storybook/page`) opens a
 story by URL from any runner that can navigate (Playwright, WebdriverIO,
 Puppeteer and the rest), so a browser suite reuses the stories instead of

@@ -588,6 +588,7 @@ import { defineConfig } from '@harnessed-ts/core'
 export default defineConfig({
   testIdAttribute: 'data-testid',
   defaultTimeout: 5000,
+  retryAssertions: false, // should assertions retry; @harnessed-ts/cypress turns it on
   layout: { components: 'src/components', pages: 'src/pages', harnesses: 'harness' },
   testIdPattern: { widget: 'ui-<kebab>', page: 'page-<kebab>' },
 })

@@ -31,6 +31,20 @@ defineParameterType(pageParameter(pages)) // the runner's own defineParameterTyp
 Nightwatch's Cucumber runner has an adapter too, `@harnessed-ts/gherkin/nightwatch`:
 see [Gherkin (Nightwatch's Cucumber runner)](../runners/nightwatch.md#gherkin-nightwatchs-cucumber-runner).
 
+**Should style** works in any step: import `@harnessed-ts/should/register`
+wherever the runner loads support code (the Cypress support file, cucumber-js's
+`--import`, the module that builds playwright-bdd's `test`), then assert on the
+page in the world:
+
+```ts
+Then('the total is {string}', async ({ world }, total: string) => {
+  await world.checkout!.should.total.equal(total)
+})
+```
+
+Under Cypress cucumber the assertion retries, as everywhere under Cypress. See
+[Should assertions](../writing-harnesses/should-assertions.md).
+
 ## playwright-bdd
 
 `withWorld` adds a `world` fixture to playwright-bdd's `test`. A fixture is

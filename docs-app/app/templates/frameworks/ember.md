@@ -37,6 +37,18 @@ await checkout.goto({ token })
 
 Classic and Embroider + Vite builds, Ember 5.12 and later.
 
+**Should style**, under ember-qunit, ember-exam and Vitest browser mode alike:
+`npm i -D @harnessed-ts/should` and import `@harnessed-ts/should/register` in
+`tests/test-helper.ts`, beside `install(QUnit)`. A failed assertion throws, which
+QUnit and Vitest both report as a failure:
+
+```ts
+await form.should.errorText.be.null()
+await form.should.not.be.absent()
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 Where Ember differs from the other drivers:
 
 - **Queries start at the test's root element** (`#ember-testing`), for scoped and
