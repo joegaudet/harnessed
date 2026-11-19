@@ -6,6 +6,7 @@
  * import '@harnessed-ts/cypress/support'
  * ```
  */
+import { configure } from '@harnessed-ts/core'
 import { registerCommands } from './commands'
 
 export type {
@@ -17,3 +18,5 @@ export type {
 } from './commands'
 
 registerCommands()
+// Cypress's own `.should` retries; a harness's `.should` does the same here.
+configure({ retryAssertions: true })

@@ -1037,6 +1037,9 @@ importers:
       '@harnessed-ts/cypress':
         specifier: workspace:*
         version: link:../../packages/cypress
+      '@harnessed-ts/should':
+        specifier: workspace:*
+        version: link:../../packages/should
       '@testing-library/dom':
         specifier: ^10.4.2
         version: 10.4.2
