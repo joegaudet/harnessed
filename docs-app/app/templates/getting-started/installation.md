@@ -20,6 +20,9 @@ npm i -D @harnessed-ts/gherkin         # Gherkin: world, page registry, {page}
 # plus the assertion style your runner uses, if it is not `expect.extend`-based
 npm i -D @harnessed-ts/qunit        # assert.harness(x) — ember-qunit, QUnit
 npm i -D @harnessed-ts/chai         # expect(x).to.be.absent — Mocha, Cypress
+
+# or should style, under any runner
+npm i -D @harnessed-ts/should       # await form.should.error.be.null()
 ```
 
 `@harnessed-ts/core` depends on no driver. A jsdom-only project never resolves

@@ -7,6 +7,7 @@ import { defineConfig } from '@harnessed-ts/core'
 export default defineConfig({
   testIdAttribute: 'data-testid',
   defaultTimeout: 5000,
+  retryAssertions: false,
   layout: { components: 'src/components', pages: 'src/pages', harnesses: 'harness' },
   testIdPattern: { widget: 'ui-<kebab>', page: 'page-<kebab>' },
 })
@@ -30,3 +31,7 @@ import config from '../harnessed.config'
 
 applyConfig(config)
 ```
+
+`retryAssertions` makes a [should assertion](should-assertions.md) read again
+until it passes or `defaultTimeout` runs out, instead of reading once.
+`@harnessed-ts/cypress/support` turns it on, to match Cypress's own `.should`.

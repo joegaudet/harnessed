@@ -42,6 +42,19 @@ Differences from the other drivers:
 - **`upload()`** writes each file to disk first: the browser must share the
   test's file system.
 
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from the top of each test file, or a module your
+globals file imports. Every harness and target gets a `.should`. Await each
+assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await form.submitButton.should.be.absent()
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 ## Component testing
 
 `@nightwatch/react` and `@nightwatch/vue` mount a component through Vite. Mount,

@@ -181,6 +181,9 @@ npm i -D @harnessed-ts/gherkin         # Gherkin: world, page registry, {page}
 # plus the assertion style your runner uses, if it is not `expect.extend`-based
 npm i -D @harnessed-ts/qunit        # assert.harness(x) — ember-qunit, QUnit
 npm i -D @harnessed-ts/chai         # expect(x).to.be.absent — Mocha, Cypress
+
+# or should style, under any runner
+npm i -D @harnessed-ts/should       # await form.should.error.be.null()
 ```
 
 `@harnessed-ts/core` depends on no driver. A jsdom-only project never resolves
@@ -559,6 +562,18 @@ await expect(price).to.readAs(/^\$/)
 
 A failure under QUnit or Chai also reports what was read beside what was wanted,
 so their reporters show both.
+
+Or should style, under any runner, with
+[`@harnessed-ts/should`](packages/should/README.md). It also asserts on what a
+harness method returns:
+
+```ts
+import '@harnessed-ts/should/register' // once, in the test setup file
+
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await form.submitButton.should.be.absent()
+```
 
 ### Configuration
 
@@ -1824,6 +1839,7 @@ or one rule at a time:
 | `behavioural-method-names`     | a public harness method named for a mechanic (`clickSubmit`, `fillEmail`) or a DOM noun (`submitButton`, `rowLocator`) instead of intent. A warning: it judges names; `verbs`, `nouns`, and `allow` tune it                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `no-component-harness-in-test` | a test constructing a component harness directly instead of entering through a page. Runtime-agnostic (`testFiles` globs); exempts a file that renders the component itself. `strict` only.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `no-raw-intercept`             | a runner's own interception in a test — `page.route`, `cy.intercept`, `setRequestInterception`, `browser.mock`, `RequestMock()`, MSW's `setupServer` — where `mock(env)` should be used (a warning in `recommended`, an error in `strict`)                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `await-should`                 | a floating terminal on a `@harnessed-ts/should` chain, such as `form.should.error.be.null()`: unawaited, it cannot fail the test. Cypress's `cy.get(…).should('…')` is left alone                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `await-mock-install`           | a floating `.reply()`, `.use()` or `graphql.query()` on a harnessed mock: unawaited, a request fired straight after can go unanswered                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 **`@harnessed-ts/claude`** installs the authoring conventions for coding agents:
@@ -1863,6 +1879,7 @@ config alone.
 | `@harnessed-ts/storybook`      | `harnessed()` for Storybook's preview: a harness in every play function, each method a step, the matchers on its `expect`; `StoryPage` opens stories as fixtures; `/ember` renders Ember stories and settles after each interaction |
 | `@harnessed-ts/gherkin`        | Gherkin: a scenario-scoped world, a typed page registry and `{page}`; adapters for playwright-bdd, cucumber-js, Cypress cucumber, ember-cli-yadda and Nightwatch                                                                    |
 | `@harnessed-ts/qunit`          | `assert.harness(x)` checks for QUnit and ember-qunit                                                                                                                                                                                |
+| `@harnessed-ts/should`         | `await form.should.error.be.null()` should-style assertions for every runner; `/bdd` adds Chai's full BDD vocabulary                                                                                                                |
 | `@harnessed-ts/chai`           | `expect(x).to.be.absent` and friends for Chai: Mocha, Cypress, WebdriverIO                                                                                                                                                          |
 | `@harnessed-ts/page`           | `PageHarness`                                                                                                                                                                                                                       |
 | `@harnessed-ts/mock`           | API mocking: the handler model, response builders, API harnesses, factories, OpenAPI and GraphQL validation, HAR, MSW import; each driver's `/mock` entry registers its transport                                                   |

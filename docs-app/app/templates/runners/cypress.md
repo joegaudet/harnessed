@@ -69,4 +69,27 @@ it('signs in', () => {
 - **Frames** are entered when they are same-origin only, as under the dom
   driver.
 
+**Should style:** `npm i -D @harnessed-ts/should`, and import it in the support
+file, after the commands:
+
+```ts
+import '@harnessed-ts/cypress/support'
+import '@harnessed-ts/should/register'
+```
+
+Assert inside the `cy.harness` callback, like any harness call:
+
+```ts
+cy.harness(LoginFormHarness, async form => {
+  await form.submitIt()
+  await form.should.error.not.be.null()
+  await form.errorLine.should.readAs(/credentials/)
+})
+```
+
+Under Cypress a should assertion **retries**, as Cypress's own `.should` does:
+it reads again until it passes or `defaultTimeout` runs out, then reports the
+last reading. The support file turns this on with `retryAssertions`. See
+[Should assertions](../writing-harnesses/should-assertions.md).
+
 **Mocking:** `import '@harnessed-ts/cypress/mock'` in the support file, then `cy.mock(api => …)` — see [Mocking APIs](../mocking/mocking-apis.md).

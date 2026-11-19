@@ -46,4 +46,16 @@ Differences from the dom driver:
 - The driver adds one locator method, `harnessedSelector`, through
   `locators.extend`, to chain into frames. It is not meant for tests.
 
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from your Vitest setup file. Every harness and
+target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await form.submitButton.should.be.absent()
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 **Mocking:** `mock(vitestBrowser())` from `@harnessed-ts/vitest-browser/mock`, before `render` — see [Mocking APIs](../mocking/mocking-apis.md).

@@ -5,6 +5,7 @@
     "component-harnesses",
     "page-harnesses",
     "matchers",
+    "should-assertions",
     "configuration",
     "cross-driver-guarantees"
   ]

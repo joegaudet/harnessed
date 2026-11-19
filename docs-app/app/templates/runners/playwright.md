@@ -26,4 +26,16 @@ frames — cross-origin included — are entered with `frameLocator()`.
 suite, see [Gherkin](../storybook-and-bdd/gherkin.md); for a backend-free suite,
 [`createApiStubs`](../mocking/create-api-stubs.md).
 
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from the test file, or the module that declares
+your fixtures. Every harness and target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await form.submitButton.should.be.absent()
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 **Mocking:** `mock(pw(page))` from `@harnessed-ts/playwright/mock`, before `goto()` — see [Mocking APIs](../mocking/mocking-apis.md).
