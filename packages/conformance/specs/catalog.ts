@@ -901,8 +901,9 @@ export const specs: Spec[] = [
   {
     name: 'should: with retryAssertions, an assertion waits for the page to catch up',
     async run(ctx) {
+      // Shown first: the narrowed timeout is for the assertion, not for loading the fixture.
+      const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
       await withConfig({ retryAssertions: true, defaultTimeout: 2_000 }, async () => {
-        const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
         await form.should.lateCount.equal(2)
       })
     },
@@ -910,8 +911,8 @@ export const specs: Spec[] = [
   {
     name: 'should: with retryAssertions, a failure reports the last reading once the timeout runs out',
     async run(ctx) {
+      const form = new LoginFormHarness(await ctx.show('login'))
       await withConfig({ retryAssertions: true, defaultTimeout: 300 }, async () => {
-        const form = new LoginFormHarness(await ctx.show('login'))
         await assert.rejects(
           () => form.should.errorCount.equal(1),
           /expected LoginFormHarness\.errorCount\(\) to equal 1, but it was 0/,

@@ -646,4 +646,9 @@ describe('the configs', () => {
       expect(config.rules['harnessed/behavioural-method-names']).toBe('warn')
     }
   })
+
+  it("leaves await-should to strict, since Chai's own should reads the same and is synchronous", () => {
+    expect(recommended.rules['harnessed/await-should']).toBeUndefined()
+    expect(strict.rules['harnessed/await-should']).toBe('error')
+  })
 })

@@ -12,7 +12,7 @@ import '@harnessed-ts/should/register' // once, in the test setup file
 await form.should.error.be.null() // expect(await form.error()).toBeNull()
 await form.should.error.not.be.null()
 await grid.should.labelAt(1).equal('Medium')
-await form.submitButton.should.be.absent()
+await page.banner.should.be.absent() // a @ChildHarness
 await form.should.be.absent() // the harness's own host
 ```
 
@@ -21,11 +21,15 @@ on what it resolved to. `harness.should.<target>` and `query.should` take the
 harness matchers `absent`, `selected` and `readAs`, with the same failure
 messages as the Vitest, Playwright, QUnit and Chai assertions. Every terminal
 is a call that returns a promise, so **await every one**.
-`@typescript-eslint/no-floating-promises` or `harnessed/await-should` catches a
-missing `await`.
+`@typescript-eslint/no-floating-promises`, or `harnessed/await-should` from
+`@harnessed-ts/eslint-plugin`'s strict config, catches a missing `await`. An
+awaited terminal without its call, `await form.should.error.be.null`, rejects
+and says so.
 
 The types follow the harness: a misspelled method, a method that resolves
-`void`, and an expected value of the wrong type are all compile errors.
+`void`, and an expected value of the wrong type are all compile errors. Chain
+words and matcher names (`has`, `at`, `selected`, …) are reserved: a harness
+method by one of those names is asserted with `expect`.
 
 - **`@harnessed-ts/should/register`**: `null`, `true`, `false`, `undefined`,
   `equal`, `eql`, `match`, `include`, `above`, `below`, `length`, and the

@@ -12,7 +12,7 @@ import '@harnessed-ts/should/register'
 
 await form.should.error.be.null() // expect(await form.error()).toBeNull()
 await form.should.error.not.be.null()
-await form.submitButton.should.be.absent()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
 ```
 
 It works the same under every runner and driver, because it needs nothing from
@@ -28,12 +28,14 @@ that runner's page.
 - **A method** (`form.should.error`) is called when the assertion runs, and the
   assertion is about what it resolved to. A method that takes arguments is
   called with them: `grid.should.labelAt(1).equal('Medium')`.
-- **A target**, meaning a query field or a child harness (`form.should.errorLine`),
-  takes the harness matchers.
+- **A target** takes the harness matchers: a `@ChildHarness`
+  (`page.should.banner.be.absent()`), or `self`, the harness's host element. A
+  public `Query` member works too, but `harnessed/harness-public-surface` keeps
+  queries private, so prefer a child harness.
 - **Nothing**: `form.should.be.absent()` asserts on the harness's own host.
 
-`query.should` takes the harness matchers directly:
-`form.errorLine.should.readAs(/credentials/)`.
+`query.should` takes the harness matchers directly, for use inside a harness
+or with `self`: `price.self.should.readAs(/^\$/)`.
 
 Then come words that read well and change nothing (`to`, `be`, `been`, `is`,
 `that`, `which`, `and`, `has`, `have`, `with`, `at`, `of`, `same`, `does`,
@@ -43,9 +45,14 @@ returns a promise.
 
 **Await every assertion.** Reading the page goes through a driver, so an
 un-awaited assertion cannot fail the test. `@typescript-eslint/no-floating-promises`
-catches a missing `await`, and so does `harnessed/await-should` in
-`@harnessed-ts/eslint-plugin`'s recommended config, which needs no type
-information.
+catches a missing `await`, and so does `harnessed/await-should`, which needs no
+type information. That rule is in `@harnessed-ts/eslint-plugin`'s `strict`
+config only, because Chai's own should interface (`res.body.should.have.property('id')`)
+reads the same and is synchronous; turn it on yourself if you don't use Chai's.
+
+Awaiting a terminal without its call, `await form.should.error.be.null` in
+Chai's property style, rejects with `` `.null` is a call: write `.null()` ``
+rather than passing without asserting.
 
 ## What can be asserted on
 
@@ -57,6 +64,11 @@ does not compile when `attempts()` resolves a number. Left out:
   retry it would run again.
 - A plain field, which is not read through a driver.
 - A method that needs arguments, until it is called with them.
+- A method that resolves `unknown` or `any`: give it a return type.
+- A member named like a chain word or a matcher: `to`, `be`, `been`, `is`,
+  `that`, `which`, `and`, `has`, `have`, `with`, `at`, `of`, `same`, `does`,
+  `but`, `still`, `also`, `not`, `deep`, `absent`, `selected`, `readAs`. Those
+  names belong to the chain, so assert on such a method with `expect`.
 
 ## Vocabulary
 
@@ -99,7 +111,9 @@ since the two values agreeing was the problem.
 By default an assertion reads once. With `retryAssertions` on, it reads again,
 calling the method again each time, until it passes or `defaultTimeout` runs
 out, then reports the last reading. An error thrown while reading is retried in
-the same way, because the target may not exist yet.
+the same way, because the target may not exist yet. The deadline is checked
+between readings, so a read that itself waits (`text()` on a missing target)
+can take up to one more `defaultTimeout` before the last failure is reported.
 
 ```ts
 import { configure } from '@harnessed-ts/core'

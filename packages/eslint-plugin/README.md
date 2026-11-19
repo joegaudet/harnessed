@@ -64,6 +64,8 @@ the rules named under `@harnessed-ts/`:
   `form.should.error.be.null()`. Every terminal returns a promise, so an
   un-awaited one cannot fail the test. Only a `should` that is chained on is
   checked, so Cypress's `cy.get(…).should('be.visible')` is left alone.
+  `strict` only: Chai's should interface (`res.body.should.have.property('id')`)
+  reads the same and is synchronous.
 
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).

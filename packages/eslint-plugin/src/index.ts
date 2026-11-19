@@ -56,8 +56,6 @@ const recommendedRules = {
   'harnessed/no-raw-locator-in-test': 'warn',
   // A floating mock install is a race, not a style point.
   'harnessed/await-mock-install': 'error',
-  // An un-awaited assertion cannot fail the test.
-  'harnessed/await-should': 'error',
   // A suggestion for the same reason as raw locators: tests that predate
   // harnessed mocking keep passing.
   'harnessed/no-raw-intercept': 'warn',
@@ -65,6 +63,9 @@ const recommendedRules = {
 
 const strictRules = {
   ...recommendedRules,
+  // Strict only: Chai's own should interface (`res.body.should.have.property('id')`)
+  // is synchronous and reads the same, so in `recommended` this would flag it.
+  'harnessed/await-should': 'error',
   'harnessed/no-raw-locator-in-test': 'error',
   'harnessed/no-raw-intercept': 'error',
   // Strict only: a repo mid-adoption has tests that reach a component harness

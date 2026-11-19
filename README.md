@@ -336,6 +336,10 @@ agreement is the whole reason the abstraction exists.
     its `<label>`, replacing any earlier selection; the page sees each file's
     name and bytes. Anything but a file input, or several files for an input
     that is not `multiple`, is refused at once, in one wording.
+14. **A should assertion means the same everywhere.** `await form.should.error.be.null()`
+    reads through the driver and fails with the same message under each one.
+    With `retryAssertions` on it reads again until it passes or `defaultTimeout`
+    runs out; with it off it reads once and answers at once.
 
 Where the drivers genuinely cannot match, the difference is documented rather than
 papered over:
@@ -572,7 +576,7 @@ import '@harnessed-ts/should/register' // once, in the test setup file
 
 await form.should.error.be.null() // expect(await form.error()).toBeNull()
 await form.should.error.not.be.null()
-await form.submitButton.should.be.absent()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
 ```
 
 ### Configuration
@@ -1839,7 +1843,7 @@ or one rule at a time:
 | `behavioural-method-names`     | a public harness method named for a mechanic (`clickSubmit`, `fillEmail`) or a DOM noun (`submitButton`, `rowLocator`) instead of intent. A warning: it judges names; `verbs`, `nouns`, and `allow` tune it                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `no-component-harness-in-test` | a test constructing a component harness directly instead of entering through a page. Runtime-agnostic (`testFiles` globs); exempts a file that renders the component itself. `strict` only.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `no-raw-intercept`             | a runner's own interception in a test — `page.route`, `cy.intercept`, `setRequestInterception`, `browser.mock`, `RequestMock()`, MSW's `setupServer` — where `mock(env)` should be used (a warning in `recommended`, an error in `strict`)                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `await-should`                 | a floating terminal on a `@harnessed-ts/should` chain, such as `form.should.error.be.null()`: unawaited, it cannot fail the test. Cypress's `cy.get(…).should('…')` is left alone                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `await-should`                 | a floating terminal on a `@harnessed-ts/should` chain, such as `form.should.error.be.null()`: unawaited, it cannot fail the test. Cypress's `cy.get(…).should('…')` is left alone. `strict` only, since Chai's synchronous should reads the same                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `await-mock-install`           | a floating `.reply()`, `.use()` or `graphql.query()` on a harnessed mock: unawaited, a request fired straight after can go unanswered                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 **`@harnessed-ts/claude`** installs the authoring conventions for coding agents:
