@@ -7,6 +7,7 @@ export type {
   Asserted,
   HarnessShould,
   Member,
+  Reserved,
   TargetAssertion,
   ValueAssertion,
   Words,

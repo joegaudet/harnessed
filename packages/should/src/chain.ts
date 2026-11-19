@@ -35,8 +35,23 @@ export interface ValueCheck {
 /** A target assertion: reads the page through a query or a harness host. */
 export type TargetCheck = (subject: Assertable, args: readonly unknown[]) => Promise<MatcherResult>
 
-const valueChecks = new Map<string, ValueCheck>()
-const targetChecks = new Map<string, TargetCheck>()
+interface Tables {
+  value: Map<string, ValueCheck>
+  target: Map<string, TargetCheck>
+}
+
+/**
+ * The vocabulary, kept on `globalThis` for the reason core keeps its registry
+ * there: the ESM and CJS copies of this package must share one, or whichever
+ * copy registered last would decide which assertions exist.
+ */
+const TABLES = Symbol.for('harnessed.should.tables.v1')
+const tables = ((globalThis as { [TABLES]?: Tables })[TABLES] ??= {
+  value: new Map(),
+  target: new Map(),
+})
+const valueChecks = tables.value
+const targetChecks = tables.target
 
 /** Adds value assertions; `@harnessed-ts/should/bdd/register` adds its vocabulary this way. */
 export function addValueChecks(table: Record<string, ValueCheck>): void {
@@ -70,9 +85,9 @@ const WORDS = new Set([
 
 /**
  * Properties tooling reads off any object it prints or awaits. Answering them
- * with `undefined` keeps a chain from throwing inside a reporter; `then` in
- * particular must stay undefined, or awaiting a chain without its terminal call
- * would run the chain as a thenable instead of failing to type-check.
+ * with `undefined` keeps a chain from throwing inside a reporter. A chain is
+ * not thenable: awaiting one asserts nothing, and is the reporter's business,
+ * not ours. An uncalled terminal is thenable, and rejects; see `terminalCall`.
  */
 const PROBES = new Set(['then', 'toJSON', 'asymmetricMatch', '$$typeof', 'nodeType', 'constructor'])
 
@@ -139,7 +154,11 @@ function chain(
   // An arrow function as the target: callable for a method that takes
   // arguments, and without a non-configurable `prototype` to trip proxy invariants.
   return new Proxy(() => undefined, {
-    apply: (_target, _this, args: unknown[]) => apply?.(args),
+    apply: (_target, _this, args: unknown[]) => {
+      if (apply !== undefined) return apply(args)
+      const word = state.path.slice(state.path.lastIndexOf('.') + 1)
+      throw new TypeError(`harnessed: "${word}" is not a call (on ${state.path}).`)
+    },
     get(_target, prop) {
       if (prop === Symbol.toPrimitive || prop === 'toString') return () => state.path
       if (prop === Symbol.toStringTag) return 'Should'
@@ -150,17 +169,35 @@ function chain(
       const run = terminal(prop)
       if (run?.chainable === true) {
         const word = next({}, prop)
-        return new Proxy((...args: unknown[]) => run(args, state), {
-          get: (_target, key) => Reflect.get(word, key),
+        const call = terminalCall(prop, args => run(args, state))
+        return new Proxy(call, {
+          get: (target, key) => (key === 'then' ? target.then : Reflect.get(word, key)),
         })
       }
-      if (run !== undefined) return (...args: unknown[]) => run(args, state)
+      if (run !== undefined) return terminalCall(prop, args => run(args, state))
       if (fallback !== undefined) return fallback(prop)
       throw new TypeError(
         `harnessed: "${prop}" is not a should assertion (on ${state.path}). Check the spelling, or import "@harnessed-ts/should/bdd/register" for the full BDD vocabulary.`,
       )
     },
   })
+}
+
+/**
+ * A terminal, callable. It is also a thenable that rejects, because
+ * `await form.should.be.null` — Chai's property style — type-checks (TypeScript
+ * lets anything be awaited) and would otherwise pass without asserting.
+ */
+function terminalCall(
+  name: string,
+  call: (args: unknown[]) => Promise<void>,
+): ((...args: unknown[]) => Promise<void>) & PromiseLike<never> {
+  return Object.assign((...args: unknown[]) => call(args), {
+    then<A, B>(_onFulfilled?: unknown, onRejected?: (reason: unknown) => A | B): Promise<A | B> {
+      const error = new TypeError(`harnessed: \`.${name}\` is a call: write \`.${name}()\`.`)
+      return Promise.reject(error).then(undefined, onRejected)
+    },
+  }) as ((...args: unknown[]) => Promise<void>) & PromiseLike<never>
 }
 
 function targetTerminal(subject: Assertable): (name: string) => Terminal | undefined {

@@ -45,6 +45,8 @@ describe('should types', () => {
       void form.should.cell.equal('x')
       // @ts-expect-error — the expected value has the method's type
       void form.should.attempts.equal('3')
+      // @ts-expect-error — a member named like a chain word is reserved
+      void form.should.has('admin')
       // @ts-expect-error — terminals are calls
       void form.should.error.be.null.then
     })

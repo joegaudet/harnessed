@@ -95,9 +95,16 @@ export type Asserted<V> = V extends Query | { readonly self: Query }
         : (...args: A) => ValueAssertion<R>
     : never
 
+/**
+ * Names `harness.should` keeps for itself: the chain words, `not`, the harness
+ * matchers, and what tooling probes. A harness member by one of these names
+ * cannot be asserted on through `harness.should`; call it and use `expect`.
+ */
+export type Reserved = keyof TargetAssertion | 'should' | 'deep' | 'then' | 'toJSON' | 'toString'
+
 /** `harness.should`: its methods and targets by name, plus the harness matchers on its host. */
 export type HarnessShould<T> = {
   readonly [
-    K in keyof T as K extends 'should' ? never : [Asserted<T[K]>] extends [never] ? never : K
+    K in keyof T as K extends Reserved ? never : [Asserted<T[K]>] extends [never] ? never : K
   ]: Asserted<T[K]>
 } & TargetAssertion

@@ -49,6 +49,11 @@ export class FormHarness extends ComponentHarness {
     throw new Error('the form blew up')
   }
 
+  /** Named like a chain word: reserved, so `form.should.has` must not compile. */
+  async has(tag: string): Promise<boolean> {
+    return (await this.tags()).includes(tag)
+  }
+
   async submitIt(): Promise<void> {
     await this.submitButton.click()
   }

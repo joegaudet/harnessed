@@ -168,6 +168,22 @@ describe('mistakes', () => {
     expect(Reflect.get(form.should, 'then')).toBeUndefined()
   })
 
+  it('rejects a terminal awaited without its call, naming the fix', async () => {
+    const form = show(FULL_FORM)
+    await expect(Promise.resolve(Reflect.get(form.should.error.be, 'null'))).rejects.toThrow(
+      /`\.null` is a call: write `\.null\(\)`/,
+    )
+    await expect(Promise.resolve(Reflect.get(form.should.be, 'absent'))).rejects.toThrow(
+      /`\.absent` is a call/,
+    )
+  })
+
+  it('refuses a call on a word', () => {
+    const form = show(FULL_FORM)
+    const be: unknown = Reflect.get(form.should.error, 'be')
+    expect(() => (be as () => unknown)()).toThrow(/"be" is not a call/)
+  })
+
   it('prints its path', () => {
     const form = show(FULL_FORM)
     expect(String(form.should.error.not)).toBe('FormHarness.should.error.not')
@@ -210,6 +226,16 @@ describe('retryAssertions', () => {
     setTimeout(() => clearError(), 50)
     await failure(() => form.should.error.be.null())
     expect(form.calls).toBe(1)
+  })
+})
+
+describe('two copies of should', () => {
+  it('shares one vocabulary: the CJS register after the ESM bdd register keeps bdd', async () => {
+    await import('../src/bdd/register')
+    // The built CJS copy: a second module instance. `pnpm build` must run first.
+    createRequire(import.meta.url)('../dist/register.cjs')
+    const form = show(FULL_FORM)
+    await Reflect.get(form.should.attempts.be, 'within')(1, 5)
   })
 })
 
