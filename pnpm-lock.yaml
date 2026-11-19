@@ -303,6 +303,9 @@ importers:
       '@harnessed-ts/page':
         specifier: workspace:^
         version: link:../page
+      '@harnessed-ts/should':
+        specifier: workspace:^
+        version: link:../should
     devDependencies:
       '@harnessed-ts/dom':
         specifier: workspace:^

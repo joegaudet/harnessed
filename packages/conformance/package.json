@@ -15,7 +15,8 @@
   "dependencies": {
     "@harnessed-ts/core": "workspace:^",
     "@harnessed-ts/mock": "workspace:^",
-    "@harnessed-ts/page": "workspace:^"
+    "@harnessed-ts/page": "workspace:^",
+    "@harnessed-ts/should": "workspace:^"
   },
   "devDependencies": {
     "@harnessed-ts/dom": "workspace:^",

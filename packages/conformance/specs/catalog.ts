@@ -1,4 +1,6 @@
 import assert from './assert'
+// For its side effect: every driver that runs the catalog runs the should specs too.
+import '@harnessed-ts/should/register'
 import { configure, getConfig, StrictModeViolation } from '@harnessed-ts/core'
 import type { BoundingBox, EnvConfig } from '@harnessed-ts/core'
 import { CardGridHarness } from '../fixture/harnesses/CardGrid.harness'
@@ -63,6 +65,24 @@ async function withPresenceTestIds(body: () => Promise<void>): Promise<void> {
     await body()
   } finally {
     configure({ testIdAttribute: before })
+  }
+}
+
+/**
+ * Runs `body` under the given runtime settings and restores whatever was
+ * configured before. The should specs pin both retry modes this way, so they
+ * mean the same under Cypress, which turns retry on, as everywhere else.
+ */
+async function withConfig(
+  settings: { retryAssertions: boolean; defaultTimeout?: number },
+  body: () => Promise<void>,
+): Promise<void> {
+  const before = getConfig()
+  configure(settings)
+  try {
+    await body()
+  } finally {
+    configure({ retryAssertions: before.retryAssertions, defaultTimeout: before.defaultTimeout })
   }
 }
 
@@ -803,6 +823,111 @@ export const specs: Spec[] = [
         () => grid.uploadToAmbiguousCard(new File(['x'], 'x.txt')),
         strictOnCards,
       )
+    },
+  },
+  {
+    name: 'should: a harness method is read through the driver, and asserted on what it resolved',
+    async run(ctx) {
+      await withConfig({ retryAssertions: false }, async () => {
+        const form = new LoginFormHarness(await ctx.show('login-error'))
+        await form.should.errorText.not.be.null()
+        await form.should.errorText.equal('Bad credentials')
+        await form.should.errorCount.equal(1)
+        await assert.rejects(
+          () => form.should.errorText.be.null(),
+          /^AssertionError: expected LoginFormHarness\.errorText\(\) to be null, but it was "Bad credentials"$/,
+        )
+      })
+    },
+  },
+  {
+    name: 'should: a negated failure names what it read',
+    async run(ctx) {
+      await withConfig({ retryAssertions: false }, async () => {
+        const form = new LoginFormHarness(await ctx.show('login'))
+        await form.should.errorText.be.null()
+        await assert.rejects(
+          () => form.should.errorText.not.be.null(),
+          /^AssertionError: expected LoginFormHarness\.errorText\(\) not to be null$/,
+        )
+      })
+    },
+  },
+  {
+    name: 'should: a method that takes arguments, and deep equality',
+    async run(ctx) {
+      await withConfig({ retryAssertions: false }, async () => {
+        const grid = new CardGridHarness(await ctx.show('cards'))
+        await grid.should.labelAt(1).equal('Medium')
+        await grid.should.labels.include('Medium')
+        await grid.should.cardCount.be.above(2)
+        await grid.should.labels.have.length(3)
+        await grid.should.labels.deep.equal(['Small', 'Medium', 'Large'])
+      })
+    },
+  },
+  {
+    name: 'should: absent, on a query and on a harness',
+    async run(ctx) {
+      await withConfig({ retryAssertions: false }, async () => {
+        const form = new LoginFormHarness(await ctx.show('login'))
+        await form.errorQuery.should.be.absent()
+        await form.should.errorQuery.be.absent()
+        await form.should.not.be.absent()
+      })
+    },
+  },
+  {
+    name: 'should: readAs through a member, and a failed absent in the shared wording',
+    async run(ctx) {
+      await withConfig({ retryAssertions: false }, async () => {
+        const form = new LoginFormHarness(await ctx.show('login-error'))
+        await form.should.errorQuery.readAs(/credentials/)
+        await assert.rejects(() => form.errorQuery.should.be.absent(), /1 node\(s\) matched/)
+      })
+    },
+  },
+  {
+    name: 'should: selected, on a child harness',
+    async run(ctx) {
+      await withConfig({ retryAssertions: false }, async () => {
+        const grid = new CardGridHarness(await ctx.show('cards'))
+        await grid.cardAt(1).should.not.be.selected()
+        await grid.chooseByLabel('Medium')
+        await grid.cardAt(1).should.be.selected()
+      })
+    },
+  },
+  {
+    name: 'should: with retryAssertions, an assertion waits for the page to catch up',
+    async run(ctx) {
+      await withConfig({ retryAssertions: true, defaultTimeout: 2_000 }, async () => {
+        const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
+        await form.should.lateCount.equal(2)
+      })
+    },
+  },
+  {
+    name: 'should: with retryAssertions, a failure reports the last reading once the timeout runs out',
+    async run(ctx) {
+      await withConfig({ retryAssertions: true, defaultTimeout: 300 }, async () => {
+        const form = new LoginFormHarness(await ctx.show('login'))
+        await assert.rejects(
+          () => form.should.errorCount.equal(1),
+          /expected LoginFormHarness\.errorCount\(\) to equal 1, but it was 0/,
+        )
+      })
+    },
+  },
+  {
+    name: 'should: without retryAssertions, an assertion checks once',
+    async run(ctx) {
+      await withConfig({ retryAssertions: false }, async () => {
+        const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
+        const started = Date.now()
+        await assert.rejects(() => form.should.lateCount.equal(2), /but it was 0/)
+        assert.ok(Date.now() - started < IMMEDIATE_MS, 'a single check answers immediately')
+      })
     },
   },
 ]
