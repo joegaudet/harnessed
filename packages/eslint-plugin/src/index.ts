@@ -1,5 +1,6 @@
 import type { Rule } from 'eslint'
 import awaitMockInstall from './rules/await-mock-install'
+import awaitShould from './rules/await-should'
 import behaviouralMethodNames from './rules/behavioural-method-names'
 import harnessPublicSurface from './rules/harness-public-surface'
 import noComponentHarnessInTest from './rules/no-component-harness-in-test'
@@ -13,6 +14,7 @@ import requireWaitForReady from './rules/require-wait-for-ready'
 
 export const rules: Record<string, Rule.RuleModule> = {
   'await-mock-install': awaitMockInstall,
+  'await-should': awaitShould,
   'behavioural-method-names': behaviouralMethodNames,
   'harness-public-surface': harnessPublicSurface,
   'no-component-harness-in-test': noComponentHarnessInTest,
@@ -54,6 +56,8 @@ const recommendedRules = {
   'harnessed/no-raw-locator-in-test': 'warn',
   // A floating mock install is a race, not a style point.
   'harnessed/await-mock-install': 'error',
+  // An un-awaited assertion cannot fail the test.
+  'harnessed/await-should': 'error',
   // A suggestion for the same reason as raw locators: tests that predate
   // harnessed mocking keep passing.
   'harnessed/no-raw-intercept': 'warn',
