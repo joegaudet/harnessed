@@ -1764,6 +1764,23 @@ shows both.
 
 **Mocking:** `this.mocks` on the cucumber-js world, `mocks` in a Yadda step, `withMocks(test)` under playwright-bdd, `cy.mock` under Cypress — see [Mocking APIs](#mocking-apis).
 
+## Model-based tests with switchyard
+
+When a component's behaviour is a [switchyard](https://joegaudet.com/switchyard/) statechart,
+the machine already knows every path through it.
+[`@switchyard/harnessed`](https://github.com/joegaudet/switchyard/tree/main/packages/harnessed)
+turns each path into a test: it fires the path's events through your harness and checks the UI
+after every step, under any runner harnessed supports.
+
+```ts
+for (const t of modelTests({
+  machine: () => new Fetch(),
+  events: { fetch: h => h.fetch(), retry: h => h.retry() },
+  states: { idle: async h => expect(await h.status()).toBe('Idle') /* , … */ },
+}))
+  test(t.name, async () => t.run(await renderFetcher()))
+```
+
 ## Keeping the conventions
 
 **`@harnessed-ts/eslint-plugin`** turns the authoring rules into a gate. Harnesses

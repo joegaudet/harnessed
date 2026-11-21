@@ -63,6 +63,7 @@ function title(name: string): string {
     <a href="https://joegaudet.com/harnessed/" aria-current="page">harnessed</a> ·
     <a href="https://joegaudet.com/real-enums/">real-enums</a> ·
     <a href="https://joegaudet.com/ember-formwright/">Formwright</a> ·
-    <a href="https://joegaudet.com/ember-joinery/">Joinery</a>
+    <a href="https://joegaudet.com/ember-joinery/">Joinery</a> ·
+    <a href="https://joegaudet.com/switchyard/">switchyard</a>
   </footer>
 </template>
