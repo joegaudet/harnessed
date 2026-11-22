@@ -32,4 +32,16 @@ jsdom has no layout and no address bar, so:
   `await page.expectReady()`; `goto()` and the URL members are refused.
 - **Frames** are entered when they are same-origin.
 
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from your Vitest setup file. Every harness and
+target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 **Mocking:** `mock(dom({ user }))` from `@harnessed-ts/dom/mock`, before `render` — see [Mocking APIs](../mocking/mocking-apis.md).

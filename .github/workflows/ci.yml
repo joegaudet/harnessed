@@ -73,8 +73,8 @@ jobs:
       - run: pnpm build
       - run: pnpm test:rules
       # Package unit tests: the Babel plugin through both Ember decorator
-      # pipelines, the injectable resolver from its built file, the chai and
-      # qunit assertion adapters, and the release script's publish plan.
+      # pipelines, the injectable resolver from its built file, the chai, should
+      # and qunit assertion adapters, and the release script's publish plan.
       - run: pnpm test:units
 
   examples:

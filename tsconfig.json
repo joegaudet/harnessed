@@ -16,6 +16,7 @@
     { "path": "./packages/mock" },
     { "path": "./packages/gherkin" },
     { "path": "./packages/chai" },
+    { "path": "./packages/should" },
     { "path": "./packages/qunit" },
     { "path": "./packages/ember" },
     { "path": "./packages/angular" },

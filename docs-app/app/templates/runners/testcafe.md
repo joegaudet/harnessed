@@ -68,4 +68,16 @@ is no `/matchers` entry. Documented differences:
 - **`isVisible()`** uses the shared layout rule: a non-empty box that
   `visibility` does not hide, and content inside a hidden frame is hidden.
 
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from the top of each test file. Every harness
+and target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 **Mocking:** `mock(testcafe(t))` from `@harnessed-ts/testcafe/mock`, inside the test — see [Mocking APIs](../mocking/mocking-apis.md).

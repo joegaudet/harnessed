@@ -13,6 +13,7 @@ const PAGES = [
   'writing-harnesses/component-harnesses.md',
   'writing-harnesses/page-harnesses.md',
   'writing-harnesses/matchers.md',
+  'writing-harnesses/should-assertions.md',
   'writing-harnesses/configuration.md',
   'writing-harnesses/cross-driver-guarantees.md',
   'mocking/mocking-apis.md',

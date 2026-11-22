@@ -19,6 +19,7 @@ export default defineConfig({
     '@harnessed-ts/playwright',
     '@harnessed-ts/page',
     '@harnessed-ts/mock',
+    '@harnessed-ts/should',
     '@playwright/test',
     '@testing-library/dom',
     '@testing-library/react',

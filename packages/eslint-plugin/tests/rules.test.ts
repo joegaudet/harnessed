@@ -7,6 +7,7 @@ import noPageOrScreenInHarness from '../src/rules/no-page-or-screen-in-harness'
 import noRawLocatorInTest from '../src/rules/no-raw-locator-in-test'
 import noRawIntercept from '../src/rules/no-raw-intercept'
 import awaitMockInstall from '../src/rules/await-mock-install'
+import awaitShould from '../src/rules/await-should'
 import noReachThroughCast from '../src/rules/no-reach-through-cast'
 import requireHost from '../src/rules/require-host'
 import requireWaitForReady from '../src/rules/require-wait-for-ready'
@@ -985,6 +986,40 @@ describe('await-mock-install', () => {
           { messageId: 'floating', data: { call: '.use()' } },
           { messageId: 'floating', data: { call: '.fromHar()' } },
         ],
+      },
+    ],
+  })
+})
+
+describe('await-should', () => {
+  tester.run('await-should', awaitShould, {
+    valid: [
+      { name: 'awaited', code: `await form.should.error.be.null()` },
+      { name: 'awaited on a query', code: `await form.submitButton.should.not.be.absent()` },
+      { name: 'returned', code: `const check = () => form.should.error.be.null()` },
+      { name: 'kept in a variable', code: `const pending = form.should.attempts.equal(3)` },
+      { name: 'voided on purpose', code: `void form.should.error.be.null()` },
+      {
+        name: "Cypress's own should is a call, not a chain",
+        code: `cy.get('[data-testid="x"]').should('be.visible').and('contain', 'Hi')`,
+      },
+      { name: 'a should that is not chained further', code: `checks.should()` },
+    ],
+    invalid: [
+      {
+        name: 'a floating terminal',
+        code: `form.should.error.be.null()`,
+        errors: [{ messageId: 'floating', data: { call: '.null()' } }],
+      },
+      {
+        name: 'a floating method link with arguments',
+        code: `async function t() { grid.should.labelAt(1).equal('Medium') }`,
+        errors: [{ messageId: 'floating', data: { call: '.equal()' } }],
+      },
+      {
+        name: 'a floating query assertion',
+        code: `login.form.errorQuery.should.readAs(/credentials/)`,
+        errors: [{ messageId: 'floating', data: { call: '.readAs()' } }],
       },
     ],
   })

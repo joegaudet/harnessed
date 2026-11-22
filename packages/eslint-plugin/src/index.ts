@@ -1,5 +1,6 @@
 import type { Rule } from 'eslint'
 import awaitMockInstall from './rules/await-mock-install'
+import awaitShould from './rules/await-should'
 import behaviouralMethodNames from './rules/behavioural-method-names'
 import harnessPublicSurface from './rules/harness-public-surface'
 import noComponentHarnessInTest from './rules/no-component-harness-in-test'
@@ -13,6 +14,7 @@ import requireWaitForReady from './rules/require-wait-for-ready'
 
 export const rules: Record<string, Rule.RuleModule> = {
   'await-mock-install': awaitMockInstall,
+  'await-should': awaitShould,
   'behavioural-method-names': behaviouralMethodNames,
   'harness-public-surface': harnessPublicSurface,
   'no-component-harness-in-test': noComponentHarnessInTest,
@@ -61,6 +63,9 @@ const recommendedRules = {
 
 const strictRules = {
   ...recommendedRules,
+  // Strict only: Chai's own should interface (`res.body.should.have.property('id')`)
+  // is synchronous and reads the same, so in `recommended` this would flag it.
+  'harnessed/await-should': 'error',
   'harnessed/no-raw-locator-in-test': 'error',
   'harnessed/no-raw-intercept': 'error',
   // Strict only: a repo mid-adoption has tests that reach a component harness

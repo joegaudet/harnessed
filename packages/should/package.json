@@ -1,0 +1,84 @@
+{
+  "name": "@harnessed-ts/should",
+  "version": "0.8.3",
+  "description": "Should-style assertions for harnesses: `await form.should.error.be.null()` under every runner.",
+  "keywords": [
+    "testing",
+    "harness",
+    "should",
+    "assertions",
+    "bdd"
+  ],
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Joe Gaudet",
+      "url": "https://github.com/joegaudet"
+    },
+    {
+      "name": "Jay Seo",
+      "url": "https://github.com/jayseo5953"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joegaudet/harnessed.git",
+    "directory": "packages/should"
+  },
+  "homepage": "https://github.com/joegaudet/harnessed#readme",
+  "bugs": "https://github.com/joegaudet/harnessed/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./register": {
+      "types": "./dist/register.d.ts",
+      "import": "./dist/register.js",
+      "require": "./dist/register.cjs"
+    },
+    "./bdd": {
+      "types": "./dist/bdd/index.d.ts",
+      "import": "./dist/bdd/index.js",
+      "require": "./dist/bdd/index.cjs"
+    },
+    "./bdd/register": {
+      "types": "./dist/bdd/register.d.ts",
+      "import": "./dist/bdd/register.js",
+      "require": "./dist/bdd/register.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@harnessed-ts/core": "workspace:^"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist *.tsbuildinfo",
+    "test": "vitest run"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@harnessed-ts/dom": "workspace:^",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/user-event": "^14.6.7",
+    "jsdom": "^30.1.1",
+    "vitest": "^5.0.3"
+  }
+}

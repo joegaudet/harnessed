@@ -4,6 +4,7 @@ import { requireHostMeta } from './host-meta'
 import type { Query } from './query'
 import { createQuery } from './registry'
 import { frame } from './selector'
+import { defineShould } from './should'
 import type { Selector } from './selector'
 
 export interface ChildHarnessOptions {
@@ -94,3 +95,5 @@ export abstract class ScopedHarness implements HarnessHost {
     return new HarnessClass(this._env, childScope(this._scope, options))
   }
 }
+
+defineShould(ScopedHarness.prototype)

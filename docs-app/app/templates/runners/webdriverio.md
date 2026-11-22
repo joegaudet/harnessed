@@ -49,4 +49,16 @@ is also registered as a preload script, so later documents start with it), and
 - **Waits** run inside the page, so a `timeout` above the session's script
   timeout (30s by default) needs `browser.setTimeout({ script })`.
 
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from the top of each spec, or `wdio.conf.ts`.
+Every harness and target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 **Mocking:** `mock(wdio(browser))` from `@harnessed-ts/webdriverio/mock`, over WebDriver BiDi — see [Mocking APIs](../mocking/mocking-apis.md).

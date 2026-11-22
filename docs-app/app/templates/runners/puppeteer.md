@@ -55,4 +55,16 @@ Differences worth knowing:
 - **`selectOption()`** matches an option's value, then its label, and replaces a
   multi-select's selection.
 
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from `vitest.setup.ts`, beside the matchers.
+Every harness and target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
+
 **Mocking:** `mock(puppeteer(page))` from `@harnessed-ts/puppeteer/mock`, before `goto()` — see [Mocking APIs](../mocking/mocking-apis.md).

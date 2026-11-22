@@ -350,6 +350,13 @@ expect(await form.error()).toBeNull()</code></pre>
 await form.signInAs('ada@example.com', 'hunter2')
 await expect(form).toBeAbsent()</code></pre>
           </article>
+          <article>
+            <header>Or should style, under any runner</header>
+            <pre><code class="language-typescript">import '@harnessed-ts/should/register'
+
+await form.signInAs('ada@example.com', 'hunter2')
+await form.should.error.be.null()</code></pre>
+          </article>
         </div>
       </section>
 
@@ -871,6 +878,14 @@ it('signs in', () =&gt; {
     await expect(form).to.readAs(/Welcome/)
   })
 })</code></pre>
+          <p>
+            Or should style: add <code>import '@harnessed-ts/should/register'</code> to the support
+            file. Under Cypress it retries, like Cypress's own <code>.should</code>:
+          </p>
+          <pre><code class="language-typescript">cy.harness(LoginFormHarness, async form =&gt; {
+  await form.submitIt()
+  await form.should.error.equal('Wrong password')
+})</code></pre>
           <p>Mocking the API:</p>
           <pre><code class="language-typescript">// cypress/support/e2e.ts
 import '@harnessed-ts/cypress/mock'
@@ -1108,6 +1123,11 @@ Then('the total is {string}', async ({ world }, total) =&gt; {
                 >: <code>absent</code>, <code>selected</code> and <code>readAs</code> assertions,
                 and checks of mocked requests, for runners that don't use
                 <code>expect.extend</code>.
+              </li>
+              <li>
+                <strong><code>@harnessed-ts/should</code></strong
+                >: should-style assertions under every runner, such as
+                <code>await form.should.error.be.null()</code>, with retry under Cypress.
               </li>
               <li>
                 <strong><code>@harnessed-ts/config</code></strong

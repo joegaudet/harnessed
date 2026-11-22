@@ -1,6 +1,7 @@
 import { emptySet } from './errors'
 import { eachOf, filterOf, lastIndex, mapOf } from './list'
 import type { Selector } from './selector'
+import { defineShould } from './should'
 
 export interface WaitOptions {
   /** Milliseconds to wait for the target. Falls back to the configured default. */
@@ -145,3 +146,5 @@ export abstract class Query {
     return this.map(query => query.text())
   }
 }
+
+defineShould(Query.prototype)

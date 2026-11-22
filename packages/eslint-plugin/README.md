@@ -60,6 +60,12 @@ the rules named under `@harnessed-ts/`:
   intercepting; left unawaited, a request fired straight after can go
   unanswered. Only chains that start at `mock(…)`, a variable holding one, or
   something named `mocks` are checked, so `nock(…).get(…).reply(…)` is left alone.
+- `await-should` — a floating terminal on a `@harnessed-ts/should` chain, such as
+  `form.should.error.be.null()`. Every terminal returns a promise, so an
+  un-awaited one cannot fail the test. Only a `should` that is chained on is
+  checked, so Cypress's `cy.get(…).should('be.visible')` is left alone.
+  `strict` only: Chai's should interface (`res.body.should.have.property('id')`)
+  reads the same and is synchronous.
 
 Full guide, the cross-driver guarantees, and the API: the
 [harnessed README](https://github.com/joegaudet/harnessed#readme).

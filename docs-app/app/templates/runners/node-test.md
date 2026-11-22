@@ -39,3 +39,15 @@ extensionless and NodeNext `./x.js` imports to the TypeScript file. Everything
 in [Testing Library](testing-library.md) about jsdom applies.
 `mock.timers` from `node:test` is not something Testing Library's waits know
 about; prefer real timers in harness-driven tests.
+
+**Should style:** `npm i -D @harnessed-ts/should`, then add a third flag,
+`--import @harnessed-ts/should/register`, or import it at the top of the test
+file. Every harness and target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).

@@ -34,3 +34,7 @@ await expect(price).to.readAs(/^\$/)
 
 A failure under QUnit or Chai also reports what was read beside what was wanted,
 so their reporters show both.
+
+To write the same checks as `await card.should.be.selected()`, or to assert on
+what a harness method returns, `await form.should.error.be.null()`, see
+[Should assertions](should-assertions.md).

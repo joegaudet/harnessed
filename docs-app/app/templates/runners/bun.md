@@ -40,3 +40,15 @@ in the nearest tsconfig — which an Angular or MobX project sets for its own co
 esbuild first, so harnesses keep the standard protocol whatever the tsconfig
 says. happy-dom computes no layout, so `isVisible()` and `boundingBox()` behave as
 under jsdom. Bun 1.2 or later.
+
+**Should style:** `npm i -D @harnessed-ts/should`, then import
+`@harnessed-ts/should/register` from the file `bunfig.toml` preloads. Every
+harness and target gets a `.should`. Await each assertion:
+
+```ts
+await form.should.error.be.null() // expect(await form.error()).toBeNull()
+await form.should.error.not.be.null()
+await page.banner.should.be.absent() // a @ChildHarness, or form.self
+```
+
+See [Should assertions](../writing-harnesses/should-assertions.md).
