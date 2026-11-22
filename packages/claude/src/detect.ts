@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
+/** Where a repo keeps components, pages and harnesses, and its test-id values, as {@link detectLayout} guesses them. */
 export interface DetectedLayout {
   components: string
   pages: string
@@ -133,6 +134,7 @@ export const RUNNERS = [
   'storybook',
 ] as const
 
+/** A test runner `install` can document: one of {@link RUNNERS}. */
 export type Runner = (typeof RUNNERS)[number]
 
 /** The `@harnessed-ts/gherkin` entry points, one per Gherkin runner. */
@@ -144,6 +146,7 @@ export const GHERKIN_ADAPTERS = [
   'nightwatch',
 ] as const
 
+/** A `@harnessed-ts/gherkin` entry point: one of {@link GHERKIN_ADAPTERS}. */
 export type GherkinAdapter = (typeof GHERKIN_ADAPTERS)[number]
 
 export function isRunner(value: unknown): value is Runner {

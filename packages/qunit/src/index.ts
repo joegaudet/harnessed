@@ -15,9 +15,11 @@ export interface HarnessAssertions {
   isPresent(message?: string): Promise<void>
   /** `aria-pressed="true"`. */
   isSelected(message?: string): Promise<void>
+  /** Not `aria-pressed="true"`. */
   isNotSelected(message?: string): Promise<void>
   /** The text equals a string or matches a pattern. */
   readsAs(expected: string | RegExp, message?: string): Promise<void>
+  /** The text neither equals the string nor matches the pattern. */
   doesNotReadAs(expected: string | RegExp, message?: string): Promise<void>
 }
 
@@ -26,8 +28,11 @@ export interface HarnessAssertions {
  * calls from `api.calls()`. Async like the harness checks, for one shape.
  */
 export interface RequestAssertions {
+  /** At least one request was made. */
   wasRequested(message?: string): Promise<void>
+  /** No request was made. */
   wasNotRequested(message?: string): Promise<void>
+  /** Exactly `times` requests were made. */
   wasRequestedTimes(times: number, message?: string): Promise<void>
   /** At least one request carried this body, query or headers. */
   wasRequestedWith(expected: RequestExpectation, message?: string): Promise<void>

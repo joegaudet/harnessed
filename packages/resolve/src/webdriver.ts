@@ -141,6 +141,7 @@ export interface FrameInfo {
   readonly visible: boolean
 }
 
+/** How {@link walk} crosses frames; `E` is the driver's element handle type. */
 export interface WalkOptions<E> {
   /** Wait for each frame link, or answer at once by throwing FrameAbsent. */
   waiting: boolean

@@ -14,15 +14,20 @@ export type GotoArgs<Params> = [keyof Params] extends [never]
  * signature differ between pages with and without them.
  */
 export interface Readiness {
+  /** Resolves once the target has arrived, or rejects naming it. */
   expectReady(options?: WaitOptions): Promise<void>
 }
 
+/** A page class `transitionTo` can construct: an env and the parent scope, like any harness. */
 export interface PageHarnessConstructor<
   T extends ScopedHarness & Readiness = ScopedHarness & Readiness,
 > {
   new (env: EnvConfig, parentScope?: readonly Selector[]): T
   readonly name: string
 }
+
+/** What the timer resolves with, so a timeout is told apart from a readiness failure. */
+const EXPIRED = Symbol('harnessed.expired')
 
 /**
  * One test object per screen: what it is composed of, how to know it has
@@ -41,9 +46,6 @@ export interface PageHarnessConstructor<
  * `Params` declares the substitutions the path needs, so `goto()` is checked
  * against the path rather than trusted.
  */
-/** What the timer resolves with, so a timeout is told apart from a readiness failure. */
-const EXPIRED = Symbol('harnessed.expired')
-
 export abstract class PageHarness<Params extends Record<string, string> = Record<never, never>>
   extends ScopedHarness
   implements Readiness
@@ -145,6 +147,11 @@ export abstract class PageHarness<Params extends Record<string, string> = Record
     }
   }
 
+  /**
+   * Navigates to {@link PageHarness.path | path}, with `params` substituted, and
+   * waits for the page to be ready. Installs the page's `mocks` first. Throws a
+   * readable error when the page has no path or the driver cannot navigate.
+   */
   async goto(...[params]: GotoArgs<Params>): Promise<void> {
     // The page's own facts first, then the driver's: a missing path is the
     // cheaper and more local mistake.
@@ -174,14 +181,17 @@ export abstract class PageHarness<Params extends Record<string, string> = Record
     return resolved
   }
 
+  /** The address bar's URL now, from the driver. */
   get currentUrl(): string {
     return this.navigation.currentUrl(this._env)
   }
 
+  /** The pathname of {@link PageHarness.currentUrl | currentUrl}. */
   get currentPathname(): string {
     return new URL(this.currentUrl).pathname
   }
 
+  /** The query string of {@link PageHarness.currentUrl | currentUrl}, parsed. */
   get currentSearchParams(): URLSearchParams {
     return new URL(this.currentUrl).searchParams
   }

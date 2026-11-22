@@ -1,7 +1,10 @@
 name: pages
 
-# Publishes docs/site, with the README's GIFs from docs/media and the guide built from
-# docs-app into guide/, to GitHub Pages.
+# Publishes docs/site, with the README's GIFs from docs/media, the guide built from docs-app
+# into guide/, and the API reference into api/, to GitHub Pages. The guide is built from main;
+# the API reference from the latest release's sources, so it never shows unreleased API:
+# release.yml dispatches this after publishing, and a site-only push to main keeps it at that
+# release.
 on:
   push:
     branches: [main]
@@ -11,6 +14,11 @@ on:
       - 'docs-app/**'
       - 'packages/*/src/**'
       - '.github/workflows/pages.yml'
+      - 'docs/api.css'
+      - 'typedoc.json'
+      - 'packages/*/typedoc.json'
+      - 'scripts/typedoc-site.mjs'
+      - 'scripts/llms-full.mjs'
   workflow_dispatch:
 
 concurrency:
@@ -30,6 +38,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
@@ -38,12 +48,30 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm guide:build
+      # shortcut: only src comes from the tag, so a package added since the last release shows
+      # up early; build the whole tag in a worktree if that starts to matter.
+      - name: Use the latest release's sources for the API reference
+        run: |
+          tag=$(git describe --tags --abbrev=0 --match 'v*')
+          git checkout "$tag" -- ':(glob)packages/*/src/**'
+          # "Defined in" links point at the release's lines (packages mode only reads
+          # gitRevision from packageOptions). CI gates the docs on main; this renders what
+          # shipped, so a warning doesn't block a deploy.
+          node -e '
+            const fs = require("node:fs"), c = JSON.parse(fs.readFileSync("typedoc.json"))
+            c.packageOptions.gitRevision = process.argv[1]
+            c.treatWarningsAsErrors = false
+            fs.writeFileSync("typedoc.json", JSON.stringify(c))
+          ' "$tag"
+      - run: pnpm build
+      - run: pnpm docs:api
       - uses: actions/configure-pages@v6
       - run: |
           mkdir -p _site/media
           cp -R docs/site/. _site/
           cp docs/media/*.gif _site/media/
           cp -R docs-app/dist _site/guide
+          cp -R docs/api _site/api
           # Deep links into the guide land on Pages' 404; the app routes them.
           cp docs-app/dist/index.html _site/404.html
       - uses: actions/upload-pages-artifact@v5

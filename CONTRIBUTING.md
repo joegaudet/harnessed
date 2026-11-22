@@ -147,10 +147,24 @@ shows updates the site in the same PR**:
   `@harnessed-ts/*` versions after a release. The `examples` CI job keeps it
   green, and the site's StackBlitz link opens it from `main`.
 
+The **API reference** at `/harnessed/api/` is the one generated part: TypeDoc builds it from
+the packages' TSDoc (`pnpm docs:api`, after `pnpm build`) into `docs/api/`, styled by
+`docs/api.css` and `scripts/typedoc-site.mjs`, with `docs/api/llms-full.txt` beside it
+(`docs/site/llms.txt` followed by the reference as Markdown). Pages deploys it from the latest
+release tag's sources. Every warning fails `pnpm test:scripts`: a broken `{@link}`, an exported
+signature that names a type the package doesn't export, and, in every package not yet opted
+out in its own `typedoc.json` (`validation.notDocumented: false`), an exported declaration
+without a doc comment. If a leaked type is meant to stay private, list it in the package's
+`typedoc.json` `intentionallyNotExported`. New packages are strict by default.
+
 To preview:
 
 ```bash
 mkdir -p /tmp/harnessed-site/media && cp -R docs/site/. /tmp/harnessed-site/ && cp docs/media/*.gif /tmp/harnessed-site/media/ && python3 -m http.server 8765 --directory /tmp/harnessed-site
+
+# With the API reference, assembled the way Pages deploys it:
+pnpm build && pnpm docs:api && rm -rf _site && cp -R docs/site _site && cp -R docs/api _site/api
+python3 -m http.server 8766 --directory _site
 ```
 
 ## Releasing

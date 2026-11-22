@@ -137,3 +137,16 @@ jobs:
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 ||
             gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes \
               $([[ "$GITHUB_REF_NAME" == *-* ]] && echo --prerelease)
+
+  # Rebuilds the API reference on the site from the release just published. Pages only deploys
+  # from main (the github-pages environment's branch policy), so this dispatches the pages
+  # workflow on main rather than running it on the tag; pages.yml builds from the latest tag.
+  pages:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main

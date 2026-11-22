@@ -1,0 +1,65 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "harnessed",
+  "entryPointStrategy": "packages",
+  "entryPoints": ["packages/*"],
+  "packageOptions": {
+    "entryPoints": ["src/index.ts"],
+    "validation": {
+      "notExported": true,
+      "invalidLink": true,
+      "notDocumented": true
+    },
+    "requiredToBeDocumented": [
+      "Enum",
+      "Variable",
+      "Function",
+      "Class",
+      "Interface",
+      "TypeAlias",
+      "Method",
+      "Accessor"
+    ]
+  },
+  "outputs": [
+    {
+      "name": "html",
+      "path": "docs/api"
+    },
+    {
+      "name": "markdown",
+      "path": "docs/api-md"
+    },
+    {
+      "name": "json",
+      "path": "docs/api/api.json"
+    }
+  ],
+  "plugin": ["typedoc-plugin-markdown", "./scripts/typedoc-site.mjs"],
+  "readme": "none",
+  "hostedBaseUrl": "https://joegaudet.com/harnessed/api/",
+  "customCss": "docs/api.css",
+  "favicon": "docs/site/favicon.svg",
+  "navigationLinks": {
+    "Home": "https://joegaudet.com/harnessed/",
+    "Guide": "https://joegaudet.com/harnessed/guide/",
+    "GitHub": "https://github.com/joegaudet/harnessed"
+  },
+  "excludeInternal": true,
+  "excludePrivate": true,
+  "treatWarningsAsErrors": true,
+  "highlightLanguages": [
+    "bash",
+    "css",
+    "html",
+    "javascript",
+    "json",
+    "jsx",
+    "typescript",
+    "tsx",
+    "handlebars",
+    "glimmer-ts",
+    "jsonc",
+    "toml"
+  ]
+}

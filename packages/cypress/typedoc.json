@@ -1,0 +1,8 @@
+{
+  "entryPoints": ["src/index.ts", "src/support.ts", "src/mock.ts"],
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  }
+}

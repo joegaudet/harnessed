@@ -1,0 +1,74 @@
+/* The API reference (TypeDoc's default theme) in the marketing site's look: its palette, Inter,
+   Pico's background and text colours, and the sticky blurred nav with the logo. TypeDoc copies
+   this to api/assets/custom.css. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+
+:root {
+  --brand-violet: #7c3aed;
+  --brand-amber: #f59e0b;
+
+  /* Pico's light scheme */
+  --light-color-background: #fff;
+  --light-color-background-secondary: #f8fafc;
+  --light-color-background-navbar: rgb(255 255 255 / 0.8);
+  --light-color-accent: #e2e8f0;
+  --light-color-text: #373c44;
+  --light-color-text-aside: #646b79;
+  --light-color-link: var(--brand-violet);
+  --light-color-focus-outline: rgb(124 58 237 / 0.4);
+
+  /* Pico's dark scheme, with the site's lighter violet */
+  --dark-color-background: #13171f;
+  --dark-color-background-secondary: #181c25;
+  --dark-color-background-navbar: rgb(19 23 31 / 0.8);
+  --dark-color-accent: #2a3140;
+  --dark-color-text: #c2c7d0;
+  --dark-color-text-aside: #7b8495;
+  --dark-color-link: #a78bfa;
+  --dark-color-focus-outline: rgb(167 139 250 / 0.4);
+}
+
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+}
+
+.tsd-page-toolbar {
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.tsd-toolbar-contents .title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+}
+
+.tsd-toolbar-contents .title::before {
+  content: '';
+  width: 28px;
+  height: 28px;
+  background: url('../../logo.svg') center / contain no-repeat;
+}
+
+#tsd-toolbar-links a {
+  color: var(--color-text-aside);
+  font-weight: 500;
+}
+
+#tsd-toolbar-links a:hover {
+  color: var(--color-text);
+}
+
+a.tsd-anchor-link,
+.tsd-signature-type {
+  color: var(--color-link);
+}

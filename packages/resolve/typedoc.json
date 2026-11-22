@@ -1,0 +1,4 @@
+{
+  "entryPoints": ["src/index.ts", "src/inject.ts", "src/webdriver.ts"],
+  "intentionallyNotExported": ["src/page-api.ts:Wire"]
+}

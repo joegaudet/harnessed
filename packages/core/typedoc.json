@@ -1,0 +1,14 @@
+{
+  "entryPoints": ["src/index.ts", "src/vite.ts", "src/babel.ts", "src/register.ts", "src/bun.ts"],
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "intentionallyNotExported": [
+    "src/babel.ts:BabelApi",
+    "src/babel.ts:BabelPlugin",
+    "src/vite.ts:MinimalPlugin",
+    "src/bun.ts:PluginBuilder"
+  ]
+}

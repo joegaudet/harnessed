@@ -238,6 +238,7 @@ export function renderSkill(template: string, context: RenderContext): string {
   return substitute(withRunners, context)
 }
 
+/** A rules file template with the repo's directories and test-id attribute substituted. */
 export function renderRules(template: string, context: RenderContext): string {
   return substitute(template, context)
 }

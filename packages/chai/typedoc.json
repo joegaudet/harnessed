@@ -1,0 +1,3 @@
+{
+  "intentionallyNotExported": ["src/index.ts:ChaiStatic", "src/index.ts:ChaiUtils"]
+}

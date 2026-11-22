@@ -36,6 +36,7 @@ function title(name: string): string {
     </a>
     <nav aria-label="Site">
       <a href="https://joegaudet.com/harnessed/">Home</a>
+      <a href="https://joegaudet.com/harnessed/api/">API</a>
       <a href="https://github.com/joegaudet/harnessed">GitHub</a>
     </nav>
   </header>

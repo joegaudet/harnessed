@@ -19,6 +19,11 @@ export default tseslint.config(
       'examples/**',
       // The guide app, like a test-app: Ember tooling and its own `typecheck`.
       'docs-app/**',
+      // The generated API reference, and the site assembled for a local preview
+      // (CONTRIBUTING.md, The website).
+      'docs/api/**',
+      'docs/api-md/**',
+      '_site/**',
     ],
   },
   js.configs.recommended,
