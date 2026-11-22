@@ -1768,7 +1768,7 @@ shows both.
 
 When a component's behaviour is a [switchyard](https://joegaudet.com/switchyard/) statechart,
 the machine already knows every path through it.
-[`@switchyard/harnessed`](https://github.com/joegaudet/switchyard/tree/main/packages/harnessed)
+[`@switchyard-ts/harnessed`](https://github.com/joegaudet/switchyard/tree/main/packages/harnessed)
 turns each path into a test: it fires the path's events through your harness and checks the UI
 after every step, under any runner harnessed supports.
 
