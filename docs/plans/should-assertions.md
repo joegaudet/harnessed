@@ -2,6 +2,9 @@
 
 Status: implemented on `feat/joe/should-assertions` · Base: `main` @ `cb2f813`
 
+Decision #1 and the first non-goal are superseded by [method-should.md](method-should.md):
+`should` now follows the member, `form.error.should`.
+
 ## Goal
 
 Every runner gets a should-style alternative to `expect(await …)`:

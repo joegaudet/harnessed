@@ -82,7 +82,7 @@ Assert inside the `cy.harness` callback, like any harness call:
 ```ts
 cy.harness(LoginFormHarness, async form => {
   await form.submitIt()
-  await form.should.error.not.be.null()
+  await form.error.should.not.be.null()
   await form.should.not.be.absent()
 })
 ```

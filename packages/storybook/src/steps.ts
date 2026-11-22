@@ -1,4 +1,4 @@
-import { ScopedHarness } from '@harnessed-ts/core'
+import { attachShould, ScopedHarness, unwrapMethod } from '@harnessed-ts/core'
 
 /** Storybook's `context.step`, narrowed to what the proxy needs. */
 export type StepRunner = (label: string, play: () => Promise<void>) => Promise<unknown> | unknown
@@ -46,18 +46,34 @@ export function withSteps<T extends ScopedHarness>(harness: T, step: StepRunner)
     get(target, prop) {
       const value: unknown = Reflect.get(target, prop, target)
       if (typeof value !== 'function') return wrap(value)
+      // `should` is a chain, callable only so a word can refuse a call.
+      if (prop === 'should') return value
       if (typeof prop !== 'string' || prop === 'constructor' || prop.startsWith('_')) {
         return (value as (...args: unknown[]) => unknown).bind(target)
       }
       const method = value as (...args: unknown[]) => unknown
       if (method instanceof AsyncFunction) {
-        return async (...args: unknown[]) => {
+        const stepped = async (...args: unknown[]): Promise<unknown> => {
           let result: unknown
-          await step(stepLabel(className, method, args, prop), async () => {
+          await step(stepLabel(className, unwrapMethod(method), args, prop), async () => {
             result = await method.apply(target, args)
           })
           return wrap(result)
         }
+        // A method @harnessed-ts/should wrapped: keep its `should`, and give the
+        // stepped call one that asserts on that call. Others keep whatever
+        // `should` they had, Chai's included.
+        if (unwrapMethod(method) === method) return stepped
+        // shortcut: a retry, and the uncalled `method.should`, read outside the step, so they log no step; upgrade if they should show in the panel.
+        const readings = (...args: unknown[]): Promise<unknown> => {
+          const reading = stepped(...args)
+          attachShould(method, reading, args)
+          return reading
+        }
+        return Object.defineProperty(readings, 'should', {
+          configurable: true,
+          get: () => (method as { should?: unknown }).should,
+        })
       }
       return (...args: unknown[]) => wrap(method.apply(target, args))
     },

@@ -43,7 +43,7 @@ Classic and Embroider + Vite builds, Ember 5.12 and later.
 QUnit and Vitest both report as a failure:
 
 ```ts
-await form.should.errorText.be.null()
+await form.errorText.should.be.null()
 await form.should.not.be.absent()
 ```
 

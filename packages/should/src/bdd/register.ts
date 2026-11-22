@@ -5,13 +5,9 @@
  * ```ts
  * import '@harnessed-ts/should/bdd/register'
  *
- * await form.should.profile.have.property('name', 'Ada')
- * await form.should.attempts.be.within(1, 5)
+ * await form.profile.should.have.property('name', 'Ada')
+ * await form.attempts.should.be.within(1, 5)
  * ```
  */
-import '../register'
-import { addValueChecks } from '../chain'
-import { bddAssertions } from './assertions'
-import './types'
-
-addValueChecks(bddAssertions)
+import './register-scoped'
+import '../globals'

@@ -3,6 +3,15 @@ import type { Query } from '@harnessed-ts/core'
 import { dom } from '@harnessed-ts/dom'
 import userEvent from '@testing-library/user-event'
 
+/** The attempts counter inside the form. */
+export class CounterHarness extends ComponentHarness {
+  async value(): Promise<number> {
+    return Number(await this.self.text())
+  }
+}
+// Applied by hand: these tests run without a decorator transform.
+Harness({ host: testId('attempts') })(CounterHarness, {} as ClassDecoratorContext)
+
 /** A form with an error line, a toggle button and a few readings to assert on. */
 export class FormHarness extends ComponentHarness {
   calls = 0
@@ -49,9 +58,18 @@ export class FormHarness extends ComponentHarness {
     throw new Error('the form blew up')
   }
 
-  /** Named like a chain word: reserved, so `form.should.has` must not compile. */
+  /** Named like a chain word, which no longer matters: `should` follows the member. */
   async has(tag: string): Promise<boolean> {
     return (await this.tags()).includes(tag)
+  }
+
+  /** A child harness, to show it gets `should` too. */
+  get counter(): CounterHarness {
+    return this.childHarness(CounterHarness)
+  }
+
+  label(): string {
+    return 'form'
   }
 
   async submitIt(): Promise<void> {

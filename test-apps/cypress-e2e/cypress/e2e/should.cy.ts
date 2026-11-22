@@ -15,7 +15,7 @@ describe('should assertions under Cypress', () => {
     cy.visit(`/${viewSearch('login-late-duplicates')}`)
     cy.get('[data-testid="login-form"]')
     cy.harness(LoginFormHarness, async form => {
-      await form.should.lateCount.equal(2)
+      await form.lateCount.should.equal(2)
     })
   })
 
@@ -23,7 +23,8 @@ describe('should assertions under Cypress', () => {
     cy.visit(`/${viewSearch('login-error')}`)
     cy.get('[data-testid="login-form"]')
     cy.harness(LoginFormHarness, async form => {
-      await form.should.errorText.equal('Bad credentials')
+      await form.errorText.should.equal('Bad credentials')
+      await form.errorText().should.match(/credentials/)
       await form.errorQuery.should.readAs(/credentials/)
       await form.should.not.be.absent()
     })

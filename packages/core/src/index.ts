@@ -33,8 +33,14 @@ export { harnessMatchers } from './matchers'
 export type { Assertable, MatcherResult } from './matchers'
 export { Query } from './query'
 export { ScopedHarness } from './scoped-harness'
-export { registerShould } from './should'
-export type { ShouldFactory } from './should'
+export {
+  attachShould,
+  markWrapped,
+  registerHarnessWrapper,
+  registerShould,
+  unwrapMethod,
+} from './should'
+export type { AttachShould, HarnessWrapper, ShouldFactory } from './should'
 export type { ChildHarnessOptions, ScopedHarnessConstructor } from './scoped-harness'
 export type { BoundingBox, WaitOptions, WaitState } from './query'
 export {
