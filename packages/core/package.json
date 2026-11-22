@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/core",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "Component harnesses that run under any test driver — the driver-free core.",
   "keywords": [
     "testing",
