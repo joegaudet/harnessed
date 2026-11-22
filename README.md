@@ -579,6 +579,37 @@ await form.should.error.not.be.null()
 await page.banner.should.be.absent() // a @ChildHarness, or form.self
 ```
 
+### Should assertions (`@harnessed-ts/should`)
+
+| Import                              | Installs                                                                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `@harnessed-ts/should/register`     | `.should` on every harness and `Query`, with the vocabulary below                                                |
+| `@harnessed-ts/should/bdd/register` | the same, plus Chai's BDD vocabulary as calls (`ok()`, `a(type)`, `property()`, `within()`, `rejectedWith()`, …) |
+
+`harness.should.<method>` calls the method when the assertion runs;
+`harness.should.<method>(...args)` calls it with arguments. `harness.should.<childHarness>`,
+`harness.should` itself and `query.should` take the harness matchers. Then: the words
+`to be been is that which and has have with at of same does but still also`, the
+flags `not` and `deep`, and a terminal call that returns `Promise<void>`.
+
+| Terminal                                                   | Passes when                                                    |
+| ---------------------------------------------------------- | -------------------------------------------------------------- |
+| `null()` `true()` `false()` `undefined()`                  | the value is exactly that                                      |
+| `equal(x)` `equals` `eq`                                   | `=== x`; structural after `.deep`                              |
+| `eql(x)` `eqls`                                            | structurally equal                                             |
+| `match(re)`                                                | a string matching `re`                                         |
+| `include(x)` `includes` `contain` `contains`               | a substring, an array or Set member, or a subset of properties |
+| `above(n)` `gt` `greaterThan` · `below(n)` `lt` `lessThan` | a number past `n`                                              |
+| `length(n)` `lengthOf`                                     | `length` of a string or array, `size` of a Map or Set          |
+| `absent()` `selected()` `readAs(x)`                        | targets only; the same messages as the matchers above          |
+
+A failure throws `AssertionError` with `actual`, `expected` and `showDiff`. The types
+follow the harness: a misspelled member, a method resolving `void`, `unknown` or
+`any`, and an expected value of the wrong type don't compile. Chain words and matcher
+names are reserved, so a method by one of those names is asserted with `expect`.
+`registerShould(factory)` in core is the hook `/register` fills; you won't need it
+unless you write your own vocabulary.
+
 ### Configuration
 
 ```ts
@@ -601,6 +632,9 @@ editor started anywhere both find the right one. `testIdAttribute` is pushed int
 Testing Library and Playwright for you. It is a plain attribute name, matched by
 value (`data-testid`, `data-test`), or a prefix ending in `*`, matched by presence
 (`data-test-*`, for ember-test-selectors) — see [Selectors](#selectors).
+`retryAssertions` makes a should assertion read again until it passes or
+`defaultTimeout` runs out, instead of reading once; `@harnessed-ts/cypress/support`
+turns it on.
 
 The runtime half is explicit, because your test setup already transforms
 TypeScript and a bundler-free loader has no business running there:

@@ -350,6 +350,13 @@ expect(await form.error()).toBeNull()</code></pre>
 await form.signInAs('ada@example.com', 'hunter2')
 await expect(form).toBeAbsent()</code></pre>
           </article>
+          <article>
+            <header>Or should style, under any runner</header>
+            <pre><code class="language-typescript">import '@harnessed-ts/should/register'
+
+await form.signInAs('ada@example.com', 'hunter2')
+await form.should.error.be.null()</code></pre>
+          </article>
         </div>
       </section>
 
@@ -870,6 +877,14 @@ it('signs in', () =&gt; {
     await form.submitIt()
     await expect(form).to.readAs(/Welcome/)
   })
+})</code></pre>
+          <p>
+            Or should style: add <code>import '@harnessed-ts/should/register'</code> to the support
+            file. Under Cypress it retries, like Cypress's own <code>.should</code>:
+          </p>
+          <pre><code class="language-typescript">cy.harness(LoginFormHarness, async form =&gt; {
+  await form.submitIt()
+  await form.should.error.equal('Wrong password')
 })</code></pre>
           <p>Mocking the API:</p>
           <pre><code class="language-typescript">// cypress/support/e2e.ts
