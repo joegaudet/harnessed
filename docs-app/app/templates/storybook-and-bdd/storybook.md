@@ -50,7 +50,7 @@ and a play function can assert on the harness directly:
 ```tsx
 play: async ({ harness }) => {
   await harness.signInAs('ada@example.com', 'guess')
-  await harness.should.error.equal('Wrong password')
+  await harness.error.should.equal('Wrong password')
 }
 ```
 

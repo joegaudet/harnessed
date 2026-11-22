@@ -42,6 +42,11 @@
       "import": "./dist/register.js",
       "require": "./dist/register.cjs"
     },
+    "./register-scoped": {
+      "types": "./dist/register-scoped.d.ts",
+      "import": "./dist/register-scoped.js",
+      "require": "./dist/register-scoped.cjs"
+    },
     "./bdd": {
       "types": "./dist/bdd/index.d.ts",
       "import": "./dist/bdd/index.js",
@@ -51,6 +56,11 @@
       "types": "./dist/bdd/register.d.ts",
       "import": "./dist/bdd/register.js",
       "require": "./dist/bdd/register.cjs"
+    },
+    "./bdd/register-scoped": {
+      "types": "./dist/bdd/register-scoped.d.ts",
+      "import": "./dist/bdd/register-scoped.js",
+      "require": "./dist/bdd/register-scoped.cjs"
     },
     "./package.json": "./package.json"
   },

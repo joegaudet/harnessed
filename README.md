@@ -183,7 +183,7 @@ npm i -D @harnessed-ts/qunit        # assert.harness(x) — ember-qunit, QUnit
 npm i -D @harnessed-ts/chai         # expect(x).to.be.absent — Mocha, Cypress
 
 # or should style, under any runner
-npm i -D @harnessed-ts/should       # await form.should.error.be.null()
+npm i -D @harnessed-ts/should       # await form.error.should.be.null()
 ```
 
 `@harnessed-ts/core` depends on no driver. A jsdom-only project never resolves
@@ -336,7 +336,7 @@ agreement is the whole reason the abstraction exists.
     its `<label>`, replacing any earlier selection; the page sees each file's
     name and bytes. Anything but a file input, or several files for an input
     that is not `multiple`, is refused at once, in one wording.
-14. **A should assertion means the same everywhere.** `await form.should.error.be.null()`
+14. **A should assertion means the same everywhere.** `await form.error.should.be.null()`
     reads through the driver and fails with the same message under each one.
     With `retryAssertions` on it reads again until it passes or `defaultTimeout`
     runs out; with it off it reads once and answers at once.
@@ -574,8 +574,8 @@ harness method returns:
 ```ts
 import '@harnessed-ts/should/register' // once, in the test setup file
 
-await form.should.error.be.null() // expect(await form.error()).toBeNull()
-await form.should.error.not.be.null()
+await form.error.should.be.null() // expect(await form.error()).toBeNull()
+await form.error.should.not.be.null()
 await page.banner.should.be.absent() // a @ChildHarness, or form.self
 ```
 
@@ -586,8 +586,8 @@ await page.banner.should.be.absent() // a @ChildHarness, or form.self
 | `@harnessed-ts/should/register`     | `.should` on every harness and `Query`, with the vocabulary below                                                |
 | `@harnessed-ts/should/bdd/register` | the same, plus Chai's BDD vocabulary as calls (`ok()`, `a(type)`, `property()`, `within()`, `rejectedWith()`, …) |
 
-`harness.should.<method>` calls the method when the assertion runs;
-`harness.should.<method>(...args)` calls it with arguments. `harness.should.<childHarness>`,
+`harness.<method>.should` calls the method when the assertion runs;
+`harness.<method>(...args).should` asserts on that call. `harness.<childHarness>.should`,
 `harness.should` itself and `query.should` take the harness matchers. Then: the words
 `to be been is that which and has have with at of same does but still also`, the
 flags `not` and `deep`, and a terminal call that returns `Promise<void>`.
@@ -603,11 +603,11 @@ flags `not` and `deep`, and a terminal call that returns `Promise<void>`.
 | `length(n)` `lengthOf`                                     | `length` of a string or array, `size` of a Map or Set          |
 | `absent()` `selected()` `readAs(x)`                        | targets only; the same messages as the matchers above          |
 
-A failure throws `AssertionError` with `actual`, `expected` and `showDiff`. The types
-follow the harness: a misspelled member, a method resolving `void`, `unknown` or
-`any`, and an expected value of the wrong type don't compile. Chain words and matcher
-names are reserved, so a method by one of those names is asserted with `expect`.
-`registerShould(factory)` in core is the hook `/register` fills; you won't need it
+A failure throws `AssertionError` with `actual`, `expected` and `showDiff`.
+`harness.<method>().should` is typed by the method, so an expected value of the wrong
+type doesn't compile; `harness.<method>.should` accepts any, since TypeScript can't see
+the method's type from there. Don't assert on an action: under retry it runs again.
+`registerShould(factory)` and `registerHarnessWrapper(wrap)` in core are the hooks `/register` fills; you won't need it
 unless you write your own vocabulary.
 
 ### Configuration
@@ -1878,7 +1878,7 @@ or one rule at a time:
 | `behavioural-method-names`     | a public harness method named for a mechanic (`clickSubmit`, `fillEmail`) or a DOM noun (`submitButton`, `rowLocator`) instead of intent. A warning: it judges names; `verbs`, `nouns`, and `allow` tune it                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `no-component-harness-in-test` | a test constructing a component harness directly instead of entering through a page. Runtime-agnostic (`testFiles` globs); exempts a file that renders the component itself. `strict` only.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `no-raw-intercept`             | a runner's own interception in a test — `page.route`, `cy.intercept`, `setRequestInterception`, `browser.mock`, `RequestMock()`, MSW's `setupServer` — where `mock(env)` should be used (a warning in `recommended`, an error in `strict`)                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `await-should`                 | a floating terminal on a `@harnessed-ts/should` chain, such as `form.should.error.be.null()`: unawaited, it cannot fail the test. Cypress's `cy.get(…).should('…')` is left alone. `strict` only, since Chai's synchronous should reads the same                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `await-should`                 | a floating terminal on a `@harnessed-ts/should` chain, such as `form.error.should.be.null()`: unawaited, it cannot fail the test. Cypress's `cy.get(…).should('…')` is left alone. `strict` only, since Chai's synchronous should reads the same                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `await-mock-install`           | a floating `.reply()`, `.use()` or `graphql.query()` on a harnessed mock: unawaited, a request fired straight after can go unanswered                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 
 **`@harnessed-ts/claude`** installs the authoring conventions for coding agents:
@@ -1918,7 +1918,7 @@ config alone.
 | `@harnessed-ts/storybook`      | `harnessed()` for Storybook's preview: a harness in every play function, each method a step, the matchers on its `expect`; `StoryPage` opens stories as fixtures; `/ember` renders Ember stories and settles after each interaction |
 | `@harnessed-ts/gherkin`        | Gherkin: a scenario-scoped world, a typed page registry and `{page}`; adapters for playwright-bdd, cucumber-js, Cypress cucumber, ember-cli-yadda and Nightwatch                                                                    |
 | `@harnessed-ts/qunit`          | `assert.harness(x)` checks for QUnit and ember-qunit                                                                                                                                                                                |
-| `@harnessed-ts/should`         | `await form.should.error.be.null()` should-style assertions for every runner; `/bdd` adds Chai's full BDD vocabulary                                                                                                                |
+| `@harnessed-ts/should`         | `await form.error.should.be.null()` should-style assertions for every runner; `/bdd` adds Chai's full BDD vocabulary                                                                                                                |
 | `@harnessed-ts/chai`           | `expect(x).to.be.absent` and friends for Chai: Mocha, Cypress, WebdriverIO                                                                                                                                                          |
 | `@harnessed-ts/page`           | `PageHarness`                                                                                                                                                                                                                       |
 | `@harnessed-ts/mock`           | API mocking: the handler model, response builders, API harnesses, factories, OpenAPI and GraphQL validation, HAR, MSW import; each driver's `/mock` entry registers its transport                                                   |

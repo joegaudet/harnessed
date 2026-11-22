@@ -9,27 +9,29 @@ import '@harnessed-ts/should/register' // once, in the test setup file
 ```
 
 ```ts
-await form.should.error.be.null() // expect(await form.error()).toBeNull()
-await form.should.error.not.be.null()
-await grid.should.labelAt(1).equal('Medium')
+await form.error.should.be.null() // expect(await form.error()).toBeNull()
+await form.error.should.not.be.null()
+await grid.labelAt(1).should.equal('Medium')
 await page.banner.should.be.absent() // a @ChildHarness
 await form.should.be.absent() // the harness's own host
 ```
 
-`harness.should.<method>` calls the method when the assertion runs and asserts
-on what it resolved to. `harness.should.<target>` and `query.should` take the
+`harness.<method>.should` calls the method when the assertion runs and asserts
+on what it resolved to; `harness.<method>(...args).should` asserts on that call.
+A child harness's `.should`, `harness.should` and `query.should` take the
 harness matchers `absent`, `selected` and `readAs`, with the same failure
 messages as the Vitest, Playwright, QUnit and Chai assertions. Every terminal
 is a call that returns a promise, so **await every one**.
 `@typescript-eslint/no-floating-promises`, or `harnessed/await-should` from
 `@harnessed-ts/eslint-plugin`'s strict config, catches a missing `await`. An
-awaited terminal without its call, `await form.should.error.be.null`, rejects
+awaited terminal without its call, `await form.error.should.be.null`, rejects
 and says so.
 
-The types follow the harness: a misspelled method, a method that resolves
-`void`, and an expected value of the wrong type are all compile errors. Chain
-words and matcher names (`has`, `at`, `selected`, …) are reserved: a harness
-method by one of those names is asserted with `expect`.
+`harness.<method>().should` is typed by the method, so an expected value of the
+wrong type is a compile error. `harness.<method>.should` is not: TypeScript
+can't see the method's type from there, so the short form accepts any expected
+value. Don't assert on an action (a method resolving `void`): under retry it runs
+again on each attempt.
 
 - **`@harnessed-ts/should/register`**: `null`, `true`, `false`, `undefined`,
   `equal`, `eql`, `match`, `include`, `above`, `below`, `length`, and the
@@ -37,6 +39,10 @@ method by one of those names is asserted with `expect`.
 - **`@harnessed-ts/should/bdd/register`**: all of that, plus Chai's BDD
   vocabulary as calls: `ok()`, `a('string')`, `property('name', 'Ada')`,
   `members([...])`, `within(1, 5)`, `rejectedWith(/locked/)`, and the rest.
+- **`/register-scoped`** and **`/bdd/register-scoped`**: the same at runtime, without
+  the global `Function.should` and `Promise.should` types. Use these if the suite also
+  uses Chai's should interface, whose types on functions and promises the globals
+  would hide. Only `harness.should` and `query.should` are typed then.
 
 A failure throws an `AssertionError` carrying `actual` and `expected`, so the
 runner shows a diff. With `retryAssertions` on (`configure({ retryAssertions: true })`

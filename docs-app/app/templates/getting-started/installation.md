@@ -22,7 +22,7 @@ npm i -D @harnessed-ts/qunit        # assert.harness(x) — ember-qunit, QUnit
 npm i -D @harnessed-ts/chai         # expect(x).to.be.absent — Mocha, Cypress
 
 # or should style, under any runner
-npm i -D @harnessed-ts/should       # await form.should.error.be.null()
+npm i -D @harnessed-ts/should       # await form.error.should.be.null()
 ```
 
 `@harnessed-ts/core` depends on no driver. A jsdom-only project never resolves

@@ -994,11 +994,12 @@ describe('await-mock-install', () => {
 describe('await-should', () => {
   tester.run('await-should', awaitShould, {
     valid: [
-      { name: 'awaited', code: `await form.should.error.be.null()` },
+      { name: 'awaited', code: `await form.error.should.be.null()` },
+      { name: 'awaited, on a called method', code: `await form.cell(2, 'name').should.equal('x')` },
       { name: 'awaited on a query', code: `await form.submitButton.should.not.be.absent()` },
-      { name: 'returned', code: `const check = () => form.should.error.be.null()` },
-      { name: 'kept in a variable', code: `const pending = form.should.attempts.equal(3)` },
-      { name: 'voided on purpose', code: `void form.should.error.be.null()` },
+      { name: 'returned', code: `const check = () => form.error.should.be.null()` },
+      { name: 'kept in a variable', code: `const pending = form.attempts.should.equal(3)` },
+      { name: 'voided on purpose', code: `void form.error.should.be.null()` },
       {
         name: "Cypress's own should is a call, not a chain",
         code: `cy.get('[data-testid="x"]').should('be.visible').and('contain', 'Hi')`,
@@ -1008,12 +1009,12 @@ describe('await-should', () => {
     invalid: [
       {
         name: 'a floating terminal',
-        code: `form.should.error.be.null()`,
+        code: `form.error.should.be.null()`,
         errors: [{ messageId: 'floating', data: { call: '.null()' } }],
       },
       {
-        name: 'a floating method link with arguments',
-        code: `async function t() { grid.should.labelAt(1).equal('Medium') }`,
+        name: 'a floating assertion on a called method',
+        code: `async function t() { grid.labelAt(1).should.equal('Medium') }`,
         errors: [{ messageId: 'floating', data: { call: '.equal()' } }],
       },
       {

@@ -127,7 +127,7 @@ async function settle(attempt: () => Promise<Attempt>, negate: boolean): Promise
 }
 
 interface ChainState {
-  /** How the chain prints: `FormHarness.should.error.not`. */
+  /** How the chain prints: `FormHarness.error.should.not`. */
   path: string
   negate: boolean
   deep: boolean
@@ -141,21 +141,15 @@ interface Terminal {
 /**
  * The shared proxy behind every chain: words, `not` and `deep` return a new
  * chain; a terminal name returns the call that runs the assertion. Anything
- * else is handed to `fallback`, or refused by name.
+ * else is refused by name.
  */
-function chain(
-  state: ChainState,
-  terminal: (name: string) => Terminal | undefined,
-  fallback?: (name: string) => unknown,
-  apply?: (args: unknown[]) => unknown,
-): object {
+function chain(state: ChainState, terminal: (name: string) => Terminal | undefined): object {
   const next = (patch: Partial<ChainState>, word: string): object =>
     chain({ ...state, ...patch, path: `${state.path}.${word}` }, terminal)
-  // An arrow function as the target: callable for a method that takes
-  // arguments, and without a non-configurable `prototype` to trip proxy invariants.
+  // An arrow function as the target, so a call on a word reaches `apply`, and
+  // without a non-configurable `prototype` to trip proxy invariants.
   return new Proxy(() => undefined, {
-    apply: (_target, _this, args: unknown[]) => {
-      if (apply !== undefined) return apply(args)
+    apply: () => {
       const word = state.path.slice(state.path.lastIndexOf('.') + 1)
       throw new TypeError(`harnessed: "${word}" is not a call (on ${state.path}).`)
     },
@@ -175,7 +169,6 @@ function chain(
         })
       }
       if (run !== undefined) return terminalCall(prop, args => run(args, state))
-      if (fallback !== undefined) return fallback(prop)
       throw new TypeError(
         `harnessed: "${prop}" is not a should assertion (on ${state.path}). Check the spelling, or import "@harnessed-ts/should/bdd/register" for the full BDD vocabulary.`,
       )
@@ -217,7 +210,8 @@ export function targetChain(subject: Assertable, path: string): object {
   return chain({ path, negate: false, deep: false }, targetTerminal(subject))
 }
 
-function valueChain(label: string, path: string, read: () => Promise<unknown>): object {
+/** A chain on what `read` resolves to; `label` names it in failure messages. */
+export function valueChain(label: string, path: string, read: () => Promise<unknown>): object {
   return chain({ path, negate: false, deep: false }, name => {
     const check = valueChecks.get(name)
     if (check === undefined) return undefined
@@ -247,50 +241,8 @@ function valueChain(label: string, path: string, read: () => Promise<unknown>): 
   })
 }
 
-/** `harness.should.method`, callable when the method takes arguments. */
-function methodLink(harness: object, name: string, path: string, args: unknown[] = []): object {
-  const owner = harness.constructor.name
-  const label = `${owner}.${name}(${args.map(show).join(', ')})`
-  const read = (): Promise<unknown> =>
-    (harness as Record<string, (...a: unknown[]) => Promise<unknown>>)[name]!(...args)
-  const link = valueChain(label, path, read)
-  return new Proxy(link, {
-    apply: (_target, _this, called: unknown[]) => methodLink(harness, name, path, called),
-  })
-}
-
-/** Something the harness matchers can read: a query, or a harness via its host. */
-function isTarget(value: unknown): value is Assertable {
-  if (typeof value !== 'object' || value === null) return false
-  if ('self' in value) return true
-  const query = value as { attribute?: unknown; count?: unknown }
-  return typeof query.attribute === 'function' && typeof query.count === 'function'
-}
-
-/**
- * `harness.should`: a member name picks what to assert on; words and the harness
- * matchers assert on the harness's own host (`form.should.be.absent()`).
- */
-export function harnessChain(harness: object): object {
-  const owner = harness.constructor.name
-  const path = `${owner}.should`
-  return chain(
-    { path, negate: false, deep: false },
-    targetTerminal(harness as Assertable),
-    name => {
-      const member = (harness as Record<string, unknown>)[name]
-      if (typeof member === 'function') return methodLink(harness, name, `${path}.${name}`)
-      if (isTarget(member)) return targetChain(member, `${path}.${name}`)
-      throw new TypeError(
-        `harnessed: ${owner}.${name} is not an async method or a target, so it cannot be asserted on.`,
-      )
-    },
-  )
-}
-
-/** What `registerShould` is handed: a harness gets the member chain, a query the target chain. */
+/** What `registerShould` is handed: a harness asserts on its host, a query on itself. */
 export function shouldFor(subject: object): unknown {
-  return 'self' in subject
-    ? harnessChain(subject)
-    : targetChain(subject as Assertable, 'target.should')
+  const path = 'self' in subject ? `${subject.constructor.name}.should` : 'target.should'
+  return targetChain(subject as Assertable, path)
 }

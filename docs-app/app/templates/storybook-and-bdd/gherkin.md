@@ -38,7 +38,7 @@ page in the world:
 
 ```ts
 Then('the total is {string}', async ({ world }, total: string) => {
-  await world.checkout!.should.total.equal(total)
+  await world.checkout!.total.should.equal(total)
 })
 ```
 

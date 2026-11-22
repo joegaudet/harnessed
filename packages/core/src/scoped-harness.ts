@@ -4,7 +4,7 @@ import { requireHostMeta } from './host-meta'
 import type { Query } from './query'
 import { createQuery } from './registry'
 import { frame } from './selector'
-import { defineShould } from './should'
+import { defineShould, wrapHarness } from './should'
 import type { Selector } from './selector'
 
 export interface ChildHarnessOptions {
@@ -53,6 +53,9 @@ export abstract class ScopedHarness implements HarnessHost {
     this._env = env
     this._parentScope = parentScope
     this._scope = [...parentScope, host]
+    // Returning an object from a base constructor makes it `this` for every
+    // subclass, so their fields, `#private` ones included, land on the wrapper.
+    return wrapHarness(this)
   }
 
   protected get _hostSelector(): Selector {

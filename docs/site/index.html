@@ -355,7 +355,7 @@ await expect(form).toBeAbsent()</code></pre>
             <pre><code class="language-typescript">import '@harnessed-ts/should/register'
 
 await form.signInAs('ada@example.com', 'hunter2')
-await form.should.error.be.null()</code></pre>
+await form.error.should.be.null()</code></pre>
           </article>
         </div>
       </section>
@@ -884,7 +884,7 @@ it('signs in', () =&gt; {
           </p>
           <pre><code class="language-typescript">cy.harness(LoginFormHarness, async form =&gt; {
   await form.submitIt()
-  await form.should.error.equal('Wrong password')
+  await form.error.should.equal('Wrong password')
 })</code></pre>
           <p>Mocking the API:</p>
           <pre><code class="language-typescript">// cypress/support/e2e.ts
@@ -1127,7 +1127,7 @@ Then('the total is {string}', async ({ world }, total) =&gt; {
               <li>
                 <strong><code>@harnessed-ts/should</code></strong
                 >: should-style assertions under every runner, such as
-                <code>await form.should.error.be.null()</code>, with retry under Cypress.
+                <code>await form.error.should.be.null()</code>, with retry under Cypress.
               </li>
               <li>
                 <strong><code>@harnessed-ts/config</code></strong

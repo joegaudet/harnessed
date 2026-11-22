@@ -73,8 +73,8 @@ is no `/matchers` entry. Documented differences:
 and target gets a `.should`. Await each assertion:
 
 ```ts
-await form.should.error.be.null() // expect(await form.error()).toBeNull()
-await form.should.error.not.be.null()
+await form.error.should.be.null() // expect(await form.error()).toBeNull()
+await form.error.should.not.be.null()
 await page.banner.should.be.absent() // a @ChildHarness, or form.self
 ```
 

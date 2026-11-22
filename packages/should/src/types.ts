@@ -1,5 +1,3 @@
-import type { Query } from '@harnessed-ts/core'
-
 /** Words that read well and change nothing. */
 export interface Words<Self> {
   readonly to: Self
@@ -80,31 +78,6 @@ export interface TargetAssertion extends Words<TargetAssertion> {
   readAs(expected: string | RegExp): Promise<void>
 }
 
-/**
- * What a member is asserted as. A method resolving `void` is an action, not a
- * reading — and under retry it would run again — so it is left out, as is
- * anything that is neither a method nor a target.
- */
-export type Asserted<V> = V extends Query | { readonly self: Query }
-  ? TargetAssertion
-  : V extends (...args: infer A) => Promise<infer R>
-    ? [void] extends [R]
-      ? never
-      : [] extends A
-        ? ValueAssertion<R> & ((...args: A) => ValueAssertion<R>)
-        : (...args: A) => ValueAssertion<R>
-    : never
-
-/**
- * Names `harness.should` keeps for itself: the chain words, `not`, the harness
- * matchers, and what tooling probes. A harness member by one of these names
- * cannot be asserted on through `harness.should`; call it and use `expect`.
- */
-export type Reserved = keyof TargetAssertion | 'should' | 'deep' | 'then' | 'toJSON' | 'toString'
-
-/** `harness.should`: its methods and targets by name, plus the harness matchers on its host. */
-export type HarnessShould<T> = {
-  readonly [
-    K in keyof T as K extends Reserved ? never : [Asserted<T[K]>] extends [never] ? never : K
-  ]: Asserted<T[K]>
-} & TargetAssertion
+/** What an uncalled method's `should` checks values against: anything at all. */
+export type Unchecked =
+  string | number | boolean | bigint | symbol | readonly unknown[] | object | null | undefined

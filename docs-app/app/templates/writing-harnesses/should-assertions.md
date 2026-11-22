@@ -10,8 +10,8 @@ gets a `.should`:
 ```ts
 import '@harnessed-ts/should/register'
 
-await form.should.error.be.null() // expect(await form.error()).toBeNull()
-await form.should.error.not.be.null()
+await form.error.should.be.null() // expect(await form.error()).toBeNull()
+await form.error.should.not.be.null()
 await page.banner.should.be.absent() // a @ChildHarness, or form.self
 ```
 
@@ -23,16 +23,18 @@ that runner's page.
 
 ## Reading the chain
 
-`harness.should` takes a member name, then reads like Chai:
+`should` follows what it asserts on, then reads like Chai:
 
-- **A method** (`form.should.error`) is called when the assertion runs, and the
-  assertion is about what it resolved to. A method that takes arguments is
-  called with them: `grid.should.labelAt(1).equal('Medium')`.
-- **A target** takes the harness matchers: a `@ChildHarness`
-  (`page.should.banner.be.absent()`), or `self`, the harness's host element. A
-  public `Query` member works too, but `harnessed/harness-public-surface` keeps
+- **A method**: `form.error.should` calls `error()` when the assertion runs,
+  and asserts on what it resolved to. A method that takes arguments is called
+  first: `grid.labelAt(1).should.equal('Medium')`. That works on a zero-arg
+  method too, `form.error().should.be.null()`, and checks types more strictly;
+  see below.
+- **A target**: a `@ChildHarness` (`page.banner.should.be.absent()`), or
+  `self`, the harness's host element, takes the harness matchers. A public
+  `Query` member works too, but `harnessed/harness-public-surface` keeps
   queries private, so prefer a child harness.
-- **Nothing**: `form.should.be.absent()` asserts on the harness's own host.
+- **The harness itself**: `form.should.be.absent()` asserts on its own host.
 
 `query.should` takes the harness matchers directly, for use inside a harness
 or with `self`: `price.self.should.readAs(/^\$/)`.
@@ -50,25 +52,32 @@ type information. That rule is in `@harnessed-ts/eslint-plugin`'s `strict`
 config only, because Chai's own should interface (`res.body.should.have.property('id')`)
 reads the same and is synchronous; turn it on yourself if you don't use Chai's.
 
-Awaiting a terminal without its call, `await form.should.error.be.null` in
+Awaiting a terminal without its call, `await form.error.should.be.null` in
 Chai's property style, rejects with `` `.null` is a call: write `.null()` ``
 rather than passing without asserting.
 
-## What can be asserted on
+## Types
 
-The types follow the harness. A misspelled member is a compile error, and the
-expected value takes the method's own type: `form.should.attempts.equal('3')`
-does not compile when `attempts()` resolves a number. Left out:
+`form.error().should` is typed by the method: the expected value takes the
+method's own type, so `form.attempts().should.equal('3')` does not compile when
+`attempts()` resolves a number.
 
-- A method that resolves `void`. That is an action, not a reading, and under
-  retry it would run again.
-- A plain field, which is not read through a driver.
-- A method that needs arguments, until it is called with them.
-- A method that resolves `unknown` or `any`: give it a return type.
-- A member named like a chain word or a matcher: `to`, `be`, `been`, `is`,
-  `that`, `which`, `and`, `has`, `have`, `with`, `at`, `of`, `same`, `does`,
-  `but`, `still`, `also`, `not`, `deep`, `absent`, `selected`, `readAs`. Those
-  names belong to the chain, so assert on such a method with `expect`.
+`form.error.should` is not. TypeScript cannot see a method's type from a
+`should` on the method itself, so the short form accepts any expected value.
+Use the called form where that check matters. It is also the form for a typed
+callback: `form.attempts().should.satisfy((n: number) => n > 0)` compiles, and
+the short form does not.
+
+Both forms rest on global types, `Function.should` and `Promise.should`. If the
+suite also uses Chai's should interface, they hide its types on functions and
+promises (`fn.should.throw()`), so import `@harnessed-ts/should/register-scoped`
+(or `/bdd/register-scoped`) instead. It works the same at runtime; only
+`harness.should` and `query.should` are typed.
+
+**Don't assert on an action.** A method that resolves `void`, such as
+`submit()`, is an action, not a reading. Under retry, an assertion calls the
+method again on each attempt, so `form.submit.should…` would submit again and
+again. Neither form refuses it at compile time.
 
 ## Vocabulary
 

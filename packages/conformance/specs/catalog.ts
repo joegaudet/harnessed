@@ -830,11 +830,11 @@ export const specs: Spec[] = [
     async run(ctx) {
       await withConfig({ retryAssertions: false }, async () => {
         const form = new LoginFormHarness(await ctx.show('login-error'))
-        await form.should.errorText.not.be.null()
-        await form.should.errorText.equal('Bad credentials')
-        await form.should.errorCount.equal(1)
+        await form.errorText.should.not.be.null()
+        await form.errorText().should.equal('Bad credentials')
+        await form.errorCount.should.equal(1)
         await assert.rejects(
-          () => form.should.errorText.be.null(),
+          () => form.errorText.should.be.null(),
           /^AssertionError: expected LoginFormHarness\.errorText\(\) to be null, but it was "Bad credentials"$/,
         )
       })
@@ -845,9 +845,9 @@ export const specs: Spec[] = [
     async run(ctx) {
       await withConfig({ retryAssertions: false }, async () => {
         const form = new LoginFormHarness(await ctx.show('login'))
-        await form.should.errorText.be.null()
+        await form.errorText.should.be.null()
         await assert.rejects(
-          () => form.should.errorText.not.be.null(),
+          () => form.errorText.should.not.be.null(),
           /^AssertionError: expected LoginFormHarness\.errorText\(\) not to be null$/,
         )
       })
@@ -858,11 +858,11 @@ export const specs: Spec[] = [
     async run(ctx) {
       await withConfig({ retryAssertions: false }, async () => {
         const grid = new CardGridHarness(await ctx.show('cards'))
-        await grid.should.labelAt(1).equal('Medium')
-        await grid.should.labels.include('Medium')
-        await grid.should.cardCount.be.above(2)
-        await grid.should.labels.have.length(3)
-        await grid.should.labels.deep.equal(['Small', 'Medium', 'Large'])
+        await grid.labelAt(1).should.equal('Medium')
+        await grid.labels.should.include('Medium')
+        await grid.cardCount.should.be.above(2)
+        await grid.labels.should.have.length(3)
+        await grid.labels.should.deep.equal(['Small', 'Medium', 'Large'])
       })
     },
   },
@@ -872,17 +872,16 @@ export const specs: Spec[] = [
       await withConfig({ retryAssertions: false }, async () => {
         const form = new LoginFormHarness(await ctx.show('login'))
         await form.errorQuery.should.be.absent()
-        await form.should.errorQuery.be.absent()
         await form.should.not.be.absent()
       })
     },
   },
   {
-    name: 'should: readAs through a member, and a failed absent in the shared wording',
+    name: 'should: readAs on a query, and a failed absent in the shared wording',
     async run(ctx) {
       await withConfig({ retryAssertions: false }, async () => {
         const form = new LoginFormHarness(await ctx.show('login-error'))
-        await form.should.errorQuery.readAs(/credentials/)
+        await form.errorQuery.should.readAs(/credentials/)
         await assert.rejects(() => form.errorQuery.should.be.absent(), /1 node\(s\) matched/)
       })
     },
@@ -904,7 +903,7 @@ export const specs: Spec[] = [
       // Shown first: the narrowed timeout is for the assertion, not for loading the fixture.
       const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
       await withConfig({ retryAssertions: true, defaultTimeout: 2_000 }, async () => {
-        await form.should.lateCount.equal(2)
+        await form.lateCount.should.equal(2)
       })
     },
   },
@@ -914,7 +913,7 @@ export const specs: Spec[] = [
       const form = new LoginFormHarness(await ctx.show('login'))
       await withConfig({ retryAssertions: true, defaultTimeout: 300 }, async () => {
         await assert.rejects(
-          () => form.should.errorCount.equal(1),
+          () => form.errorCount.should.equal(1),
           /expected LoginFormHarness\.errorCount\(\) to equal 1, but it was 0/,
         )
       })
@@ -926,7 +925,7 @@ export const specs: Spec[] = [
       await withConfig({ retryAssertions: false }, async () => {
         const form = new LoginFormHarness(await ctx.show('login-late-duplicates'))
         const started = Date.now()
-        await assert.rejects(() => form.should.lateCount.equal(2), /but it was 0/)
+        await assert.rejects(() => form.lateCount.should.equal(2), /but it was 0/)
         assert.ok(Date.now() - started < IMMEDIATE_MS, 'a single check answers immediately')
       })
     },

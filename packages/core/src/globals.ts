@@ -21,7 +21,7 @@ export const DEFAULT_RUNTIME_CONFIG: Readonly<RuntimeConfig> = Object.freeze({
 import type { RuntimeConfig } from './config'
 import type { HarnessOptions } from './host-meta'
 import type { BeforeNavigate, Navigation, QueryFactory } from './registry'
-import type { ShouldFactory } from './should'
+import type { HarnessWrapper, ShouldFactory } from './should'
 
 const SLOT = Symbol.for('harnessed.globals.v1')
 
@@ -36,6 +36,8 @@ export interface HarnessedGlobals {
   merged: Readonly<RuntimeConfig>
   /** What every `.should` getter builds its chain with. See `registerShould`. */
   should?: ShouldFactory | undefined
+  /** What every harness constructor returns instead of itself. See `registerHarnessWrapper`. */
+  wrapHarness?: HarnessWrapper | undefined
 }
 
 interface GlobalCarrier {
