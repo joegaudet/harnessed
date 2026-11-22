@@ -11,6 +11,7 @@ import noRunnerImportInHarness from './rules/no-runner-import-in-harness'
 import requireHost from './rules/require-host'
 import requireWaitForReady from './rules/require-wait-for-ready'
 
+/** Every rule, by name without the `harnessed/` prefix. */
 export const rules: Record<string, Rule.RuleModule> = {
   'await-mock-install': awaitMockInstall,
   'behavioural-method-names': behaviouralMethodNames,
@@ -25,19 +26,9 @@ export const rules: Record<string, Rule.RuleModule> = {
   'require-wait-for-ready': requireWaitForReady,
 }
 
+/** The plugin's name and version, as ESLint reads them. */
 const meta = { name: '@harnessed-ts/eslint-plugin', version: '0.3.0' }
 
-/**
- * Turns the harness conventions into a gate. Written rules get followed until
- * someone is in a hurry; these do not.
- *
- * ```js
- * // eslint.config.js
- * import harnessed from '@harnessed-ts/eslint-plugin'
- *
- * export default [harnessed.configs.recommended]
- * ```
- */
 const recommendedRules = {
   'harnessed/no-page-or-screen-in-harness': 'error',
   'harnessed/no-reach-through-cast': 'error',
@@ -92,6 +83,17 @@ function legacy(flat: Record<string, string>): Record<string, string> {
  */
 export const configs: Record<string, unknown> = {}
 
+/**
+ * Turns the harness conventions into a gate. Written rules get followed until
+ * someone is in a hurry; these do not.
+ *
+ * ```js
+ * // eslint.config.js
+ * import harnessed from '@harnessed-ts/eslint-plugin'
+ *
+ * export default [harnessed.configs.recommended]
+ * ```
+ */
 const plugin = { meta, rules, configs }
 
 configs.recommended = {

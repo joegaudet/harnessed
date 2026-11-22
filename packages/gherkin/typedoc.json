@@ -1,0 +1,10 @@
+{
+  "entryPoints": [
+    "src/index.ts",
+    "src/playwright-bdd.ts",
+    "src/cucumber.ts",
+    "src/nightwatch.ts",
+    "src/cypress.ts",
+    "src/yadda.ts"
+  ]
+}

@@ -95,6 +95,7 @@ export type YaddaStep<W, P extends PageMap, A extends unknown[]> = (
   ...args: A
 ) => unknown
 
+/** What a step library needs: the pages, how to build their env, and Yadda's dictionary and language. */
 export interface YaddaStepsOptions<P extends PageMap> {
   /** The pages features can name. Defines `$page` unless `dictionary` is given. */
   pages: PageRegistry<P>
@@ -115,8 +116,11 @@ export interface YaddaSteps<W, P extends PageMap> {
   readonly world: Partial<W>
   /** The Yadda library to run: what an ember-cli-yadda steps module returns. */
   readonly library: Yadda.BaseLibrary
+  /** Registers a `Given` step, in the library's language. */
   given<A extends unknown[]>(signature: Yadda.Signature, step: YaddaStep<W, P, A>): this
+  /** Registers a `When` step, in the library's language. */
   when<A extends unknown[]>(signature: Yadda.Signature, step: YaddaStep<W, P, A>): this
+  /** Registers a `Then` step, in the library's language. */
   then<A extends unknown[]>(signature: Yadda.Signature, step: YaddaStep<W, P, A>): this
   /** A step that matches after any keyword: `Given`, `When`, `Then`, `And`, `But`. */
   step<A extends unknown[]>(signature: Yadda.Signature, step: YaddaStep<W, P, A>): this

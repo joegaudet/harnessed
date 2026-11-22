@@ -14,6 +14,7 @@ import type { Runner } from './detect'
 import type { RenderContext } from './render'
 import { allExampleFiles, exampleFiles, renderConfig, renderRules, renderSkill } from './render'
 
+/** What {@link install} writes, and where. */
 export interface InstallOptions {
   /** Repo root. Defaults to the working directory. */
   root?: string
@@ -25,6 +26,7 @@ export interface InstallOptions {
   overwriteConfig?: boolean
 }
 
+/** What {@link install} did: the layout it used and the paths it wrote, skipped or removed. */
 export interface InstallResult {
   context: RenderContext
   written: string[]

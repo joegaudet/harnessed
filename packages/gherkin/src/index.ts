@@ -20,6 +20,7 @@ import type { EnvConfig } from '@harnessed-ts/core'
 /** Anything a page registry can construct: a page or component harness class. */
 export type PageConstructor<T = object> = new (env: EnvConfig) => T
 
+/** Page names, as features write them, to the harness class each one opens. */
 export type PageMap = Record<string, PageConstructor>
 
 /** The pages a feature can name. */
@@ -32,6 +33,10 @@ export interface PageRegistry<P extends PageMap> {
   open<N extends keyof P & string>(name: N, env: EnvConfig): InstanceType<P[N]>
 }
 
+/**
+ * The registry of pages a feature can name. Throws when `pages` is empty, since
+ * a `{page}` parameter with no names would match any step.
+ */
 export function definePages<P extends PageMap>(pages: P): PageRegistry<P> {
   const names = (Object.keys(pages) as Array<keyof P & string>).sort((a, b) => b.length - a.length)
   if (names.length === 0) {
@@ -63,6 +68,7 @@ export function definePages<P extends PageMap>(pages: P): PageRegistry<P> {
 export interface ParameterTypeDefinition<T> {
   name: string
   regexp: RegExp
+  /** Turns the matched text into the step argument. */
   transformer: (match: string) => T
   useForSnippets?: boolean
 }

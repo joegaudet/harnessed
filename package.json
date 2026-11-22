@@ -35,7 +35,8 @@
     "test:rules": "pnpm --filter @harnessed-ts/eslint-plugin test",
     "clean": "pnpm -r --filter './packages/*' run clean && rm -rf tsconfig.tsbuildinfo",
     "test:scripts": "node --test scripts/*.test.mjs",
-    "test:units": "pnpm test:scripts && pnpm --filter @harnessed-ts/core --filter @harnessed-ts/mock --filter @harnessed-ts/resolve --filter @harnessed-ts/chai --filter @harnessed-ts/qunit --filter @harnessed-ts/testcafe --filter @harnessed-ts/nightwatch --filter @harnessed-ts/gherkin --filter @harnessed-ts/claude --filter @harnessed-ts/storybook test"
+    "test:units": "pnpm test:scripts && pnpm --filter @harnessed-ts/core --filter @harnessed-ts/mock --filter @harnessed-ts/resolve --filter @harnessed-ts/chai --filter @harnessed-ts/qunit --filter @harnessed-ts/testcafe --filter @harnessed-ts/nightwatch --filter @harnessed-ts/gherkin --filter @harnessed-ts/claude --filter @harnessed-ts/storybook test",
+    "docs:api": "typedoc && node scripts/llms-full.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
@@ -45,6 +46,8 @@
     "eslint": "^10.13.0",
     "prettier": "^3.9.10",
     "tsup": "^8.5.1",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.14.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.0"
   }

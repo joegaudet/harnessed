@@ -1,0 +1,38 @@
+# harnessed
+
+> Test harnesses for components and pages: like page objects, but for components too. One API
+> that runs under every major JavaScript test runner (Testing Library, Playwright, Ember,
+> Cypress, WebdriverIO, Vitest browser mode, Puppeteer, TestCafe, Nightwatch, node:test and
+> Bun), with Gherkin on top, and inside Storybook's play functions.
+
+A harness is a class that lets a test drive a component the way a person would, through methods
+named for what the component does. Its fields are `Query`s declared with decorators
+(`@ByRole`, `@ByLabel`, `@ByTestId`), and it is constructed with a driver's env
+(`dom(...)`, `pw(page)`, `ember()`, ...), so the same class runs in a jsdom unit test and in
+a real browser. A `PageHarness` (`@harnessed-ts/page`) adds a path, `goto()` and a readiness
+check. `@harnessed-ts/mock` mocks HTTP and WebSocket APIs the same way under every driver.
+
+Packages are published under the `@harnessed-ts` scope: `core` (queries, selectors,
+`ComponentHarness`, decorators, `configure()`), one driver package per runner, `page`,
+`mock`, `gherkin`, `storybook`, the `qunit` and `chai` assertion adapters, an
+`eslint-plugin`, and `claude` (an authoring skill and its install CLI).
+
+## Docs
+
+- [Guide](https://joegaudet.com/harnessed/guide/): introduction, installation, writing harnesses, every runner and framework
+- [Introduction](https://joegaudet.com/harnessed/guide/getting-started/introduction)
+- [Installation](https://joegaudet.com/harnessed/guide/getting-started/installation)
+- [Component harnesses](https://joegaudet.com/harnessed/guide/writing-harnesses/component-harnesses)
+- [Page harnesses](https://joegaudet.com/harnessed/guide/writing-harnesses/page-harnesses)
+- [Mocking APIs](https://joegaudet.com/harnessed/guide/mocking/mocking-apis)
+- [Packages](https://joegaudet.com/harnessed/guide/tooling/packages)
+- [README](https://github.com/joegaudet/harnessed#readme)
+
+## API
+
+- [API reference](https://joegaudet.com/harnessed/api/): every export of every package, from
+  the latest release
+- [llms-full.txt](https://joegaudet.com/harnessed/api/llms-full.txt): this file followed by the
+  whole API reference as Markdown
+- [api.json](https://joegaudet.com/harnessed/api/api.json): the API reference as TypeDoc's JSON
+  model, for tools

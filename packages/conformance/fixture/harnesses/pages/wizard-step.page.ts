@@ -5,7 +5,7 @@ import { PageHarness } from '@harnessed-ts/page'
 /**
  * Shared shape for both wizard steps: a level-1 title and a readiness check. The
  * base carries the decorated fields; each subclass supplies only its own host,
- * which is the inheritance case @Harness has to survive — now on a page.
+ * which is the inheritance case `@Harness` has to survive — now on a page.
  */
 export abstract class WizardStepPage<
   Params extends Record<string, string> = Record<never, never>,

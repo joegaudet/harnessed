@@ -11,16 +11,18 @@ import type { WireSelector } from './wire'
 
 export { PAGE_API_GLOBAL }
 
+/** A selector as handed over the wire, or as-is when caller and page share a realm. */
+type Wire = Selector | WireSelector
+
 /**
  * Settings a remote driver passes on every call. The page has no access to the
  * test process's `configure()`, so the runtime config travels with the call
  * rather than being pushed once.
  */
-/** A selector as handed over the wire, or as-is when caller and page share a realm. */
-type Wire = Selector | WireSelector
-
 export interface PageApiOptions {
+  /** The attribute `testId()` selectors match, as configured in the test process. */
   testIdAttribute: string
+  /** How long a waiting call (`count`, `one`, `all`) waits, in milliseconds. */
   timeout: number
 }
 
@@ -84,6 +86,11 @@ export interface PageApi {
   fileTarget(element: Element): FileTarget
 }
 
+/**
+ * Builds the {@link PageApi} over `document`. The injected bundle
+ * (`inject.global.js`) installs it in the page under `PAGE_API_GLOBAL`. A
+ * `null` root resolves from `document.body`.
+ */
 export function createPageApi(document: Document): PageApi {
   const start = (root: Element | null): HTMLElement => (root ?? document.body) as HTMLElement
   // Only the test-id attribute: every waiting call passes its timeout

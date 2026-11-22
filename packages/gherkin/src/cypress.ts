@@ -6,6 +6,7 @@ import { createWorld } from './index'
  */
 export type HookRegistrar = (fn: () => void) => void
 
+/** How {@link cypressWorld} resets the world between scenarios. */
 export interface CypressWorldOptions {
   /**
    * Registers the reset that runs before each scenario. Defaults to the global
@@ -14,6 +15,7 @@ export interface CypressWorldOptions {
   beforeEach?: HookRegistrar
 }
 
+/** What {@link cypressWorld} returns: access to the running scenario's world. */
 export interface CypressWorld<W> {
   /** The current scenario's bag. Read it inside a step, never at module level. */
   world(): Partial<W>

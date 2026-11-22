@@ -1,0 +1,15 @@
+{
+  "entryPoints": [
+    "src/index.ts",
+    "src/builders.ts",
+    "src/in-page.ts",
+    "src/remote-page.ts",
+    "src/graphql-schema.ts",
+    "src/vitest.ts"
+  ],
+  "validation": {
+    "notExported": false,
+    "invalidLink": true,
+    "notDocumented": false
+  }
+}

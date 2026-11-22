@@ -11,6 +11,7 @@ export interface WireRegExp {
   flags: string
 }
 
+/** A selector after {@link encodeSelector}: plain JSON, with each RegExp as a {@link WireRegExp}. */
 export type WireSelector = Record<string, unknown>
 
 /**
@@ -54,6 +55,7 @@ function decodeValue(value: unknown): unknown {
   return value
 }
 
+/** Makes `selector` safe to send to a remote page, tagging each RegExp it holds. */
 export function encodeSelector(selector: Selector): WireSelector {
   return encodeValue(selector) as WireSelector
 }
