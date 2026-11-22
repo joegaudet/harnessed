@@ -1,14 +1,16 @@
+// .jsonc, not typedoc.json: the guide's Kolay reads packages/core/typedoc.json into its own
+// TypeDoc run, where these relative entry points resolve against docs-app/.
 {
   "entryPoints": ["src/index.ts", "src/vite.ts", "src/babel.ts", "src/register.ts", "src/bun.ts"],
   "validation": {
     "notExported": true,
     "invalidLink": true,
-    "notDocumented": false
+    "notDocumented": false,
   },
   "intentionallyNotExported": [
     "src/babel.ts:BabelApi",
     "src/babel.ts:BabelPlugin",
     "src/vite.ts:MinimalPlugin",
-    "src/bun.ts:PluginBuilder"
-  ]
+    "src/bun.ts:PluginBuilder",
+  ],
 }

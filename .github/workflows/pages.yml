@@ -16,7 +16,7 @@ on:
       - '.github/workflows/pages.yml'
       - 'docs/api.css'
       - 'typedoc.json'
-      - 'packages/*/typedoc.json'
+      - 'packages/*/typedoc.json*'
       - 'scripts/typedoc-site.mjs'
       - 'scripts/llms-full.mjs'
   workflow_dispatch:

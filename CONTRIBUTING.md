@@ -153,7 +153,8 @@ the packages' TSDoc (`pnpm docs:api`, after `pnpm build`) into `docs/api/`, styl
 (`docs/site/llms.txt` followed by the reference as Markdown). Pages deploys it from the latest
 release tag's sources. Every warning fails `pnpm test:scripts`: a broken `{@link}`, an exported
 signature that names a type the package doesn't export, and, in every package not yet opted
-out in its own `typedoc.json` (`validation.notDocumented: false`), an exported declaration
+out in its own `typedoc.json` (core's is `typedoc.jsonc`, since the guide's Kolay reads a
+typedoc.json there) with `validation.notDocumented: false`, an exported declaration
 without a doc comment. If a leaked type is meant to stay private, list it in the package's
 `typedoc.json` `intentionallyNotExported`. New packages are strict by default.
 
