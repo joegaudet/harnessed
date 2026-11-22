@@ -1,5 +1,15 @@
 # @harnessed-ts/storybook
 
+## 0.9.0
+
+### Patch Changes
+
+- Updated dependencies [49e6b67]
+  - @harnessed-ts/core@0.9.0
+  - @harnessed-ts/dom@0.9.0
+  - @harnessed-ts/mock@0.9.0
+  - @harnessed-ts/page@0.9.0
+
 ## 0.8.3
 
 ### Patch Changes

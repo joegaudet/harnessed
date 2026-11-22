@@ -1,5 +1,14 @@
 # @harnessed-ts/ember
 
+## 0.9.0
+
+### Patch Changes
+
+- Updated dependencies [49e6b67]
+  - @harnessed-ts/core@0.9.0
+  - @harnessed-ts/mock@0.9.0
+  - @harnessed-ts/resolve@0.9.0
+
 ## 0.8.3
 
 ### Patch Changes

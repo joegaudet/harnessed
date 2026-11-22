@@ -1,5 +1,11 @@
 # @harnessed-ts/claude
 
+## 0.9.0
+
+### Patch Changes
+
+- @harnessed-ts/config@0.9.0
+
 ## 0.8.3
 
 ### Patch Changes

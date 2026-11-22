@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/claude",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "Installs the harness authoring skill, rules, and templates into a repo's .claude/ directory.",
   "keywords": [
     "claude",

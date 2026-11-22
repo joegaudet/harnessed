@@ -1,6 +1,6 @@
 {
   "name": "@harnessed-ts/should",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "description": "Should-style assertions for harnesses: `await form.should.error.be.null()` under every runner.",
   "keywords": [
     "testing",
