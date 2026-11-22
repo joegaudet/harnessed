@@ -1,5 +1,14 @@
 # @harnessed-ts/gherkin
 
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies [d396361]
+  - @harnessed-ts/core@0.10.0
+  - @harnessed-ts/mock@0.10.0
+  - @harnessed-ts/nightwatch@0.10.0
+
 ## 0.9.0
 
 ### Patch Changes
