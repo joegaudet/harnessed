@@ -1,5 +1,15 @@
 # @harnessed-ts/conformance
 
+## 0.10.0
+
+### Patch Changes
+
+- Updated dependencies [d396361]
+  - @harnessed-ts/should@0.10.0
+  - @harnessed-ts/core@0.10.0
+  - @harnessed-ts/mock@0.10.0
+  - @harnessed-ts/page@0.10.0
+
 ## 0.9.0
 
 ### Minor Changes
